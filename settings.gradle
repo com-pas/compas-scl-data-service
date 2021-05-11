@@ -7,6 +7,9 @@ pluginManagement {
         mavenLocal()
         mavenCentral()
         gradlePluginPortal()
+        maven {
+            url "https://maven.pkg.github.com/com-pas/*"
+        }
     }
 
     plugins {
