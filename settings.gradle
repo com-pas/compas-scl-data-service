@@ -8,7 +8,12 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven {
-            url "https://maven.pkg.github.com/com-pas/*"
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/com-pas/*")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+            }
         }
     }
 
