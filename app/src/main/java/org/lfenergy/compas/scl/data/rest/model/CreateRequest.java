@@ -6,10 +6,13 @@ package org.lfenergy.compas.scl.data.rest.model;
 
 import org.lfenergy.compas.scl.SCL;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+@XmlRootElement(name = "CreateRequest")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CreateRequest {
     @XmlElement(name = "SCL")
     private SCL scl;
