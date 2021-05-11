@@ -19,6 +19,9 @@ version '1.0.0-SNAPSHOT'
 repositories {
     mavenLocal()
     mavenCentral()
+    maven {
+        url "https://maven.pkg.github.com/com-pas/*"
+    }
 }
 
 dependencies {
