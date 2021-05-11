@@ -1,0 +1,11 @@
+plugins {
+    id 'org.lfenergy.compas.scl.data.java-common-conventions'
+    id 'org.kordamp.gradle.jandex'
+}
+
+dependencies {
+    implementation 'jakarta.enterprise:jakarta.enterprise.cdi-api'
+    implementation 'org.lfenergy.compas:core-commons'
+
+    api project(':repository')
+}
