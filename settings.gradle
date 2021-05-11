@@ -1,0 +1,15 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    plugins {
+        id "${quarkusPluginId}" version "${quarkusPluginVersion}"
+        id 'org.kordamp.gradle.jandex' version '0.6.0'
+    }
+}
+
+rootProject.name = 'compas-scl-data-service'
+include('app', 'service', 'repository', 'repository-basex', 'repository-postgresql')
