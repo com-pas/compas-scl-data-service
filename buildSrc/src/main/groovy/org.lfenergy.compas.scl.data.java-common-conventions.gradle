@@ -17,8 +17,8 @@ repositories {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/com-pas/*")
         credentials {
-            username = "$githubUsername" ?: System.getenv("GITHUB_USERNAME")
-            password = "$githubToken" ?: System.getenv("GITHUB_TOKEN")
+            username = hasProperty('githubUsername') ? githubUsername : System.getenv("GITHUB_USERNAME")
+            password = hasProperty('githubUsername') ? githubToken : System.getenv("GITHUB_TOKEN")
         }
     }
 }
@@ -28,7 +28,6 @@ dependencies {
         // Define dependency versions as constraints
         implementation 'org.lfenergy.compas:core-commons:1.0-SNAPSHOT'
         implementation 'jakarta.enterprise:jakarta.enterprise.cdi-api:2.0.2'
-        implementation 'org.eclipse.microprofile.config:microprofile-config-api:1.4'
         implementation 'org.eclipse.microprofile.config:microprofile-config-api:1.4'
         implementation 'org.slf4j:slf4j-api:1.7.30'
     }
