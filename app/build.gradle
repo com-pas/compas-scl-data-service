@@ -8,13 +8,14 @@ plugins {
 }
 
 dependencies {
-    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+    implementation enforcedPlatform("io.quarkus:quarkus-universe-bom:${quarkusPlatformVersion}")
+
     implementation 'io.quarkus:quarkus-arc'
     implementation 'io.quarkus:quarkus-resteasy'
     implementation 'io.quarkus:quarkus-smallrye-openapi'
     implementation 'io.quarkus:quarkus-resteasy-jaxb'
-    implementation 'org.lfenergy.compas:core-commons'
 
+    implementation 'org.lfenergy.compas:core-commons'
     implementation project(':service')
 
     testImplementation 'io.quarkus:quarkus-junit5'
