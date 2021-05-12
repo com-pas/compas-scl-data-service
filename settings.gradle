@@ -3,23 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pluginManagement {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        gradlePluginPortal()
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/com-pas/*")
-            credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
-            }
-        }
-    }
-
     plugins {
-        id "${quarkusPluginId}" version "${quarkusPluginVersion}"
-        id 'org.kordamp.gradle.jandex' version '0.6.0'
+        id "io.quarkus" version "${quarkusPluginVersion}"
+        id "org.kordamp.gradle.jandex" version "${jandexPluginVersion}"
     }
 }
 
