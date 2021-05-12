@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 plugins {
-    id 'org.lfenergy.compas.scl.data.java-common-conventions'
+    id 'org.lfenergy.compas.scl.data.java-library-conventions'
 }
 
 dependencies {
-    implementation 'org.lfenergy.compas:core-commons'
+    api 'org.lfenergy.compas:core-commons'
 }

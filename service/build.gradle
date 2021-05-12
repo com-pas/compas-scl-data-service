@@ -11,7 +11,6 @@ plugins {
 
 dependencies {
     implementation 'jakarta.enterprise:jakarta.enterprise.cdi-api'
-    implementation 'org.lfenergy.compas:core-commons'
 
     api project(':repository')
     implementation project(':repository-basex')
