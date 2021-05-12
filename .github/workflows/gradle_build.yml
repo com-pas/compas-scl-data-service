@@ -22,5 +22,4 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew clean build
       env:
-        GITHUB_USERNAME: "OWNER"
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
