@@ -16,6 +16,7 @@ repositories {
     maven {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/com-pas/*")
+
     }
 }
 
@@ -24,6 +25,9 @@ dependencies {
         // Define dependency versions as constraints
         implementation 'org.lfenergy.compas:core-commons:1.0-SNAPSHOT'
         implementation 'jakarta.enterprise:jakarta.enterprise.cdi-api:2.0.2'
+        implementation 'org.eclipse.microprofile.config:microprofile-config-api:1.4'
+        implementation 'org.eclipse.microprofile.config:microprofile-config-api:1.4'
+        implementation 'org.slf4j:slf4j-api:1.7.30'
     }
 
     // Use JUnit Jupiter API for testing.
