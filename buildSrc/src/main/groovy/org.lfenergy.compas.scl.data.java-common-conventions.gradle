@@ -17,7 +17,8 @@ repositories {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/com-pas/*")
         credentials {
-            password = System.getenv("GITHUB_TOKEN")
+            username = "$github.username" ?: System.getenv("GITHUB_USERNAME")
+            password = "$github.token" ?: System.getenv("GITHUB_TOKEN")
         }
     }
 }
