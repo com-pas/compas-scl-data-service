@@ -14,6 +14,6 @@ import javax.enterprise.context.ApplicationScoped;
 public class ReadinessHealthCheck implements HealthCheck {
     @Override
     public HealthCheckResponse call() {
-        return HealthCheckResponse.up("System up");
+        return HealthCheckResponse.up("System Ready");
     }
 }

@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.scl.data.rest.model;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.lfenergy.compas.scl.SCL;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -16,8 +17,10 @@ import static org.lfenergy.compas.scl.data.rest.Constants.SCL_NAMESPACE;
 @XmlRootElement(name = "CreateRequest")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CreateRequest {
+    @Schema(example = "SCL XML...")
     @XmlElement(name = "SCL", namespace = SCL_NAMESPACE, required = true)
     private SCL scl;
+    @Schema(example = "STATION-0012312")
     @XmlElement(name = "Name", required = true)
     private String name;
 

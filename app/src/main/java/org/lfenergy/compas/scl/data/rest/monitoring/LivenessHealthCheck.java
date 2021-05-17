@@ -14,6 +14,6 @@ import javax.enterprise.context.ApplicationScoped;
 public class LivenessHealthCheck implements HealthCheck {
     @Override
     public HealthCheckResponse call() {
-        return HealthCheckResponse.up("System up");
+        return HealthCheckResponse.up("System Live");
     }
 }

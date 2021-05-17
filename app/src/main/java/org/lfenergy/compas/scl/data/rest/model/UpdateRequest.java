@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.scl.data.rest.model;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 
@@ -17,8 +18,10 @@ import static org.lfenergy.compas.scl.data.rest.Constants.SCL_NAMESPACE;
 @XmlRootElement(name = "UpdateRequest")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class UpdateRequest {
+    @Schema(example = "SCL XML...")
     @XmlElement(name = "SCL", namespace = SCL_NAMESPACE, required = true)
     private SCL scl;
+    @Schema(example = "MAJOR")
     @XmlElement(name = "ChangeSet", required = true)
     private ChangeSetType changeSetType;
 
