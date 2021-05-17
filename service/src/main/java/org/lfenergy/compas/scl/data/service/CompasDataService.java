@@ -27,17 +27,17 @@ public class CompasDataService {
     }
 
     public UUID create(SclType type, String name, SCL scl) {
-        return repository.create(type, name, scl);
+        // TODO: Add name and type to SCL before storing the SCL.
+        return repository.create(type, scl);
     }
 
     public UUID update(SclType type, UUID uuid, ChangeSetType changeSetType, SCL scl) {
         // We always add a new version to the database, so add version record to the SCL and create a new record.
         SCL currentSCL = repository.findSCLByUUID(type, uuid);
         // TODO: Add version record to SCL.
-
-        // TODO: Retrieve name from SCL
+        // TODO: Add name and type to SCL before storing the SCL. Retrieve name from original SCL.
         String name = "";
-        return repository.create(type, name, scl);
+        return repository.create(type, scl);
     }
 
     public void delete(SclType type, UUID uuid) {

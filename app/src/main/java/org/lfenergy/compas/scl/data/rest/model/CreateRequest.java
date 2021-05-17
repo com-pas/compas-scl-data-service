@@ -11,12 +11,14 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import static org.lfenergy.compas.scl.data.rest.Constants.SCL_NAMESPACE;
+
 @XmlRootElement(name = "CreateRequest")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CreateRequest {
-    @XmlElement(name = "SCL")
+    @XmlElement(name = "SCL", namespace = SCL_NAMESPACE, required = true)
     private SCL scl;
-    @XmlElement(name = "Name")
+    @XmlElement(name = "Name", required = true)
     private String name;
 
     public SCL getScl() {

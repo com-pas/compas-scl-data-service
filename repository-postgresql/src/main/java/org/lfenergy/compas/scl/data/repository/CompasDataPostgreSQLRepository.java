@@ -18,7 +18,7 @@ public class CompasDataPostgreSQLRepository implements CompasDataRepository {
     }
 
     @Override
-    public UUID create(SclType type, String name, SCL scl) {
+    public UUID create(SclType type, SCL scl) {
         throw new UnsupportedOperationException("Not implemented!");
     }
 
