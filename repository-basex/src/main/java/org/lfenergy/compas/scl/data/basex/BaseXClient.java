@@ -4,6 +4,8 @@
 
 package org.lfenergy.compas.scl.data.basex;
 
+import org.lfenergy.compas.scl.data.repository.SclDataException;
+
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -12,6 +14,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Java client for BaseX.
@@ -22,10 +26,7 @@ import java.util.ArrayList;
  * (C) BaseX Team 2005-20, BSD License
  */
 public final class BaseXClient implements Closeable {
-    /**
-     * UTF-8 charset.
-     */
-    private static final Charset UTF8 = StandardCharsets.UTF_8;
+
     /**
      * Output stream.
      */
@@ -106,9 +107,9 @@ public final class BaseXClient implements Closeable {
      * @throws IOException Exception
      */
     public String execute(final String command) throws IOException {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        final var os = new ByteArrayOutputStream();
         execute(command, os);
-        return new String(os.toByteArray(), UTF8);
+        return new String(os.toByteArray(), UTF_8);
     }
 
     /**
@@ -205,9 +206,9 @@ public final class BaseXClient implements Closeable {
      * @throws IOException I/O exception
      */
     private String receive() throws IOException {
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        final var os = new ByteArrayOutputStream();
         receive(in, os);
-        return new String(os.toByteArray(), UTF8);
+        return new String(os.toByteArray(), UTF_8);
     }
 
     /**
@@ -217,7 +218,7 @@ public final class BaseXClient implements Closeable {
      * @throws IOException I/O exception
      */
     private void send(final String string) throws IOException {
-        out.write((string + '\0').getBytes(UTF8));
+        out.write((string + '\0').getBytes(UTF_8));
     }
 
     /**
@@ -256,8 +257,8 @@ public final class BaseXClient implements Closeable {
      * @throws IOException I/O exception
      */
     private void send(final InputStream input) throws IOException {
-        final BufferedInputStream bis = new BufferedInputStream(input);
-        final BufferedOutputStream bos = new BufferedOutputStream(out);
+        final var bis = new BufferedInputStream(input);
+        final var bos = new BufferedOutputStream(out);
         for (int b; (b = bis.read()) != -1; ) {
             // 0x00 and 0xFF will be prefixed by 0xFF
             if (b == 0x00 || b == 0xFF) bos.write(0xFF);
@@ -276,18 +277,17 @@ public final class BaseXClient implements Closeable {
      * @return String
      */
     private static String md5(final String pw) {
-        final StringBuilder sb = new StringBuilder();
+        final var sb = new StringBuilder();
         try {
-            final MessageDigest md = MessageDigest.getInstance("MD5");
+            final var md = MessageDigest.getInstance("MD5");
             md.update(pw.getBytes());
             for (final byte b : md.digest()) {
-                final String s = Integer.toHexString(b & 0xFF);
+                final var s = Integer.toHexString(b & 0xFF);
                 if (s.length() == 1) sb.append('0');
                 sb.append(s);
             }
         } catch (final NoSuchAlgorithmException ex) {
-            // should not occur
-            ex.printStackTrace();
+            throw new SclDataException(ex);
         }
         return sb.toString();
     }
@@ -376,7 +376,7 @@ public final class BaseXClient implements Closeable {
                 out.write(4);
                 send(id);
                 cache = new ArrayList<>();
-                final ByteArrayOutputStream os = new ByteArrayOutputStream();
+                final var os = new ByteArrayOutputStream();
                 while (in.read() > 0) {
                     receive(in, os);
                     cache.add(os.toByteArray());
@@ -397,7 +397,7 @@ public final class BaseXClient implements Closeable {
          * @throws IOException I/O Exception
          */
         public String next() throws IOException {
-            return more() ? new String(cache.set(pos++, null), UTF8) : null;
+            return more() ? new String(cache.set(pos++, null), UTF_8) : null;
         }
 
         /**

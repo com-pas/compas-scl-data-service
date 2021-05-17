@@ -33,10 +33,10 @@ public class CompasDataService {
 
     public UUID update(SclType type, UUID uuid, ChangeSetType changeSetType, SCL scl) {
         // We always add a new version to the database, so add version record to the SCL and create a new record.
-        SCL currentSCL = repository.findSCLByUUID(type, uuid);
         // TODO: Add version record to SCL.
         // TODO: Add name and type to SCL before storing the SCL. Retrieve name from original SCL.
-        String name = "";
+        var currentSCL = repository.findSCLByUUID(type, uuid);
+        var name = "";
         return repository.create(type, scl);
     }
 

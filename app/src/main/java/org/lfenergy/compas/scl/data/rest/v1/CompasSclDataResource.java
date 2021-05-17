@@ -29,7 +29,7 @@ public class CompasSclDataResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public CreateResponse create(@PathParam(TYPE_PATH_PARAM) SclType type, CreateRequest request) {
-        CreateResponse response = new CreateResponse();
+        var response = new CreateResponse();
         response.setUuid(compasDataService.create(type, request.getName(), request.getScl()));
         return response;
     }
@@ -39,7 +39,7 @@ public class CompasSclDataResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public GetResponse findSCLByUUID(@PathParam(TYPE_PATH_PARAM) SclType type, @PathParam(UUID_PATH_PARAM) String uuid) {
-        GetResponse response = new GetResponse();
+        var response = new GetResponse();
         response.setScl(compasDataService.findSCLByUUID(type, UUID.fromString(uuid)));
         return response;
     }
@@ -49,7 +49,7 @@ public class CompasSclDataResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public UpdateResponse update(@PathParam(TYPE_PATH_PARAM) SclType type, @PathParam(UUID_PATH_PARAM) String uuid, UpdateRequest request) {
-        UpdateResponse response = new UpdateResponse();
+        var response = new UpdateResponse();
         response.setUuid(compasDataService.update(type, UUID.fromString(uuid), request.getUpdateType(), request.getScl()));
         return response;
     }
