@@ -16,7 +16,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -84,7 +83,7 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
         return executeCommand(client -> {
             var response = new StringBuilder();
             client.execute("OPEN ".concat(type.name()));
-            try (BaseXClient.Query queryToRun = client.query(query)) {
+            try (var queryToRun = client.query(query)) {
                 while (queryToRun.more()) {
                     response.append(queryToRun.next());
                 }
