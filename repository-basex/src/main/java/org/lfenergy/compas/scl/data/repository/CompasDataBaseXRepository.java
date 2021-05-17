@@ -46,7 +46,7 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
 
         // At startup create all needed databases.
         for (SclType type: SclType.values()) {
-            executeCommand((client) -> {
+            executeCommand(client -> {
                 client.execute("CREATE DB " + type.name());
                 return true;
             });
@@ -63,7 +63,7 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
     public UUID create(SclType type, SCL scl) {
         UUID uuid = UUID.randomUUID();
         InputStream inputStream = new ByteArrayInputStream(marshallerWrapper.marshall(scl).getBytes(StandardCharsets.UTF_8));
-        executeCommand((client) -> {
+        executeCommand(client -> {
             client.execute("OPEN ".concat(type.name()));
             client.add(uuid.toString().concat(".xml"), inputStream);
             return true;
@@ -73,7 +73,7 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
 
     @Override
     public void delete(SclType type, UUID uuid) {
-        executeCommand((client) -> {
+        executeCommand(client -> {
             client.execute("OPEN ".concat(type.name()));
             client.execute("DELETE ".concat(uuid.toString().concat(".xml")));
             return true;
@@ -81,7 +81,7 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
     }
 
     private String executeQuery(SclType type, String query) {
-        return executeCommand((client) -> {
+        return executeCommand(client -> {
             StringBuilder response = new StringBuilder();
             client.execute("OPEN ".concat(type.name()));
             try (BaseXClient.Query queryToRun = client.query(query)) {
@@ -94,7 +94,7 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
         });
     }
 
-    private <R> R executeCommand(ClientCommand<R> command) {
+    private <R> R executeCommand(ClientExecutor<R> command) {
         try (BaseXClient client = new BaseXClient(baseXHost, baseXPort, baseXUsername, baseXPassword)) {
             return command.execute(client);
         } catch (IOException exception) {
@@ -104,7 +104,7 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
         }
     }
 
-    private interface ClientCommand<R> {
+    private interface ClientExecutor<R> {
         R execute(BaseXClient client) throws IOException;
     }
 }
