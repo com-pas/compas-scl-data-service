@@ -7,6 +7,8 @@ plugins {
 
     // Generate index file jandex.idx to index beans.
     id "org.kordamp.gradle.jandex"
+
+    id 'org.sonarqube' version '3.2.0'
 }
 
 dependencies {
