@@ -9,3 +9,9 @@ plugins {
 dependencies {
     api 'org.lfenergy.compas:core-commons'
 }
+
+sonarqube {
+    properties {
+        property "sonar.tests", ""
+    }
+}

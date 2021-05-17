@@ -14,3 +14,9 @@ dependencies {
 
     api project(':repository')
 }
+
+sonarqube {
+    properties {
+        property "sonar.tests", ""
+    }
+}
