@@ -1,0 +1,18 @@
+// SPDX-FileCopyrightText: 2021 Alliander N.V.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+plugins {
+    id 'org.sonarqube'
+}
+
+// Adding SonarQube properties for checking multi module
+subprojects {
+    version = '1.0'
+    sonarqube {
+        properties {
+            property "sonar.sources", "src/main"
+            property "sonar.tests", "src/test"
+        }
+    }
+}
