@@ -4,7 +4,6 @@
 
 plugins {
     id 'org.lfenergy.compas.scl.data.java-library-conventions'
-    id 'org.sonarqube'
 }
 
 dependencies {
