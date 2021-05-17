@@ -3,8 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.repository;
 
-import java.security.NoSuchAlgorithmException;
-
 public class SclDataException extends RuntimeException {
     public SclDataException(Throwable cause) {
         super(cause);
