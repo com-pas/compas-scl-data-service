@@ -55,14 +55,14 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
 
     @Override
     public SCL findSCLByUUID(SclType type, UUID uuid) {
-        String result = executeQuery(type, "doc('".concat(type.name()).concat("/").concat(uuid.toString()).concat(".xml')"));
+        var result = executeQuery(type, "doc('".concat(type.name()).concat("/").concat(uuid.toString()).concat(".xml')"));
         return marshallerWrapper.unmarshall(result.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
     public UUID create(SclType type, SCL scl) {
-        UUID uuid = UUID.randomUUID();
-        InputStream inputStream = new ByteArrayInputStream(marshallerWrapper.marshall(scl).getBytes(StandardCharsets.UTF_8));
+        var uuid = UUID.randomUUID();
+        var inputStream = new ByteArrayInputStream(marshallerWrapper.marshall(scl).getBytes(StandardCharsets.UTF_8));
         executeCommand(client -> {
             client.execute("OPEN ".concat(type.name()));
             client.add(uuid.toString().concat(".xml"), inputStream);
@@ -82,7 +82,7 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
 
     private String executeQuery(SclType type, String query) {
         return executeCommand(client -> {
-            StringBuilder response = new StringBuilder();
+            var response = new StringBuilder();
             client.execute("OPEN ".concat(type.name()));
             try (BaseXClient.Query queryToRun = client.query(query)) {
                 while (queryToRun.more()) {
@@ -95,10 +95,10 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
     }
 
     private <R> R executeCommand(ClientExecutor<R> command) {
-        try (BaseXClient client = new BaseXClient(baseXHost, baseXPort, baseXUsername, baseXPassword)) {
+        try (var client = new BaseXClient(baseXHost, baseXPort, baseXUsername, baseXPassword)) {
             return command.execute(client);
         } catch (IOException exception) {
-            final String exceptionMessage = exception.getLocalizedMessage();
+            final var exceptionMessage = exception.getLocalizedMessage();
             LOGGER.error("executeCommand: {}", exceptionMessage);
             throw new SclDataException("Error executing command!", exception);
         }
