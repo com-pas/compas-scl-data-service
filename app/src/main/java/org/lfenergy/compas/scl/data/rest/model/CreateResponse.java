@@ -13,7 +13,7 @@ import java.util.UUID;
 @XmlRootElement(name = "CreateResponse")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CreateResponse {
-    @XmlElement(name = "Uuid")
+    @XmlElement(name = "Uuid", required = true)
     private UUID uuid;
 
     public UUID getUuid() {

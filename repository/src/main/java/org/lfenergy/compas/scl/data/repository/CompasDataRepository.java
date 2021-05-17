@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface CompasDataRepository {
     SCL findSCLByUUID(SclType type, UUID uuid);
 
-    UUID create(SclType type, String name, SCL scl);
+    UUID create(SclType type, SCL scl);
 
     void delete(SclType type, UUID uuid);
 }
