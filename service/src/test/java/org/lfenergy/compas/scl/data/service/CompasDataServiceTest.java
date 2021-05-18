@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
@@ -62,7 +62,7 @@ class CompasDataServiceTest {
         UUID newUuid = compasDataService.update(type, uuid, ChangeSetType.MAJOR, scl);
 
         assertNotNull(newUuid);
-        assertFalse(uuid.equals(newUuid));
+        assertNotEquals(uuid, newUuid);
         verify(compasDataRepository, times(1)).create(type, scl);
         verify(compasDataRepository, times(1)).findSCLByUUID(type, uuid);
     }
