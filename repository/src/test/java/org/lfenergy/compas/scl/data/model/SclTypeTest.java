@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class SclTypeTest extends AbstractEnumTest {
-    @Test
-    void testEnumValues() {
-        enumCodeCoverage(SclType.class);
+    @Override
+    protected Class<? extends Enum<?>> getEnumClass() {
+        return SclType.class;
     }
 
     @Test

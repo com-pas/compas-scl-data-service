@@ -3,12 +3,16 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.model;
 
+import org.junit.jupiter.api.Test;
+
 import java.lang.reflect.InvocationTargetException;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 abstract class AbstractEnumTest {
-    protected void enumCodeCoverage(Class<? extends Enum<?>> enumClass) {
+    @Test
+    void testEnumCodeCoverage() {
+        Class<? extends Enum<?>> enumClass = getEnumClass();
         try {
             for (var o : (Enum<?>[]) enumClass.getMethod("values").invoke(null)) {
                 assertNotNull(enumClass.getMethod("valueOf", String.class).invoke(null, o.name()));
@@ -17,4 +21,6 @@ abstract class AbstractEnumTest {
             throw new RuntimeException(exp);
         }
     }
+
+    protected abstract Class<? extends Enum<?>> getEnumClass();
 }
