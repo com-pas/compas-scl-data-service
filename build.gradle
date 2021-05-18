@@ -8,12 +8,17 @@ plugins {
 
 // Adding SonarQube properties for checking multi module
 subprojects {
+    apply plugin: 'jacoco'
+
     version = '1.0'
+
     sonarqube {
         properties {
             property "sonar.sources", "src/main"
             property "sonar.tests", "src/test"
             property "sonar.java.coveragePlugin", "jacoco"
+            property "sonar.java.test.binaries", "build/classes/java/test"
+            property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/codeCoverageReport/codeCoverageReport.xml"
         }
     }
 }
