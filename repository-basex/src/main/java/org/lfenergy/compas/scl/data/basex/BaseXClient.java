@@ -166,15 +166,6 @@ public final class BaseXClient implements Closeable {
     }
 
     /**
-     * Returns command information.
-     *
-     * @return string info
-     */
-    public String info() {
-        return info;
-    }
-
-    /**
      * Closes the session.
      *
      * @throws IOException Exception
@@ -277,7 +268,8 @@ public final class BaseXClient implements Closeable {
     private static String md5(final String pw) {
         final var sb = new StringBuilder();
         try {
-            final var md = MessageDigest.getInstance("MD5");
+            // BaseX uses MD5 hashing, so we can change this for now.
+            final var md = MessageDigest.getInstance("MD5"); // NOSONAR
             md.update(pw.getBytes());
             for (final byte b : md.digest()) {
                 final var s = Integer.toHexString(b & 0xFF);

@@ -63,7 +63,7 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
         var uuid = UUID.randomUUID();
         var inputStream = new ByteArrayInputStream(marshallerWrapper.marshall(scl).getBytes(StandardCharsets.UTF_8));
         executeCommand(client -> {
-            client.execute("OPEN ".concat(type.name()));
+            openDatabase(client, type);
             client.add(uuid.toString().concat(".xml"), inputStream);
             return true;
         });
@@ -73,7 +73,7 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
     @Override
     public void delete(SclType type, UUID uuid) {
         executeCommand(client -> {
-            client.execute("OPEN ".concat(type.name()));
+            openDatabase(client, type);
             client.execute("DELETE ".concat(uuid.toString().concat(".xml")));
             return true;
         });
@@ -82,15 +82,23 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
     private String executeQuery(SclType type, String query) {
         return executeCommand(client -> {
             var response = new StringBuilder();
-            client.execute("OPEN ".concat(type.name()));
+            openDatabase(client, type);
             try (var queryToRun = client.query(query)) {
                 while (queryToRun.more()) {
                     response.append(queryToRun.next());
                 }
             }
-            client.execute("CLOSE");
+            closeDatabase(client);
             return response.toString();
         });
+    }
+
+    private void openDatabase(BaseXClient client, SclType type) throws IOException {
+        client.execute("OPEN ".concat(type.name()));
+    }
+
+    private void closeDatabase(BaseXClient client) throws IOException {
+        client.execute("CLOSE");
     }
 
     private <R> R executeCommand(ClientExecutor<R> command) {

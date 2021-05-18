@@ -4,6 +4,7 @@
 
 package org.lfenergy.compas.scl.data.rest.v1;
 
+import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.rest.model.*;
 import org.lfenergy.compas.scl.data.service.CompasDataService;
@@ -42,6 +43,14 @@ public class CompasSclDataResource {
         var response = new GetResponse();
         response.setScl(compasDataService.findSCLByUUID(type, UUID.fromString(uuid)));
         return response;
+    }
+
+    @GET
+    @Path("/{" + UUID_PATH_PARAM + "}/scl")
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
+    public SCL findRawSCLByUUID(@PathParam(TYPE_PATH_PARAM) SclType type, @PathParam(UUID_PATH_PARAM) String uuid) {
+        return compasDataService.findSCLByUUID(type, UUID.fromString(uuid));
     }
 
     @PUT
