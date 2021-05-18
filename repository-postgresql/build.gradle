@@ -14,11 +14,3 @@ dependencies {
 
     api project(':repository')
 }
-
-// TODO: Remove SonarQube property when tests are added.
-// It's a workaround, because SonarQube can't handle non-existing folders.
-sonarqube {
-    properties {
-        property "sonar.tests", ""
-    }
-}
