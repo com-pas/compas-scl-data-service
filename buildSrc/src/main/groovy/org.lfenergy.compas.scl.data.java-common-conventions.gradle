@@ -31,11 +31,12 @@ dependencies {
         implementation 'jakarta.enterprise:jakarta.enterprise.cdi-api:2.0.2'
         implementation 'org.eclipse.microprofile.config:microprofile-config-api:1.4'
         implementation 'org.slf4j:slf4j-api:1.7.30'
-    }
+   }
 
     // Use JUnit Jupiter API for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
     testImplementation "org.mockito:mockito-junit-jupiter:3.+"
+    testImplementation 'com.openpojo:openpojo:0.9.1'
 
     // Use JUnit Jupiter Engine for testing.
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'

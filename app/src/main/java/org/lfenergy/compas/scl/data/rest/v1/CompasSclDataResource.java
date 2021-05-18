@@ -59,7 +59,7 @@ public class CompasSclDataResource {
     @Produces(MediaType.APPLICATION_XML)
     public UpdateResponse update(@PathParam(TYPE_PATH_PARAM) SclType type, @PathParam(UUID_PATH_PARAM) String uuid, UpdateRequest request) {
         var response = new UpdateResponse();
-        response.setUuid(compasDataService.update(type, UUID.fromString(uuid), request.getUpdateType(), request.getScl()));
+        response.setUuid(compasDataService.update(type, UUID.fromString(uuid), request.getChangeSetType(), request.getScl()));
         return response;
     }
 
