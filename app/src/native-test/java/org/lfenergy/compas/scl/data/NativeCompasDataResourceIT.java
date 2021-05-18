@@ -2,12 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.scl.data;
-
-import io.quarkus.test.junit.NativeImageTest;
-
-@NativeImageTest
-public class NativeCompasDataResourceIT extends CompasDataResourceTest {
-
-    // Execute the same tests but in native mode.
-}
+//package org.lfenergy.compas.scl.data;
+//
+//import io.quarkus.test.junit.NativeImageTest;
+//
+//@NativeImageTest
+//class NativeHealthCheckTest extends HealthCheckTest {
+//    // Execute the same tests but in native mode.
+//}

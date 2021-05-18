@@ -24,3 +24,8 @@ sonarqube {
         property "sonar.tests", ""
     }
 }
+
+jacocoTestReport {
+    dependsOn test
+    dependsOn jandex
+}

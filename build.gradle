@@ -8,8 +8,6 @@ plugins {
 
 // Adding SonarQube properties for checking multi module
 subprojects {
-    apply plugin: 'jacoco'
-
     version = '1.0'
 
     sonarqube {

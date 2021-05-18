@@ -14,3 +14,8 @@ dependencies {
 
     api project(':repository')
 }
+
+jacocoTestReport {
+    dependsOn test
+    dependsOn jandex
+}
