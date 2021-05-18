@@ -17,21 +17,21 @@ class CompasDataPostgreSQLRepositoryTest {
     private CompasDataPostgreSQLRepository repository;
 
     @Test
-    public void findSCLByUUID_WhenCalled_ThenUnsupportedExceptionThrown() {
+    void findSCLByUUID_WhenCalled_ThenUnsupportedExceptionThrown() {
         assertThrows(UnsupportedOperationException.class, () -> {
             repository.findSCLByUUID(SclType.SCD, UUID.randomUUID());
         });
     }
 
     @Test
-    public void create_WhenCalled_ThenUnsupportedExceptionThrown() {
+    void create_WhenCalled_ThenUnsupportedExceptionThrown() {
         assertThrows(UnsupportedOperationException.class, () -> {
             repository.create(SclType.SCD, new SCL());
         });
     }
 
     @Test
-    public void delete_WhenCalled_ThenUnsupportedExceptionThrown() {
+    void delete_WhenCalled_ThenUnsupportedExceptionThrown() {
         assertThrows(UnsupportedOperationException.class, () -> {
             repository.delete(SclType.SCD, UUID.randomUUID());
         });
