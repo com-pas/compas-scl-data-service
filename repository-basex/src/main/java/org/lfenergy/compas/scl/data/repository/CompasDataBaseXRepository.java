@@ -4,10 +4,10 @@
 
 package org.lfenergy.compas.scl.data.repository;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.lfenergy.compas.commons.MarshallerWrapper;
 import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.basex.BaseXClient;
+import org.lfenergy.compas.scl.data.basex.BaseXClientFactory;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,27 +24,15 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompasDataBaseXRepository.class);
 
     private final MarshallerWrapper marshallerWrapper;
-
-    private final String baseXHost;
-    private final Integer baseXPort;
-    private final String baseXUsername;
-    private final String baseXPassword;
+    private final BaseXClientFactory baseXClientFactory;
 
     @Inject
-    public CompasDataBaseXRepository(@ConfigProperty(name = "basex.host") String baseXHost,
-                                     @ConfigProperty(name = "basex.port") Integer baseXPort,
-                                     @ConfigProperty(name = "basex.username") String baseXUsername,
-                                     @ConfigProperty(name = "basex.password") String baseXPassword
-                                    ) throws Exception {
-        this.baseXHost = baseXHost;
-        this.baseXPort = baseXPort;
-        this.baseXUsername = baseXUsername;
-        this.baseXPassword = baseXPassword;
-
+    public CompasDataBaseXRepository(BaseXClientFactory baseXClientFactory) throws Exception {
+        this.baseXClientFactory = baseXClientFactory;
         this.marshallerWrapper = new MarshallerWrapper.Builder().build();
 
         // At startup create all needed databases.
-        for (SclType type: SclType.values()) {
+        for (SclType type : SclType.values()) {
             executeCommand(client -> {
                 client.execute("CREATE DB " + type.name());
                 return true;
@@ -102,7 +90,7 @@ public class CompasDataBaseXRepository implements CompasDataRepository {
     }
 
     private <R> R executeCommand(ClientExecutor<R> command) {
-        try (var client = new BaseXClient(baseXHost, baseXPort, baseXUsername, baseXPassword)) {
+        try (var client = baseXClientFactory.createClient()) {
             return command.execute(client);
         } catch (IOException exception) {
             final var exceptionMessage = exception.getLocalizedMessage();
