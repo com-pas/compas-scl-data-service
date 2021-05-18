@@ -33,11 +33,11 @@ public class UpdateRequest {
         this.scl = scl;
     }
 
-    public ChangeSetType getUpdateType() {
+    public ChangeSetType getChangeSetType() {
         return changeSetType;
     }
 
-    public void setUpdateType(ChangeSetType changeSetType) {
+    public void setChangeSetType(ChangeSetType changeSetType) {
         this.changeSetType = changeSetType;
     }
 }

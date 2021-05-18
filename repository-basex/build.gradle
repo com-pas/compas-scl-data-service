@@ -28,3 +28,11 @@ sonarqube {
 jacocoTestReport {
     dependsOn jandex
 }
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            excludes = ['org.lfenergy.compas.scl.data.basex.BaseXClient']
+        }
+    }
+}
