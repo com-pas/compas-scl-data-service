@@ -14,7 +14,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,7 +28,7 @@ class CompasDataServiceTest {
     void findSCLByUUID_WhenCalled_ThenRepositoryIsCalled() {
         SclType type = SclType.SCD;
         UUID uuid = UUID.randomUUID();
-        when(compasDataRepository.findSCLByUUID(eq(type), eq(uuid))).thenReturn(new SCL());
+        when(compasDataRepository.findSCLByUUID(type, uuid)).thenReturn(new SCL());
 
         SCL result = compasDataService.findSCLByUUID(type, uuid);
 
@@ -43,7 +42,7 @@ class CompasDataServiceTest {
         String name = "JUSTSOMENAME";
         SCL scl = new SCL();
 
-        when(compasDataRepository.create(eq(type), eq(scl))).thenReturn(UUID.randomUUID());
+        when(compasDataRepository.create(type, scl)).thenReturn(UUID.randomUUID());
 
         UUID uuid = compasDataService.create(type, name, scl);
 
@@ -57,8 +56,8 @@ class CompasDataServiceTest {
         UUID uuid = UUID.randomUUID();
         SCL scl = new SCL();
 
-        when(compasDataRepository.findSCLByUUID(eq(type), eq(uuid))).thenReturn(new SCL());
-        when(compasDataRepository.create(eq(type), eq(scl))).thenReturn(UUID.randomUUID());
+        when(compasDataRepository.findSCLByUUID(type, uuid)).thenReturn(new SCL());
+        when(compasDataRepository.create(type, scl)).thenReturn(UUID.randomUUID());
 
         UUID newUuid = compasDataService.update(type, uuid, ChangeSetType.MAJOR, scl);
 
@@ -73,7 +72,7 @@ class CompasDataServiceTest {
         SclType type = SclType.SCD;
         UUID uuid = UUID.randomUUID();
 
-        doNothing().when(compasDataRepository).delete(eq(type), eq(uuid));
+        doNothing().when(compasDataRepository).delete(type, uuid);
 
         compasDataService.delete(type, uuid);
 
