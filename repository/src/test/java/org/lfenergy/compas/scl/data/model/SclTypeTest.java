@@ -5,9 +5,18 @@ package org.lfenergy.compas.scl.data.model;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 class SclTypeTest extends AbstractEnumTest {
     @Test
     void testEnumValues() {
         enumCodeCoverage(SclType.class);
+    }
+
+    @Test
+    void testDescription() {
+        for (var type : SclType.values()) {
+            assertNotNull(type.getDescription());
+        }
     }
 }
