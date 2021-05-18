@@ -13,6 +13,7 @@ subprojects {
         properties {
             property "sonar.sources", "src/main"
             property "sonar.tests", "src/test"
+            property "sonar.java.coveragePlugin", "jacoco"
         }
     }
 }
