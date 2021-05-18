@@ -26,7 +26,7 @@ class CompasDataServiceTest {
     private CompasDataService compasDataService;
 
     @Test
-    public void findSCLByUUID_WhenCalled_ThenRepositoryIsCalled() {
+    void findSCLByUUID_WhenCalled_ThenRepositoryIsCalled() {
         SclType type = SclType.SCD;
         UUID uuid = UUID.randomUUID();
         when(compasDataRepository.findSCLByUUID(eq(type), eq(uuid))).thenReturn(new SCL());
@@ -38,7 +38,7 @@ class CompasDataServiceTest {
     }
 
     @Test
-    public void create_WhenCalled_ThenRepositoryIsCalledAndUUIDIsReturned() {
+    void create_WhenCalled_ThenRepositoryIsCalledAndUUIDIsReturned() {
         SclType type = SclType.SCD;
         String name = "JUSTSOMENAME";
         SCL scl = new SCL();
@@ -52,7 +52,7 @@ class CompasDataServiceTest {
     }
 
     @Test
-    public void update_WhenCalled_ThenRepositoryIsCalledAndNewUUIDIsReturned() {
+    void update_WhenCalled_ThenRepositoryIsCalledAndNewUUIDIsReturned() {
         SclType type = SclType.SCD;
         UUID uuid = UUID.randomUUID();
         SCL scl = new SCL();
@@ -69,7 +69,7 @@ class CompasDataServiceTest {
     }
 
     @Test
-    public void delete_WhenCalled_ThenRepositoryIsCalled() {
+    void delete_WhenCalled_ThenRepositoryIsCalled() {
         SclType type = SclType.SCD;
         UUID uuid = UUID.randomUUID();
 
