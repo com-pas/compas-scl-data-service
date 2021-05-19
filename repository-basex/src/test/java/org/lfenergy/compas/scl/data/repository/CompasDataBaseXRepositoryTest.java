@@ -14,7 +14,6 @@ import org.lfenergy.compas.scl.data.basex.BaseXClientFactory;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.InputStream;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,7 +27,7 @@ class CompasDataBaseXRepositoryTest {
 
     @BeforeAll
     static void beforeAll() throws Exception {
-        int portNumber = getFreePortNumber();
+        var portNumber = getFreePortNumber();
         server = createServer(portNumber);
         factory = new BaseXClientFactory("localhost", portNumber, "admin", "admin");
     }
@@ -40,9 +39,9 @@ class CompasDataBaseXRepositoryTest {
 
     @Test
     void find_WhenCalledWithUnknownUUID_ThenExceptionIsThrown() throws Exception {
-        CompasDataBaseXRepository repository = new CompasDataBaseXRepository(factory);
-        SclType type = SclType.SCD;
-        UUID uuid = UUID.randomUUID();
+        var repository = new CompasDataBaseXRepository(factory);
+        var type = SclType.SCD;
+        var uuid = UUID.randomUUID();
 
         assertThrows(SclDataException.class, () -> {
             repository.findSCLByUUID(type, uuid);
@@ -51,28 +50,28 @@ class CompasDataBaseXRepositoryTest {
 
     @Test
     void createAndFind_WhenSclAdded_ThenScLStoredAndCanBeFound() throws Exception {
-        CompasDataBaseXRepository repository = new CompasDataBaseXRepository(factory);
-        SclType type = SclType.SCD;
-        SCL scl = readSCL();
+        var repository = new CompasDataBaseXRepository(factory);
+        var type = SclType.SCD;
+        var scl = readSCL();
 
-        UUID uuid = repository.create(type, scl);
+        var uuid = repository.create(type, scl);
         assertNotNull(uuid);
 
-        SCL foundScl = repository.findSCLByUUID(type, uuid);
+        var foundScl = repository.findSCLByUUID(type, uuid);
         assertNotNull(foundScl);
         assertEquals(scl.getHeader().getId(), foundScl.getHeader().getId());
     }
 
     @Test
     void createFindAndDelete_WhenSclAddedAndDelete_ThenScLStoredAndRemoved() throws Exception {
-        CompasDataBaseXRepository repository = new CompasDataBaseXRepository(factory);
-        SclType type = SclType.SCD;
-        SCL scl = readSCL();
+        var repository = new CompasDataBaseXRepository(factory);
+        var type = SclType.SCD;
+        var scl = readSCL();
 
-        UUID uuid = repository.create(type, scl);
+        var uuid = repository.create(type, scl);
         assertNotNull(uuid);
 
-        SCL foundScl = repository.findSCLByUUID(type, uuid);
+        var foundScl = repository.findSCLByUUID(type, uuid);
         assertNotNull(foundScl);
         assertEquals(scl.getHeader().getId(), foundScl.getHeader().getId());
 
@@ -83,7 +82,7 @@ class CompasDataBaseXRepositoryTest {
     }
 
     private SCL readSCL() throws Exception {
-        InputStream inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.xml");
+        var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.xml");
         assert inputStream != null;
         return new MarshallerWrapper.Builder().build().unmarshall(inputStream);
     }

@@ -37,7 +37,6 @@ public class CompasSclDataResource {
 
     @GET
     @Path("/{" + UUID_PATH_PARAM + "}")
-    @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public GetResponse findSCLByUUID(@PathParam(TYPE_PATH_PARAM) SclType type, @PathParam(UUID_PATH_PARAM) String uuid) {
         var response = new GetResponse();
@@ -47,7 +46,6 @@ public class CompasSclDataResource {
 
     @GET
     @Path("/{" + UUID_PATH_PARAM + "}/scl")
-    @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public SCL findRawSCLByUUID(@PathParam(TYPE_PATH_PARAM) SclType type, @PathParam(UUID_PATH_PARAM) String uuid) {
         return compasDataService.findSCLByUUID(type, UUID.fromString(uuid));
@@ -65,7 +63,6 @@ public class CompasSclDataResource {
 
     @DELETE
     @Path("/{" + UUID_PATH_PARAM + "}")
-    @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public void delete(@PathParam(TYPE_PATH_PARAM) SclType type, @PathParam(UUID_PATH_PARAM) String uuid) {
         compasDataService.delete(type, UUID.fromString(uuid));

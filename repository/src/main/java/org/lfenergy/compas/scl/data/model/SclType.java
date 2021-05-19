@@ -6,10 +6,10 @@ package org.lfenergy.compas.scl.data.model;
 
 public enum SclType {
     SSD("Substation Specification Description"),
-    IID("IED instance description"),
+    IID("IED Instance Description"),
     ICD("IED Capability Description"),
     SCD("Substation Configuration Description"),
-    CID("Configured IED description");
+    CID("Configured IED Description");
 
     private final String description;
 
