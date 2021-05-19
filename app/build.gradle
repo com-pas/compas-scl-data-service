@@ -4,6 +4,7 @@
 
 plugins {
     id 'org.lfenergy.compas.scl.data.java-common-conventions'
+
     id 'io.quarkus'
 }
 
@@ -22,4 +23,11 @@ dependencies {
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.quarkus:quarkus-junit5-mockito'
     testImplementation 'io.rest-assured:rest-assured'
+    testImplementation 'io.quarkus:quarkus-jacoco'
+}
+
+test {
+    jacoco {
+        excludeClassLoaders = ["*QuarkusClassLoader"]
+    }
 }

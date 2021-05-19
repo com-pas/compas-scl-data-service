@@ -50,8 +50,8 @@ public class CompasSclDataResourceTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("ns2", SCL_NAMESPACE));
-        assertEquals("HeaderID", xmlPath.get("Getresponse.ns2:SCL.ns2:Header.@id"));
+                .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
+        assertEquals("HeaderID", xmlPath.get("GetResponse.scl:SCL.scl:Header.@id"));
         verify(compasDataService, times(1)).findSCLByUUID(type, uuid);
     }
 
@@ -73,8 +73,8 @@ public class CompasSclDataResourceTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("ns2", SCL_NAMESPACE));
-        assertEquals("HeaderID", xmlPath.get("ns2:SCL.ns2:Header.@id"));
+                .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
+        assertEquals("HeaderID", xmlPath.get("scl:SCL.scl:Header.@id"));
         verify(compasDataService, times(1)).findSCLByUUID(type, uuid);
     }
 
@@ -101,7 +101,7 @@ public class CompasSclDataResourceTest {
                 .extract()
                 .response();
 
-        assertEquals(uuid.toString(), response.xmlPath().getString("/CreateResponse/Uuid"));
+        assertEquals(uuid.toString(), response.xmlPath().getString("CreateResponse.Uuid"));
         verify(compasDataService, times(1)).create(eq(type), eq(name), any(SCL.class));
     }
 
@@ -130,7 +130,7 @@ public class CompasSclDataResourceTest {
                 .extract()
                 .response();
 
-        assertEquals(newUuid.toString(), response.xmlPath().getString("/UpdateResponse/Uuid"));
+        assertEquals(newUuid.toString(), response.xmlPath().getString("UpdateResponse.Uuid"));
         verify(compasDataService, times(1)).update(eq(type), eq(uuid), eq(changeSetType), any(SCL.class));
     }
 
