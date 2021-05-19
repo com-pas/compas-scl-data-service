@@ -3,11 +3,13 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.basex;
 
+import org.basex.BaseXServer;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 
-public final class TcpPortUtil {
-    private TcpPortUtil() {
+public final class BaseXServerUtil {
+    private BaseXServerUtil() {
     }
 
     public static int getFreePortNumber() throws IOException {
@@ -19,4 +21,7 @@ public final class TcpPortUtil {
         throw new IOException("Port is not available");
     }
 
+    public static BaseXServer createServer(int portNumber) throws IOException {
+        return new BaseXServer("-p" + portNumber);
+    }
 }

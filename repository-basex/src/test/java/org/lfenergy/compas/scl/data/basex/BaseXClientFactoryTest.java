@@ -4,24 +4,25 @@
 package org.lfenergy.compas.scl.data.basex;
 
 import org.basex.BaseXServer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.lfenergy.compas.scl.data.basex.TcpPortUtil.getFreePortNumber;
+import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.createServer;
+import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.getFreePortNumber;
 
 class BaseXClientFactoryTest {
-    private BaseXServer server;
-    private BaseXClientFactory factory;
+    private static BaseXServer server;
+    private static BaseXClientFactory factory;
 
-    @BeforeEach
-    void beforeAll() throws IOException {
-        int freePortNumber = getFreePortNumber();
-        server = new BaseXServer("-p" + freePortNumber);
-        factory = new BaseXClientFactory("localhost", freePortNumber, "admin", "admin");
+    @BeforeAll
+    static void beforeAll() throws IOException {
+        int portNumber = getFreePortNumber();
+        server = createServer(portNumber);
+        factory = new BaseXClientFactory("localhost", portNumber, "admin", "admin");
     }
 
     @Test
@@ -29,8 +30,8 @@ class BaseXClientFactoryTest {
         assertNotNull(factory.createClient());
     }
 
-    @AfterEach
-    void afterAll() {
+    @AfterAll
+    static void afterAll() {
         server.stop();
     }
 }

@@ -23,7 +23,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * <p>
  * (C) BaseX Team 2005-20, BSD License
  */
-public final class BaseXClient implements Closeable {
+public class BaseXClient implements Closeable {
 
     /**
      * Output stream.
