@@ -28,7 +28,7 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 @TestHTTPEndpoint(CompasSclDataResource.class)
-public class CompasSclDataResourceTest {
+class CompasSclDataResourceTest {
     @InjectMock
     private CompasDataService compasDataService;
 
