@@ -4,6 +4,10 @@
 package org.lfenergy.compas.scl.data.repository;
 
 public class SclDataException extends RuntimeException {
+    public SclDataException(String message) {
+        super(message);
+    }
+
     public SclDataException(Throwable cause) {
         super(cause);
     }

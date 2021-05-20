@@ -13,9 +13,10 @@ import org.lfenergy.compas.commons.MarshallerWrapper;
 import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.SclType;
+import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.model.CreateRequest;
 import org.lfenergy.compas.scl.data.rest.model.UpdateRequest;
-import org.lfenergy.compas.scl.data.service.CompasDataService;
+import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 
 import java.io.InputStream;
 import java.util.UUID;
@@ -30,7 +31,7 @@ import static org.mockito.Mockito.*;
 @TestHTTPEndpoint(CompasSclDataResource.class)
 class CompasSclDataResourceTest {
     @InjectMock
-    private CompasDataService compasDataService;
+    private CompasSclDataService compasSclDataService;
 
     @Test
     void findSCLByUUID_WhenCalled_ThenSCLResponseRetrieved() throws Exception {
@@ -38,7 +39,7 @@ class CompasSclDataResourceTest {
         var uuid = UUID.randomUUID();
         var scl = readSCL();
 
-        when(compasDataService.findSCLByUUID(type, uuid)).thenReturn(scl);
+        when(compasSclDataService.findSCLByUUID(type, uuid)).thenReturn(scl);
 
         Response response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -52,7 +53,32 @@ class CompasSclDataResourceTest {
         var xmlPath = response.xmlPath()
                 .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
         assertEquals("HeaderID", xmlPath.get("GetResponse.scl:SCL.scl:Header.@id"));
-        verify(compasDataService, times(1)).findSCLByUUID(type, uuid);
+        verify(compasSclDataService, times(1)).findSCLByUUID(type, uuid);
+    }
+
+    @Test
+    void findSCLByUUIDAndVersion_WhenCalled_ThenSCLResponseRetrieved() throws Exception {
+        var type = SclType.SCD;
+        var uuid = UUID.randomUUID();
+        var scl = readSCL();
+        var version = new Version(1, 2, 3);
+
+        when(compasSclDataService.findSCLByUUID(type, uuid, version)).thenReturn(scl);
+
+        Response response = given()
+                .pathParam(TYPE_PATH_PARAM, type)
+                .pathParam(UUID_PATH_PARAM, uuid)
+                .pathParam(VERSION_PATH_PARAM, version.toString())
+                .when().get("/{" + UUID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
+                .then()
+                .statusCode(200)
+                .extract()
+                .response();
+
+        var xmlPath = response.xmlPath()
+                .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
+        assertEquals("HeaderID", xmlPath.get("GetResponse.scl:SCL.scl:Header.@id"));
+        verify(compasSclDataService, times(1)).findSCLByUUID(type, uuid, version);
     }
 
     @Test
@@ -61,7 +87,7 @@ class CompasSclDataResourceTest {
         var uuid = UUID.randomUUID();
         var scl = readSCL();
 
-        when(compasDataService.findSCLByUUID(type, uuid)).thenReturn(scl);
+        when(compasSclDataService.findSCLByUUID(type, uuid)).thenReturn(scl);
 
         Response response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -75,7 +101,7 @@ class CompasSclDataResourceTest {
         var xmlPath = response.xmlPath()
                 .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
         assertEquals("HeaderID", xmlPath.get("scl:SCL.scl:Header.@id"));
-        verify(compasDataService, times(1)).findSCLByUUID(type, uuid);
+        verify(compasSclDataService, times(1)).findSCLByUUID(type, uuid);
     }
 
     @Test
@@ -89,7 +115,7 @@ class CompasSclDataResourceTest {
         request.setScl(scl);
         request.setName(name);
 
-        when(compasDataService.create(eq(type), eq(name), any(SCL.class))).thenReturn(uuid);
+        when(compasSclDataService.create(eq(type), eq(name), any(SCL.class))).thenReturn(uuid);
 
         Response response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -102,13 +128,12 @@ class CompasSclDataResourceTest {
                 .response();
 
         assertEquals(uuid.toString(), response.xmlPath().getString("CreateResponse.Uuid"));
-        verify(compasDataService, times(1)).create(eq(type), eq(name), any(SCL.class));
+        verify(compasSclDataService, times(1)).create(eq(type), eq(name), any(SCL.class));
     }
 
     @Test
     void update_WhenCalled_ThenServiceCalledAndNewUUIDRetrieved() throws Exception {
         var uuid = UUID.randomUUID();
-        var newUuid = UUID.randomUUID();
         var type = SclType.SCD;
         var changeSetType = ChangeSetType.MAJOR;
         var scl = readSCL();
@@ -117,29 +142,26 @@ class CompasSclDataResourceTest {
         request.setScl(scl);
         request.setChangeSetType(changeSetType);
 
-        when(compasDataService.update(eq(type), eq(uuid), eq(changeSetType), any(SCL.class))).thenReturn(newUuid);
+        doNothing().when(compasSclDataService).update(eq(type), eq(uuid), eq(changeSetType), any(SCL.class));
 
-        Response response = given()
+        given()
                 .pathParam(TYPE_PATH_PARAM, type)
                 .pathParam(UUID_PATH_PARAM, uuid)
                 .contentType(ContentType.XML)
                 .body(request)
                 .when().put("/{" + UUID_PATH_PARAM + "}")
                 .then()
-                .statusCode(200)
-                .extract()
-                .response();
+                .statusCode(204);
 
-        assertEquals(newUuid.toString(), response.xmlPath().getString("UpdateResponse.Uuid"));
-        verify(compasDataService, times(1)).update(eq(type), eq(uuid), eq(changeSetType), any(SCL.class));
+        verify(compasSclDataService, times(1)).update(eq(type), eq(uuid), eq(changeSetType), any(SCL.class));
     }
 
     @Test
-    void delete_WhenCalled_ThenServiceCalled() {
+    void deleteAll_WhenCalled_ThenServiceCalled() {
         var uuid = UUID.randomUUID();
         var type = SclType.SCD;
 
-        doNothing().when(compasDataService).delete(type, uuid);
+        doNothing().when(compasSclDataService).delete(type, uuid);
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -148,7 +170,26 @@ class CompasSclDataResourceTest {
                 .then()
                 .statusCode(204);
 
-        verify(compasDataService, times(1)).delete(type, uuid);
+        verify(compasSclDataService, times(1)).delete(type, uuid);
+    }
+
+    @Test
+    void deleteVersion_WhenCalled_ThenServiceCalled() {
+        var uuid = UUID.randomUUID();
+        var type = SclType.SCD;
+        var version = new Version(1, 2, 3);
+
+        doNothing().when(compasSclDataService).delete(type, uuid, version);
+
+        given()
+                .pathParam(TYPE_PATH_PARAM, type)
+                .pathParam(UUID_PATH_PARAM, uuid)
+                .pathParam(VERSION_PATH_PARAM, version.toString())
+                .when().delete("/{" + UUID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
+                .then()
+                .statusCode(204);
+
+        verify(compasSclDataService, times(1)).delete(type, uuid, version);
     }
 
     private SCL readSCL() throws Exception {

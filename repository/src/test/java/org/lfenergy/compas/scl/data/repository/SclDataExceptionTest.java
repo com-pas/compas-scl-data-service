@@ -9,20 +9,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SclDataExceptionTest {
     @Test
-    void SclDataException_WhenCalledWithOnlyCause_ThenCauseCanBeRetrieved() {
-        Exception expected = new RuntimeException();
-        SclDataException exception = new SclDataException(expected);
+    void constructor_WhenCalledWithOnlyMessage_ThenMessageCanBeRetrieved() {
+        String expectedMessage = "The message";
+        SclDataException exception = new SclDataException(expectedMessage);
 
-        assertEquals(expected, exception.getCause());
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
     @Test
-    void SclDataException_WhenCalledWithCauseAndMessage_ThenCauseAndMessageCanBeRetrieved() {
-        String message = "The message";
-        Exception expected = new RuntimeException();
-        SclDataException exception = new SclDataException(message, expected);
+    void constructor_WhenCalledWithOnlyCause_ThenCauseCanBeRetrieved() {
+        Exception expectedCause = new RuntimeException();
+        SclDataException exception = new SclDataException(expectedCause);
 
-        assertEquals(message, exception.getMessage());
-        assertEquals(expected, exception.getCause());
+        assertEquals(expectedCause, exception.getCause());
+    }
+
+    @Test
+    void constructor_WhenCalledWithCauseAndMessage_ThenCauseAndMessageCanBeRetrieved() {
+        String expectedMessage = "The message";
+        Exception expectedCause = new RuntimeException();
+        SclDataException exception = new SclDataException(expectedMessage, expectedCause);
+
+        assertEquals(expectedMessage, exception.getMessage());
+        assertEquals(expectedCause, exception.getCause());
     }
 }

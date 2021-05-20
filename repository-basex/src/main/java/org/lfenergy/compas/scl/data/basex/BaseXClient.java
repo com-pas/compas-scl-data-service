@@ -111,6 +111,18 @@ public class BaseXClient implements Closeable {
     }
 
     /**
+     * Executes a XQuery Command and returns the result.
+     *
+     * @param xqueryCommand command
+     * @return result
+     * @throws IOException Exception
+     */
+    public String executeXQuery(final String xqueryCommand) throws IOException {
+        return execute("xquery " + xqueryCommand);
+
+    }
+
+    /**
      * Creates a query object.
      *
      * @param query query string

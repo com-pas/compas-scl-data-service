@@ -11,4 +11,5 @@ public final class Constants {
 
     public static final String TYPE_PATH_PARAM = "type";
     public static final String UUID_PATH_PARAM = "uuid";
+    public static final String VERSION_PATH_PARAM = "version";
 }

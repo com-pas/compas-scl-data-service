@@ -6,24 +6,35 @@ package org.lfenergy.compas.scl.data.repository;
 
 import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.SclType;
+import org.lfenergy.compas.scl.data.model.Version;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.UUID;
 
 @ApplicationScoped
-public class CompasDataPostgreSQLRepository implements CompasDataRepository {
+public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepository {
     @Override
     public SCL findSCLByUUID(SclType type, UUID uuid) {
         throw new UnsupportedOperationException("Not implemented!");
     }
 
     @Override
-    public UUID create(SclType type, SCL scl) {
+    public SCL findSCLByUUID(SclType type, UUID uuid, Version version) {
+        throw new UnsupportedOperationException("Not implemented!");
+    }
+
+    @Override
+    public void create(SclType type, UUID uuid, SCL scl, Version version) {
         throw new UnsupportedOperationException("Not implemented!");
     }
 
     @Override
     public void delete(SclType type, UUID uuid) {
+        throw new UnsupportedOperationException("Not implemented!");
+    }
+
+    @Override
+    public void delete(SclType type, UUID uuid, Version version) {
         throw new UnsupportedOperationException("Not implemented!");
     }
 }
