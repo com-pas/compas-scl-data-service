@@ -10,6 +10,7 @@ import org.lfenergy.compas.scl.data.model.Version;
 import java.util.UUID;
 
 public interface CompasSclDataRepository {
+    
     SCL findSCLByUUID(SclType type, UUID uuid);
 
     SCL findSCLByUUID(SclType type, UUID uuid, Version version);
