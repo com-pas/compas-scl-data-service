@@ -41,8 +41,9 @@ class CompasSclDataPostgreSQLRepositoryTest {
     void create_WhenCalled_ThenUnsupportedExceptionThrown() {
         var uuid = UUID.randomUUID();
         var scl = new SCL();
+        var version = new Version(1, 0, 0);
         assertThrows(UnsupportedOperationException.class, () -> {
-            repository.create(SclType.SCD, uuid, scl, new Version(1, 0, 0));
+            repository.create(SclType.SCD, uuid, scl, version);
         });
     }
 
@@ -57,8 +58,9 @@ class CompasSclDataPostgreSQLRepositoryTest {
     @Test
     void delete_WhenCalledWithVersion_ThenUnsupportedExceptionThrown() {
         var uuid = UUID.randomUUID();
+        var version = new Version(1, 0, 0);
         assertThrows(UnsupportedOperationException.class, () -> {
-            repository.delete(SclType.SCD, uuid, new Version(1, 0, 0));
+            repository.delete(SclType.SCD, uuid, version);
         });
     }
 }

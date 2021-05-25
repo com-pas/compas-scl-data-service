@@ -85,6 +85,21 @@ class VersionTest {
     }
 
     @Test
+    void equals_WhenTwoObjectHaveDifferentMajorVersion_ThenEqualsShouldNotBeTheSame() {
+        assertNotEquals(new Version(1, 5, 8), new Version(2, 5, 8));
+    }
+
+    @Test
+    void equals_WhenTwoObjectHaveDifferentMinorVersion_ThenEqualsShouldNotBeTheSame() {
+        assertNotEquals(new Version(1, 5, 8), new Version(1, 6, 8));
+    }
+
+    @Test
+    void equals_WhenTwoObjectHaveDifferentPatchVersion_ThenEqualsShouldNotBeTheSame() {
+        assertNotEquals(new Version(1, 5, 8), new Version(1, 5, 9));
+    }
+
+    @Test
     void equals_WhenTwoSameObject_ThenEqualsShouldAlsoBeTheSame() {
         var version = new Version(1, 5, 8);
         assertEquals(version, version);
@@ -92,12 +107,12 @@ class VersionTest {
 
     @Test
     void equals_WhenTwoDifferentObjectType_ThenEqualsShouldNeverBeTheSame() {
-        assertNotEquals(new Version(1, 5, 8), "1.5.8");
+        assertNotEquals("1.5.8", new Version(1, 5, 8));
     }
 
     @Test
     void equals_WhenOneObjectIsNull_ThenEqualsShouldNeverBeTheSame() {
-        assertNotEquals(new Version(1, 5, 8), null);
+        assertNotEquals(null, new Version(1, 5, 8));
     }
 
     @Test

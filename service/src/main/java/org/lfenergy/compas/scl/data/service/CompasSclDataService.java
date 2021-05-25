@@ -32,8 +32,8 @@ public class CompasSclDataService {
     }
 
     public UUID create(SclType type, String name, SCL scl) {
-        // When the SCL is create the version will be set to 1.0.0
         var uuid = UUID.randomUUID();
+        // When the SCL is create the version will be set to 1.0.0
         var version = new Version(1, 0, 0);
         scl.getHeader().setVersion(version.toString());
         // TODO: Add name and type to SCL before storing the SCL.
@@ -43,9 +43,8 @@ public class CompasSclDataService {
     }
 
     public void update(SclType type, UUID uuid, ChangeSetType changeSetType, SCL scl) {
-        // We always add a new version to the database, so add version record to the SCL and create a new record.
-        // TODO: Add version record to SCL.
         var currentSCL = repository.findSCLByUUID(type, uuid);
+        // We always add a new version to the database, so add version record to the SCL and create a new record.
         var version = new Version(currentSCL.getHeader().getVersion());
         version = version.getNextVersion(changeSetType);
         scl.getHeader().setVersion(version.toString());

@@ -80,7 +80,7 @@ public class Version {
             final Version other = (Version) obj;
             return majorVersion == other.majorVersion
                     && minorVersion == other.minorVersion
-                    && patchVersion == patchVersion;
+                    && patchVersion == other.patchVersion;
         } else {
             return false;
         }
