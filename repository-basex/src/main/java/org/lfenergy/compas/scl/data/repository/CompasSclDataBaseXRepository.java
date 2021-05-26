@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static java.lang.String.format;
+
 @ApplicationScoped
 public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataBaseXRepository.class);
@@ -42,21 +44,24 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                     "           ))\n" +
                     "      return $doc\n" +
                     "};\n";
+    private static final String DECLARE_DB_VARIABLE = "declare variable $db := '%s';\n";
+    private static final String DECLARE_ID_VARIABLE = "declare variable $id := '%s';\n";
 
-
-    private final MarshallerWrapper marshallerWrapper;
     private final BaseXClientFactory baseXClientFactory;
+    private final MarshallerWrapper marshallerWrapper;
+    private final JaxbMarshaller sclDataMarshaller;
 
     @Inject
     public CompasSclDataBaseXRepository(BaseXClientFactory baseXClientFactory) throws Exception {
         this.baseXClientFactory = baseXClientFactory;
         this.marshallerWrapper = new MarshallerWrapper.Builder().build();
+        this.sclDataMarshaller = new JaxbMarshaller();
 
         // At startup create all needed databases.
         Arrays.stream(SclType.values()).forEach(type ->
                 executeCommand(client -> {
                     client.executeXQuery(
-                            "declare variable $db := '" + type + "'; " +
+                            format(DECLARE_DB_VARIABLE, type) +
                                     "if (not(db:exists($db))) " +
                                     " then db:create($db)");
                     return true;
@@ -65,41 +70,29 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
 
     @Override
     public List<Item> list(SclType type) {
-        try {
-            var jaxbMarshaller = new JaxbMarshaller();
-
-            return executeQuery(type, DECLARE_NAMESPACE +
-                            DECLARE_LATEST_VERSION_FUNC +
-                            "declare variable $db := '" + type + "'; " +
-                            "for $resource in db:open($db) " +
-                            "   let $id := $resource//scl:SCL/scl:Header/@id " +
-                            "   group by $id " +
-                            "   return '<Item><Id>' || $id || '</Id><Version>' || local:latest-version($db, $id)//scl:SCL/scl:Header/@version || '</Version></Item>'",
-                    jaxbMarshaller::unmarshal
-            );
-        } catch (JAXBException exp) {
-            throw new SclDataException(exp);
-        }
+        return executeQuery(type, DECLARE_NAMESPACE +
+                        DECLARE_LATEST_VERSION_FUNC +
+                        format(DECLARE_DB_VARIABLE, type) +
+                        "for $resource in db:open($db) " +
+                        "   let $id := $resource//scl:SCL/scl:Header/@id " +
+                        "   group by $id " +
+                        "   return '<Item><Id>' || $id || '</Id><Version>' || local:latest-version($db, $id)//scl:SCL/scl:Header/@version || '</Version></Item>'",
+                sclDataMarshaller::unmarshal
+        );
     }
 
     @Override
     public List<Item> listSCLVersionsByUUID(SclType type, UUID id) {
-        try {
-            var jaxbMarshaller = new JaxbMarshaller();
-
-            return executeQuery(type, DECLARE_NAMESPACE +
-                            "declare variable $db := '" + type + "'; " +
-                            "declare variable $id := '" + id + "'; " +
-                            "for $resource in db:open($db, $id) " +
-                            "   let $id := $resource//scl:SCL/scl:Header/@id " +
-                            "   let $version := $resource//scl:SCL/scl:Header/@version " +
-                            "   order by $version " +
-                            "   return '<Item><Id>' || $id || '</Id><Version>' || $version || '</Version></Item>' ",
-                    jaxbMarshaller::unmarshal
-            );
-        } catch (JAXBException exp) {
-            throw new SclDataException(exp);
-        }
+        return executeQuery(type, DECLARE_NAMESPACE +
+                        format(DECLARE_DB_VARIABLE, type) +
+                        format(DECLARE_ID_VARIABLE, id) +
+                        "for $resource in db:open($db, $id) " +
+                        "   let $id := $resource//scl:SCL/scl:Header/@id " +
+                        "   let $version := $resource//scl:SCL/scl:Header/@version " +
+                        "   order by $version " +
+                        "   return '<Item><Id>' || $id || '</Id><Version>' || $version || '</Version></Item>' ",
+                sclDataMarshaller::unmarshal
+        );
     }
 
     @Override
@@ -109,8 +102,8 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
         // Sort the result descending, this way the last version is the first.
         // Use this path to retrieve the document with the doc function.
         var result = executeQuery(type, DECLARE_LATEST_VERSION_FUNC +
-                        "declare variable $db := '" + type + "'; " +
-                        "declare variable $id := '" + id + "'; " +
+                        format(DECLARE_DB_VARIABLE, type) +
+                        format(DECLARE_ID_VARIABLE, id) +
                         "local:latest-version($db, $id)",
                 row -> marshallerWrapper.unmarshall(row.getBytes(StandardCharsets.UTF_8)));
         return result.get(0);
