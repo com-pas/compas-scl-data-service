@@ -35,13 +35,15 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     private static final String DECLARE_LATEST_VERSION_FUNC =
             "declare function local:latest-version($db as xs:string, $id as xs:string)\n" +
                     "   as document-node() { \n" +
-                    "      let $doc := \n" +
-                    "        doc(concat($db, '/',\n" +
-                    "            (for $resource in db:list-details($db, $id)\n" +
-                    "               order by $resource/text() descending\n" +
-                    "               return $resource\n" +
-                    "            )[1]/text()\n" +
-                    "           ))\n" +
+                    "      let $doc :=\n" +
+                    "          (for $resource in db:open($db, $id)\n" +
+                    "            let $parts := tokenize($resource/scl:SCL/scl:Header/@version, '\\.')\n" +
+                    "            let $majorVersion := xs:int($parts[1])\n" +
+                    "            let $minorVersion := xs:int($parts[2])\n" +
+                    "            let $patchVersion := xs:int($parts[3])\n" +
+                    "            order by $majorVersion descending, $minorVersion descending, $patchVersion descending\n" +
+                    "            return $resource\n" +
+                    "          )[1]\n" +
                     "      return $doc\n" +
                     "};\n";
     private static final String DECLARE_DB_VARIABLE = "declare variable $db := '%s';\n";
@@ -62,8 +64,8 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                 executeCommand(client -> {
                     client.executeXQuery(
                             format(DECLARE_DB_VARIABLE, type) +
-                                    "if (not(db:exists($db))) " +
-                                    " then db:create($db)");
+                                    "if (not(db:exists($db)))\n" +
+                                    "   then db:create($db)");
                     return true;
                 }));
     }
@@ -73,9 +75,9 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
         return executeQuery(type, DECLARE_NAMESPACE +
                         DECLARE_LATEST_VERSION_FUNC +
                         format(DECLARE_DB_VARIABLE, type) +
-                        "for $resource in db:open($db) " +
-                        "   let $id := $resource//scl:SCL/scl:Header/@id " +
-                        "   group by $id " +
+                        "for $resource in db:open($db)\n" +
+                        "   let $id := $resource/scl:SCL/scl:Header/@id\n" +
+                        "   group by $id\n" +
                         "   return '<Item><Id>' || $id || '</Id><Version>' || local:latest-version($db, $id)//scl:SCL/scl:Header/@version || '</Version></Item>'",
                 sclDataMarshaller::unmarshal
         );
@@ -86,10 +88,14 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
         return executeQuery(type, DECLARE_NAMESPACE +
                         format(DECLARE_DB_VARIABLE, type) +
                         format(DECLARE_ID_VARIABLE, id) +
-                        "for $resource in db:open($db, $id) " +
-                        "   let $id := $resource//scl:SCL/scl:Header/@id " +
-                        "   let $version := $resource//scl:SCL/scl:Header/@version " +
-                        "   order by $version " +
+                        "for $resource in db:open($db, $id)\n" +
+                        "   let $id := $resource/scl:SCL/scl:Header/@id\n" +
+                        "   let $version := $resource/scl:SCL/scl:Header/@version\n" +
+                        "   let $parts := tokenize($version, '\\.')\n" +
+                        "   let $majorVersion := xs:int($parts[1])\n" +
+                        "   let $minorVersion := xs:int($parts[2])\n" +
+                        "   let $patchVersion := xs:int($parts[3])\n" +
+                        "   order by $majorVersion, $minorVersion, $patchVersion\n" +
                         "   return '<Item><Id>' || $id || '</Id><Version>' || $version || '</Version></Item>' ",
                 sclDataMarshaller::unmarshal
         );
@@ -101,7 +107,8 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
         // Retrieve all versions using db:list-details function.
         // Sort the result descending, this way the last version is the first.
         // Use this path to retrieve the document with the doc function.
-        var result = executeQuery(type, DECLARE_LATEST_VERSION_FUNC +
+        var result = executeQuery(type, DECLARE_NAMESPACE +
+                        DECLARE_LATEST_VERSION_FUNC +
                         format(DECLARE_DB_VARIABLE, type) +
                         format(DECLARE_ID_VARIABLE, id) +
                         "local:latest-version($db, $id)",
@@ -156,6 +163,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
         return executeCommand(client -> {
             var response = new ArrayList<R>();
             openDatabase(client, type);
+            LOGGER.debug("Executing Query:\n{}", query);
             try (var queryToRun = client.query(query)) {
                 while (queryToRun.more()) {
                     response.add(mapper.map(queryToRun.next()));
