@@ -152,6 +152,31 @@ class CompasSclDataResourceTest {
     }
 
     @Test
+    void findSCLByUUIDAndVersion_WhenCalled_ThenSCLRetrieved() throws Exception {
+        var type = SclType.SCD;
+        var uuid = UUID.randomUUID();
+        var scl = readSCL();
+        var version = new Version(1, 2, 3);
+
+        when(compasSclDataService.findSCLByUUID(type, uuid, version)).thenReturn(scl);
+
+        Response response = given()
+                .pathParam(TYPE_PATH_PARAM, type)
+                .pathParam(ID_PATH_PARAM, uuid)
+                .pathParam(VERSION_PATH_PARAM, version.toString())
+                .when().get("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}/scl")
+                .then()
+                .statusCode(200)
+                .extract()
+                .response();
+
+        var xmlPath = response.xmlPath()
+                .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
+        assertEquals("HeaderID", xmlPath.get("scl:SCL.scl:Header.@id"));
+        verify(compasSclDataService, times(1)).findSCLByUUID(type, uuid, version);
+    }
+
+    @Test
     void create_WhenCalled_ThenServiceCalledAndUUIDRetrieved() throws Exception {
         var uuid = UUID.randomUUID();
         var type = SclType.SCD;
