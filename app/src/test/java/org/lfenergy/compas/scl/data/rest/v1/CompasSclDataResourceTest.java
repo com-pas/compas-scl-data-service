@@ -58,12 +58,12 @@ class CompasSclDataResourceTest {
     }
 
     @Test
-    void listSCLVersionsByUUID_WhenCalled_ThenItemResponseRetrieved() {
+    void listVersionsByUUID_WhenCalled_ThenItemResponseRetrieved() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var version = "1.0.0";
 
-        when(compasSclDataService.listSCLVersionsByUUID(type, uuid)).thenReturn(Collections.singletonList(new Item(uuid.toString(), version)));
+        when(compasSclDataService.listVersionsByUUID(type, uuid)).thenReturn(Collections.singletonList(new Item(uuid.toString(), version)));
 
         Response response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -77,16 +77,16 @@ class CompasSclDataResourceTest {
         var xmlPath = response.xmlPath();
         assertEquals(uuid.toString(), xmlPath.get("ListResponse.Item[0].Id"));
         assertEquals(version, xmlPath.get("ListResponse.Item[0].Version"));
-        verify(compasSclDataService, times(1)).listSCLVersionsByUUID(type, uuid);
+        verify(compasSclDataService, times(1)).listVersionsByUUID(type, uuid);
     }
 
     @Test
-    void findSCLByUUID_WhenCalled_ThenSCLResponseRetrieved() throws Exception {
+    void findByUUID_WhenCalled_ThenSCLResponseRetrieved() throws Exception {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL();
 
-        when(compasSclDataService.findSCLByUUID(type, uuid)).thenReturn(scl);
+        when(compasSclDataService.findByUUID(type, uuid)).thenReturn(scl);
 
         Response response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -100,17 +100,17 @@ class CompasSclDataResourceTest {
         var xmlPath = response.xmlPath()
                 .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
         assertEquals("HeaderID", xmlPath.get("GetResponse.scl:SCL.scl:Header.@id"));
-        verify(compasSclDataService, times(1)).findSCLByUUID(type, uuid);
+        verify(compasSclDataService, times(1)).findByUUID(type, uuid);
     }
 
     @Test
-    void findSCLByUUIDAndVersion_WhenCalled_ThenSCLResponseRetrieved() throws Exception {
+    void findByUUIDAndVersion_WhenCalled_ThenSCLResponseRetrieved() throws Exception {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL();
         var version = new Version(1, 2, 3);
 
-        when(compasSclDataService.findSCLByUUID(type, uuid, version)).thenReturn(scl);
+        when(compasSclDataService.findByUUID(type, uuid, version)).thenReturn(scl);
 
         Response response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -125,16 +125,16 @@ class CompasSclDataResourceTest {
         var xmlPath = response.xmlPath()
                 .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
         assertEquals("HeaderID", xmlPath.get("GetResponse.scl:SCL.scl:Header.@id"));
-        verify(compasSclDataService, times(1)).findSCLByUUID(type, uuid, version);
+        verify(compasSclDataService, times(1)).findByUUID(type, uuid, version);
     }
 
     @Test
-    void findSCLByUUID_WhenCalledOnlySCL_ThenSCLRetrieved() throws Exception {
+    void findRawSCLByUUID_WhenCalledOnlySCL_ThenSCLRetrieved() throws Exception {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL();
 
-        when(compasSclDataService.findSCLByUUID(type, uuid)).thenReturn(scl);
+        when(compasSclDataService.findByUUID(type, uuid)).thenReturn(scl);
 
         Response response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -148,17 +148,17 @@ class CompasSclDataResourceTest {
         var xmlPath = response.xmlPath()
                 .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
         assertEquals("HeaderID", xmlPath.get("scl:SCL.scl:Header.@id"));
-        verify(compasSclDataService, times(1)).findSCLByUUID(type, uuid);
+        verify(compasSclDataService, times(1)).findByUUID(type, uuid);
     }
 
     @Test
-    void findSCLByUUIDAndVersion_WhenCalled_ThenSCLRetrieved() throws Exception {
+    void findRawSCLByUUIDAndVersion_WhenCalled_ThenSCLRetrieved() throws Exception {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL();
         var version = new Version(1, 2, 3);
 
-        when(compasSclDataService.findSCLByUUID(type, uuid, version)).thenReturn(scl);
+        when(compasSclDataService.findByUUID(type, uuid, version)).thenReturn(scl);
 
         Response response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -173,7 +173,7 @@ class CompasSclDataResourceTest {
         var xmlPath = response.xmlPath()
                 .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
         assertEquals("HeaderID", xmlPath.get("scl:SCL.scl:Header.@id"));
-        verify(compasSclDataService, times(1)).findSCLByUUID(type, uuid, version);
+        verify(compasSclDataService, times(1)).findByUUID(type, uuid, version);
     }
 
     @Test

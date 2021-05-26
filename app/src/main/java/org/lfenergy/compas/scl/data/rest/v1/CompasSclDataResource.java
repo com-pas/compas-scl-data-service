@@ -39,7 +39,7 @@ public class CompasSclDataResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_XML)
-    public ListResponse listItems(@PathParam(TYPE_PATH_PARAM) SclType type) {
+    public ListResponse list(@PathParam(TYPE_PATH_PARAM) SclType type) {
         var response = new ListResponse();
         response.setItems(compasSclDataService.list(type));
         return response;
@@ -48,31 +48,31 @@ public class CompasSclDataResource {
     @GET
     @Path("/{" + ID_PATH_PARAM + "}/versions")
     @Produces(MediaType.APPLICATION_XML)
-    public VersionsResponse listSCLVersionsByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                                  @PathParam(ID_PATH_PARAM) UUID id) {
+    public VersionsResponse listVersionsByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
+                                               @PathParam(ID_PATH_PARAM) UUID id) {
         var response = new VersionsResponse();
-        response.setItems(compasSclDataService.listSCLVersionsByUUID(type, id));
+        response.setItems(compasSclDataService.listVersionsByUUID(type, id));
         return response;
     }
 
     @GET
     @Path("/{" + ID_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
-    public GetResponse findSCLByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                     @PathParam(ID_PATH_PARAM) UUID id) {
+    public GetResponse findByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
+                                  @PathParam(ID_PATH_PARAM) UUID id) {
         var response = new GetResponse();
-        response.setScl(compasSclDataService.findSCLByUUID(type, id));
+        response.setScl(compasSclDataService.findByUUID(type, id));
         return response;
     }
 
     @GET
     @Path("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
-    public GetResponse findSCLByUUIDAnfVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                               @PathParam(ID_PATH_PARAM) UUID id,
-                                               @PathParam(Constants.VERSION_PATH_PARAM) Version version) {
+    public GetResponse findByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
+                                            @PathParam(ID_PATH_PARAM) UUID id,
+                                            @PathParam(Constants.VERSION_PATH_PARAM) Version version) {
         var response = new GetResponse();
-        response.setScl(compasSclDataService.findSCLByUUID(type, id, version));
+        response.setScl(compasSclDataService.findByUUID(type, id, version));
         return response;
     }
 
@@ -81,7 +81,7 @@ public class CompasSclDataResource {
     @Produces(MediaType.APPLICATION_XML)
     public SCL findRawSCLByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
                                 @PathParam(ID_PATH_PARAM) UUID id) {
-        return compasSclDataService.findSCLByUUID(type, id);
+        return compasSclDataService.findByUUID(type, id);
     }
 
     @GET
@@ -90,7 +90,7 @@ public class CompasSclDataResource {
     public SCL findRawSCLByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
                                           @PathParam(ID_PATH_PARAM) UUID id,
                                           @PathParam(Constants.VERSION_PATH_PARAM) Version version) {
-        return compasSclDataService.findSCLByUUID(type, id, version);
+        return compasSclDataService.findByUUID(type, id, version);
     }
 
     @PUT

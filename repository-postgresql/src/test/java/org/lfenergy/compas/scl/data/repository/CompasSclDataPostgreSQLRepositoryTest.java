@@ -28,27 +28,27 @@ class CompasSclDataPostgreSQLRepositoryTest {
     }
 
     @Test
-    void listSCLVersionsByUUID_WhenCalled_ThenUnsupportedExceptionThrown() {
+    void listVersionsByUUID_WhenCalled_ThenUnsupportedExceptionThrown() {
         var uuid = UUID.randomUUID();
         assertThrows(UnsupportedOperationException.class, () -> {
-            repository.listSCLVersionsByUUID(SclType.SCD, uuid);
+            repository.listVersionsByUUID(SclType.SCD, uuid);
         });
     }
 
     @Test
-    void findSCLByUUID_WhenCalledWithoutVersion_ThenUnsupportedExceptionThrown() {
+    void findByUUID_WhenCalledWithoutVersion_ThenUnsupportedExceptionThrown() {
         var uuid = UUID.randomUUID();
         assertThrows(UnsupportedOperationException.class, () -> {
-            repository.findSCLByUUID(SclType.SCD, uuid);
+            repository.findByUUID(SclType.SCD, uuid);
         });
     }
 
     @Test
-    void findSCLByUUID_WhenCalledWithVersion_ThenUnsupportedExceptionThrown() {
+    void findByUUID_WhenCalledWithVersion_ThenUnsupportedExceptionThrown() {
         var uuid = UUID.randomUUID();
         var version = new Version(1, 0, 0);
         assertThrows(UnsupportedOperationException.class, () -> {
-            repository.findSCLByUUID(SclType.SCD, uuid, version);
+            repository.findByUUID(SclType.SCD, uuid, version);
         });
     }
 

@@ -41,40 +41,40 @@ class CompasSclDataServiceTest {
     }
 
     @Test
-    void listSCLVersionsByUUID_WhenCalled_ThenRepositoryIsCalled() {
+    void listVersionsByUUID_WhenCalled_ThenRepositoryIsCalled() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
-        when(compasSclDataRepository.listSCLVersionsByUUID(type, uuid)).thenReturn(emptyList());
+        when(compasSclDataRepository.listVersionsByUUID(type, uuid)).thenReturn(emptyList());
 
-        var result = compasSclDataService.listSCLVersionsByUUID(type, uuid);
+        var result = compasSclDataService.listVersionsByUUID(type, uuid);
 
         assertNotNull(result);
-        verify(compasSclDataRepository, times(1)).listSCLVersionsByUUID(type, uuid);
+        verify(compasSclDataRepository, times(1)).listVersionsByUUID(type, uuid);
     }
 
     @Test
-    void findSCLByUUID_WhenCalledWithoutVersion_ThenRepositoryIsCalled() {
+    void findByUUID_WhenCalledWithoutVersion_ThenRepositoryIsCalled() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
-        when(compasSclDataRepository.findSCLByUUID(type, uuid)).thenReturn(createBasicSCL());
+        when(compasSclDataRepository.findByUUID(type, uuid)).thenReturn(createBasicSCL());
 
-        var result = compasSclDataService.findSCLByUUID(type, uuid);
+        var result = compasSclDataService.findByUUID(type, uuid);
 
         assertNotNull(result);
-        verify(compasSclDataRepository, times(1)).findSCLByUUID(type, uuid);
+        verify(compasSclDataRepository, times(1)).findByUUID(type, uuid);
     }
 
     @Test
-    void findSCLByUUID_WhenCalledWithVersion_ThenRepositoryIsCalled() {
+    void findByUUID_WhenCalledWithVersion_ThenRepositoryIsCalled() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var version = new Version(1, 0, 0);
-        when(compasSclDataRepository.findSCLByUUID(type, uuid, version)).thenReturn(createBasicSCL());
+        when(compasSclDataRepository.findByUUID(type, uuid, version)).thenReturn(createBasicSCL());
 
-        var result = compasSclDataService.findSCLByUUID(type, uuid, version);
+        var result = compasSclDataService.findByUUID(type, uuid, version);
 
         assertNotNull(result);
-        verify(compasSclDataRepository, times(1)).findSCLByUUID(type, uuid, version);
+        verify(compasSclDataRepository, times(1)).findByUUID(type, uuid, version);
     }
 
     @Test
@@ -97,13 +97,13 @@ class CompasSclDataServiceTest {
         var uuid = UUID.randomUUID();
         var scl = createBasicSCL();
 
-        when(compasSclDataRepository.findSCLByUUID(type, uuid)).thenReturn(createBasicSCL());
+        when(compasSclDataRepository.findByUUID(type, uuid)).thenReturn(createBasicSCL());
         doNothing().when(compasSclDataRepository).create(eq(type), eq(uuid), eq(scl), any(Version.class));
 
         compasSclDataService.update(type, uuid, ChangeSetType.MAJOR, scl);
 
         verify(compasSclDataRepository, times(1)).create(eq(type), eq(uuid), eq(scl), any(Version.class));
-        verify(compasSclDataRepository, times(1)).findSCLByUUID(type, uuid);
+        verify(compasSclDataRepository, times(1)).findByUUID(type, uuid);
     }
 
     @Test
