@@ -41,6 +41,18 @@ class CompasSclDataServiceTest {
     }
 
     @Test
+    void listSCLVersionsByUUID_WhenCalled_ThenRepositoryIsCalled() {
+        var type = SclType.SCD;
+        var uuid = UUID.randomUUID();
+        when(compasSclDataRepository.listSCLVersionsByUUID(type, uuid)).thenReturn(emptyList());
+
+        var result = compasSclDataService.listSCLVersionsByUUID(type, uuid);
+
+        assertNotNull(result);
+        verify(compasSclDataRepository, times(1)).listSCLVersionsByUUID(type, uuid);
+    }
+
+    @Test
     void findSCLByUUID_WhenCalledWithoutVersion_ThenRepositoryIsCalled() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();

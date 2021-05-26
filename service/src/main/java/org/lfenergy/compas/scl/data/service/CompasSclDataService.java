@@ -29,6 +29,10 @@ public class CompasSclDataService {
         return repository.list(type);
     }
 
+    public List<Item> listSCLVersionsByUUID(SclType type, UUID id) {
+        return repository.listSCLVersionsByUUID(type, id);
+    }
+
     public SCL findSCLByUUID(SclType type, UUID id) {
         return repository.findSCLByUUID(type, id);
     }

@@ -17,11 +17,9 @@ abstract class AbstractPojoTester {
         var personPojo = PojoClassFactory.getPojoClass(getClassToBeTested());
         var validator = ValidatorBuilder.create()
                 // Lets make sure that we have a getter and a setter for every field defined.
-                .with(new GetterMustExistRule())
-                .with(new SetterMustExistRule())
+                .with(new GetterMustExistRule(), new SetterMustExistRule())
                 // Lets also validate that they are behaving as expected
-                .with(new SetterTester())
-                .with(new GetterTester())
+                .with(new SetterTester(), new GetterTester())
                 .build();
 
         // Start the Test

@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: 2021 Alliander N.V.
 //
 // SPDX-License-Identifier: Apache-2.0
-
 package org.lfenergy.compas.scl.data.rest.v1;
 
 import org.lfenergy.compas.scl.SCL;
@@ -43,6 +42,16 @@ public class CompasSclDataResource {
     public ListResponse listItems(@PathParam(TYPE_PATH_PARAM) SclType type) {
         var response = new ListResponse();
         response.setItems(compasSclDataService.list(type));
+        return response;
+    }
+
+    @GET
+    @Path("/{" + ID_PATH_PARAM + "}/versions")
+    @Produces(MediaType.APPLICATION_XML)
+    public VersionsResponse listSCLVersionsByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
+                                                  @PathParam(ID_PATH_PARAM) UUID id) {
+        var response = new VersionsResponse();
+        response.setItems(compasSclDataService.listSCLVersionsByUUID(type, id));
         return response;
     }
 

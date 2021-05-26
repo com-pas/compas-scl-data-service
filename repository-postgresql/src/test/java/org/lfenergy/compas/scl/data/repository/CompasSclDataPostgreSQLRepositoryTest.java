@@ -21,6 +21,21 @@ class CompasSclDataPostgreSQLRepositoryTest {
     private CompasSclDataPostgreSQLRepository repository;
 
     @Test
+    void list_WhenCalled_ThenUnsupportedExceptionThrown() {
+        assertThrows(UnsupportedOperationException.class, () -> {
+            repository.list(SclType.SCD);
+        });
+    }
+
+    @Test
+    void listSCLVersionsByUUID_WhenCalled_ThenUnsupportedExceptionThrown() {
+        var uuid = UUID.randomUUID();
+        assertThrows(UnsupportedOperationException.class, () -> {
+            repository.listSCLVersionsByUUID(SclType.SCD, uuid);
+        });
+    }
+
+    @Test
     void findSCLByUUID_WhenCalledWithoutVersion_ThenUnsupportedExceptionThrown() {
         var uuid = UUID.randomUUID();
         assertThrows(UnsupportedOperationException.class, () -> {

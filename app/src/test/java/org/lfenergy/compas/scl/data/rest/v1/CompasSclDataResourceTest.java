@@ -58,6 +58,29 @@ class CompasSclDataResourceTest {
     }
 
     @Test
+    void listSCLVersionsByUUID_WhenCalled_ThenItemResponseRetrieved() {
+        var type = SclType.SCD;
+        var uuid = UUID.randomUUID();
+        var version = "1.0.0";
+
+        when(compasSclDataService.listSCLVersionsByUUID(type, uuid)).thenReturn(Collections.singletonList(new Item(uuid.toString(), version)));
+
+        Response response = given()
+                .pathParam(TYPE_PATH_PARAM, type)
+                .pathParam(ID_PATH_PARAM, uuid)
+                .when().get("/{" + ID_PATH_PARAM + "}/versions")
+                .then()
+                .statusCode(200)
+                .extract()
+                .response();
+
+        var xmlPath = response.xmlPath();
+        assertEquals(uuid.toString(), xmlPath.get("ListResponse.Item[0].Id"));
+        assertEquals(version, xmlPath.get("ListResponse.Item[0].Version"));
+        verify(compasSclDataService, times(1)).listSCLVersionsByUUID(type, uuid);
+    }
+
+    @Test
     void findSCLByUUID_WhenCalled_ThenSCLResponseRetrieved() throws Exception {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
