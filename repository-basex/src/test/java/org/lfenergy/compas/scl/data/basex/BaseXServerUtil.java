@@ -14,7 +14,7 @@ public final class BaseXServerUtil {
 
     public static int getFreePortNumber() throws IOException {
         try (ServerSocket serverSocket = new ServerSocket(0)) {
-            if (serverSocket != null && serverSocket.getLocalPort() > 0) {
+            if (serverSocket.getLocalPort() > 0) {
                 return serverSocket.getLocalPort();
             }
         }
@@ -22,6 +22,7 @@ public final class BaseXServerUtil {
     }
 
     public static BaseXServer createServer(int portNumber) throws IOException {
+        System.setProperty("org.basex.path", "build/basex");
         return new BaseXServer("-p" + portNumber);
     }
 }

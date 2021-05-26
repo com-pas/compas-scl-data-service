@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.commons.MarshallerWrapper;
 import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
+import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.model.CreateRequest;
@@ -19,6 +20,7 @@ import org.lfenergy.compas.scl.data.rest.model.UpdateRequest;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
@@ -34,6 +36,28 @@ class CompasSclDataResourceTest {
     private CompasSclDataService compasSclDataService;
 
     @Test
+    void list_WhenCalled_ThenItemResponseRetrieved() {
+        var type = SclType.SCD;
+        var uuid = UUID.randomUUID();
+        var version = "1.0.0";
+
+        when(compasSclDataService.list(type)).thenReturn(Collections.singletonList(new Item(uuid.toString(), version)));
+
+        Response response = given()
+                .pathParam(TYPE_PATH_PARAM, type)
+                .when().get("/list")
+                .then()
+                .statusCode(200)
+                .extract()
+                .response();
+
+        var xmlPath = response.xmlPath();
+        assertEquals(uuid.toString(), xmlPath.get("ListResponse.Item[0].Id"));
+        assertEquals(version, xmlPath.get("ListResponse.Item[0].Version"));
+        verify(compasSclDataService, times(1)).list(type);
+    }
+
+    @Test
     void findSCLByUUID_WhenCalled_ThenSCLResponseRetrieved() throws Exception {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
@@ -43,8 +67,8 @@ class CompasSclDataResourceTest {
 
         Response response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
-                .pathParam(UUID_PATH_PARAM, uuid)
-                .when().get("/{" + UUID_PATH_PARAM + "}")
+                .pathParam(ID_PATH_PARAM, uuid)
+                .when().get("/{" + ID_PATH_PARAM + "}")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -67,9 +91,9 @@ class CompasSclDataResourceTest {
 
         Response response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
-                .pathParam(UUID_PATH_PARAM, uuid)
+                .pathParam(ID_PATH_PARAM, uuid)
                 .pathParam(VERSION_PATH_PARAM, version.toString())
-                .when().get("/{" + UUID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
+                .when().get("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -91,8 +115,8 @@ class CompasSclDataResourceTest {
 
         Response response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
-                .pathParam(UUID_PATH_PARAM, uuid)
-                .when().get("/{" + UUID_PATH_PARAM + "}/scl")
+                .pathParam(ID_PATH_PARAM, uuid)
+                .when().get("/{" + ID_PATH_PARAM + "}/scl")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -127,7 +151,7 @@ class CompasSclDataResourceTest {
                 .extract()
                 .response();
 
-        assertEquals(uuid.toString(), response.xmlPath().getString("CreateResponse.Uuid"));
+        assertEquals(uuid.toString(), response.xmlPath().getString("CreateResponse.Id"));
         verify(compasSclDataService, times(1)).create(eq(type), eq(name), any(SCL.class));
     }
 
@@ -146,10 +170,10 @@ class CompasSclDataResourceTest {
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
-                .pathParam(UUID_PATH_PARAM, uuid)
+                .pathParam(ID_PATH_PARAM, uuid)
                 .contentType(ContentType.XML)
                 .body(request)
-                .when().put("/{" + UUID_PATH_PARAM + "}")
+                .when().put("/{" + ID_PATH_PARAM + "}")
                 .then()
                 .statusCode(204);
 
@@ -165,8 +189,8 @@ class CompasSclDataResourceTest {
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
-                .pathParam(UUID_PATH_PARAM, uuid)
-                .when().delete("/{" + UUID_PATH_PARAM + "}")
+                .pathParam(ID_PATH_PARAM, uuid)
+                .when().delete("/{" + ID_PATH_PARAM + "}")
                 .then()
                 .statusCode(204);
 
@@ -183,9 +207,9 @@ class CompasSclDataResourceTest {
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
-                .pathParam(UUID_PATH_PARAM, uuid)
+                .pathParam(ID_PATH_PARAM, uuid)
                 .pathParam(VERSION_PATH_PARAM, version.toString())
-                .when().delete("/{" + UUID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
+                .when().delete("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
                 .then()
                 .statusCode(204);
 

@@ -8,10 +8,7 @@ import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.Constants;
-import org.lfenergy.compas.scl.data.rest.model.CreateRequest;
-import org.lfenergy.compas.scl.data.rest.model.CreateResponse;
-import org.lfenergy.compas.scl.data.rest.model.GetResponse;
-import org.lfenergy.compas.scl.data.rest.model.UpdateRequest;
+import org.lfenergy.compas.scl.data.rest.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 
 import javax.inject.Inject;
@@ -36,72 +33,81 @@ public class CompasSclDataResource {
     public CreateResponse create(@PathParam(TYPE_PATH_PARAM) SclType type,
                                  CreateRequest request) {
         var response = new CreateResponse();
-        response.setUuid(compasSclDataService.create(type, request.getName(), request.getScl()));
+        response.setId(compasSclDataService.create(type, request.getName(), request.getScl()));
         return response;
     }
 
     @GET
-    @Path("/{" + UUID_PATH_PARAM + "}")
+    @Path("/list")
+    @Produces(MediaType.APPLICATION_XML)
+    public ListResponse listItems(@PathParam(TYPE_PATH_PARAM) SclType type) {
+        var response = new ListResponse();
+        response.setItems(compasSclDataService.list(type));
+        return response;
+    }
+
+    @GET
+    @Path("/{" + ID_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
     public GetResponse findSCLByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                     @PathParam(UUID_PATH_PARAM) UUID uuid) {
+                                     @PathParam(ID_PATH_PARAM) UUID id) {
         var response = new GetResponse();
-        response.setScl(compasSclDataService.findSCLByUUID(type, uuid));
+        response.setScl(compasSclDataService.findSCLByUUID(type, id));
         return response;
     }
 
     @GET
-    @Path("/{" + UUID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
+    @Path("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
     public GetResponse findSCLByUUIDAnfVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                               @PathParam(UUID_PATH_PARAM) UUID uuid,
+                                               @PathParam(ID_PATH_PARAM) UUID id,
                                                @PathParam(Constants.VERSION_PATH_PARAM) Version version) {
         var response = new GetResponse();
-        response.setScl(compasSclDataService.findSCLByUUID(type, uuid, version));
+        response.setScl(compasSclDataService.findSCLByUUID(type, id, version));
         return response;
     }
 
     @GET
-    @Path("/{" + UUID_PATH_PARAM + "}/scl")
+    @Path("/{" + ID_PATH_PARAM + "}/scl")
     @Produces(MediaType.APPLICATION_XML)
     public SCL findRawSCLByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                @PathParam(UUID_PATH_PARAM) UUID uuid) {
-        return compasSclDataService.findSCLByUUID(type, uuid);
+                                @PathParam(ID_PATH_PARAM) UUID id) {
+        return compasSclDataService.findSCLByUUID(type, id);
     }
 
     @GET
-    @Path("/{" + UUID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}/scl")
+    @Path("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}/scl")
     @Produces(MediaType.APPLICATION_XML)
     public SCL findRawSCLByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                          @PathParam(UUID_PATH_PARAM) UUID uuid,
+                                          @PathParam(ID_PATH_PARAM) UUID id,
                                           @PathParam(Constants.VERSION_PATH_PARAM) Version version) {
-        return compasSclDataService.findSCLByUUID(type, uuid, version);
+        return compasSclDataService.findSCLByUUID(type, id, version);
     }
 
     @PUT
-    @Path("/{" + UUID_PATH_PARAM + "}")
+    @Path("/{" + ID_PATH_PARAM + "}")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public void update(@PathParam(TYPE_PATH_PARAM) SclType type,
-                       @PathParam(UUID_PATH_PARAM) UUID uuid,
+                       @PathParam(ID_PATH_PARAM) UUID id,
                        UpdateRequest request) {
-        compasSclDataService.update(type, uuid, request.getChangeSetType(), request.getScl());
+        compasSclDataService.update(type, id, request.getChangeSetType(), request.getScl());
     }
 
     @DELETE
-    @Path("/{" + UUID_PATH_PARAM + "}")
+    @Path("/{" + ID_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
     public void deleteAll(@PathParam(TYPE_PATH_PARAM) SclType type,
-                          @PathParam(UUID_PATH_PARAM) UUID uuid) {
-        compasSclDataService.delete(type, uuid);
+                          @PathParam(ID_PATH_PARAM) UUID id) {
+        compasSclDataService.delete(type, id);
     }
 
     @DELETE
-    @Path("/{" + UUID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
+    @Path("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
     public void deleteVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
-                              @PathParam(UUID_PATH_PARAM) UUID uuid,
+                              @PathParam(ID_PATH_PARAM) UUID id,
                               @PathParam(Constants.VERSION_PATH_PARAM) Version version) {
-        compasSclDataService.delete(type, uuid, version);
+        compasSclDataService.delete(type, id, version);
     }
 }
