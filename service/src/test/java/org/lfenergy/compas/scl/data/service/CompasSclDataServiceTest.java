@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
+import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
@@ -29,12 +30,23 @@ class CompasSclDataServiceTest {
     private CompasSclDataService compasSclDataService;
 
     @Test
+    void list_WhenCalled_ThenRepositoryIsCalled() {
+        var type = SclType.SCD;
+        when(compasSclDataRepository.list(type)).thenReturn(emptyList());
+
+        var result = compasSclDataService.list(type);
+
+        assertNotNull(result);
+        verify(compasSclDataRepository, times(1)).list(type);
+    }
+
+    @Test
     void findSCLByUUID_WhenCalledWithoutVersion_ThenRepositoryIsCalled() {
-        SclType type = SclType.SCD;
-        UUID uuid = UUID.randomUUID();
+        var type = SclType.SCD;
+        var uuid = UUID.randomUUID();
         when(compasSclDataRepository.findSCLByUUID(type, uuid)).thenReturn(createBasicSCL());
 
-        SCL result = compasSclDataService.findSCLByUUID(type, uuid);
+        var result = compasSclDataService.findSCLByUUID(type, uuid);
 
         assertNotNull(result);
         verify(compasSclDataRepository, times(1)).findSCLByUUID(type, uuid);
@@ -42,12 +54,12 @@ class CompasSclDataServiceTest {
 
     @Test
     void findSCLByUUID_WhenCalledWithVersion_ThenRepositoryIsCalled() {
-        SclType type = SclType.SCD;
-        UUID uuid = UUID.randomUUID();
-        Version version = new Version(1, 0, 0);
+        var type = SclType.SCD;
+        var uuid = UUID.randomUUID();
+        var version = new Version(1, 0, 0);
         when(compasSclDataRepository.findSCLByUUID(type, uuid, version)).thenReturn(createBasicSCL());
 
-        SCL result = compasSclDataService.findSCLByUUID(type, uuid, version);
+        var result = compasSclDataService.findSCLByUUID(type, uuid, version);
 
         assertNotNull(result);
         verify(compasSclDataRepository, times(1)).findSCLByUUID(type, uuid, version);
@@ -55,13 +67,13 @@ class CompasSclDataServiceTest {
 
     @Test
     void create_WhenCalled_ThenRepositoryIsCalledAndUUIDIsReturned() {
-        SclType type = SclType.SCD;
-        String name = "JUSTSOMENAME";
-        SCL scl = createBasicSCL();
+        var type = SclType.SCD;
+        var name = "JUSTSOMENAME";
+        var scl = createBasicSCL();
 
         doNothing().when(compasSclDataRepository).create(eq(type), any(UUID.class), eq(scl), any(Version.class));
 
-        UUID uuid = compasSclDataService.create(type, name, scl);
+        var uuid = compasSclDataService.create(type, name, scl);
 
         assertNotNull(uuid);
         verify(compasSclDataRepository, times(1)).create(eq(type), any(UUID.class), eq(scl), any(Version.class));
@@ -69,9 +81,9 @@ class CompasSclDataServiceTest {
 
     @Test
     void update_WhenCalled_ThenRepositoryIsCalledAndNewUUIDIsReturned() {
-        SclType type = SclType.SCD;
-        UUID uuid = UUID.randomUUID();
-        SCL scl = createBasicSCL();
+        var type = SclType.SCD;
+        var uuid = UUID.randomUUID();
+        var scl = createBasicSCL();
 
         when(compasSclDataRepository.findSCLByUUID(type, uuid)).thenReturn(createBasicSCL());
         doNothing().when(compasSclDataRepository).create(eq(type), eq(uuid), eq(scl), any(Version.class));
@@ -84,8 +96,8 @@ class CompasSclDataServiceTest {
 
     @Test
     void delete_WhenCalledWithoutVersion_ThenRepositoryIsCalled() {
-        SclType type = SclType.SCD;
-        UUID uuid = UUID.randomUUID();
+        var type = SclType.SCD;
+        var uuid = UUID.randomUUID();
 
         doNothing().when(compasSclDataRepository).delete(type, uuid);
 
@@ -96,9 +108,9 @@ class CompasSclDataServiceTest {
 
     @Test
     void delete_WhenCalledWithVersion_ThenRepositoryIsCalled() {
-        SclType type = SclType.SCD;
-        UUID uuid = UUID.randomUUID();
-        Version version = new Version(1, 0, 0);
+        var type = SclType.SCD;
+        var uuid = UUID.randomUUID();
+        var version = new Version(1, 0, 0);
 
         doNothing().when(compasSclDataRepository).delete(type, uuid, version);
 

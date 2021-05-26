@@ -4,20 +4,23 @@
 package org.lfenergy.compas.scl.data.repository;
 
 import org.lfenergy.compas.scl.SCL;
+import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface CompasSclDataRepository {
-    
-    SCL findSCLByUUID(SclType type, UUID uuid);
+    List<Item> list(SclType type);
 
-    SCL findSCLByUUID(SclType type, UUID uuid, Version version);
+    SCL findSCLByUUID(SclType type, UUID id);
 
-    void create(SclType type, UUID uuid, SCL scl, Version version);
+    SCL findSCLByUUID(SclType type, UUID id, Version version);
 
-    void delete(SclType type, UUID uuid);
+    void create(SclType type, UUID id, SCL scl, Version version);
 
-    void delete(SclType type, UUID uuid, Version version);
+    void delete(SclType type, UUID id);
+
+    void delete(SclType type, UUID id, Version version);
 }

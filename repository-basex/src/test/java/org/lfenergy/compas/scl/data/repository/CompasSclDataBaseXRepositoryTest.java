@@ -25,6 +25,7 @@ import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.getFreePortNumb
 
 @ExtendWith(MockitoExtension.class)
 class CompasSclDataBaseXRepositoryTest {
+    private static final SclType TYPE = SclType.SCD;
     private static BaseXServer server;
     private static BaseXClientFactory factory;
     private CompasSclDataBaseXRepository repository;
@@ -38,6 +39,7 @@ class CompasSclDataBaseXRepositoryTest {
 
     @BeforeEach
     void beforeEach() throws Exception {
+        factory.createClient().executeXQuery("db:create('" + TYPE + "')");
         repository = new CompasSclDataBaseXRepository(factory);
     }
 
@@ -47,24 +49,78 @@ class CompasSclDataBaseXRepositoryTest {
     }
 
     @Test
+    void list_WhenCalledOnEmptyDatabase_ThenNoRecordsReturned() {
+        var items = repository.list(TYPE);
+
+        assertNotNull(items);
+        assertEquals(0, items.size());
+    }
+
+    @Test
+    void list_WhenRecordAdded_ThenRecordFound() throws Exception {
+        var version = new Version(1, 0, 0);
+        var uuid = UUID.randomUUID();
+        var scl = readSCL(uuid, version);
+        repository.create(TYPE, uuid, scl, version);
+
+        var items = repository.list(TYPE);
+
+        assertNotNull(items);
+        assertEquals(1, items.size());
+        assertEquals(uuid.toString(), items.get(0).getId());
+    }
+
+    @Test
+    void list_WhenTwoRecordAdded_ThenBothRecordsFound() throws Exception {
+        var version = new Version(1, 0, 0);
+        var uuid = UUID.randomUUID();
+        var scl = readSCL(uuid, version);
+        repository.create(TYPE, uuid, scl, version);
+        uuid = UUID.randomUUID();
+        scl = readSCL(uuid, version);
+        repository.create(TYPE, uuid, scl, version);
+
+        var items = repository.list(TYPE);
+
+        assertNotNull(items);
+        assertEquals(2, items.size());
+    }
+
+    @Test
+    void list_WhenTwoVersionsOfARecordAdded_ThenLatestRecordFound() throws Exception {
+        var version = new Version(1, 0, 0);
+        var uuid = UUID.randomUUID();
+        var scl = readSCL(uuid, version);
+        repository.create(TYPE, uuid, scl, version);
+        version = new Version(1, 1, 0);
+        scl = readSCL(uuid, version);
+        repository.create(TYPE, uuid, scl, version);
+
+        var items = repository.list(TYPE);
+
+        assertNotNull(items);
+        assertEquals(1, items.size());
+        assertEquals(uuid.toString(), items.get(0).getId());
+        assertEquals(version.toString(), items.get(0).getVersion());
+    }
+
+    @Test
     void find_WhenCalledWithUnknownUUID_ThenExceptionIsThrown() {
-        var type = SclType.SCD;
         var uuid = UUID.randomUUID();
 
         assertThrows(SclDataException.class, () -> {
-            repository.findSCLByUUID(type, uuid);
+            repository.findSCLByUUID(TYPE, uuid);
         });
     }
 
     @Test
     void createAndFind_WhenSclAdded_ThenScLStoredAndLastVersionCanBeFound() throws Exception {
         var version = new Version(1, 0, 0);
-        var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL(uuid, version);
-        repository.create(type, uuid, scl, version);
+        repository.create(TYPE, uuid, scl, version);
 
-        var foundScl = repository.findSCLByUUID(type, uuid);
+        var foundScl = repository.findSCLByUUID(TYPE, uuid);
 
         assertNotNull(foundScl);
         assertEquals(uuid.toString(), foundScl.getHeader().getId());
@@ -74,16 +130,15 @@ class CompasSclDataBaseXRepositoryTest {
     @Test
     void createAndFind_WhenMoreVersionOfSclAdded_ThenDefaultSCLLastVersionReturned() throws Exception {
         var version = new Version(1, 0, 0);
-        var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL(uuid, version);
-        repository.create(type, uuid, scl, version);
+        repository.create(TYPE, uuid, scl, version);
 
         var nextVersion = version.getNextVersion(ChangeSetType.MAJOR);
         var nextScl = readSCL(uuid, nextVersion);
-        repository.create(type, uuid, nextScl, nextVersion);
+        repository.create(TYPE, uuid, nextScl, nextVersion);
 
-        var foundScl = repository.findSCLByUUID(type, uuid);
+        var foundScl = repository.findSCLByUUID(TYPE, uuid);
 
         assertNotNull(foundScl);
         assertEquals(uuid.toString(), foundScl.getHeader().getId());
@@ -93,16 +148,15 @@ class CompasSclDataBaseXRepositoryTest {
     @Test
     void createAndFind_WhenMoreVersionOfSCLAdded_ThenSCLOldVersionCanBeFound() throws Exception {
         var version = new Version(1, 0, 0);
-        var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL(uuid, version);
-        repository.create(type, uuid, scl, version);
+        repository.create(TYPE, uuid, scl, version);
 
         var nextVersion = version.getNextVersion(ChangeSetType.MAJOR);
         var nextScl = readSCL(uuid, nextVersion);
-        repository.create(type, uuid, nextScl, nextVersion);
+        repository.create(TYPE, uuid, nextScl, nextVersion);
 
-        var foundScl = repository.findSCLByUUID(type, uuid, version);
+        var foundScl = repository.findSCLByUUID(TYPE, uuid, version);
 
         assertNotNull(foundScl);
         assertEquals(uuid.toString(), foundScl.getHeader().getId());
@@ -112,44 +166,42 @@ class CompasSclDataBaseXRepositoryTest {
     @Test
     void createAndDelete_WhenSclAddedAndDelete_ThenScLStoredAndRemoved() throws Exception {
         var version = new Version(1, 0, 0);
-        var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL(uuid, version);
 
-        repository.create(type, uuid, scl, version);
-        var foundScl = repository.findSCLByUUID(type, uuid);
+        repository.create(TYPE, uuid, scl, version);
+        var foundScl = repository.findSCLByUUID(TYPE, uuid);
         assertNotNull(foundScl);
         assertEquals(scl.getHeader().getId(), foundScl.getHeader().getId());
 
-        repository.delete(type, uuid, version);
+        repository.delete(TYPE, uuid, version);
         assertThrows(SclDataException.class, () -> {
-            repository.findSCLByUUID(type, uuid);
+            repository.findSCLByUUID(TYPE, uuid);
         });
     }
 
     @Test
     void createAndDeleteAll_WhenSclAddedAndDelete_ThenScLStoredAndRemoved() throws Exception {
         var version = new Version(1, 0, 0);
-        var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL(uuid, version);
 
-        repository.create(type, uuid, scl, version);
-        var foundScl = repository.findSCLByUUID(type, uuid);
+        repository.create(TYPE, uuid, scl, version);
+        var foundScl = repository.findSCLByUUID(TYPE, uuid);
         assertNotNull(foundScl);
         assertEquals(scl.getHeader().getId(), foundScl.getHeader().getId());
         assertEquals(scl.getHeader().getVersion(), foundScl.getHeader().getVersion());
 
         version = version.getNextVersion(ChangeSetType.MAJOR);
-        repository.create(type, uuid, scl, version);
-        foundScl = repository.findSCLByUUID(type, uuid);
+        repository.create(TYPE, uuid, scl, version);
+        foundScl = repository.findSCLByUUID(TYPE, uuid);
         assertNotNull(foundScl);
         assertEquals(scl.getHeader().getId(), foundScl.getHeader().getId());
         assertEquals(scl.getHeader().getVersion(), foundScl.getHeader().getVersion());
 
-        repository.delete(type, uuid);
+        repository.delete(TYPE, uuid);
         assertThrows(SclDataException.class, () -> {
-            repository.findSCLByUUID(type, uuid);
+            repository.findSCLByUUID(TYPE, uuid);
         });
     }
 
