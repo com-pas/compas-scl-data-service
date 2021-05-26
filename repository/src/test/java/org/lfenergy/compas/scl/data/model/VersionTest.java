@@ -81,38 +81,28 @@ class VersionTest {
 
     @Test
     void equals_WhenTwoObjectHaveSameVersion_ThenEqualsShouldAlsoBeTheSame() {
-        assertTrue(new Version(1, 5, 8).equals(new Version(1, 5, 8)));
+        assertEquals(new Version(1, 5, 8), new Version(1, 5, 8));
     }
 
     @Test
     void equals_WhenTwoObjectHaveDifferentMajorVersion_ThenEqualsShouldNotBeTheSame() {
-        assertFalse(new Version(1, 5, 8).equals(new Version(2, 5, 8)));
+        assertNotEquals(new Version(1, 5, 8), new Version(2, 5, 8));
     }
 
     @Test
     void equals_WhenTwoObjectHaveDifferentMinorVersion_ThenEqualsShouldNotBeTheSame() {
-        assertFalse(new Version(1, 5, 8).equals(new Version(1, 6, 8)));
+        assertNotEquals(new Version(1, 5, 8), new Version(1, 6, 8));
     }
 
     @Test
     void equals_WhenTwoObjectHaveDifferentPatchVersion_ThenEqualsShouldNotBeTheSame() {
-        assertFalse(new Version(1, 5, 8).equals(new Version(1, 5, 9)));
+        assertNotEquals(new Version(1, 5, 8), new Version(1, 5, 9));
     }
 
     @Test
     void equals_WhenTwoSameObject_ThenEqualsShouldAlsoBeTheSame() {
         var version = new Version(1, 5, 8);
-        assertTrue(version.equals(version));
-    }
-
-    @Test
-    void equals_WhenTwoDifferentObjectType_ThenEqualsShouldNeverBeTheSame() {
-        assertFalse(new Version(1, 5, 8).equals("1.5.8"));
-    }
-
-    @Test
-    void equals_WhenOneObjectIsNull_ThenEqualsShouldNeverBeTheSame() {
-        assertFalse(new Version(1, 5, 8).equals(null));
+        assertEquals(version, version);
     }
 
     @Test
