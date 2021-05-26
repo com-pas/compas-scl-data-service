@@ -75,7 +75,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                             "   let $id := $resource//scl:SCL/scl:Header/@id " +
                             "   group by $id " +
                             "   return '<Item><Id>' || $id || '</Id><Version>' || local:latest-version($db, $id)//scl:SCL/scl:Header/@version || '</Version></Item>'",
-                    row -> jaxbMarshaller.unmarshal(row)
+                    jaxbMarshaller::unmarshal
             );
         } catch (JAXBException exp) {
             throw new SclDataException(exp);
@@ -95,7 +95,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                             "   let $version := $resource//scl:SCL/scl:Header/@version " +
                             "   order by $version " +
                             "   return '<Item><Id>' || $id || '</Id><Version>' || $version || '</Version></Item>' ",
-                    row -> jaxbMarshaller.unmarshal(row)
+                    jaxbMarshaller::unmarshal
             );
         } catch (JAXBException exp) {
             throw new SclDataException(exp);
