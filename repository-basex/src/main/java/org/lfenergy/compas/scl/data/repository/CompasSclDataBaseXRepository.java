@@ -82,7 +82,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public List<Item> listSCLVersionsByUUID(SclType type, UUID id) {
+    public List<Item> listVersionsByUUID(SclType type, UUID id) {
         return executeQuery(type, DECLARE_NAMESPACE +
                         format(DECLARE_DB_VARIABLE, type) +
                         format(DECLARE_ID_VARIABLE, id) +
@@ -96,7 +96,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public SCL findSCLByUUID(SclType type, UUID id) {
+    public SCL findByUUID(SclType type, UUID id) {
         // This find method always searches for the latest version.
         // Retrieve all versions using db:list-details function.
         // Sort the result descending, this way the last version is the first.
@@ -110,7 +110,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public SCL findSCLByUUID(SclType type, UUID id, Version version) {
+    public SCL findByUUID(SclType type, UUID id, Version version) {
         // This find method searches for a specific version.
         var result = executeQuery(type,
                 "doc('" + type + "/" + createDocumentPath(id, version) + "')",

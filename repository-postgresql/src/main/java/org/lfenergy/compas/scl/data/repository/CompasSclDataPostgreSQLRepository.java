@@ -24,17 +24,17 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public List<Item> listSCLVersionsByUUID(SclType type, UUID id) {
+    public List<Item> listVersionsByUUID(SclType type, UUID id) {
         throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
-    public SCL findSCLByUUID(SclType type, UUID id) {
+    public SCL findByUUID(SclType type, UUID id) {
         throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
-    public SCL findSCLByUUID(SclType type, UUID id, Version version) {
+    public SCL findByUUID(SclType type, UUID id, Version version) {
         throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 

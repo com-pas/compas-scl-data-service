@@ -29,16 +29,16 @@ public class CompasSclDataService {
         return repository.list(type);
     }
 
-    public List<Item> listSCLVersionsByUUID(SclType type, UUID id) {
-        return repository.listSCLVersionsByUUID(type, id);
+    public List<Item> listVersionsByUUID(SclType type, UUID id) {
+        return repository.listVersionsByUUID(type, id);
     }
 
-    public SCL findSCLByUUID(SclType type, UUID id) {
-        return repository.findSCLByUUID(type, id);
+    public SCL findByUUID(SclType type, UUID id) {
+        return repository.findByUUID(type, id);
     }
 
-    public SCL findSCLByUUID(SclType type, UUID id, Version version) {
-        return repository.findSCLByUUID(type, id, version);
+    public SCL findByUUID(SclType type, UUID id, Version version) {
+        return repository.findByUUID(type, id, version);
     }
 
     public UUID create(SclType type, String name, SCL scl) {
@@ -54,7 +54,7 @@ public class CompasSclDataService {
     }
 
     public void update(SclType type, UUID id, ChangeSetType changeSetType, SCL scl) {
-        var currentSCL = repository.findSCLByUUID(type, id);
+        var currentSCL = repository.findByUUID(type, id);
         // We always add a new version to the database, so add version record to the SCL and create a new record.
         var version = new Version(currentSCL.getHeader().getVersion());
         version = version.getNextVersion(changeSetType);
