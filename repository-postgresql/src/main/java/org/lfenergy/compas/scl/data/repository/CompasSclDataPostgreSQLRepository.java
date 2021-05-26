@@ -15,33 +15,41 @@ import java.util.UUID;
 
 @ApplicationScoped
 public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepository {
+
+    public static final String NOT_IMPLEMENTED = "Not implemented!";
+
     @Override
     public List<Item> list(SclType type) {
-        throw new UnsupportedOperationException("Not implemented!");
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
+    }
+
+    @Override
+    public List<Item> listSCLVersionsByUUID(SclType type, UUID id) {
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
     public SCL findSCLByUUID(SclType type, UUID id) {
-        throw new UnsupportedOperationException("Not implemented!");
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
     public SCL findSCLByUUID(SclType type, UUID id, Version version) {
-        throw new UnsupportedOperationException("Not implemented!");
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
     public void create(SclType type, UUID id, SCL scl, Version version) {
-        throw new UnsupportedOperationException("Not implemented!");
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
     public void delete(SclType type, UUID id) {
-        throw new UnsupportedOperationException("Not implemented!");
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
     public void delete(SclType type, UUID id, Version version) {
-        throw new UnsupportedOperationException("Not implemented!");
+        throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 }

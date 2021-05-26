@@ -105,6 +105,24 @@ class CompasSclDataBaseXRepositoryTest {
     }
 
     @Test
+    void listSCLVersionsByUUID_WhenTwoVersionsOfARecordAdded_ThenAllRecordAreFound() throws Exception {
+        var version = new Version(1, 0, 0);
+        var uuid = UUID.randomUUID();
+        var scl = readSCL(uuid, version);
+        repository.create(TYPE, uuid, scl, version);
+        version = new Version(1, 1, 0);
+        scl = readSCL(uuid, version);
+        repository.create(TYPE, uuid, scl, version);
+
+        var items = repository.listSCLVersionsByUUID(TYPE, uuid);
+
+        assertNotNull(items);
+        assertEquals(2, items.size());
+        assertEquals(uuid.toString(), items.get(1).getId());
+        assertEquals(version.toString(), items.get(1).getVersion());
+    }
+
+    @Test
     void find_WhenCalledWithUnknownUUID_ThenExceptionIsThrown() {
         var uuid = UUID.randomUUID();
 

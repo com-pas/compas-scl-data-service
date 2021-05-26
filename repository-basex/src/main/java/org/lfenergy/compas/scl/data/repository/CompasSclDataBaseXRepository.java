@@ -10,18 +10,15 @@ import org.lfenergy.compas.scl.data.basex.BaseXClientFactory;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.util.JaxbMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,8 +66,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     @Override
     public List<Item> list(SclType type) {
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance("org.lfenergy.compas.scl.data.model");
-            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+            var jaxbMarshaller = new JaxbMarshaller();
 
             return executeQuery(type, DECLARE_NAMESPACE +
                             DECLARE_LATEST_VERSION_FUNC +
@@ -79,7 +75,27 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                             "   let $id := $resource//scl:SCL/scl:Header/@id " +
                             "   group by $id " +
                             "   return '<Item><Id>' || $id || '</Id><Version>' || local:latest-version($db, $id)//scl:SCL/scl:Header/@version || '</Version></Item>'",
-                    row -> jaxbUnmarshaller.unmarshal(new StreamSource(new StringReader(row)), Item.class).getValue()
+                    row -> jaxbMarshaller.unmarshal(row)
+            );
+        } catch (JAXBException exp) {
+            throw new SclDataException(exp);
+        }
+    }
+
+    @Override
+    public List<Item> listSCLVersionsByUUID(SclType type, UUID id) {
+        try {
+            var jaxbMarshaller = new JaxbMarshaller();
+
+            return executeQuery(type, DECLARE_NAMESPACE +
+                            "declare variable $db := '" + type + "'; " +
+                            "declare variable $id := '" + id + "'; " +
+                            "for $resource in db:open($db, $id) " +
+                            "   let $id := $resource//scl:SCL/scl:Header/@id " +
+                            "   let $version := $resource//scl:SCL/scl:Header/@version " +
+                            "   order by $version " +
+                            "   return '<Item><Id>' || $id || '</Id><Version>' || $version || '</Version></Item>' ",
+                    row -> jaxbMarshaller.unmarshal(row)
             );
         } catch (JAXBException exp) {
             throw new SclDataException(exp);

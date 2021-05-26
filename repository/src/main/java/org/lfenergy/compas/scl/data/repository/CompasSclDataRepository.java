@@ -14,6 +14,8 @@ import java.util.UUID;
 public interface CompasSclDataRepository {
     List<Item> list(SclType type);
 
+    List<Item> listSCLVersionsByUUID(SclType type, UUID id);
+
     SCL findSCLByUUID(SclType type, UUID id);
 
     SCL findSCLByUUID(SclType type, UUID id, Version version);
