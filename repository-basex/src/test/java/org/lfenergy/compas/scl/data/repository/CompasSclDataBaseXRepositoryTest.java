@@ -20,8 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.createServer;
-import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.getFreePortNumber;
+import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.*;
 
 @ExtendWith(MockitoExtension.class)
 class CompasSclDataBaseXRepositoryTest {
@@ -34,7 +33,7 @@ class CompasSclDataBaseXRepositoryTest {
     static void beforeAll() throws Exception {
         var portNumber = getFreePortNumber();
         server = createServer(portNumber);
-        factory = new BaseXClientFactory("localhost", portNumber, "admin", "admin");
+        factory = createClientFactory(portNumber);
     }
 
     @BeforeEach

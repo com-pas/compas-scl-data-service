@@ -25,4 +25,8 @@ public final class BaseXServerUtil {
         System.setProperty("org.basex.path", "build/basex");
         return new BaseXServer("-p" + portNumber);
     }
+
+    public static BaseXClientFactory createClientFactory(int portNumber) {
+        return new BaseXClientFactory("localhost", portNumber, "admin", "admin");
+    }
 }
