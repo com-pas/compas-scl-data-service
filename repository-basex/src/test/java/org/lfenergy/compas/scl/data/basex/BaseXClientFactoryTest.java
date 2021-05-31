@@ -11,8 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.createServer;
-import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.getFreePortNumber;
+import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.*;
 
 class BaseXClientFactoryTest {
     private static BaseXServer server;
@@ -22,7 +21,7 @@ class BaseXClientFactoryTest {
     static void beforeAll() throws IOException {
         int portNumber = getFreePortNumber();
         server = createServer(portNumber);
-        factory = new BaseXClientFactory("localhost", portNumber, "admin", "admin");
+        factory = createClientFactory(portNumber);
     }
 
     @Test
