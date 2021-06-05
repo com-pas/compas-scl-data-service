@@ -9,6 +9,7 @@ plugins {
 }
 
 dependencies {
+    implementation 'io.quarkus:quarkus-container-image-docker'
     implementation enforcedPlatform("io.quarkus:quarkus-universe-bom:${quarkusPlatformVersion}")
 
     implementation 'io.quarkus:quarkus-arc'
