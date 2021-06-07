@@ -3,34 +3,26 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.basex;
 
-import org.basex.BaseXServer;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.*;
+import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.createClientFactory;
 
+@ExtendWith({BaseXServerJUnitExtension.class})
 class BaseXClientFactoryTest {
-    private static BaseXServer server;
     private static BaseXClientFactory factory;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
-        int portNumber = getFreePortNumber();
-        server = createServer(portNumber);
-        factory = createClientFactory(portNumber);
+    static void beforeAll() {
+        factory = createClientFactory(BaseXServerJUnitExtension.getPortNumber());
     }
 
     @Test
     void createClient_WhenCalled_ThenReturnClient() throws IOException {
         assertNotNull(factory.createClient());
-    }
-
-    @AfterAll
-    static void afterAll() {
-        server.stop();
     }
 }
