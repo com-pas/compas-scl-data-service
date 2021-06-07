@@ -9,7 +9,6 @@ plugins {
 }
 
 dependencies {
-    implementation 'io.quarkus:quarkus-container-image-docker'
     implementation enforcedPlatform("io.quarkus:quarkus-universe-bom:${quarkusPlatformVersion}")
 
     implementation 'io.quarkus:quarkus-arc'
@@ -17,6 +16,7 @@ dependencies {
     implementation 'io.quarkus:quarkus-smallrye-openapi'
     implementation 'io.quarkus:quarkus-smallrye-health'
     implementation 'io.quarkus:quarkus-resteasy-jaxb'
+    implementation 'io.quarkus:quarkus-container-image-docker'
 
     implementation 'org.lfenergy.compas:core-commons'
     implementation project(':service')
