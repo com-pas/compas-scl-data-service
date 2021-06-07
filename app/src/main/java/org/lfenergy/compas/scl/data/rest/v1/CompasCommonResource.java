@@ -11,6 +11,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Path("/common/v1/")
 public class CompasCommonResource {
@@ -19,10 +21,10 @@ public class CompasCommonResource {
     @Produces(MediaType.APPLICATION_XML)
     public TypeListResponse list() {
         var response = new TypeListResponse();
-        for (var sclType : SclType.values()) {
-            var responseType = new Type(sclType.name(), sclType.getDescription());
-            response.getTypes().add(responseType);
-        }
+        response.setTypes(
+                Arrays.stream(SclType.values())
+                        .map(sclType -> new Type(sclType.name(), sclType.getDescription()))
+                        .collect(Collectors.toList()));
         return response;
     }
 }
