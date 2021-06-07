@@ -9,7 +9,9 @@ public enum SclType {
     IID("IED Instance Description"),
     ICD("IED Capability Description"),
     SCD("Substation Configuration Description"),
-    CID("Configured IED Description");
+    CID("Configured IED Description"),
+    SED("System Exchange Description"),
+    ISD("IED Specification Description");
 
     private final String description;
 
