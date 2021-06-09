@@ -3,8 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.repository;
 
-import org.basex.BaseXServer;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.commons.MarshallerWrapper;
 import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.basex.BaseXClientFactory;
+import org.lfenergy.compas.scl.data.basex.BaseXServerJUnitExtension;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
@@ -20,31 +19,23 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.*;
+import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.createClientFactory;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, BaseXServerJUnitExtension.class})
 class CompasSclDataBaseXRepositoryTest {
     private static final SclType TYPE = SclType.SCD;
-    private static BaseXServer server;
     private static BaseXClientFactory factory;
     private CompasSclDataBaseXRepository repository;
 
     @BeforeAll
-    static void beforeAll() throws Exception {
-        var portNumber = getFreePortNumber();
-        server = createServer(portNumber);
-        factory = createClientFactory(portNumber);
+    static void beforeAll() {
+        factory = createClientFactory(BaseXServerJUnitExtension.getPortNumber());
     }
 
     @BeforeEach
     void beforeEach() throws Exception {
         factory.createClient().executeXQuery("db:create('" + TYPE + "')");
         repository = new CompasSclDataBaseXRepository(factory);
-    }
-
-    @AfterAll
-    static void afterAll() {
-        server.stop();
     }
 
     @Test

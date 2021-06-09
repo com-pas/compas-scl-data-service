@@ -7,7 +7,6 @@ import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.http.ContentType;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.commons.MarshallerWrapper;
 import org.lfenergy.compas.scl.SCL;
@@ -19,7 +18,6 @@ import org.lfenergy.compas.scl.data.rest.model.CreateRequest;
 import org.lfenergy.compas.scl.data.rest.model.UpdateRequest;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -43,7 +41,7 @@ class CompasSclDataResourceTest {
 
         when(compasSclDataService.list(type)).thenReturn(Collections.singletonList(new Item(uuid.toString(), version)));
 
-        Response response = given()
+        var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
                 .when().get("/list")
                 .then()
@@ -65,7 +63,7 @@ class CompasSclDataResourceTest {
 
         when(compasSclDataService.listVersionsByUUID(type, uuid)).thenReturn(Collections.singletonList(new Item(uuid.toString(), version)));
 
-        Response response = given()
+        var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
                 .pathParam(ID_PATH_PARAM, uuid)
                 .when().get("/{" + ID_PATH_PARAM + "}/versions")
@@ -88,7 +86,7 @@ class CompasSclDataResourceTest {
 
         when(compasSclDataService.findByUUID(type, uuid)).thenReturn(scl);
 
-        Response response = given()
+        var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
                 .pathParam(ID_PATH_PARAM, uuid)
                 .when().get("/{" + ID_PATH_PARAM + "}")
@@ -112,7 +110,7 @@ class CompasSclDataResourceTest {
 
         when(compasSclDataService.findByUUID(type, uuid, version)).thenReturn(scl);
 
-        Response response = given()
+        var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
                 .pathParam(ID_PATH_PARAM, uuid)
                 .pathParam(VERSION_PATH_PARAM, version.toString())
@@ -136,7 +134,7 @@ class CompasSclDataResourceTest {
 
         when(compasSclDataService.findByUUID(type, uuid)).thenReturn(scl);
 
-        Response response = given()
+        var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
                 .pathParam(ID_PATH_PARAM, uuid)
                 .when().get("/{" + ID_PATH_PARAM + "}/scl")
@@ -160,7 +158,7 @@ class CompasSclDataResourceTest {
 
         when(compasSclDataService.findByUUID(type, uuid, version)).thenReturn(scl);
 
-        Response response = given()
+        var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
                 .pathParam(ID_PATH_PARAM, uuid)
                 .pathParam(VERSION_PATH_PARAM, version.toString())
@@ -189,7 +187,7 @@ class CompasSclDataResourceTest {
 
         when(compasSclDataService.create(eq(type), eq(name), any(SCL.class))).thenReturn(uuid);
 
-        Response response = given()
+        var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
                 .contentType(ContentType.XML)
                 .body(request)
@@ -265,7 +263,7 @@ class CompasSclDataResourceTest {
     }
 
     private SCL readSCL() throws Exception {
-        InputStream inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.xml");
+        var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.xml");
         assert inputStream != null;
         return new MarshallerWrapper.Builder().build().unmarshall(inputStream);
     }
