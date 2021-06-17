@@ -4,9 +4,7 @@
 
 name: Docker Hub Deployment
 
-on:
-  release:
-    types: [released]
+on: push
 
 jobs:
   push_to_registry:
@@ -15,10 +13,28 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
+      - name: Extract tag name
+        id: extract_tagname
+        shell: bash
+        # Extra the tagname form the git reference, value of GITHUB_REF will be something like refs/tags/<tag_name>.
+        run: echo "##[set-output name=tagname;]$(echo ${GITHUB_REF##*/})"
       - name: Login to Docker Hub
-        run: echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-      - name: Build and publish Docker Image
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      - name: Build Docker Image
         run: ./gradlew clean build -Dquarkus-profile=publishNativeImage
         env:
           GITHUB_USERNAME: "OWNER"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push image to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          # Set the context to use the current directory and not execute it's own git checkout.
+          context: .
+          push: true
+          # Tag the images using the tagname and also latest.
+          tags: |
+            lfenergycompas/compas-scl-data-service:${{ steps.extract_tagname.outputs.tagname }}
+            lfenergycompas/compas-scl-data-service:latest
