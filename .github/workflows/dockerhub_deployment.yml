@@ -4,7 +4,9 @@
 
 name: Docker Hub Deployment
 
-on: push
+on:
+  release:
+    types: [released]
 
 jobs:
   push_to_registry:
