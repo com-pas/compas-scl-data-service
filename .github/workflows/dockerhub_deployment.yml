@@ -23,18 +23,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      - name: Build Docker Image
+      - name: Build and publish Docker Image
         run: ./gradlew clean build -Dquarkus-profile=publishNativeImage
         env:
           GITHUB_USERNAME: "OWNER"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push image to Docker Hub
-        uses: docker/build-push-action@v2
-        with:
-          # Set the context to use the current directory and not execute it's own git checkout.
-          context: .
-          push: true
-          # Tag the images using the tagname and also latest.
-          tags: |
-            lfenergycompas/compas-scl-data-service:${{ steps.extract_tagname.outputs.tagname }}
-            lfenergycompas/compas-scl-data-service:latest
