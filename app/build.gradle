@@ -19,6 +19,8 @@ dependencies {
     implementation 'io.quarkus:quarkus-container-image-docker'
 
     implementation 'org.lfenergy.compas:core-commons'
+    implementation 'org.lfenergy.compas:scl-extension'
+
     implementation project(':service')
 
     testImplementation 'io.quarkus:quarkus-junit5'
