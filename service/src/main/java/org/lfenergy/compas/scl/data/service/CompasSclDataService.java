@@ -5,6 +5,9 @@
 package org.lfenergy.compas.scl.data.service;
 
 import org.lfenergy.compas.scl.SCL;
+import org.lfenergy.compas.scl.TPrivate;
+import org.lfenergy.compas.scl.compas.ObjectFactory;
+import org.lfenergy.compas.scl.compas.TSclFileType;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
@@ -13,7 +16,10 @@ import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.xml.bind.JAXBElement;
+
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -47,7 +53,8 @@ public class CompasSclDataService {
         // When the SCL is create the version will be set to 1.0.0
         var version = new Version(1, 0, 0);
         scl.getHeader().setVersion(version.toString());
-        // TODO: Add name and type to SCL before storing the SCL.
+
+        setSclCompasPrivateElement(scl, name, type);
 
         repository.create(type, id, scl, version);
         return id;
@@ -69,8 +76,33 @@ public class CompasSclDataService {
     public void delete(SclType type, UUID id) {
         repository.delete(type, id);
     }
-
+ 
     public void delete(SclType type, UUID id, Version version) {
         repository.delete(type, id, version);
+    }
+
+    /**
+     * Set the full CoMPAS private element for the given SCL file.
+     * @param scl the SCL file to edit.
+     * @param filename the filename to add
+     * @param fileType the file type to add.
+     */
+    private void setSclCompasPrivateElement(SCL scl, String filename, SclType fileType) {
+        // Creating a private
+        var compasPrivate = new TPrivate();
+        var compasPrivateElementFactory = new ObjectFactory();
+
+        // Setting the type (required for a SCL private element)
+        compasPrivate.setType("compas_scl");
+
+        // Adding the filename element and the file type element
+        compasPrivate.getContent().add(compasPrivateElementFactory.createSclFilename(filename));
+
+        // TODO: Make this work!
+        // TSclFileType sclFileType = TSclFileType.valueOf(fileType.toString());
+        // compasPrivate.getContent().add(compasPrivateElementFactory.createSclFileType(sclFileType));
+
+        // Adding it to the SCL file.
+        scl.getPrivate().add(compasPrivate);
     }
 }
