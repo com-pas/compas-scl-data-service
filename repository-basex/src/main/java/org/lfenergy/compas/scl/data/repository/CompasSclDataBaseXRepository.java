@@ -77,8 +77,9 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         format(DECLARE_DB_VARIABLE, type) +
                         "for $resource in db:open($db)\n" +
                         "   let $id := $resource/scl:SCL/scl:Header/@id\n" +
+                        "   let $filename := $resource/scl:SCL/scl:Private[@type='compas_scl']/*:SclFilename\n" +
                         "   group by $id\n" +
-                        "   return '<Item><Id>' || $id || '</Id><Version>' || local:latest-version($db, $id)//scl:SCL/scl:Header/@version || '</Version></Item>'",
+                        "   return '<Item><Id>' || $id || '</Id><Filename>' || $filename || '</Filename><Version>' || local:latest-version($db, $id)//scl:SCL/scl:Header/@version || '</Version></Item>'",
                 sclDataMarshaller::unmarshal
         );
     }
@@ -90,13 +91,14 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         format(DECLARE_ID_VARIABLE, id) +
                         "for $resource in db:open($db, $id)\n" +
                         "   let $id := $resource/scl:SCL/scl:Header/@id\n" +
+                        "   let $filename := $resource/scl:SCL/scl:Private[@type='compas_scl']/*:SclFilename\n" +
                         "   let $version := $resource/scl:SCL/scl:Header/@version\n" +
                         "   let $parts := tokenize($version, '\\.')\n" +
                         "   let $majorVersion := xs:int($parts[1])\n" +
                         "   let $minorVersion := xs:int($parts[2])\n" +
                         "   let $patchVersion := xs:int($parts[3])\n" +
                         "   order by $majorVersion, $minorVersion, $patchVersion\n" +
-                        "   return '<Item><Id>' || $id || '</Id><Version>' || $version || '</Version></Item>' ",
+                        "   return '<Item><Id>' || $id || '</Id><Filename>' || $filename || '</Filename><Version>' || $version || '</Version></Item>' ",
                 sclDataMarshaller::unmarshal
         );
     }
