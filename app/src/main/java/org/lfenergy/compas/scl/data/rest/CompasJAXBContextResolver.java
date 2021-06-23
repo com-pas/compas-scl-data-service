@@ -20,7 +20,7 @@ public class CompasJAXBContextResolver implements ContextResolver<JAXBContext> {
                     org.lfenergy.compas.scl.data.rest.model.ObjectFactory.class,
                     org.lfenergy.compas.scl.data.model.ObjectFactory.class,
                     org.lfenergy.compas.scl.ObjectFactory.class,
-                    org.lfenergy.compas.extensions.ObjectFactory.class);
+                    org.lfenergy.compas.scl.extensions.ObjectFactory.class);
         } catch (JAXBException exp) {
             throw new SclDataException(exp);
         }
