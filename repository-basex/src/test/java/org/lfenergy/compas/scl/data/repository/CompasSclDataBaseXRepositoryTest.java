@@ -214,7 +214,7 @@ class CompasSclDataBaseXRepositoryTest {
     }
 
     private SCL readSCL(UUID uuid, Version version) throws Exception {
-        var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.xml");
+        var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd");
         assert inputStream != null;
         var scl = new MarshallerWrapper.Builder().build().unmarshall(inputStream);
         scl.getHeader().setId(uuid.toString());

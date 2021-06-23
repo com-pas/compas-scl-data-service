@@ -13,6 +13,7 @@ import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.xml.bind.JAXBElement;
 import java.util.UUID;
 
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
@@ -30,9 +31,9 @@ public class CompasSclDataResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public CreateResponse create(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                 CreateRequest request) {
+                                 JAXBElement<CreateRequest> request) {
         var response = new CreateResponse();
-        response.setId(compasSclDataService.create(type, request.getName(), request.getScl()));
+        response.setId(compasSclDataService.create(type, request.getValue().getName(), request.getValue().getScl()));
         return response;
     }
 
@@ -99,8 +100,8 @@ public class CompasSclDataResource {
     @Produces(MediaType.APPLICATION_XML)
     public void update(@PathParam(TYPE_PATH_PARAM) SclType type,
                        @PathParam(ID_PATH_PARAM) UUID id,
-                       UpdateRequest request) {
-        compasSclDataService.update(type, id, request.getChangeSetType(), request.getScl());
+                       JAXBElement<UpdateRequest> request) {
+        compasSclDataService.update(type, id, request.getValue().getChangeSetType(), request.getValue().getScl());
     }
 
     @DELETE

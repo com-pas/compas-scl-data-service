@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: Docker Hub Deployment
+name: Docker Hub Publish
 
 on:
   release:
