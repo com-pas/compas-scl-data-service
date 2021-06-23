@@ -22,6 +22,8 @@ dependencies {
     implementation 'org.lfenergy.compas:scl-extension'
 
     implementation project(':service')
+    implementation project(':repository')
+    implementation project(':repository-basex')
 
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.quarkus:quarkus-junit5-mockito'

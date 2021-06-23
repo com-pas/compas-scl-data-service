@@ -263,7 +263,7 @@ class CompasSclDataResourceTest {
     }
 
     private SCL readSCL() throws Exception {
-        var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.xml");
+        var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd");
         assert inputStream != null;
         return new MarshallerWrapper.Builder().build().unmarshall(inputStream);
     }
