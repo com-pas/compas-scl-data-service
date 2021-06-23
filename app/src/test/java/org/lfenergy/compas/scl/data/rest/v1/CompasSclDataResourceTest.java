@@ -37,9 +37,11 @@ class CompasSclDataResourceTest {
     void list_WhenCalled_ThenItemResponseRetrieved() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
+        var filename = "Filename";
         var version = "1.0.0";
 
-        when(compasSclDataService.list(type)).thenReturn(Collections.singletonList(new Item(uuid.toString(), version)));
+        when(compasSclDataService.list(type))
+                .thenReturn(Collections.singletonList(new Item(uuid.toString(), filename, version)));
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -51,6 +53,7 @@ class CompasSclDataResourceTest {
 
         var xmlPath = response.xmlPath();
         assertEquals(uuid.toString(), xmlPath.get("ListResponse.Item[0].Id"));
+        assertEquals(filename, xmlPath.get("ListResponse.Item[0].Filename"));
         assertEquals(version, xmlPath.get("ListResponse.Item[0].Version"));
         verify(compasSclDataService, times(1)).list(type);
     }
@@ -59,9 +62,11 @@ class CompasSclDataResourceTest {
     void listVersionsByUUID_WhenCalled_ThenItemResponseRetrieved() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
+        var filename = "Filename";
         var version = "1.0.0";
 
-        when(compasSclDataService.listVersionsByUUID(type, uuid)).thenReturn(Collections.singletonList(new Item(uuid.toString(), version)));
+        when(compasSclDataService.listVersionsByUUID(type, uuid))
+                .thenReturn(Collections.singletonList(new Item(uuid.toString(), filename, version)));
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -74,6 +79,7 @@ class CompasSclDataResourceTest {
 
         var xmlPath = response.xmlPath();
         assertEquals(uuid.toString(), xmlPath.get("ListResponse.Item[0].Id"));
+        assertEquals(filename, xmlPath.get("ListResponse.Item[0].Filename"));
         assertEquals(version, xmlPath.get("ListResponse.Item[0].Version"));
         verify(compasSclDataService, times(1)).listVersionsByUUID(type, uuid);
     }
