@@ -83,9 +83,11 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         format(DECLARE_DB_VARIABLE, type) +
                         "for $resource in db:open($db)\n" +
                         "   let $id := $resource/scl:SCL/scl:Header/@id\n" +
-                        "   let $name := $resource/scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + SCL_NAME_EXTENSION.getFieldName() + "\n" +
                         "   group by $id\n" +
-                        "   return '<Item><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || local:latest-version($db, $id)//scl:SCL/scl:Header/@version || '</Version></Item>'",
+                        "   let $latestScl := local:latest-version($db, $id)\n" +
+                        "   let $version := $latestScl//scl:SCL/scl:Header/@version\n" +
+                        "   let $name := $latestScl//scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + SCL_NAME_EXTENSION.getFieldName() + "\n" +
+                        "   return '<Item><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>'",
                 sclDataMarshaller::unmarshal
         );
     }
