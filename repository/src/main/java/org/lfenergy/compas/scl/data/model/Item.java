@@ -17,10 +17,10 @@ public class Item {
     )
     private String id;
     @XmlElement(
-            name = "Filename",
+            name = "Name",
             required = true
     )
-    private String filename;
+    private String name;
     @XmlElement(
             name = "Version",
             required = true
@@ -30,9 +30,9 @@ public class Item {
     public Item() {
     }
 
-    public Item(String id, String filename, String version) {
+    public Item(String id, String name, String version) {
         this.id = id;
-        this.filename = filename;
+        this.name = name;
         this.version = version;
     }
 
@@ -44,12 +44,12 @@ public class Item {
         this.id = id;
     }
 
-    public String getFilename() {
-        return filename;
+    public String getName() {
+        return name;
     }
 
-    public void setFilename(String filename) {
-        this.filename = filename;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getVersion() {
