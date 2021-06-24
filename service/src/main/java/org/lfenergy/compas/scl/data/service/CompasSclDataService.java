@@ -4,9 +4,8 @@
 
 package org.lfenergy.compas.scl.data.service;
 
+import org.lfenergy.compas.commons.CompasExtensionsManager;
 import org.lfenergy.compas.scl.SCL;
-import org.lfenergy.compas.scl.TAnyContentFromOtherNamespace;
-import org.lfenergy.compas.scl.TPrivate;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
@@ -17,19 +16,22 @@ import org.lfenergy.compas.scl.extensions.TSclFileType;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.lfenergy.compas.scl.extensions.common.CompasExtensionsField.SCL_FILETYPE_EXTENSION;
+import static org.lfenergy.compas.scl.extensions.common.CompasExtensionsField.SCL_NAME_EXTENSION;
+
 @ApplicationScoped
 public class CompasSclDataService {
     private CompasSclDataRepository repository;
+    private CompasExtensionsManager compasExtensionsManager;
 
     @Inject
-    public CompasSclDataService(CompasSclDataRepository repository) {
+    public CompasSclDataService(CompasSclDataRepository repository, CompasExtensionsManager compasExtensionsManager) {
         this.repository = repository;
+        this.compasExtensionsManager = compasExtensionsManager;
     }
 
     public List<Item> list(SclType type) {
@@ -84,23 +86,6 @@ public class CompasSclDataService {
         repository.delete(type, id, version);
     }
 
-    private Optional<TPrivate> getCompasPrivate(SCL scl) {
-        return scl.getPrivate()
-                .stream()
-                .filter(tPrivate -> tPrivate.getType().equals("compas_scl"))
-                .findFirst();
-    }
-
-    private Optional<JAXBElement> getCompasElement(SCL scl, String name) {
-        return getCompasPrivate(scl).stream()
-                .map(TAnyContentFromOtherNamespace::getContent)
-                .flatMap(List::stream)
-                .filter(element -> element instanceof JAXBElement)
-                .map(element -> (JAXBElement) element)
-                .filter(element -> element.getName().equals(new QName("https://www.lfenergy.org/compas/v1", name)))
-                .findFirst();
-    }
-
     /**
      * Set the full CoMPAS private element for the given SCL file.
      *
@@ -110,27 +95,26 @@ public class CompasSclDataService {
      */
     private void setSclCompasPrivateElement(SCL scl, Optional<String> filename, SclType fileType) {
         var compasPrivateElementFactory = new ObjectFactory();
-        var compasPrivate = getCompasPrivate(scl)
+        var compasPrivate = compasExtensionsManager.getCompasPrivate(scl)
                 .orElseGet(() -> {
                     // Creating a private
-                    var newPrivate = new TPrivate();
-                    // Setting the type (required for a SCL private element)
-                    newPrivate.setType("compas_scl");
+                    var newPrivate = compasExtensionsManager.createCompasPrivate();
                     // Adding it to the SCL file.
                     scl.getPrivate().add(newPrivate);
                     return newPrivate;
                 });
 
-        // Adding the filename element and the file type element
+        // If a filename is passed, this name will be set as private element.
         filename.ifPresent(value ->
-                getCompasElement(scl, "SclFilename")
+                compasExtensionsManager.getCompasElement(compasPrivate, SCL_NAME_EXTENSION)
                         .ifPresentOrElse(
                                 element -> element.setValue(value),
-                                () -> compasPrivate.getContent().add(compasPrivateElementFactory.createSclFilename(value)))
+                                () -> compasPrivate.getContent().add(compasPrivateElementFactory.createSclName(value)))
         );
 
+        // Always set the file type as private element.
         TSclFileType sclFileType = TSclFileType.valueOf(fileType.toString());
-        getCompasElement(scl, "SclFileType")
+        compasExtensionsManager.getCompasElement(compasPrivate, SCL_FILETYPE_EXTENSION)
                 .ifPresentOrElse(
                         element -> element.setValue(sclFileType),
                         () -> compasPrivate.getContent().add(compasPrivateElementFactory.createSclFileType(sclFileType))
