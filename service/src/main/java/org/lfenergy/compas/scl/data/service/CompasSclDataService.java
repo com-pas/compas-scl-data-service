@@ -6,6 +6,7 @@ package org.lfenergy.compas.scl.data.service;
 
 import org.lfenergy.compas.commons.CompasExtensionsManager;
 import org.lfenergy.compas.scl.SCL;
+import org.lfenergy.compas.scl.TPrivate;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
@@ -58,22 +59,22 @@ public class CompasSclDataService {
         scl.getHeader().setVersion(version.toString());
 
         // Set name and type to SCL before storing the SCL.
-        setSclCompasPrivateElement(scl, Optional.of(name), type);
+        setSclCompasPrivateElement(scl, Optional.empty(), Optional.of(name), type);
 
         repository.create(type, id, scl, version);
         return id;
     }
 
     public void update(SclType type, UUID id, ChangeSetType changeSetType, SCL scl) {
-        var currentSCL = repository.findByUUID(type, id);
+        var currentScl = repository.findByUUID(type, id);
         // We always add a new version to the database, so add version record to the SCL and create a new record.
-        var version = new Version(currentSCL.getHeader().getVersion());
+        var version = new Version(currentScl.getHeader().getVersion());
         version = version.getNextVersion(changeSetType);
         scl.getHeader().setId(id.toString());
         scl.getHeader().setVersion(version.toString());
 
         // Add name and type to SCL before storing the SCL.
-        setSclCompasPrivateElement(scl, Optional.empty(), type);
+        setSclCompasPrivateElement(scl, Optional.of(currentScl), Optional.empty(), type);
 
         repository.create(type, id, scl, version);
     }
@@ -90,11 +91,10 @@ public class CompasSclDataService {
      * Set the full CoMPAS private element for the given SCL file.
      *
      * @param scl      the SCL file to edit.
-     * @param filename the filename to add
+     * @param name     the name to add
      * @param fileType the file type to add.
      */
-    private void setSclCompasPrivateElement(SCL scl, Optional<String> filename, SclType fileType) {
-        var compasPrivateElementFactory = new ObjectFactory();
+    private void setSclCompasPrivateElement(SCL scl, Optional<SCL> currentScl, Optional<String> name, SclType fileType) {
         var compasPrivate = compasExtensionsManager.getCompasPrivate(scl)
                 .orElseGet(() -> {
                     // Creating a private
@@ -104,20 +104,37 @@ public class CompasSclDataService {
                     return newPrivate;
                 });
 
-        // If a filename is passed, this name will be set as private element.
-        filename.ifPresent(value ->
-                compasExtensionsManager.getCompasElement(compasPrivate, SCL_NAME_EXTENSION)
-                        .ifPresentOrElse(
-                                element -> element.setValue(value),
-                                () -> compasPrivate.getContent().add(compasPrivateElementFactory.createSclName(value)))
-        );
+        // If the new SCL contains the Name Element we will use that value (or set the new name if passed to this method)
+        // Otherwise if there is no Name Element there are 2 options, if the new name is passed that will be used to create a Name Element
+        // If no name is passed, but a previous version of the SCL exists, we will copy the Name Element from there.
+        compasExtensionsManager.getCompasElement(compasPrivate, SCL_NAME_EXTENSION)
+                .ifPresentOrElse(
+                        element -> name.ifPresent(element::setValue),
+                        () -> name.ifPresentOrElse(
+                                value -> addCompasName(compasPrivate, value),
+                                () -> currentScl
+                                        .flatMap(previousScl -> compasExtensionsManager.getCompasPrivate(previousScl))
+                                        .flatMap(previousCompasPrivate -> compasExtensionsManager.getCompasName(previousCompasPrivate))
+                                        .ifPresent(previousSclName -> addCompasName(compasPrivate, previousSclName))
+                        )
+                );
 
         // Always set the file type as private element.
         TSclFileType sclFileType = TSclFileType.valueOf(fileType.toString());
         compasExtensionsManager.getCompasElement(compasPrivate, SCL_FILETYPE_EXTENSION)
                 .ifPresentOrElse(
                         element -> element.setValue(sclFileType),
-                        () -> compasPrivate.getContent().add(compasPrivateElementFactory.createSclFileType(sclFileType))
+                        () -> addCompasType(compasPrivate, sclFileType)
                 );
+    }
+
+    private void addCompasName(TPrivate compasPrivate, String name) {
+        var compasPrivateElementFactory = new ObjectFactory();
+        compasPrivate.getContent().add(compasPrivateElementFactory.createSclName(name));
+    }
+
+    private void addCompasType(TPrivate compasPrivate, TSclFileType sclFileType) {
+        var compasPrivateElementFactory = new ObjectFactory();
+        compasPrivate.getContent().add(compasPrivateElementFactory.createSclFileType(sclFileType));
     }
 }

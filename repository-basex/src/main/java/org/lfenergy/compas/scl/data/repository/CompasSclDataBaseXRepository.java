@@ -26,12 +26,17 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.lang.String.format;
+import static org.lfenergy.compas.commons.CommonConstants.XML_DEFAULT_NS_URI;
+import static org.lfenergy.compas.scl.extensions.common.CompasExtensionsConstants.COMPAS_EXTENSION_NS;
+import static org.lfenergy.compas.scl.extensions.common.CompasExtensionsConstants.COMPAS_SCL_EXTENSION_TYPE;
+import static org.lfenergy.compas.scl.extensions.common.CompasExtensionsField.SCL_NAME_EXTENSION;
 
 @ApplicationScoped
 public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataBaseXRepository.class);
 
-    private static final String DECLARE_NAMESPACE = "declare namespace scl=\"http://www.iec.ch/61850/2003/SCL\";\n";
+    private static final String DECLARE_SCL_NAMESPACE = "declare namespace scl=\"" + XML_DEFAULT_NS_URI + "\";\n";
+    private static final String DECLARE_COMPAS_NAMESPACE = "declare namespace compas=\"" + COMPAS_EXTENSION_NS + "\";\n";
     private static final String DECLARE_LATEST_VERSION_FUNC =
             "declare function local:latest-version($db as xs:string, $id as xs:string)\n" +
                     "   as document-node() { \n" +
@@ -72,33 +77,35 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
 
     @Override
     public List<Item> list(SclType type) {
-        return executeQuery(type, DECLARE_NAMESPACE +
+        return executeQuery(type, DECLARE_SCL_NAMESPACE +
+                        DECLARE_COMPAS_NAMESPACE +
                         DECLARE_LATEST_VERSION_FUNC +
                         format(DECLARE_DB_VARIABLE, type) +
                         "for $resource in db:open($db)\n" +
                         "   let $id := $resource/scl:SCL/scl:Header/@id\n" +
-                        "   let $filename := $resource/scl:SCL/scl:Private[@type='compas_scl']/*:SclFilename\n" +
+                        "   let $name := $resource/scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + SCL_NAME_EXTENSION.getFieldName() + "\n" +
                         "   group by $id\n" +
-                        "   return '<Item><Id>' || $id || '</Id><Filename>' || $filename || '</Filename><Version>' || local:latest-version($db, $id)//scl:SCL/scl:Header/@version || '</Version></Item>'",
+                        "   return '<Item><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || local:latest-version($db, $id)//scl:SCL/scl:Header/@version || '</Version></Item>'",
                 sclDataMarshaller::unmarshal
         );
     }
 
     @Override
     public List<Item> listVersionsByUUID(SclType type, UUID id) {
-        return executeQuery(type, DECLARE_NAMESPACE +
+        return executeQuery(type, DECLARE_SCL_NAMESPACE +
+                        DECLARE_COMPAS_NAMESPACE +
                         format(DECLARE_DB_VARIABLE, type) +
                         format(DECLARE_ID_VARIABLE, id) +
                         "for $resource in db:open($db, $id)\n" +
                         "   let $id := $resource/scl:SCL/scl:Header/@id\n" +
-                        "   let $filename := $resource/scl:SCL/scl:Private[@type='compas_scl']/*:SclFilename\n" +
+                        "   let $name := $resource/scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + SCL_NAME_EXTENSION.getFieldName() + "\n" +
                         "   let $version := $resource/scl:SCL/scl:Header/@version\n" +
                         "   let $parts := tokenize($version, '\\.')\n" +
                         "   let $majorVersion := xs:int($parts[1])\n" +
                         "   let $minorVersion := xs:int($parts[2])\n" +
                         "   let $patchVersion := xs:int($parts[3])\n" +
                         "   order by $majorVersion, $minorVersion, $patchVersion\n" +
-                        "   return '<Item><Id>' || $id || '</Id><Filename>' || $filename || '</Filename><Version>' || $version || '</Version></Item>' ",
+                        "   return '<Item><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>' ",
                 sclDataMarshaller::unmarshal
         );
     }
@@ -109,7 +116,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
         // Retrieve all versions using db:list-details function.
         // Sort the result descending, this way the last version is the first.
         // Use this path to retrieve the document with the doc function.
-        var result = executeQuery(type, DECLARE_NAMESPACE +
+        var result = executeQuery(type, DECLARE_SCL_NAMESPACE +
                         DECLARE_LATEST_VERSION_FUNC +
                         format(DECLARE_DB_VARIABLE, type) +
                         format(DECLARE_ID_VARIABLE, id) +

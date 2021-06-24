@@ -108,7 +108,7 @@ class CompasSclDataServiceTest {
         var type = SclType.SCD;
         var name = "JUSTSOMENAME";
         var scl = createBasicSCL();
-        createCompasPrivate(scl, "JUSTANOTHERNAME", SclType.ISD);
+        createCompasPrivate(scl, "JUSTANOTHERNAME", SclType.IID);
 
         doNothing().when(compasSclDataRepository).create(eq(type), any(UUID.class), eq(scl), any(Version.class));
 

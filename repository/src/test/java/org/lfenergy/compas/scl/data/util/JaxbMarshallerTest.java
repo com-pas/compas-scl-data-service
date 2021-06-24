@@ -15,16 +15,16 @@ class JaxbMarshallerTest {
     @Test
     void unmarshal_WhenItemXMLPassed_ThenItemObjectReturned() throws JAXBException {
         var id = "ID";
-        var filename = "FILENAME";
+        var name = "NAME";
         var version = "VERSION";
-        var xml = "<Item><Id>" + id + "</Id><Filename>" + filename + "</Filename><Version>" + version + "</Version></Item>";
+        var xml = "<Item><Id>" + id + "</Id><Name>" + name + "</Name><Version>" + version + "</Version></Item>";
 
         JaxbMarshaller marshaller = new JaxbMarshaller();
         Item item = marshaller.unmarshal(xml);
 
         assertNotNull(item);
         assertEquals(id, item.getId());
-        assertEquals(filename, item.getFilename());
+        assertEquals(name, item.getName());
         assertEquals(version, item.getVersion());
     }
 }

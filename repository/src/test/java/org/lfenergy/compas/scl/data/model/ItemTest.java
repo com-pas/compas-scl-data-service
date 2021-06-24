@@ -18,13 +18,13 @@ class ItemTest extends AbstractPojoTester {
     @Test
     void constructor_WhenCalledWithParameters_ThenValuesAreFilled() {
         var id = UUID.randomUUID().toString();
-        var filename = "Filename";
+        var name = "Name";
         var version = "1.0.0";
 
-        var item = new Item(id, filename, version);
+        var item = new Item(id, name, version);
 
         assertEquals(id, item.getId());
-        assertEquals(filename, item.getFilename());
+        assertEquals(name, item.getName());
         assertEquals(version, item.getVersion());
     }
 }
