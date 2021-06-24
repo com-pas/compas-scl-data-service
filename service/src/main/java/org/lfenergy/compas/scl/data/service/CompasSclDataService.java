@@ -94,6 +94,7 @@ public class CompasSclDataService {
      * @param name     the name to add
      * @param fileType the file type to add.
      */
+    @SuppressWarnings("unchecked")
     private void setSclCompasPrivateElement(SCL scl, Optional<SCL> currentScl, Optional<String> name, SclType fileType) {
         var compasPrivate = compasExtensionsManager.getCompasPrivate(scl)
                 .orElseGet(() -> {
@@ -114,13 +115,13 @@ public class CompasSclDataService {
                                 value -> addCompasName(compasPrivate, value),
                                 () -> currentScl
                                         .flatMap(previousScl -> compasExtensionsManager.getCompasPrivate(previousScl))
-                                        .flatMap(previousCompasPrivate -> compasExtensionsManager.getCompasName(previousCompasPrivate))
+                                        .flatMap(previousCompasPrivate -> compasExtensionsManager.getCompasSclName(previousCompasPrivate))
                                         .ifPresent(previousSclName -> addCompasName(compasPrivate, previousSclName))
                         )
                 );
 
         // Always set the file type as private element.
-        TSclFileType sclFileType = TSclFileType.valueOf(fileType.toString());
+        var sclFileType = TSclFileType.valueOf(fileType.toString());
         compasExtensionsManager.getCompasElement(compasPrivate, SCL_FILETYPE_EXTENSION)
                 .ifPresentOrElse(
                         element -> element.setValue(sclFileType),
