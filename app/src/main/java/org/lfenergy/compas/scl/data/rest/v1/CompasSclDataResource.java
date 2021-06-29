@@ -6,7 +6,6 @@ package org.lfenergy.compas.scl.data.rest.v1;
 import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
-import org.lfenergy.compas.scl.data.rest.Constants;
 import org.lfenergy.compas.scl.data.rest.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 
@@ -71,7 +70,7 @@ public class CompasSclDataResource {
     @Produces(MediaType.APPLICATION_XML)
     public GetResponse findByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
                                             @PathParam(ID_PATH_PARAM) UUID id,
-                                            @PathParam(Constants.VERSION_PATH_PARAM) Version version) {
+                                            @PathParam(VERSION_PATH_PARAM) Version version) {
         var response = new GetResponse();
         response.setScl(compasSclDataService.findByUUID(type, id, version));
         return response;
@@ -90,7 +89,7 @@ public class CompasSclDataResource {
     @Produces(MediaType.APPLICATION_XML)
     public SCL findRawSCLByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
                                           @PathParam(ID_PATH_PARAM) UUID id,
-                                          @PathParam(Constants.VERSION_PATH_PARAM) Version version) {
+                                          @PathParam(VERSION_PATH_PARAM) Version version) {
         return compasSclDataService.findByUUID(type, id, version);
     }
 
@@ -117,7 +116,7 @@ public class CompasSclDataResource {
     @Produces(MediaType.APPLICATION_XML)
     public void deleteVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
                               @PathParam(ID_PATH_PARAM) UUID id,
-                              @PathParam(Constants.VERSION_PATH_PARAM) Version version) {
+                              @PathParam(VERSION_PATH_PARAM) Version version) {
         compasSclDataService.delete(type, id, version);
     }
 }
