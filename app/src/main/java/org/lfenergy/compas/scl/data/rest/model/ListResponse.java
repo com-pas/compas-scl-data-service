@@ -11,10 +11,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
-@XmlRootElement(name = "ListResponse")
+import static org.lfenergy.compas.scl.data.model.Constants.SDS_NAMESPACE;
+
+@XmlRootElement(name = "ListResponse", namespace = SDS_NAMESPACE)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ListResponse {
-    @XmlElement(name = "Item")
+    @XmlElement(name = "Item", namespace = SDS_NAMESPACE)
     private List<Item> items;
 
     public List<Item> getItems() {

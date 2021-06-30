@@ -10,6 +10,7 @@ import javax.xml.bind.JAXBException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.lfenergy.compas.scl.data.model.Constants.SDS_NAMESPACE;
 
 class JaxbMarshallerTest {
     @Test
@@ -17,7 +18,7 @@ class JaxbMarshallerTest {
         var id = "ID";
         var name = "NAME";
         var version = "VERSION";
-        var xml = "<Item><Id>" + id + "</Id><Name>" + name + "</Name><Version>" + version + "</Version></Item>";
+        var xml = "<Item xmlns=\"" + SDS_NAMESPACE + "\"><Id>" + id + "</Id><Name>" + name + "</Name><Version>" + version + "</Version></Item>";
 
         JaxbMarshaller marshaller = new JaxbMarshaller();
         Item item = marshaller.unmarshal(xml);

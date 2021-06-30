@@ -24,6 +24,7 @@ import java.util.UUID;
 import static io.restassured.RestAssured.given;
 import static io.restassured.path.xml.config.XmlPathConfig.xmlPathConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.lfenergy.compas.scl.data.model.Constants.SCL_NAMESPACE;
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
 import static org.mockito.Mockito.*;
 

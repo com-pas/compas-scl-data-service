@@ -7,8 +7,6 @@ public final class Constants {
     private Constants() {
     }
 
-    public static final String SCL_NAMESPACE = "http://www.iec.ch/61850/2003/SCL";
-
     public static final String TYPE_PATH_PARAM = "type";
     public static final String ID_PATH_PARAM = "id";
     public static final String VERSION_PATH_PARAM = "version";

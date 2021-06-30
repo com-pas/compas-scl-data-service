@@ -12,9 +12,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import static org.lfenergy.compas.scl.data.rest.Constants.SCL_NAMESPACE;
+import static org.lfenergy.compas.scl.data.model.Constants.SCL_NAMESPACE;
+import static org.lfenergy.compas.scl.data.model.Constants.SDS_NAMESPACE;
 
-@XmlRootElement(name = "GetResponse")
+@XmlRootElement(name = "GetResponse", namespace = SDS_NAMESPACE)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GetResponse {
     @Schema(example = "SCL XML...")

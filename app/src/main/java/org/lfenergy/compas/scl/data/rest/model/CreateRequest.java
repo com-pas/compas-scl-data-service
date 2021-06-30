@@ -12,16 +12,17 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import static org.lfenergy.compas.scl.data.rest.Constants.SCL_NAMESPACE;
+import static org.lfenergy.compas.scl.data.model.Constants.SCL_NAMESPACE;
+import static org.lfenergy.compas.scl.data.model.Constants.SDS_NAMESPACE;
 
-@XmlRootElement(name = "CreateRequest")
+@XmlRootElement(name = "CreateRequest", namespace = SDS_NAMESPACE)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CreateRequest {
     @Schema(example = "SCL XML...")
     @XmlElement(name = "SCL", namespace = SCL_NAMESPACE, required = true)
     private SCL scl;
     @Schema(example = "STATION-0012312")
-    @XmlElement(name = "Name", required = true)
+    @XmlElement(name = "Name", namespace = SDS_NAMESPACE, required = true)
     private String name;
 
     public SCL getScl() {
