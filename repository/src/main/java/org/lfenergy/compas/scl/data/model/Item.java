@@ -6,23 +6,26 @@ package org.lfenergy.compas.scl.data.model;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "Item")
+import static org.lfenergy.compas.scl.data.model.Constants.SDS_NAMESPACE;
+
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Item {
     @XmlElement(
             name = "Id",
+            namespace = SDS_NAMESPACE,
             required = true
     )
     private String id;
     @XmlElement(
             name = "Name",
+            namespace = SDS_NAMESPACE,
             required = true
     )
     private String name;
     @XmlElement(
             name = "Version",
+            namespace = SDS_NAMESPACE,
             required = true
     )
     private String version;

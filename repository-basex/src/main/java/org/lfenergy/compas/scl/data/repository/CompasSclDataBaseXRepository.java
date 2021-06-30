@@ -27,6 +27,7 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.lfenergy.compas.commons.CommonConstants.XML_DEFAULT_NS_URI;
+import static org.lfenergy.compas.scl.data.model.Constants.SDS_NAMESPACE;
 import static org.lfenergy.compas.scl.extensions.common.CompasExtensionsConstants.COMPAS_EXTENSION_NS;
 import static org.lfenergy.compas.scl.extensions.common.CompasExtensionsConstants.COMPAS_SCL_EXTENSION_TYPE;
 import static org.lfenergy.compas.scl.extensions.common.CompasExtensionsField.SCL_NAME_EXTENSION;
@@ -87,7 +88,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         "   let $latestScl := local:latest-version($db, $id)\n" +
                         "   let $version := $latestScl//scl:SCL/scl:Header/@version\n" +
                         "   let $name := $latestScl//scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + SCL_NAME_EXTENSION.getFieldName() + "\n" +
-                        "   return '<Item><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>'",
+                        "   return '<Item xmlns=\"" + SDS_NAMESPACE + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>'",
                 sclDataMarshaller::unmarshal
         );
     }
@@ -107,7 +108,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         "   let $minorVersion := xs:int($parts[2])\n" +
                         "   let $patchVersion := xs:int($parts[3])\n" +
                         "   order by $majorVersion, $minorVersion, $patchVersion\n" +
-                        "   return '<Item><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>' ",
+                        "   return '<Item xmlns=\"" + SDS_NAMESPACE + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>' ",
                 sclDataMarshaller::unmarshal
         );
     }

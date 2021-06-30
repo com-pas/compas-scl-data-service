@@ -10,10 +10,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.UUID;
 
-@XmlRootElement(name = "CreateResponse")
+import static org.lfenergy.compas.scl.data.model.Constants.SDS_NAMESPACE;
+
+@XmlRootElement(name = "CreateResponse", namespace = SDS_NAMESPACE)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CreateResponse {
-    @XmlElement(name = "Id", required = true)
+    @XmlElement(name = "Id", namespace = SDS_NAMESPACE, required = true)
     private UUID id;
 
     public UUID getId() {

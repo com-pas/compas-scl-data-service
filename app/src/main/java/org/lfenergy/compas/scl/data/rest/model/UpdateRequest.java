@@ -13,7 +13,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import static org.lfenergy.compas.scl.data.rest.Constants.SCL_NAMESPACE;
+import static org.lfenergy.compas.scl.data.model.Constants.SCL_NAMESPACE;
+import static org.lfenergy.compas.scl.data.model.Constants.SDS_NAMESPACE;
 
 @XmlRootElement(name = "UpdateRequest")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -22,7 +23,7 @@ public class UpdateRequest {
     @XmlElement(name = "SCL", namespace = SCL_NAMESPACE, required = true)
     private SCL scl;
     @Schema(example = "MAJOR")
-    @XmlElement(name = "ChangeSet", required = true)
+    @XmlElement(name = "ChangeSet", namespace = SDS_NAMESPACE, required = true)
     private ChangeSetType changeSetType;
 
     public SCL getScl() {

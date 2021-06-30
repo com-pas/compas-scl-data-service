@@ -10,10 +10,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.commons.MarshallerWrapper;
 import org.lfenergy.compas.scl.SCL;
-import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.data.model.Item;
-import org.lfenergy.compas.scl.data.model.SclType;
-import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.data.rest.model.CreateRequest;
 import org.lfenergy.compas.scl.data.rest.model.UpdateRequest;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
@@ -102,7 +99,7 @@ class CompasSclDataResourceTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
+                .using(xmlPathConfig().declaredNamespace("scl", Constants.SCL_NAMESPACE));
         assertEquals("HeaderID", xmlPath.get("GetResponse.scl:SCL.scl:Header.@id"));
         verify(compasSclDataService, times(1)).findByUUID(type, uuid);
     }
@@ -127,7 +124,7 @@ class CompasSclDataResourceTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
+                .using(xmlPathConfig().declaredNamespace("scl", Constants.SCL_NAMESPACE));
         assertEquals("HeaderID", xmlPath.get("GetResponse.scl:SCL.scl:Header.@id"));
         verify(compasSclDataService, times(1)).findByUUID(type, uuid, version);
     }
@@ -150,7 +147,7 @@ class CompasSclDataResourceTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
+                .using(xmlPathConfig().declaredNamespace("scl", Constants.SCL_NAMESPACE));
         assertEquals("HeaderID", xmlPath.get("scl:SCL.scl:Header.@id"));
         verify(compasSclDataService, times(1)).findByUUID(type, uuid);
     }
@@ -175,7 +172,7 @@ class CompasSclDataResourceTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
+                .using(xmlPathConfig().declaredNamespace("scl", Constants.SCL_NAMESPACE));
         assertEquals("HeaderID", xmlPath.get("scl:SCL.scl:Header.@id"));
         verify(compasSclDataService, times(1)).findByUUID(type, uuid, version);
     }
