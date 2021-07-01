@@ -3,11 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest.v1;
 
-import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
+import org.lfenergy.compas.scl.model.SCL;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;

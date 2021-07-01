@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest;
 
-import org.lfenergy.compas.commons.CompasExtensionsManager;
+import org.lfenergy.compas.scl.commons.CompasExtensionsManager;
 
 import javax.enterprise.inject.Produces;
 

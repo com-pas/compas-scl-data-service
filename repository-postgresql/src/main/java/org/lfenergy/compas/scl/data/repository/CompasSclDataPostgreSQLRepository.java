@@ -4,10 +4,10 @@
 
 package org.lfenergy.compas.scl.data.repository;
 
-import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.model.SCL;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.List;

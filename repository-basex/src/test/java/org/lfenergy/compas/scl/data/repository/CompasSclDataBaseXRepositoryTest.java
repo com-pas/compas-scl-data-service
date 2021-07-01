@@ -7,13 +7,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.lfenergy.compas.commons.MarshallerWrapper;
-import org.lfenergy.compas.scl.SCL;
+import org.lfenergy.compas.scl.commons.MarshallerWrapper;
 import org.lfenergy.compas.scl.data.basex.BaseXClientFactory;
 import org.lfenergy.compas.scl.data.basex.BaseXServerJUnitExtension;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.model.SCL;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;

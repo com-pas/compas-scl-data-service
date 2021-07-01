@@ -4,7 +4,7 @@
 package org.lfenergy.compas.scl.data.model;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl.extensions.TSclFileType;
+import org.lfenergy.compas.scl.extensions.model.TSclFileType;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 

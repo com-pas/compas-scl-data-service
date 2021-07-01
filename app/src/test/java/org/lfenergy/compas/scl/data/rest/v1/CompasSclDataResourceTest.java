@@ -8,8 +8,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.commons.MarshallerWrapper;
-import org.lfenergy.compas.scl.SCL;
+import org.lfenergy.compas.scl.commons.MarshallerWrapper;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
@@ -17,6 +16,7 @@ import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.model.CreateRequest;
 import org.lfenergy.compas.scl.data.rest.model.UpdateRequest;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
+import org.lfenergy.compas.scl.model.SCL;
 
 import java.util.Collections;
 import java.util.UUID;

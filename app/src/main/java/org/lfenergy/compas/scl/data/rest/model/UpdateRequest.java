@@ -5,8 +5,8 @@
 package org.lfenergy.compas.scl.data.rest.model;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
+import org.lfenergy.compas.scl.model.SCL;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
