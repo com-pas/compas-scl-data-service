@@ -3,14 +3,14 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.repository;
 
-import org.lfenergy.compas.commons.MarshallerWrapper;
-import org.lfenergy.compas.scl.SCL;
+import org.lfenergy.compas.scl.commons.MarshallerWrapper;
 import org.lfenergy.compas.scl.data.basex.BaseXClient;
 import org.lfenergy.compas.scl.data.basex.BaseXClientFactory;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.util.JaxbMarshaller;
+import org.lfenergy.compas.scl.model.SCL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,18 +26,18 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.lang.String.format;
-import static org.lfenergy.compas.commons.CommonConstants.XML_DEFAULT_NS_URI;
+import static org.lfenergy.compas.scl.commons.SclConstants.SCL_NS_URI;
 import static org.lfenergy.compas.scl.data.model.Constants.SDS_NAMESPACE;
-import static org.lfenergy.compas.scl.extensions.common.CompasExtensionsConstants.COMPAS_EXTENSION_NS;
-import static org.lfenergy.compas.scl.extensions.common.CompasExtensionsConstants.COMPAS_SCL_EXTENSION_TYPE;
-import static org.lfenergy.compas.scl.extensions.common.CompasExtensionsField.SCL_NAME_EXTENSION;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_EXTENSION_NS_URI;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_SCL_EXTENSION_TYPE;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsField.SCL_NAME_EXTENSION;
 
 @ApplicationScoped
 public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataBaseXRepository.class);
 
-    private static final String DECLARE_SCL_NAMESPACE = "declare namespace scl=\"" + XML_DEFAULT_NS_URI + "\";\n";
-    private static final String DECLARE_COMPAS_NAMESPACE = "declare namespace compas=\"" + COMPAS_EXTENSION_NS + "\";\n";
+    private static final String DECLARE_SCL_NAMESPACE = "declare namespace scl=\"" + SCL_NS_URI + "\";\n";
+    private static final String DECLARE_COMPAS_NAMESPACE = "declare namespace compas=\"" + COMPAS_EXTENSION_NS_URI + "\";\n";
     private static final String DECLARE_LATEST_VERSION_FUNC =
             "declare function local:latest-version($db as xs:string, $id as xs:string)\n" +
                     "   as document-node() { \n" +

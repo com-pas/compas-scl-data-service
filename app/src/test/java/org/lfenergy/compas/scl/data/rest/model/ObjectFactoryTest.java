@@ -5,9 +5,9 @@ package org.lfenergy.compas.scl.data.rest.model;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
+import org.lfenergy.compas.scl.model.SCL;
 
 import java.util.Collections;
 import java.util.UUID;

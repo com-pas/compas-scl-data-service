@@ -4,16 +4,16 @@
 
 package org.lfenergy.compas.scl.data.service;
 
-import org.lfenergy.compas.commons.CompasExtensionsManager;
-import org.lfenergy.compas.scl.SCL;
-import org.lfenergy.compas.scl.TPrivate;
+import org.lfenergy.compas.scl.commons.CompasExtensionsManager;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
-import org.lfenergy.compas.scl.extensions.ObjectFactory;
-import org.lfenergy.compas.scl.extensions.TSclFileType;
+import org.lfenergy.compas.scl.extensions.model.ObjectFactory;
+import org.lfenergy.compas.scl.extensions.model.TSclFileType;
+import org.lfenergy.compas.scl.model.SCL;
+import org.lfenergy.compas.scl.model.TPrivate;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.lfenergy.compas.scl.extensions.common.CompasExtensionsField.SCL_FILETYPE_EXTENSION;
-import static org.lfenergy.compas.scl.extensions.common.CompasExtensionsField.SCL_NAME_EXTENSION;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsField.SCL_FILETYPE_EXTENSION;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsField.SCL_NAME_EXTENSION;
 
 @ApplicationScoped
 public class CompasSclDataService {
