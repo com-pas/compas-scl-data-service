@@ -24,6 +24,10 @@
 
   <modules>
     <module>app</module>
+    <module>repository</module>
+    <module>repository-basex</module>
+    <module>repository-postgresql</module>
+    <module>service</module>
   </modules>
 
   <dependencyManagement>
@@ -37,6 +41,7 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>io.quarkus</groupId>
