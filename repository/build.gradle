@@ -8,6 +8,7 @@ plugins {
 
 dependencies {
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api'
-    api 'org.lfenergy.compas:core-commons'
-    api 'org.lfenergy.compas:scl-extension'
+    implementation 'org.slf4j:slf4j-api'
+
+    runtimeOnly 'com.sun.xml.bind:jaxb-impl:2.3.3'
 }

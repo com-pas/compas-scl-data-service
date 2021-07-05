@@ -3,16 +3,16 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest.v1;
 
-import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
+import org.lfenergy.compas.scl.data.util.SclElementConverter;
+import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.xml.bind.JAXBElement;
 import java.util.UUID;
 
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
@@ -20,6 +20,8 @@ import static org.lfenergy.compas.scl.data.rest.Constants.*;
 @Path("/scl/v1/{" + TYPE_PATH_PARAM + "}")
 public class CompasSclDataResource {
     private CompasSclDataService compasSclDataService;
+
+    private SclElementConverter converter = new SclElementConverter();
 
     @Inject
     public CompasSclDataResource(CompasSclDataService compasSclDataService) {
@@ -30,9 +32,9 @@ public class CompasSclDataResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public CreateResponse create(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                 JAXBElement<CreateRequest> request) {
+                                 CreateRequest request) {
         var response = new CreateResponse();
-        response.setId(compasSclDataService.create(type, request.getValue().getName(), request.getValue().getScl()));
+        response.setId(compasSclDataService.create(type, request.getName(), request.getScl()));
         return response;
     }
 
@@ -79,18 +81,20 @@ public class CompasSclDataResource {
     @GET
     @Path("/{" + ID_PATH_PARAM + "}/scl")
     @Produces(MediaType.APPLICATION_XML)
-    public SCL findRawSCLByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                @PathParam(ID_PATH_PARAM) UUID id) {
-        return compasSclDataService.findByUUID(type, id);
+    public String findRawSCLByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
+                                   @PathParam(ID_PATH_PARAM) UUID id) {
+        Element scl = compasSclDataService.findByUUID(type, id);
+        return converter.convertToString(scl, false);
     }
 
     @GET
     @Path("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}/scl")
     @Produces(MediaType.APPLICATION_XML)
-    public SCL findRawSCLByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                          @PathParam(ID_PATH_PARAM) UUID id,
-                                          @PathParam(VERSION_PATH_PARAM) Version version) {
-        return compasSclDataService.findByUUID(type, id, version);
+    public String findRawSCLByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
+                                             @PathParam(ID_PATH_PARAM) UUID id,
+                                             @PathParam(VERSION_PATH_PARAM) Version version) {
+        Element scl = compasSclDataService.findByUUID(type, id, version);
+        return converter.convertToString(scl, false);
     }
 
     @PUT
@@ -99,8 +103,8 @@ public class CompasSclDataResource {
     @Produces(MediaType.APPLICATION_XML)
     public void update(@PathParam(TYPE_PATH_PARAM) SclType type,
                        @PathParam(ID_PATH_PARAM) UUID id,
-                       JAXBElement<UpdateRequest> request) {
-        compasSclDataService.update(type, id, request.getValue().getChangeSetType(), request.getValue().getScl());
+                       UpdateRequest request) {
+        compasSclDataService.update(type, id, request.getChangeSetType(), request.getScl());
     }
 
     @DELETE

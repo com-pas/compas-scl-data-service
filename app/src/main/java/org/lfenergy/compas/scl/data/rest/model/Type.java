@@ -7,13 +7,13 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
-import static org.lfenergy.compas.scl.data.model.Constants.SDS_NAMESPACE;
+import static org.lfenergy.compas.scl.data.Constants.SCL_DATA_SERVICE_NS_URI;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Type {
-    @XmlElement(name = "Code", namespace = SDS_NAMESPACE)
+    @XmlElement(name = "Code", namespace = SCL_DATA_SERVICE_NS_URI)
     private String code;
-    @XmlElement(name = "Description", namespace = SDS_NAMESPACE)
+    @XmlElement(name = "Description", namespace = SCL_DATA_SERVICE_NS_URI)
     private String description;
 
     public Type(String code, String description) {

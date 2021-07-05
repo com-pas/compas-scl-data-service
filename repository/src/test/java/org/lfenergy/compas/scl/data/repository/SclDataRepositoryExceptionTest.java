@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class SclDataExceptionTest {
+class SclDataRepositoryExceptionTest {
     @Test
     void constructor_WhenCalledWithOnlyMessage_ThenMessageCanBeRetrieved() {
         String expectedMessage = "The message";
-        SclDataException exception = new SclDataException(expectedMessage);
+        SclDataRepositoryException exception = new SclDataRepositoryException(expectedMessage);
 
         assertEquals(expectedMessage, exception.getMessage());
     }
@@ -19,7 +19,7 @@ class SclDataExceptionTest {
     @Test
     void constructor_WhenCalledWithOnlyCause_ThenCauseCanBeRetrieved() {
         Exception expectedCause = new RuntimeException();
-        SclDataException exception = new SclDataException(expectedCause);
+        SclDataRepositoryException exception = new SclDataRepositoryException(expectedCause);
 
         assertEquals(expectedCause, exception.getCause());
     }
@@ -28,7 +28,7 @@ class SclDataExceptionTest {
     void constructor_WhenCalledWithCauseAndMessage_ThenCauseAndMessageCanBeRetrieved() {
         String expectedMessage = "The message";
         Exception expectedCause = new RuntimeException();
-        SclDataException exception = new SclDataException(expectedMessage, expectedCause);
+        SclDataRepositoryException exception = new SclDataRepositoryException(expectedMessage, expectedCause);
 
         assertEquals(expectedMessage, exception.getMessage());
         assertEquals(expectedCause, exception.getCause());

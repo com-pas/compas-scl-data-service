@@ -18,9 +18,6 @@ dependencies {
     implementation 'io.quarkus:quarkus-resteasy-jaxb'
     implementation 'io.quarkus:quarkus-container-image-docker'
 
-    implementation 'org.lfenergy.compas:core-commons'
-    implementation 'org.lfenergy.compas:scl-extension'
-
     implementation project(':service')
     implementation project(':repository')
     implementation project(':repository-basex')

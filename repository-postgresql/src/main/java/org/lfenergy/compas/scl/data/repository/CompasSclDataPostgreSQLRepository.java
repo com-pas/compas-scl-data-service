@@ -4,10 +4,10 @@
 
 package org.lfenergy.compas.scl.data.repository;
 
-import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.w3c.dom.Element;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.List;
@@ -29,17 +29,17 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public SCL findByUUID(SclType type, UUID id) {
+    public Element findByUUID(SclType type, UUID id) {
         throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
-    public SCL findByUUID(SclType type, UUID id, Version version) {
+    public Element findByUUID(SclType type, UUID id, Version version) {
         throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 
     @Override
-    public void create(SclType type, UUID id, SCL scl, Version version) {
+    public void create(SclType type, UUID id, Element scl, Version version) {
         throw new UnsupportedOperationException(NOT_IMPLEMENTED);
     }
 

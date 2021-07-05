@@ -11,6 +11,7 @@ plugins {
 
 dependencies {
     implementation 'jakarta.enterprise:jakarta.enterprise.cdi-api'
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api'
 
     api project(':repository')
 }

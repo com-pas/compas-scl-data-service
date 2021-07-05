@@ -4,7 +4,7 @@
 
 package org.lfenergy.compas.scl.data.basex;
 
-import org.lfenergy.compas.scl.data.repository.SclDataException;
+import org.lfenergy.compas.scl.data.repository.SclDataRepositoryException;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -107,7 +107,7 @@ public class BaseXClient implements Closeable {
     public String execute(final String command) throws IOException {
         final var os = new ByteArrayOutputStream();
         execute(command, os);
-        return new String(os.toByteArray(), UTF_8);
+        return os.toString(UTF_8);
     }
 
     /**
@@ -209,7 +209,7 @@ public class BaseXClient implements Closeable {
     private String receive() throws IOException {
         final var os = new ByteArrayOutputStream();
         receive(in, os);
-        return new String(os.toByteArray(), UTF_8);
+        return os.toString(UTF_8);
     }
 
     /**
@@ -289,7 +289,7 @@ public class BaseXClient implements Closeable {
                 sb.append(s);
             }
         } catch (final NoSuchAlgorithmException ex) {
-            throw new SclDataException(ex);
+            throw new SclDataRepositoryException(ex);
         }
         return sb.toString();
     }

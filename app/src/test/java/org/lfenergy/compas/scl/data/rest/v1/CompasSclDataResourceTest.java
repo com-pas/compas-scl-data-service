@@ -8,8 +8,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.commons.MarshallerWrapper;
-import org.lfenergy.compas.scl.SCL;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
@@ -17,6 +15,8 @@ import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.model.CreateRequest;
 import org.lfenergy.compas.scl.data.rest.model.UpdateRequest;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
+import org.lfenergy.compas.scl.data.util.SclElementConverter;
+import org.w3c.dom.Element;
 
 import java.util.Collections;
 import java.util.UUID;
@@ -24,7 +24,7 @@ import java.util.UUID;
 import static io.restassured.RestAssured.given;
 import static io.restassured.path.xml.config.XmlPathConfig.xmlPathConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.lfenergy.compas.scl.data.model.Constants.SCL_NAMESPACE;
+import static org.lfenergy.compas.scl.data.Constants.SCL_NS_URI;
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
 import static org.mockito.Mockito.*;
 
@@ -33,6 +33,8 @@ import static org.mockito.Mockito.*;
 class CompasSclDataResourceTest {
     @InjectMock
     private CompasSclDataService compasSclDataService;
+
+    private final SclElementConverter converter = new SclElementConverter();
 
     @Test
     void list_WhenCalled_ThenItemResponseRetrieved() {
@@ -86,7 +88,7 @@ class CompasSclDataResourceTest {
     }
 
     @Test
-    void findByUUID_WhenCalled_ThenSCLResponseRetrieved() throws Exception {
+    void findByUUID_WhenCalled_ThenSCLResponseRetrieved() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL();
@@ -103,13 +105,13 @@ class CompasSclDataResourceTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
+                .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
         assertEquals("HeaderID", xmlPath.get("GetResponse.scl:SCL.scl:Header.@id"));
         verify(compasSclDataService, times(1)).findByUUID(type, uuid);
     }
 
     @Test
-    void findByUUIDAndVersion_WhenCalled_ThenSCLResponseRetrieved() throws Exception {
+    void findByUUIDAndVersion_WhenCalled_ThenSCLResponseRetrieved() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL();
@@ -128,13 +130,13 @@ class CompasSclDataResourceTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
+                .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
         assertEquals("HeaderID", xmlPath.get("GetResponse.scl:SCL.scl:Header.@id"));
         verify(compasSclDataService, times(1)).findByUUID(type, uuid, version);
     }
 
     @Test
-    void findRawSCLByUUID_WhenCalledOnlySCL_ThenSCLRetrieved() throws Exception {
+    void findRawSCLByUUID_WhenCalledOnlySCL_ThenSCLRetrieved() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL();
@@ -151,13 +153,13 @@ class CompasSclDataResourceTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
+                .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
         assertEquals("HeaderID", xmlPath.get("scl:SCL.scl:Header.@id"));
         verify(compasSclDataService, times(1)).findByUUID(type, uuid);
     }
 
     @Test
-    void findRawSCLByUUIDAndVersion_WhenCalled_ThenSCLRetrieved() throws Exception {
+    void findRawSCLByUUIDAndVersion_WhenCalled_ThenSCLRetrieved() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL();
@@ -176,13 +178,13 @@ class CompasSclDataResourceTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("scl", SCL_NAMESPACE));
+                .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
         assertEquals("HeaderID", xmlPath.get("scl:SCL.scl:Header.@id"));
         verify(compasSclDataService, times(1)).findByUUID(type, uuid, version);
     }
 
     @Test
-    void create_WhenCalled_ThenServiceCalledAndUUIDRetrieved() throws Exception {
+    void create_WhenCalled_ThenServiceCalledAndUUIDRetrieved() {
         var uuid = UUID.randomUUID();
         var type = SclType.SCD;
         var name = "StationName";
@@ -192,7 +194,7 @@ class CompasSclDataResourceTest {
         request.setScl(scl);
         request.setName(name);
 
-        when(compasSclDataService.create(eq(type), eq(name), any(SCL.class))).thenReturn(uuid);
+        when(compasSclDataService.create(eq(type), eq(name), any(Element.class))).thenReturn(uuid);
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -205,11 +207,11 @@ class CompasSclDataResourceTest {
                 .response();
 
         assertEquals(uuid.toString(), response.xmlPath().getString("CreateResponse.Id"));
-        verify(compasSclDataService, times(1)).create(eq(type), eq(name), any(SCL.class));
+        verify(compasSclDataService, times(1)).create(eq(type), eq(name), any(Element.class));
     }
 
     @Test
-    void update_WhenCalled_ThenServiceCalledAndNewUUIDRetrieved() throws Exception {
+    void update_WhenCalled_ThenServiceCalledAndNewUUIDRetrieved() {
         var uuid = UUID.randomUUID();
         var type = SclType.SCD;
         var changeSetType = ChangeSetType.MAJOR;
@@ -219,7 +221,7 @@ class CompasSclDataResourceTest {
         request.setScl(scl);
         request.setChangeSetType(changeSetType);
 
-        doNothing().when(compasSclDataService).update(eq(type), eq(uuid), eq(changeSetType), any(SCL.class));
+        doNothing().when(compasSclDataService).update(eq(type), eq(uuid), eq(changeSetType), any(Element.class));
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -230,7 +232,7 @@ class CompasSclDataResourceTest {
                 .then()
                 .statusCode(204);
 
-        verify(compasSclDataService, times(1)).update(eq(type), eq(uuid), eq(changeSetType), any(SCL.class));
+        verify(compasSclDataService, times(1)).update(eq(type), eq(uuid), eq(changeSetType), any(Element.class));
     }
 
     @Test
@@ -269,9 +271,10 @@ class CompasSclDataResourceTest {
         verify(compasSclDataService, times(1)).delete(type, uuid, version);
     }
 
-    private SCL readSCL() throws Exception {
+    private Element readSCL() {
         var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd");
         assert inputStream != null;
-        return new MarshallerWrapper.Builder().build().unmarshall(inputStream);
+
+        return converter.convertToElement(inputStream);
     }
 }
