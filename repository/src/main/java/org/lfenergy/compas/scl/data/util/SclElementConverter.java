@@ -43,8 +43,8 @@ public class SclElementConverter {
             transformer.transform(new DOMSource(element), new StreamResult(buffer));
             return buffer.toString();
         } catch (TransformerException exp) {
-            LOGGER.error("Converting problem: {}", exp.getLocalizedMessage());
-            throw new SclDataRepositoryException("Error converting to a String!", exp);
+            LOGGER.error("Converting problem: {}", exp.getLocalizedMessage(), exp);
+            throw new SclDataRepositoryException("Error converting to a String!");
         }
     }
 
@@ -68,8 +68,8 @@ public class SclElementConverter {
             var doc = builder.parse(inputSource);
             return (Element) doc.getElementsByTagNameNS(SCL_NS_URI, SCL_ELEMENT_NAME).item(0);
         } catch (ParserConfigurationException | SAXException | IOException exp) {
-            LOGGER.error("Converting problem: {}", exp.getLocalizedMessage());
-            throw new SclDataRepositoryException("Error converting to a Element!", exp);
+            LOGGER.error("Converting problem: {}", exp.getLocalizedMessage(), exp);
+            throw new SclDataRepositoryException("Error converting to a Element!");
         }
     }
 }

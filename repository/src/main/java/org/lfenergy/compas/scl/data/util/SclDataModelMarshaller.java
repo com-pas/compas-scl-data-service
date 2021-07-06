@@ -24,8 +24,8 @@ public class SclDataModelMarshaller {
             var jaxbContext = JAXBContext.newInstance("org.lfenergy.compas.scl.data.model");
             jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         } catch (JAXBException exp) {
-            LOGGER.error("Construction problem: {}", exp.getLocalizedMessage());
-            throw new SclDataRepositoryException("Error constructing unmarshaller!", exp);
+            LOGGER.error("Construction problem: {}", exp.getLocalizedMessage(), exp);
+            throw new SclDataRepositoryException("Error constructing unmarshaller!");
         }
     }
 
@@ -34,8 +34,8 @@ public class SclDataModelMarshaller {
             var source = new StreamSource(new StringReader(xml));
             return jaxbUnmarshaller.unmarshal(source, Item.class).getValue();
         } catch (JAXBException exp) {
-            LOGGER.error("Unmarshalling problem: {}", exp.getLocalizedMessage());
-            throw new SclDataRepositoryException("Error unmarshalling!", exp);
+            LOGGER.error("Unmarshalling problem: {}", exp.getLocalizedMessage(), exp);
+            throw new SclDataRepositoryException("Error unmarshalling!");
         }
     }
 }

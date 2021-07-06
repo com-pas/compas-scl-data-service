@@ -99,10 +99,7 @@ public class CompasSclDataService {
      */
     private void setSclCompasPrivateElement(Element scl, Optional<Element> currentScl, Optional<String> name, SclType fileType) {
         var compasPrivate = sclElementProcessor.getCompasPrivate(scl)
-                .orElseGet(() -> {
-                    // Creating a private
-                    return sclElementProcessor.addCompasPrivate(scl);
-                });
+                .orElseGet(() -> sclElementProcessor.addCompasPrivate(scl));
 
         // If the new SCL contains the Name Element we will use that value (or set the new name if passed to this method)
         // Otherwise if there is no Name Element there are 2 options, if the new name is passed that will be used to create a Name Element
