@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0
     <repository>
       <id>github-packages-compas</id>
       <name>Github Packages CoMPAS</name>
-      <url>https://maven.pkg.github.com/com-pas/*</url>
+      <url>https://maven.pkg.github.com/com-pas/</url>
     </repository>
   </repositories>
 
