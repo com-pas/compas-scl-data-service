@@ -1,10 +1,16 @@
 <?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2021 Alliander N.V.
+
+SPDX-License-Identifier: Apache-2.0
+-->
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.lfenergy.compas.scl.data</groupId>
   <artifactId>compas-scl-data-service</artifactId>
   <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
   <properties>
     <compiler-plugin.version>3.8.1</compiler-plugin.version>
@@ -20,6 +26,21 @@
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
     <jandex-plugin.version>0.9.0</jandex-plugin.version>
     <sonarqube-plugin.version>3.2.0</sonarqube-plugin.version>
+
+    <core-commons.version>1.0-SNAPSHOT</core-commons.version>
+    <scl-extension.version>1.0-SNAPSHOT</scl-extension.version>
+    <jakarta-bind-api.version>2.3.3</jakarta-bind-api.version>
+    <jakarta-cdi-api.version>2.0.2</jakarta-cdi-api.version>
+    <microprofile-config-api.version>1.4</microprofile-config-api.version>
+    <slf4j-api.version>1.7.30</slf4j-api.version>
+
+    <!-- Test -->
+    <basex.version>9.2.4</basex.version>
+    <junit-jupiter-api.version>5.7.1</junit-jupiter-api.version>
+    <mockito-junit-jupiter.version>3.11.2</mockito-junit-jupiter.version>
+    <openpojo.version>0.9.1</openpojo.version>
+    <slf4j-simple.version>1.7.30</slf4j-simple.version>
+    <junit-jupiter-engine.version>5.7.2</junit-jupiter-engine.version>
   </properties>
 
   <modules>
@@ -38,6 +59,68 @@
         <version>${quarkus.platform.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.lfenergy.compas</groupId>
+        <artifactId>core-commons</artifactId>
+        <version>${core-commons.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.lfenergy.compas</groupId>
+        <artifactId>scl-extension</artifactId>
+        <version>${scl-extension.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>${jakarta-bind-api.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.enterprise</groupId>
+        <artifactId>jakarta.enterprise.cdi-api</artifactId>
+        <version>${jakarta-cdi-api.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.microprofile.config</groupId>
+        <artifactId>microprofile-config-api</artifactId>
+        <version>${microprofile-config-api.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j-api.version}</version>
+      </dependency>
+      <!-- Test -->
+      <dependency>
+        <groupId>org.basex</groupId>
+        <artifactId>basex</artifactId>
+        <version>${basex.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-api</artifactId>
+        <version>${junit-jupiter-api.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-junit-jupiter</artifactId>
+        <version>${mockito-junit-jupiter.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.openpojo</groupId>
+        <artifactId>openpojo</artifactId>
+        <version>${openpojo.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j-simple.version}</version>
+      </dependency>
+      <!-- Runtime -->
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-engine</artifactId>
+        <version>${junit-jupiter-engine.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -63,41 +146,68 @@
     </dependency>
   </dependencies>
 
+  repositories {
+  mavenCentral()
+  maven {
+  name = "GitHubPackages"
+  url = uri("https://maven.pkg.github.com/com-pas/*")
+  credentials {
+  username = project.hasProperty('githubUsername') ? project.getProperty("githubUsername") : System.getenv("GITHUB_USERNAME")
+  password = project.hasProperty('githubToken') ? project.getProperty("githubToken") : System.getenv("GITHUB_TOKEN")
+  }
+  }
+  mavenLocal()
+  }
+
+  <repositories>
+    <repository>
+      <id>GithubPackages</id>
+      <url>https://maven.pkg.github.com/com-pas/*</url>
+    </repository>
+  </repositories>
+
   <build>
-    <plugins>
-      <plugin>
-        <groupId>${quarkus.platform.group-id}</groupId>
-        <artifactId>quarkus-maven-plugin</artifactId>
-        <version>${quarkus.platform.version}</version>
-        <extensions>true</extensions>
-        <executions>
-          <execution>
-            <goals>
-              <goal>build</goal>
-              <goal>generate-code</goal>
-              <goal>generate-code-tests</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>${compiler-plugin.version}</version>
-        <configuration>
-          <parameters>${maven.compiler.parameters}</parameters>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${surefire-plugin.version}</version>
-        <configuration>
-          <systemPropertyVariables>
-            <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-            <maven.home>${maven.home}</maven.home>
-          </systemPropertyVariables>
-        </configuration>
-      </plugin>
-    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.jboss.jandex</groupId>
+          <artifactId>jandex-maven-plugin</artifactId>
+          <version>1.1.0</version>
+          <executions>
+            <execution>
+              <id>make-index</id>
+              <goals>
+                <goal>jandex</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.2.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${compiler-plugin.version}</version>
+          <configuration>
+            <parameters>${maven.compiler.parameters}</parameters>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${surefire-plugin.version}</version>
+          <configuration>
+            <systemPropertyVariables>
+              <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+              <maven.home>${maven.home}</maven.home>
+            </systemPropertyVariables>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
   <profiles>
     <profile>
@@ -133,6 +243,54 @@
       <properties>
         <quarkus.package.type>native</quarkus.package.type>
       </properties>
+    </profile>
+    <profile>
+      <id>sonar</id>
+
+      <properties>
+        <sonar.language>java</sonar.language>
+
+        <!-- JaCoCo Properties -->
+        <jacoco.version>0.8.6</jacoco.version>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+      </properties>
+
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.jacoco</groupId>
+              <artifactId>jacoco-maven-plugin</artifactId>
+              <version>${jacoco.version}</version>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <configuration>
+              <exclClassLoaders>*QuarkusClassLoader</exclClassLoaders>
+            </configuration>
+            <executions>
+              <execution>
+                <id>jacoco-initialize</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>jacoco-report</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>
