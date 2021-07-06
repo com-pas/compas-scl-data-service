@@ -57,10 +57,10 @@ public class SclElementProcessor {
 
     public Optional<String> getAttributeValue(Element element, String attributeName) {
         var value = element.getAttribute(attributeName);
-        return (value != null) ? Optional.of(value) : Optional.empty();
+        return (value != null && !value.isBlank()) ? Optional.of(value) : Optional.empty();
     }
 
-    public Optional<Element> getFirstChildNodeByName(Element root, String localName) {
+    public Optional<Element> getChildNodeByName(Element root, String localName) {
         return getChildNodesByName(root, localName)
                 .stream()
                 .findFirst();

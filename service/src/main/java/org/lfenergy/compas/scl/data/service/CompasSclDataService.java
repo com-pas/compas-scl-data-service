@@ -104,22 +104,26 @@ public class CompasSclDataService {
         // If the new SCL contains the Name Element we will use that value (or set the new name if passed to this method)
         // Otherwise if there is no Name Element there are 2 options, if the new name is passed that will be used to create a Name Element
         // If no name is passed, but a previous version of the SCL exists, we will copy the Name Element from there.
-        sclElementProcessor.getFirstChildNodeByName(compasPrivate, COMPAS_SCL_NAME_EXTENSION)
+        sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_NAME_EXTENSION)
                 .ifPresentOrElse(
+                        // Override the value of the element with the name passed.
                         element -> name.ifPresent(element::setTextContent),
                         () -> name.ifPresentOrElse(
+                                // Add the Compas Element and give it a value with the name passed.
                                 value -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, value),
+                                // Retrieve the name from the previous version and copy that value, if present, to the
+                                // new Element that will be added.
                                 () -> currentScl
                                         .flatMap(sclElementProcessor::getCompasPrivate)
                                         .flatMap(previousCompasPrivate ->
-                                                sclElementProcessor.getFirstChildNodeByName(previousCompasPrivate, COMPAS_SCL_NAME_EXTENSION))
+                                                sclElementProcessor.getChildNodeByName(previousCompasPrivate, COMPAS_SCL_NAME_EXTENSION))
                                         .ifPresent(previousSclName ->
                                                 sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, previousSclName.getTextContent()))
                         )
                 );
 
         // Always set the file type as private element.
-        sclElementProcessor.getFirstChildNodeByName(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION)
+        sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION)
                 .ifPresentOrElse(
                         element -> element.setTextContent(fileType.toString()),
                         () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION, fileType.toString())

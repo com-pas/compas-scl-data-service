@@ -25,6 +25,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CompasSclDataServiceTest {
+    private static final Version currentVersion = new Version("1.0.0");
+
     @Mock
     private CompasSclDataRepository compasSclDataRepository;
 
@@ -87,7 +89,7 @@ class CompasSclDataServiceTest {
     }
 
     @Test
-    void create_WhenCalled_ThenRepositoryIsCalledAndUUIDIsReturned() {
+    void create_WhenCalledWithOutCompasExtension_ThenRepositoryIsCalledAndUUIDIsReturned() {
         var type = SclType.SCD;
         var name = "JUSTSOMENAME";
         var scl = readSCL();
@@ -108,30 +110,53 @@ class CompasSclDataServiceTest {
         var scl = readSCL();
         createCompasPrivate(scl, "JUSTANOTHERNAME", SclType.IID);
 
-        doNothing().when(compasSclDataRepository).create(eq(type), any(UUID.class), eq(scl), any(Version.class));
+        doNothing().when(compasSclDataRepository).create(eq(type), any(UUID.class), eq(scl), eq(new Version("1.0.0")));
 
         var uuid = compasSclDataService.create(type, name, scl);
 
         assertNotNull(uuid);
         assertCompasExtenions(scl, name, type);
-        verify(compasSclDataRepository, times(1)).create(eq(type), any(UUID.class), eq(scl), any(Version.class));
+        verify(compasSclDataRepository, times(1)).create(eq(type), any(UUID.class), eq(scl), eq(new Version("1.0.0")));
     }
 
     @Test
-    void update_WhenCalled_ThenRepositoryIsCalledAndNewUUIDIsReturned() {
+    void update_WhenCalledWithCompasElements_ThenRepositoryIsCalled() {
         var type = SclType.SCD;
-        var name = "JUSTANOTHERNAME";
+        var name = "JUSTSOMENAME";
         var uuid = UUID.randomUUID();
+        var changeSet = ChangeSetType.MAJOR;
         var scl = readSCL();
-        createCompasPrivate(scl, name, SclType.ISD);
+        createCompasPrivate(scl, name, SclType.IID);
+        var previousScl = readSCL();
+        createCompasPrivate(previousScl, name, type);
 
-        when(compasSclDataRepository.findByUUID(type, uuid)).thenReturn(readSCL());
-        doNothing().when(compasSclDataRepository).create(eq(type), eq(uuid), eq(scl), any(Version.class));
+        when(compasSclDataRepository.findByUUID(type, uuid)).thenReturn(previousScl);
+        doNothing().when(compasSclDataRepository).create(type, uuid, scl, currentVersion.getNextVersion(changeSet));
 
-        compasSclDataService.update(type, uuid, ChangeSetType.MAJOR, scl);
+        compasSclDataService.update(type, uuid, changeSet, scl);
 
         assertCompasExtenions(scl, name, type);
-        verify(compasSclDataRepository, times(1)).create(eq(type), eq(uuid), eq(scl), any(Version.class));
+        verify(compasSclDataRepository, times(1)).create(type, uuid, scl, currentVersion.getNextVersion(changeSet));
+        verify(compasSclDataRepository, times(1)).findByUUID(type, uuid);
+    }
+
+    @Test
+    void update_WhenCalledWithoutCompasElements_ThenRepositoryIsCalled() {
+        var type = SclType.SCD;
+        var name = "JUSTSOMENAME";
+        var uuid = UUID.randomUUID();
+        var changeSet = ChangeSetType.MAJOR;
+        var scl = readSCL();
+        var previousScl = readSCL();
+        createCompasPrivate(previousScl, name, type);
+
+        when(compasSclDataRepository.findByUUID(type, uuid)).thenReturn(previousScl);
+        doNothing().when(compasSclDataRepository).create(type, uuid, scl, currentVersion.getNextVersion(changeSet));
+
+        compasSclDataService.update(type, uuid, changeSet, scl);
+
+        assertCompasExtenions(scl, name, type);
+        verify(compasSclDataRepository, times(1)).create(type, uuid, scl, currentVersion.getNextVersion(changeSet));
         verify(compasSclDataRepository, times(1)).findByUUID(type, uuid);
     }
 
@@ -164,11 +189,11 @@ class CompasSclDataServiceTest {
         var compasPrivate = processor.getCompasPrivate(scl);
         assertTrue(compasPrivate.isPresent());
 
-        var nameElement = processor.getFirstChildNodeByName(compasPrivate.get(), COMPAS_SCL_NAME_EXTENSION);
+        var nameElement = processor.getChildNodeByName(compasPrivate.get(), COMPAS_SCL_NAME_EXTENSION);
         assertTrue(nameElement.isPresent());
         assertEquals(name, nameElement.get().getTextContent());
 
-        var typeElement = processor.getFirstChildNodeByName(compasPrivate.get(), COMPAS_SCL_FILE_TYPE_EXTENSION);
+        var typeElement = processor.getChildNodeByName(compasPrivate.get(), COMPAS_SCL_FILE_TYPE_EXTENSION);
         assertTrue(typeElement.isPresent());
         assertEquals(type.toString(), typeElement.get().getTextContent());
     }
@@ -180,7 +205,7 @@ class CompasSclDataServiceTest {
         var scl = converter.convertToElement(inputStream);
         var header = processor.getSclHeader(scl).orElseGet(() -> processor.addSclHeader(scl));
         header.setAttribute(SCL_HEADER_ID_ATTR, UUID.randomUUID().toString());
-        header.setAttribute(SCL_HEADER_VERSION_ATTR, "1.0.0");
+        header.setAttribute(SCL_HEADER_VERSION_ATTR, currentVersion.toString());
         return scl;
     }
 
