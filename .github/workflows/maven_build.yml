@@ -18,6 +18,10 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.11
+    - name: maven-settings-xml-action
+      uses: whelk-io/maven-settings-xml-action@v18
+      with:
+        servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${ secrets.GITHUB_TOKEN }" }]'
     - name: Build with Maven
       run: mvn -B clean verify
       env:

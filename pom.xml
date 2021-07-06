@@ -51,6 +51,14 @@ SPDX-License-Identifier: Apache-2.0
     <module>service</module>
   </modules>
 
+  <repositories>
+    <repository>
+      <id>github-packages-compas</id>
+      <name>Github Packages CoMPAS</name>
+      <url>https://maven.pkg.github.com/com-pas/*</url>
+    </repository>
+  </repositories>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -145,26 +153,6 @@ SPDX-License-Identifier: Apache-2.0
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
-<!--  repositories {-->
-<!--  mavenCentral()-->
-<!--  maven {-->
-<!--  name = "GitHubPackages"-->
-<!--  url = uri("https://maven.pkg.github.com/com-pas/*")-->
-<!--  credentials {-->
-<!--  username = project.hasProperty('githubUsername') ? project.getProperty("githubUsername") : System.getenv("GITHUB_USERNAME")-->
-<!--  password = project.hasProperty('githubToken') ? project.getProperty("githubToken") : System.getenv("GITHUB_TOKEN")-->
-<!--  }-->
-<!--  }-->
-<!--  mavenLocal()-->
-<!--  }-->
-
-<!--  <repositories>-->
-<!--    <repository>-->
-<!--      <id>GithubPackages</id>-->
-<!--      <url>https://maven.pkg.github.com/com-pas/*</url>-->
-<!--    </repository>-->
-<!--  </repositories>-->
 
   <build>
     <pluginManagement>
