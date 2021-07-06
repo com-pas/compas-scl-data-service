@@ -145,26 +145,26 @@ SPDX-License-Identifier: Apache-2.0
       <scope>test</scope>
     </dependency>
   </dependencies>
+  
+<!--  repositories {-->
+<!--  mavenCentral()-->
+<!--  maven {-->
+<!--  name = "GitHubPackages"-->
+<!--  url = uri("https://maven.pkg.github.com/com-pas/*")-->
+<!--  credentials {-->
+<!--  username = project.hasProperty('githubUsername') ? project.getProperty("githubUsername") : System.getenv("GITHUB_USERNAME")-->
+<!--  password = project.hasProperty('githubToken') ? project.getProperty("githubToken") : System.getenv("GITHUB_TOKEN")-->
+<!--  }-->
+<!--  }-->
+<!--  mavenLocal()-->
+<!--  }-->
 
-  repositories {
-  mavenCentral()
-  maven {
-  name = "GitHubPackages"
-  url = uri("https://maven.pkg.github.com/com-pas/*")
-  credentials {
-  username = project.hasProperty('githubUsername') ? project.getProperty("githubUsername") : System.getenv("GITHUB_USERNAME")
-  password = project.hasProperty('githubToken') ? project.getProperty("githubToken") : System.getenv("GITHUB_TOKEN")
-  }
-  }
-  mavenLocal()
-  }
-
-  <repositories>
-    <repository>
-      <id>GithubPackages</id>
-      <url>https://maven.pkg.github.com/com-pas/*</url>
-    </repository>
-  </repositories>
+<!--  <repositories>-->
+<!--    <repository>-->
+<!--      <id>GithubPackages</id>-->
+<!--      <url>https://maven.pkg.github.com/com-pas/*</url>-->
+<!--    </repository>-->
+<!--  </repositories>-->
 
   <build>
     <pluginManagement>
