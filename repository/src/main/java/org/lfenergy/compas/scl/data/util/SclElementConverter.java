@@ -10,6 +10,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -35,7 +36,11 @@ public class SclElementConverter {
     public String convertToString(Element element, boolean omitXmlDeclaration) {
         try {
             var buffer = new StringWriter();
-            var transformer = TransformerFactory.newInstance().newTransformer();
+            var factory = TransformerFactory.newInstance();
+            // Prohibit the use of all protocols by external entities:
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+            var transformer = factory.newTransformer();
             if (omitXmlDeclaration) {
                 transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             }
@@ -61,6 +66,9 @@ public class SclElementConverter {
             var factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             factory.setIgnoringElementContentWhitespace(true);
+            // Prohibit the use of all protocols by external entities:
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             // Create DocumentBuilder with default configuration
             var builder = factory.newDocumentBuilder();
 
