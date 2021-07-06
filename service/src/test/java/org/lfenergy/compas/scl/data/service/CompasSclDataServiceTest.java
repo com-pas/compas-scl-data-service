@@ -164,11 +164,11 @@ class CompasSclDataServiceTest {
         var compasPrivate = processor.getCompasPrivate(scl);
         assertTrue(compasPrivate.isPresent());
 
-        var nameElement = processor.getCompasElement(compasPrivate.get(), COMPAS_SCL_NAME_EXTENSION);
+        var nameElement = processor.getFirstChildNodeByName(compasPrivate.get(), COMPAS_SCL_NAME_EXTENSION);
         assertTrue(nameElement.isPresent());
         assertEquals(name, nameElement.get().getTextContent());
 
-        var typeElement = processor.getCompasElement(compasPrivate.get(), COMPAS_SCL_FILE_TYPE_EXTENSION);
+        var typeElement = processor.getFirstChildNodeByName(compasPrivate.get(), COMPAS_SCL_FILE_TYPE_EXTENSION);
         assertTrue(typeElement.isPresent());
         assertEquals(type.toString(), typeElement.get().getTextContent());
     }
@@ -177,15 +177,15 @@ class CompasSclDataServiceTest {
         var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd");
         assert inputStream != null;
 
-        Element scl = converter.convertToElement(inputStream);
-        Element header = processor.getHeader(scl).orElseGet(() -> processor.addHeader(scl));
+        var scl = converter.convertToElement(inputStream);
+        var header = processor.getSclHeader(scl).orElseGet(() -> processor.addSclHeader(scl));
         header.setAttribute(SCL_HEADER_ID_ATTR, UUID.randomUUID().toString());
         header.setAttribute(SCL_HEADER_VERSION_ATTR, "1.0.0");
         return scl;
     }
 
     private void createCompasPrivate(Element scl, String sclName, SclType sclType) {
-        Element compasPrivate = processor.addCompasPrivate(scl);
+        var compasPrivate = processor.addCompasPrivate(scl);
         processor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, sclName);
         processor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION, sclType.name());
     }

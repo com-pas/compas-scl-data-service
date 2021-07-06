@@ -52,8 +52,8 @@ public class CompasSclDataService {
         var id = UUID.randomUUID();
         // When the SCL is create the version will be set to 1.0.0
         var version = new Version(1, 0, 0);
-        Element header = sclElementProcessor.getHeader(scl)
-                .orElseGet(() -> sclElementProcessor.addHeader(scl));
+        var header = sclElementProcessor.getSclHeader(scl)
+                .orElseGet(() -> sclElementProcessor.addSclHeader(scl));
         header.setAttribute(SCL_HEADER_ID_ATTR, id.toString());
         header.setAttribute(SCL_HEADER_VERSION_ATTR, version.toString());
 
@@ -67,12 +67,12 @@ public class CompasSclDataService {
     public void update(SclType type, UUID id, ChangeSetType changeSetType, Element scl) {
         var currentScl = repository.findByUUID(type, id);
         // We always add a new version to the database, so add version record to the SCL and create a new record.
-        Element currentHeader = sclElementProcessor.getHeader(currentScl)
+        var currentHeader = sclElementProcessor.getSclHeader(currentScl)
                 .orElseThrow(() -> new SclDataRepositoryException("Previous version doesn't contain header!"));
         var version = new Version(currentHeader.getAttribute(SCL_HEADER_VERSION_ATTR));
         version = version.getNextVersion(changeSetType);
-        Element header = sclElementProcessor.getHeader(scl)
-                .orElseGet(() -> sclElementProcessor.addHeader(scl));
+        var header = sclElementProcessor.getSclHeader(scl)
+                .orElseGet(() -> sclElementProcessor.addSclHeader(scl));
         header.setAttribute(SCL_HEADER_ID_ATTR, id.toString());
         header.setAttribute(SCL_HEADER_VERSION_ATTR, version.toString());
 
@@ -107,7 +107,7 @@ public class CompasSclDataService {
         // If the new SCL contains the Name Element we will use that value (or set the new name if passed to this method)
         // Otherwise if there is no Name Element there are 2 options, if the new name is passed that will be used to create a Name Element
         // If no name is passed, but a previous version of the SCL exists, we will copy the Name Element from there.
-        sclElementProcessor.getCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION)
+        sclElementProcessor.getFirstChildNodeByName(compasPrivate, COMPAS_SCL_NAME_EXTENSION)
                 .ifPresentOrElse(
                         element -> name.ifPresent(element::setTextContent),
                         () -> name.ifPresentOrElse(
@@ -115,14 +115,14 @@ public class CompasSclDataService {
                                 () -> currentScl
                                         .flatMap(sclElementProcessor::getCompasPrivate)
                                         .flatMap(previousCompasPrivate ->
-                                                sclElementProcessor.getCompasElement(previousCompasPrivate, COMPAS_SCL_NAME_EXTENSION))
+                                                sclElementProcessor.getFirstChildNodeByName(previousCompasPrivate, COMPAS_SCL_NAME_EXTENSION))
                                         .ifPresent(previousSclName ->
                                                 sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, previousSclName.getTextContent()))
                         )
                 );
 
         // Always set the file type as private element.
-        sclElementProcessor.getCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION)
+        sclElementProcessor.getFirstChildNodeByName(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION)
                 .ifPresentOrElse(
                         element -> element.setTextContent(fileType.toString()),
                         () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION, fileType.toString())

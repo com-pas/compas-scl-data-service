@@ -14,56 +14,59 @@ import java.util.Optional;
 import static org.lfenergy.compas.scl.data.Constants.*;
 
 public class SclElementProcessor {
-    public Optional<Element> getHeader(Element scl) {
-        return getElementByName(scl, "Header").stream()
+    public Optional<Element> getSclHeader(Element scl) {
+        return getChildNodesByName(scl, SCL_HEADER_ELEMENT_NAME).stream()
                 .findFirst();
     }
 
-    public Element addHeader(Element scl) {
-        Element header = scl.getOwnerDocument().createElementNS(SCL_NS_URI, "Header");
-        header.setPrefix("");
+    public Element addSclHeader(Element scl) {
+        var header = scl.getOwnerDocument().createElementNS(SCL_NS_URI, SCL_HEADER_ELEMENT_NAME);
+        header.setPrefix(SCL_NS_PREFIX);
         scl.insertBefore(header, scl.getFirstChild());
         return header;
     }
 
-    public String getAttributeValue(Element element, String attributeName) {
-        String value = element.getAttribute(attributeName);
-        return (value != null) ? value : "";
-    }
-
     public Optional<Element> getCompasPrivate(Element scl) {
-        return getElementByName(scl, "Private").stream()
-                .filter(element -> element.hasAttribute("type"))
-                .filter(element -> element.getAttribute("type").equals("compas_scl"))
+        return getChildNodesByName(scl, SCL_PRIVATE_ELEMENT_NAME).stream()
+                .filter(element -> element.hasAttribute(SCL_PRIVATE_TYPE_ATTR))
+                .filter(element -> element.getAttribute(SCL_PRIVATE_TYPE_ATTR).equals(COMPAS_SCL_EXTENSION_TYPE))
                 .findFirst();
     }
 
     public Element addCompasPrivate(Element scl) {
-        scl.setAttribute("xmlns:compas", COMPAS_EXTENSION_NS_URI);
+        scl.setAttribute("xmlns:" + COMPAS_EXTENSION_NS_PREFIX, COMPAS_EXTENSION_NS_URI);
 
-        Element tPrivate = scl.getOwnerDocument().createElementNS(SCL_NS_URI, "Private");
-        tPrivate.setPrefix("");
-        tPrivate.setAttribute("type", COMPAS_SCL_EXTENSION_TYPE);
+        var tPrivate = scl.getOwnerDocument().createElementNS(SCL_NS_URI, SCL_PRIVATE_ELEMENT_NAME);
+        tPrivate.setPrefix(SCL_NS_PREFIX);
+        tPrivate.setAttribute(SCL_PRIVATE_TYPE_ATTR, COMPAS_SCL_EXTENSION_TYPE);
 
-        Element header = getHeader(scl)
+        var header = getSclHeader(scl)
                 .orElseThrow(() -> new SclDataRepositoryException("Header not found in SCL!"));
         scl.insertBefore(tPrivate, header);
         return tPrivate;
     }
 
-    public Optional<Element> getCompasElement(Element compasPrivate, String compasElementName) {
-        return getElementByName(compasPrivate, compasElementName).stream()
+
+    public Element addCompasElement(Element compasPrivate, String localName, String value) {
+        Element element = compasPrivate.getOwnerDocument().createElementNS(COMPAS_EXTENSION_NS_URI, localName);
+        element.setPrefix(COMPAS_EXTENSION_NS_PREFIX);
+        element.setTextContent(value);
+        compasPrivate.appendChild(element);
+        return element;
+    }
+
+    public Optional<String> getAttributeValue(Element element, String attributeName) {
+        var value = element.getAttribute(attributeName);
+        return (value != null) ? Optional.of(value) : Optional.empty();
+    }
+
+    public Optional<Element> getFirstChildNodeByName(Element root, String localName) {
+        return getChildNodesByName(root, localName)
+                .stream()
                 .findFirst();
     }
 
-    public void addCompasElement(Element compasPrivate, String localName, String value) {
-        Element sclNameElement = compasPrivate.getOwnerDocument().createElementNS(COMPAS_EXTENSION_NS_URI, localName);
-        sclNameElement.setPrefix("compas");
-        sclNameElement.setTextContent(value);
-        compasPrivate.appendChild(sclNameElement);
-    }
-
-    private List<Element> getElementByName(Element root, String localName) {
+    public List<Element> getChildNodesByName(Element root, String localName) {
         var foundElements = new ArrayList<Element>();
         var childNodes = root.getChildNodes();
         if (childNodes.getLength() > 0) {
@@ -76,5 +79,4 @@ public class SclElementProcessor {
         }
         return foundElements;
     }
-
 }

@@ -222,23 +222,25 @@ class CompasSclDataBaseXRepositoryTest {
     }
 
     private String getIdFromHeader(Element scl) {
-        Element header = processor.getHeader(scl)
+        var header = processor.getSclHeader(scl)
                 .orElseThrow(() -> new SclDataRepositoryException("Header not found in SCL!"));
-        return processor.getAttributeValue(header, SCL_HEADER_ID_ATTR);
+        return processor.getAttributeValue(header, SCL_HEADER_ID_ATTR)
+                .orElse("");
     }
 
     private String getVersionFromHeader(Element scl) {
-        Element header = processor.getHeader(scl)
+        var header = processor.getSclHeader(scl)
                 .orElseThrow(() -> new SclDataRepositoryException("Header not found in SCL!"));
-        return processor.getAttributeValue(header, SCL_HEADER_VERSION_ATTR);
+        return processor.getAttributeValue(header, SCL_HEADER_VERSION_ATTR)
+                .orElse("");
     }
 
     private Element readSCL(UUID uuid, Version version) {
         var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd");
         assert inputStream != null;
 
-        Element scl = converter.convertToElement(inputStream);
-        Element header = processor.getHeader(scl).orElseGet(() -> processor.addHeader(scl));
+        var scl = converter.convertToElement(inputStream);
+        var header = processor.getSclHeader(scl).orElseGet(() -> processor.addSclHeader(scl));
         header.setAttribute(SCL_HEADER_ID_ATTR, uuid.toString());
         header.setAttribute(SCL_HEADER_VERSION_ATTR, version.toString());
         return scl;

@@ -8,7 +8,6 @@ import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 import org.lfenergy.compas.scl.data.util.SclElementConverter;
-import org.w3c.dom.Element;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -83,7 +82,7 @@ public class CompasSclDataResource {
     @Produces(MediaType.APPLICATION_XML)
     public String findRawSCLByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
                                    @PathParam(ID_PATH_PARAM) UUID id) {
-        Element scl = compasSclDataService.findByUUID(type, id);
+        var scl = compasSclDataService.findByUUID(type, id);
         return converter.convertToString(scl, false);
     }
 
@@ -93,7 +92,7 @@ public class CompasSclDataResource {
     public String findRawSCLByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
                                              @PathParam(ID_PATH_PARAM) UUID id,
                                              @PathParam(VERSION_PATH_PARAM) Version version) {
-        Element scl = compasSclDataService.findByUUID(type, id, version);
+        var scl = compasSclDataService.findByUUID(type, id, version);
         return converter.convertToString(scl, false);
     }
 

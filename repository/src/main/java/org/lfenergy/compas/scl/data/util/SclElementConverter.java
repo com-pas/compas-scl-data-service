@@ -6,16 +6,13 @@ package org.lfenergy.compas.scl.data.util;
 import org.lfenergy.compas.scl.data.repository.SclDataRepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -25,6 +22,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import static org.lfenergy.compas.scl.data.Constants.SCL_ELEMENT_NAME;
 import static org.lfenergy.compas.scl.data.Constants.SCL_NS_URI;
 
 public class SclElementConverter {
@@ -36,8 +34,8 @@ public class SclElementConverter {
 
     public String convertToString(Element element, boolean omitXmlDeclaration) {
         try {
-            StringWriter buffer = new StringWriter();
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            var buffer = new StringWriter();
+            var transformer = TransformerFactory.newInstance().newTransformer();
             if (omitXmlDeclaration) {
                 transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             }
@@ -45,9 +43,8 @@ public class SclElementConverter {
             transformer.transform(new DOMSource(element), new StreamResult(buffer));
             return buffer.toString();
         } catch (TransformerException exp) {
-            final var exceptionMessage = exp.getLocalizedMessage();
-            LOGGER.error("Marshalling problem: {}", exceptionMessage);
-            throw new SclDataRepositoryException("Error marshalling!", exp);
+            LOGGER.error("Converting problem: {}", exp.getLocalizedMessage());
+            throw new SclDataRepositoryException("Error converting to a String!", exp);
         }
     }
 
@@ -61,19 +58,18 @@ public class SclElementConverter {
 
     private Element convertToElement(InputSource inputSource) {
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            var factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             factory.setIgnoringElementContentWhitespace(true);
             // Create DocumentBuilder with default configuration
-            DocumentBuilder builder = factory.newDocumentBuilder();
+            var builder = factory.newDocumentBuilder();
 
             // Parse the content to Document object
-            Document doc = builder.parse(inputSource);
-            return (Element) doc.getElementsByTagNameNS(SCL_NS_URI, "SCL").item(0);
+            var doc = builder.parse(inputSource);
+            return (Element) doc.getElementsByTagNameNS(SCL_NS_URI, SCL_ELEMENT_NAME).item(0);
         } catch (ParserConfigurationException | SAXException | IOException exp) {
-            final var exceptionMessage = exp.getLocalizedMessage();
-            LOGGER.error("Unmarshalling problem: {}", exceptionMessage);
-            throw new SclDataRepositoryException("Error unmarshalling!", exp);
+            LOGGER.error("Converting problem: {}", exp.getLocalizedMessage());
+            throw new SclDataRepositoryException("Error converting to a Element!", exp);
         }
     }
 }
