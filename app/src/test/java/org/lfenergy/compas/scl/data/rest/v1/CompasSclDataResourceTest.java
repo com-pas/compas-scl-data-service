@@ -7,7 +7,6 @@ import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.commons.MarshallerWrapper;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
@@ -29,7 +28,6 @@ import static org.lfenergy.compas.scl.data.model.Constants.SCL_NAMESPACE;
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
 import static org.mockito.Mockito.*;
 
-@Disabled
 @QuarkusTest
 @TestHTTPEndpoint(CompasSclDataResource.class)
 class CompasSclDataResourceTest {

@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
     <scl-extension.version>1.0-SNAPSHOT</scl-extension.version>
     <jakarta-bind-api.version>2.3.3</jakarta-bind-api.version>
     <jakarta-cdi-api.version>2.0.2</jakarta-cdi-api.version>
-    <microprofile-config-api.version>1.4</microprofile-config-api.version>
+    <microprofile-config-api.version>2.0</microprofile-config-api.version>
     <slf4j-api.version>1.7.30</slf4j-api.version>
 
     <!-- Test -->
