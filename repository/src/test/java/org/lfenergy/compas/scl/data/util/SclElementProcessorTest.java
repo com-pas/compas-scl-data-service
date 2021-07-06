@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2021 Alliander N.V.
+//
+// SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.util;
 
 import org.junit.jupiter.api.Test;
@@ -104,7 +107,7 @@ class SclElementProcessorTest {
         var compasPrivate = processor.getCompasPrivate(scl);
 
         var result = processor.getAttributeValue(compasPrivate.get(), SCL_PRIVATE_TYPE_ATTR);
-        
+
         assertTrue(result.isPresent());
         assertEquals(COMPAS_SCL_EXTENSION_TYPE, result.get());
     }
@@ -125,5 +128,4 @@ class SclElementProcessorTest {
 
         return converter.convertToElement(inputStream);
     }
-
 }
