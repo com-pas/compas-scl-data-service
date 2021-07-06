@@ -18,6 +18,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      - name: Create custom Maven Settings.xml
+        uses: whelk-io/maven-settings-xml-action@v18
+        with:
+          output_file: custom_maven_settings.xml
+          servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
       - name: Build and publish Docker Image
         run: mvn clean package -Dquarkus-profile=publishNativeImage
         env:
