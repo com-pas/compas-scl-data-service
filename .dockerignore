@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 *
-!build/*-runner
-!build/*-runner.jar
-!build/lib/*
-!build/quarkus-app/*
+!target/*-runner
+!target/*-runner.jar
+!target/lib/*
+!target/quarkus-app/*
