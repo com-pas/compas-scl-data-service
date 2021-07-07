@@ -7,6 +7,6 @@ Files: app/src/main/docker/*
 Copyright: 2021 Alliander N.V.
 License: Apache-2.0
 
-Files: gradle/wrapper/*
+Files: .mvn/wrapper/*
 Copyright: 2021 Alliander N.V.
 License: Apache-2.0
