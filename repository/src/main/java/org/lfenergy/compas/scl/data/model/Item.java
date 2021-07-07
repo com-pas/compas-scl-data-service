@@ -7,25 +7,25 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
-import static org.lfenergy.compas.scl.data.model.Constants.SDS_NAMESPACE;
+import static org.lfenergy.compas.scl.data.Constants.SCL_DATA_SERVICE_NS_URI;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Item {
     @XmlElement(
             name = "Id",
-            namespace = SDS_NAMESPACE,
+            namespace = SCL_DATA_SERVICE_NS_URI,
             required = true
     )
     private String id;
     @XmlElement(
             name = "Name",
-            namespace = SDS_NAMESPACE,
+            namespace = SCL_DATA_SERVICE_NS_URI,
             required = true
     )
     private String name;
     @XmlElement(
             name = "Version",
-            namespace = SDS_NAMESPACE,
+            namespace = SCL_DATA_SERVICE_NS_URI,
             required = true
     )
     private String version;

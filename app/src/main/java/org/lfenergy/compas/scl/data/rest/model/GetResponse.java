@@ -5,28 +5,27 @@
 package org.lfenergy.compas.scl.data.rest.model;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.lfenergy.compas.scl.model.SCL;
+import org.w3c.dom.Element;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import static org.lfenergy.compas.scl.data.model.Constants.SCL_NAMESPACE;
-import static org.lfenergy.compas.scl.data.model.Constants.SDS_NAMESPACE;
+import static org.lfenergy.compas.scl.data.Constants.SCL_DATA_SERVICE_NS_URI;
 
-@XmlRootElement(name = "GetResponse", namespace = SDS_NAMESPACE)
+@XmlRootElement(name = "GetResponse", namespace = SCL_DATA_SERVICE_NS_URI)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GetResponse {
     @Schema(example = "SCL XML...")
-    @XmlElement(name = "SCL", namespace = SCL_NAMESPACE, required = true)
-    private SCL scl;
+    @XmlAnyElement
+    protected Element scl;
 
-    public SCL getScl() {
+    public Element getScl() {
         return scl;
     }
 
-    public void setScl(SCL scl) {
+    public void setScl(Element scl) {
         this.scl = scl;
     }
 }

@@ -6,7 +6,7 @@ package org.lfenergy.compas.scl.data.repository;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
-import org.lfenergy.compas.scl.model.SCL;
+import org.w3c.dom.Element;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,11 +16,11 @@ public interface CompasSclDataRepository {
 
     List<Item> listVersionsByUUID(SclType type, UUID id);
 
-    SCL findByUUID(SclType type, UUID id);
+    Element findByUUID(SclType type, UUID id);
 
-    SCL findByUUID(SclType type, UUID id, Version version);
+    Element findByUUID(SclType type, UUID id, Version version);
 
-    void create(SclType type, UUID id, SCL scl, Version version);
+    void create(SclType type, UUID id, Element scl, Version version);
 
     void delete(SclType type, UUID id);
 

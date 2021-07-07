@@ -6,33 +6,21 @@ package org.lfenergy.compas.scl.data.rest.model;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.model.SCL;
+import org.w3c.dom.Element;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 
-import static org.lfenergy.compas.scl.data.model.Constants.SCL_NAMESPACE;
-import static org.lfenergy.compas.scl.data.model.Constants.SDS_NAMESPACE;
+import static org.lfenergy.compas.scl.data.Constants.SCL_DATA_SERVICE_NS_URI;
 
-@XmlRootElement(name = "UpdateRequest")
+@XmlRootElement(name = "UpdateRequest", namespace = SCL_DATA_SERVICE_NS_URI)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class UpdateRequest {
-    @Schema(example = "SCL XML...")
-    @XmlElement(name = "SCL", namespace = SCL_NAMESPACE, required = true)
-    private SCL scl;
     @Schema(example = "MAJOR")
-    @XmlElement(name = "ChangeSet", namespace = SDS_NAMESPACE, required = true)
+    @XmlElement(name = "ChangeSet", namespace = SCL_DATA_SERVICE_NS_URI, required = true)
     private ChangeSetType changeSetType;
-
-    public SCL getScl() {
-        return scl;
-    }
-
-    public void setScl(SCL scl) {
-        this.scl = scl;
-    }
+    @Schema(example = "SCL XML...")
+    @XmlAnyElement
+    protected Element scl;
 
     public ChangeSetType getChangeSetType() {
         return changeSetType;
@@ -40,5 +28,13 @@ public class UpdateRequest {
 
     public void setChangeSetType(ChangeSetType changeSetType) {
         this.changeSetType = changeSetType;
+    }
+
+    public Element getScl() {
+        return scl;
+    }
+
+    public void setScl(Element scl) {
+        this.scl = scl;
     }
 }

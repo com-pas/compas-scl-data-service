@@ -7,13 +7,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
-import org.lfenergy.compas.scl.model.SCL;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.w3c.dom.Element;
 
+import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.lfenergy.compas.scl.data.Constants.SCL_ELEMENT_NAME;
+import static org.lfenergy.compas.scl.data.Constants.SCL_NS_URI;
 
 @ExtendWith(MockitoExtension.class)
 class CompasSclDataPostgreSQLRepositoryTest {
@@ -55,7 +59,7 @@ class CompasSclDataPostgreSQLRepositoryTest {
     @Test
     void create_WhenCalled_ThenUnsupportedExceptionThrown() {
         var uuid = UUID.randomUUID();
-        var scl = new SCL();
+        var scl = createSCL();
         var version = new Version(1, 0, 0);
         assertThrows(UnsupportedOperationException.class, () -> {
             repository.create(SclType.SCD, uuid, scl, version);
@@ -77,5 +81,10 @@ class CompasSclDataPostgreSQLRepositoryTest {
         assertThrows(UnsupportedOperationException.class, () -> {
             repository.delete(SclType.SCD, uuid, version);
         });
+    }
+
+    private Element createSCL() {
+        var qName = new QName(SCL_NS_URI, SCL_ELEMENT_NAME);
+        return new JAXBElement<>(qName, Element.class, null).getValue();
     }
 }

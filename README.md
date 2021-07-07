@@ -11,8 +11,11 @@ SPDX-License-Identifier: Apache-2.0
 
 Service to store and retrieve the SCL XML to a database.
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework. If you want to learn more about Quarkus, please
-visit its website: https://quarkus.io/ .
+In the standard configuration this component is using Quarkus to run and create a native image from it. The different
+parts of this repository can also be used separately in your own component to manage SCL XML Files in a database. The
+Service Layer can be used as Java component to manage them.
+
+For more information about the architecture take a look at [documentation](doc/compas-scl-data-service.md)
 
 ## Application depends on a running BaseX instance
 

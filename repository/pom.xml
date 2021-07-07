@@ -19,25 +19,8 @@ SPDX-License-Identifier: Apache-2.0
 
     <dependencies>
         <dependency>
-            <groupId>org.lfenergy.compas</groupId>
-            <artifactId>core-commons</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.lfenergy.compas</groupId>
-            <artifactId>scl-extension</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>jakarta.enterprise</groupId>
-            <artifactId>jakarta.enterprise.cdi-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.microprofile.config</groupId>
-            <artifactId>microprofile-config-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -46,11 +29,6 @@ SPDX-License-Identifier: Apache-2.0
 
         <!-- Test Dependencies -->
         <dependency>
-            <groupId>org.basex</groupId>
-            <artifactId>basex</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <scope>test</scope>
@@ -58,11 +36,6 @@ SPDX-License-Identifier: Apache-2.0
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -73,6 +46,11 @@ SPDX-License-Identifier: Apache-2.0
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
