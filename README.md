@@ -22,32 +22,46 @@ Check [basexhttp on DockerHub](https://hub.docker.com/r/basex/basexhttp/) for a 
 
 You can run your application in dev mode that enables live coding using:
 
+```shell script
+./mvnw compile quarkus:dev
 ```
-./gradlew quarkusDev
-```
+
+> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
 
 ## Packaging and running the application
 
-The application can be packaged using `./gradlew quarkusBuild`. It produces
-the `compas-scl-data-service-1.0-SNAPSHOT-runner.jar` file in the `build` directory. Be aware that it’s not an _
-über-jar_ as the dependencies are copied into the `build/lib` directory.
+The application can be packaged using:
 
-The application is now runnable using `java -jar build/compas-cim-mapping-1.0-SNAPSHOT-runner.jar`.
-
-If you want to build an _über-jar_, just add the `--uber-jar` option to the command line:
-
+```shell script
+./mvnw package
 ```
-./gradlew quarkusBuild --uber-jar
+
+It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory. Be aware that it’s not an _über-jar_ as
+the dependencies are copied into the `target/quarkus-app/lib/` directory.
+
+If you want to build an _über-jar_, execute the following command:
+
+```shell script
+./mvnw package -Dquarkus.package.type=uber-jar
 ```
+
+The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
 
 ## Creating a native executable
 
-You can create a native executable using: `./gradlew build -Dquarkus.package.type=native`.
+You can create a native executable using:
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container
-using: `./gradlew build -Dquarkus.package.type=native -Dquarkus.native.container-build=true`.
+```shell script
+./mvnw package -Pnative
+```
 
-You can then execute your native executable with: `./build/compas-scl-data-service-1.0-SNAPSHOT-runner`
+Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
 
-If you want to learn more about building native executables, please
-consult https://quarkus.io/guides/gradle-tooling#building-a-native-executable.
+```shell script
+./mvnw package -Pnative -Dquarkus.native.container-build=true
+```
+
+You can then execute your native executable with: `./target/code-with-quarkus-1.0.0-SNAPSHOT-runner`
+
+If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.html
+.
