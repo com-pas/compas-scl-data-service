@@ -10,3 +10,11 @@ License: Apache-2.0
 Files: .mvn/wrapper/*
 Copyright: 2021 Alliander N.V.
 License: Apache-2.0
+
+Files: doc/images/*
+Copyright: 2021 Alliander N.V.
+License: Apache-2.0
+
+Files: doc/drawio/*
+Copyright: 2021 Alliander N.V.
+License: Apache-2.0
