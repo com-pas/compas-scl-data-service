@@ -136,6 +136,7 @@ SPDX-License-Identifier: Apache-2.0
 
             <properties>
                 <quarkus.package.type>native</quarkus.package.type>
+                <quarkus.native.container-build>true</quarkus.native.container-build> <!-- Allows for creating a Linux executable without GraalVM being installed -->
             </properties>
 
             <build>
@@ -180,7 +181,6 @@ SPDX-License-Identifier: Apache-2.0
 
             <properties>
                 <!-- Properties only used for publishing a native docker image (default to Docker Hub) -->
-                <quarkus.native.container-build>true</quarkus.native.container-build>
                 <quarkus.container-image.build>true</quarkus.container-image.build>
                 <quarkus.container-image.group>lfenergycompas</quarkus.container-image.group>
                 <quarkus.container-image.name>compas-scl-data-service</quarkus.container-image.name>
