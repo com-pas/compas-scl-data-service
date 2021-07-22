@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.core.commons.ElementConverter;
+import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
@@ -21,6 +22,7 @@ import java.util.UUID;
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.Constants.*;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -141,23 +143,21 @@ class CompasSclDataServiceTest {
     }
 
     @Test
-    void update_WhenCalledWithoutCompasElements_ThenRepositoryIsCalled() {
+    void update_WhenCalledPreviousSclDoesNotContainHeader_ThenExceptionIsThrown() {
         var type = SclType.SCD;
-        var name = "JUSTSOMENAME";
         var uuid = UUID.randomUUID();
         var changeSet = ChangeSetType.MAJOR;
         var scl = readSCL();
+
         var previousScl = readSCL();
-        createCompasPrivate(previousScl, name, type);
-
+        // Remove the Header from the previous version.
+        processor.getChildNodeByName(previousScl, SCL_HEADER_ELEMENT_NAME)
+            .ifPresent(element -> previousScl.removeChild(element));
         when(compasSclDataRepository.findByUUID(type, uuid)).thenReturn(previousScl);
-        doNothing().when(compasSclDataRepository).create(type, uuid, scl, currentVersion.getNextVersion(changeSet));
 
-        compasSclDataService.update(type, uuid, changeSet, scl);
-
-        assertCompasExtenions(scl, name, type);
-        verify(compasSclDataRepository, times(1)).create(type, uuid, scl, currentVersion.getNextVersion(changeSet));
-        verify(compasSclDataRepository, times(1)).findByUUID(type, uuid);
+        var exception = assertThrows(CompasSclDataServiceException.class,
+                            () -> compasSclDataService.update(type, uuid, changeSet, scl));
+        assertEquals(HEADER_NOT_FOUND_ERROR_CODE, exception.getErrorCode());
     }
 
     @Test
