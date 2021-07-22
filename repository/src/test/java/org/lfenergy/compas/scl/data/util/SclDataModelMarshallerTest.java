@@ -4,10 +4,11 @@
 package org.lfenergy.compas.scl.data.util;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl.data.repository.SclDataRepositoryException;
+import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.Constants.SCL_DATA_SERVICE_NS_URI;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.UNMARSHAL_ERROR_CODE;
 
 class SclDataModelMarshallerTest {
     @Test
@@ -31,8 +32,9 @@ class SclDataModelMarshallerTest {
         var xml = "<Item xmlns=\"" + SCL_DATA_SERVICE_NS_URI + "\"></Item Invalid>";
 
         var marshaller = new SclDataModelMarshaller();
-        assertThrows(SclDataRepositoryException.class, () -> {
+        var exception = assertThrows(CompasSclDataServiceException.class, () -> {
             marshaller.unmarshal(xml);
         });
+        assertEquals(UNMARSHAL_ERROR_CODE, exception.getErrorCode());
     }
 }

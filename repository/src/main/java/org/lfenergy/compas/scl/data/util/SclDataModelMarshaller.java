@@ -4,7 +4,7 @@
 package org.lfenergy.compas.scl.data.util;
 
 import org.lfenergy.compas.scl.data.model.Item;
-import org.lfenergy.compas.scl.data.repository.SclDataRepositoryException;
+import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +13,9 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
+
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.CREATION_ERROR_CODE;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.UNMARSHAL_ERROR_CODE;
 
 public class SclDataModelMarshaller {
     private static final Logger LOGGER = LoggerFactory.getLogger(SclDataModelMarshaller.class);
@@ -25,7 +28,7 @@ public class SclDataModelMarshaller {
             jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         } catch (JAXBException exp) {
             LOGGER.error("Construction problem: {}", exp.getLocalizedMessage(), exp);
-            throw new SclDataRepositoryException("Error constructing unmarshaller!");
+            throw new CompasSclDataServiceException(CREATION_ERROR_CODE, "Error constructing unmarshaller!");
         }
     }
 
@@ -35,7 +38,7 @@ public class SclDataModelMarshaller {
             return jaxbUnmarshaller.unmarshal(source, Item.class).getValue();
         } catch (JAXBException exp) {
             LOGGER.error("Unmarshalling problem: {}", exp.getLocalizedMessage(), exp);
-            throw new SclDataRepositoryException("Error unmarshalling!");
+            throw new CompasSclDataServiceException(UNMARSHAL_ERROR_CODE, "Error unmarshalling!");
         }
     }
 }

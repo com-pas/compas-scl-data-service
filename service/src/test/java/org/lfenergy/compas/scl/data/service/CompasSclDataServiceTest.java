@@ -6,11 +6,11 @@ package org.lfenergy.compas.scl.data.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
-import org.lfenergy.compas.scl.data.util.SclElementConverter;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,7 +32,7 @@ class CompasSclDataServiceTest {
 
     private CompasSclDataService compasSclDataService;
 
-    private final SclElementConverter converter = new SclElementConverter();
+    private final ElementConverter converter = new ElementConverter();
     private final SclElementProcessor processor = new SclElementProcessor();
 
     @BeforeEach
@@ -202,7 +202,7 @@ class CompasSclDataServiceTest {
         var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd");
         assert inputStream != null;
 
-        var scl = converter.convertToElement(inputStream);
+        var scl = converter.convertToElement(inputStream, SCL_ELEMENT_NAME, SCL_NS_URI);
         var header = processor.getSclHeader(scl).orElseGet(() -> processor.addSclHeader(scl));
         header.setAttribute(SCL_HEADER_ID_ATTR, UUID.randomUUID().toString());
         header.setAttribute(SCL_HEADER_VERSION_ATTR, currentVersion.toString());

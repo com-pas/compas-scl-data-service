@@ -3,11 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest.v1;
 
+import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
-import org.lfenergy.compas.scl.data.util.SclElementConverter;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -20,7 +20,7 @@ import static org.lfenergy.compas.scl.data.rest.Constants.*;
 public class CompasSclDataResource {
     private CompasSclDataService compasSclDataService;
 
-    private SclElementConverter converter = new SclElementConverter();
+    private ElementConverter converter = new ElementConverter();
 
     @Inject
     public CompasSclDataResource(CompasSclDataService compasSclDataService) {

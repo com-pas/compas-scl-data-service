@@ -4,14 +4,18 @@
 package org.lfenergy.compas.scl.data.util;
 
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.core.commons.ElementConverter;
+import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.w3c.dom.Element;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.Constants.*;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.UNMARSHAL_ERROR_CODE;
 
 class SclElementProcessorTest {
     private SclElementProcessor processor = new SclElementProcessor();
-    private SclElementConverter converter = new SclElementConverter();
+    private ElementConverter converter = new ElementConverter();
 
     @Test
     void getSclHeader_WhenCalledWithSclContainingAHeader_ThenHeaderReturned() {
@@ -65,7 +69,7 @@ class SclElementProcessorTest {
     }
 
     @Test
-    void addCompasPrivate_WhenCalledWithoutCompasPrivate_ThenEmptyOptionalReturned() {
+    void addCompasPrivate_WhenCalledWithoutCompasPrivate_ThenNewElementIsAdded() {
         var scl = readSCL("scl_without_compas_private.scd");
 
         var foundElement = processor.getCompasPrivate(scl);
@@ -82,7 +86,20 @@ class SclElementProcessorTest {
     }
 
     @Test
-    void addCompasElement_WhenCalled_ThenNewElementIsAdded() {
+    void addCompasPrivate_WhenCalledWithoutSclHeader_ThenExceptionIsThrown() {
+        var scl = readSCL("scl_without_header.scd");
+
+        var foundElement = processor.getCompasPrivate(scl);
+        assertFalse(foundElement.isPresent());
+
+        var exception = assertThrows(CompasSclDataServiceException.class, () -> {
+            processor.addCompasPrivate(scl);
+        });
+        assertEquals(HEADER_NOT_FOUND_ERROR_CODE, exception.getErrorCode());
+    }
+
+    @Test
+    void addCompasElement_WhenCalledWithoutCompasElement_ThenNewElementIsAdded() {
         var value = "test-station";
         var scl = readSCL("scl_without_sclname_compas_private.scd");
 
@@ -126,6 +143,6 @@ class SclElementProcessorTest {
         var inputStream = getClass().getResourceAsStream("/scl/" + sclFilename);
         assert inputStream != null;
 
-        return converter.convertToElement(inputStream);
+        return converter.convertToElement(inputStream, SCL_ELEMENT_NAME, SCL_NS_URI);
     }
 }

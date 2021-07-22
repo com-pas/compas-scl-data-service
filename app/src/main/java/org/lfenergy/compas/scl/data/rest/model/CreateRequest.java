@@ -19,7 +19,7 @@ public class CreateRequest {
     private String name;
     @Schema(example = "SCL XML...")
     @XmlAnyElement
-    protected Element scl;
+    private Element scl;
 
     public String getName() {
         return name;
