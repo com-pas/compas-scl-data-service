@@ -3,13 +3,14 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.repository;
 
+import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.basex.BaseXClient;
 import org.lfenergy.compas.scl.data.basex.BaseXClientFactory;
+import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.util.SclDataModelMarshaller;
-import org.lfenergy.compas.scl.data.util.SclElementConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -26,6 +27,8 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.lfenergy.compas.scl.data.Constants.*;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_COMMAND_ERROR_CODE;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_QUERY_ERROR_CODE;
 
 @ApplicationScoped
 public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
@@ -52,14 +55,14 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
 
     private final BaseXClientFactory baseXClientFactory;
     private final SclDataModelMarshaller sclDataMarshaller;
-    private final SclElementConverter sclElementConverter;
+    private final ElementConverter elementConverter;
 
     @Inject
     public CompasSclDataBaseXRepository(BaseXClientFactory baseXClientFactory) {
         this.baseXClientFactory = baseXClientFactory;
         
         this.sclDataMarshaller = new SclDataModelMarshaller();
-        this.sclElementConverter = new SclElementConverter();
+        this.elementConverter = new ElementConverter();
 
         // At startup create all needed databases.
         Arrays.stream(SclType.values()).forEach(type ->
@@ -120,7 +123,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         format(DECLARE_DB_VARIABLE, type) +
                         format(DECLARE_ID_VARIABLE, id) +
                         "local:latest-version($db, $id)",
-                sclElementConverter::convertToElement);
+                xmlString -> elementConverter.convertToElement(xmlString, SCL_ELEMENT_NAME, SCL_NS_URI));
         return result.get(0);
     }
 
@@ -129,13 +132,13 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
         // This find method searches for a specific version.
         var result = executeQuery(type,
                 "doc('" + type + "/" + createDocumentPath(id, version) + "')",
-                sclElementConverter::convertToElement);
+                xmlString -> elementConverter.convertToElement(xmlString, SCL_ELEMENT_NAME, SCL_NS_URI));
         return result.get(0);
     }
 
     @Override
     public void create(SclType type, UUID id, Element scl, Version version) {
-        var inputStream = new ByteArrayInputStream(sclElementConverter.convertToString(scl).getBytes(StandardCharsets.UTF_8));
+        var inputStream = new ByteArrayInputStream(elementConverter.convertToString(scl).getBytes(StandardCharsets.UTF_8));
         executeCommand(client -> {
             openDatabase(client, type);
             client.add(createDocumentPath(id, version) + "/scl.xml", inputStream);
@@ -182,8 +185,8 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                 return response;
             } catch (IOException exception) {
                 final var exceptionMessage = exception.getLocalizedMessage();
-                LOGGER.error("executeCommand: {}", exceptionMessage);
-                throw new SclDataRepositoryException("Error executing command!", exception);
+                LOGGER.error("executeQuery: {}", exceptionMessage, exception);
+                throw new CompasSclDataServiceException(BASEX_QUERY_ERROR_CODE, "Error executing query!");
             }
         });
     }
@@ -201,8 +204,8 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
             return command.execute(client);
         } catch (IOException exception) {
             final var exceptionMessage = exception.getLocalizedMessage();
-            LOGGER.error("executeCommand: {}", exceptionMessage);
-            throw new SclDataRepositoryException("Error executing command!", exception);
+            LOGGER.error("executeCommand: {}", exceptionMessage, exception);
+            throw new CompasSclDataServiceException(BASEX_COMMAND_ERROR_CODE, "Error executing command!");
         }
     }
 

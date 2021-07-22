@@ -4,7 +4,7 @@
 
 package org.lfenergy.compas.scl.data.basex;
 
-import org.lfenergy.compas.scl.data.repository.SclDataRepositoryException;
+import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_CLIENT_CREATION_ERROR_CODE;
 
 /**
  * Java client for BaseX.
@@ -288,8 +289,8 @@ public class BaseXClient implements Closeable {
                 if (s.length() == 1) sb.append('0');
                 sb.append(s);
             }
-        } catch (final NoSuchAlgorithmException ex) {
-            throw new SclDataRepositoryException(ex);
+        } catch (final NoSuchAlgorithmException exp) {
+            throw new CompasSclDataServiceException(BASEX_CLIENT_CREATION_ERROR_CODE, "Unknwn Algorithm", exp);
         }
         return sb.toString();
     }

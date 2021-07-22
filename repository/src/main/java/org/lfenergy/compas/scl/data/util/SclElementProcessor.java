@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.util;
 
-import org.lfenergy.compas.scl.data.repository.SclDataRepositoryException;
+import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.lfenergy.compas.scl.data.Constants.*;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
 
 public class SclElementProcessor {
     public Optional<Element> getSclHeader(Element scl) {
@@ -41,7 +42,7 @@ public class SclElementProcessor {
         tPrivate.setAttribute(SCL_PRIVATE_TYPE_ATTR, COMPAS_SCL_EXTENSION_TYPE);
 
         var header = getSclHeader(scl)
-                .orElseThrow(() -> new SclDataRepositoryException("Header not found in SCL!"));
+                .orElseThrow(() -> new CompasSclDataServiceException(HEADER_NOT_FOUND_ERROR_CODE, "Header not found in SCL!"));
         scl.insertBefore(tPrivate, header);
         return tPrivate;
     }

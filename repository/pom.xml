@@ -19,6 +19,11 @@ SPDX-License-Identifier: Apache-2.0
 
     <dependencies>
         <dependency>
+            <groupId>org.lfenergy.compas.core</groupId>
+            <artifactId>commons</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
         </dependency>

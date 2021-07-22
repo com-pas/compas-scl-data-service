@@ -3,9 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.model;
 
-import org.lfenergy.compas.scl.data.repository.SclDataRepositoryException;
+import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 
 import java.util.Objects;
+
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.UNKNOWN_CHANGE_SET_TYPE_ERROR_CODE;
 
 public class Version {
     private final int majorVersion;
@@ -51,7 +53,7 @@ public class Version {
             case PATCH:
                 return new Version(majorVersion, minorVersion, patchVersion + 1);
             default:
-                throw new SclDataRepositoryException("Unhandled ChangeSetType " + changeSetType);
+                throw new CompasSclDataServiceException(UNKNOWN_CHANGE_SET_TYPE_ERROR_CODE, "Unhandled ChangeSetType " + changeSetType);
         }
     }
 

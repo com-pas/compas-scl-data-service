@@ -9,7 +9,7 @@ import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
-import org.lfenergy.compas.scl.data.repository.SclDataRepositoryException;
+import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
 import org.w3c.dom.Element;
 
@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.lfenergy.compas.scl.data.Constants.*;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
 
 @ApplicationScoped
 public class CompasSclDataService {
@@ -68,7 +69,8 @@ public class CompasSclDataService {
         var currentScl = repository.findByUUID(type, id);
         // We always add a new version to the database, so add version record to the SCL and create a new record.
         var currentHeader = sclElementProcessor.getSclHeader(currentScl)
-                .orElseThrow(() -> new SclDataRepositoryException("Previous version doesn't contain header!"));
+                .orElseThrow(() ->
+                        new CompasSclDataServiceException(HEADER_NOT_FOUND_ERROR_CODE, "Previous version doesn't contain header!"));
         var version = new Version(currentHeader.getAttribute(SCL_HEADER_VERSION_ATTR));
         version = version.getNextVersion(changeSetType);
         var header = sclElementProcessor.getSclHeader(scl)
