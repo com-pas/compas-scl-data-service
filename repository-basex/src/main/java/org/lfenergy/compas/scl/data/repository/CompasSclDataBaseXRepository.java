@@ -30,6 +30,14 @@ import static org.lfenergy.compas.scl.data.Constants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_COMMAND_ERROR_CODE;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_QUERY_ERROR_CODE;
 
+/**
+ * This implementation of the repository will store the SCL XML Files in BaseX, this is a XML Database.
+ * For more information see https://basex.org/.
+ * <p>
+ * For every type of SCL a separate database is created in which the SCL XML Files are stored.
+ * every entries is stored under &lt;ID&gt;/&lt;Major version&gt;/&lt;Minor version&gt;/&lt;Patch version&gt;/scl.xml.
+ * This combination is always unique and easy to use.
+ */
 @ApplicationScoped
 public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataBaseXRepository.class);
@@ -58,11 +66,12 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     private final ElementConverter elementConverter;
 
     @Inject
-    public CompasSclDataBaseXRepository(BaseXClientFactory baseXClientFactory) {
+    public CompasSclDataBaseXRepository(BaseXClientFactory baseXClientFactory,
+                                        ElementConverter elementConverter,
+                                        SclDataModelMarshaller sclDataMarshaller) {
         this.baseXClientFactory = baseXClientFactory;
-        
-        this.sclDataMarshaller = new SclDataModelMarshaller();
-        this.elementConverter = new ElementConverter();
+        this.sclDataMarshaller = sclDataMarshaller;
+        this.elementConverter = elementConverter;
 
         // At startup create all needed databases.
         Arrays.stream(SclType.values()).forEach(type ->

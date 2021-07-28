@@ -39,7 +39,7 @@ class CompasSclDataServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        compasSclDataService = new CompasSclDataService(compasSclDataRepository);
+        compasSclDataService = new CompasSclDataService(compasSclDataRepository, processor);
     }
 
     @Test

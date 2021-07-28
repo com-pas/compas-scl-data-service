@@ -6,15 +6,42 @@ package org.lfenergy.compas.scl.data.util;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.lfenergy.compas.scl.data.Constants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
+import static org.w3c.dom.Node.ELEMENT_NODE;
 
 public class SclElementProcessor {
+    public void fixDefaultPrefix(Node root) {
+        var oldNamespacePrefixes = new HashSet<String>();
+        var nodes = new Stack<Node>();
+        nodes.push(root);
+
+        while (!nodes.isEmpty()) {
+            var node = nodes.pop();
+            if (node.getNodeType() == ELEMENT_NODE && SCL_NS_URI.equals(node.getNamespaceURI())
+                    && node.getPrefix() != null && !node.getPrefix().isBlank()) {
+                oldNamespacePrefixes.add(node.getPrefix());
+                node.setPrefix("");
+            }
+
+            // For child nodes of this node
+            NodeList childNodes = node.getChildNodes();
+            if (childNodes != null) {
+                for (int i = 0, count = childNodes.getLength(); i < count; ++i) {
+                    nodes.push(childNodes.item(i));
+                }
+            }
+        }
+
+        oldNamespacePrefixes.forEach(
+                prefix -> root.getAttributes().removeNamedItem("xmlns:" + prefix)
+        );
+    }
+
     public Optional<Element> getSclHeader(Element scl) {
         return getChildNodesByName(scl, SCL_HEADER_ELEMENT_NAME).stream()
                 .findFirst();

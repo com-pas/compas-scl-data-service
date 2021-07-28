@@ -11,11 +11,46 @@ import org.w3c.dom.Element;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.Constants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
-import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.UNMARSHAL_ERROR_CODE;
 
 class SclElementProcessorTest {
     private SclElementProcessor processor = new SclElementProcessor();
     private ElementConverter converter = new ElementConverter();
+
+    @Test
+    void fixDefaultPrefix_WhenCalledWithDifferentSclPrefix_ThenPrefixIsSetToDefaultAndAttributeRemoved() {
+        var scl = readSCL("scl_with_prefix.scd");
+
+        assertTrue(scl.hasAttribute("xmlns:scl"));
+        assertEquals("scl", scl.getPrefix());
+        var header = processor.getSclHeader(scl);
+        assertEquals("scl", header.get().getPrefix());
+
+        /// Fix the namespace prefix
+        processor.fixDefaultPrefix(scl);
+
+        assertFalse(scl.hasAttribute("xmlns:scl"));
+        assertNull(scl.getPrefix());
+        header = processor.getSclHeader(scl);
+        assertNull(header.get().getPrefix());
+    }
+
+    @Test
+    void fixDefaultPrefix_WhenCalledWithDefaultSclPrefix_ThenNothingIsDone() {
+        var scl = readSCL("scl_with_default_prefix.scd");
+
+        assertFalse(scl.hasAttribute("xmlns:scl"));
+        assertNull(scl.getPrefix());
+        var header = processor.getSclHeader(scl);
+        assertNull(header.get().getPrefix());
+
+        /// Fix the namespace prefix
+        processor.fixDefaultPrefix(scl);
+
+        assertFalse(scl.hasAttribute("xmlns:scl"));
+        assertNull(scl.getPrefix());
+        header = processor.getSclHeader(scl);
+        assertNull(header.get().getPrefix());
+    }
 
     @Test
     void getSclHeader_WhenCalledWithSclContainingAHeader_ThenHeaderReturned() {
