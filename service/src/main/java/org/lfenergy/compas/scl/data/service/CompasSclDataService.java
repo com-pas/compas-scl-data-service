@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.lfenergy.compas.scl.data.Constants.*;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
 
 /**

@@ -9,7 +9,7 @@ import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.w3c.dom.Element;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.lfenergy.compas.scl.data.Constants.*;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
 
 class SclElementProcessorTest {

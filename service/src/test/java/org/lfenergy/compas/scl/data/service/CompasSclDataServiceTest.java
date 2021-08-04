@@ -21,7 +21,7 @@ import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.lfenergy.compas.scl.data.Constants.*;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
 import static org.mockito.Mockito.*;
 

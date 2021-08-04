@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.lang.String.format;
-import static org.lfenergy.compas.scl.data.Constants.*;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_COMMAND_ERROR_CODE;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_QUERY_ERROR_CODE;
 
@@ -96,7 +96,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         "   let $latestScl := local:latest-version($db, $id)\n" +
                         "   let $version := $latestScl//scl:SCL/scl:Header/@version\n" +
                         "   let $name := $latestScl//scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + COMPAS_SCL_NAME_EXTENSION + "\n" +
-                        "   return '<Item xmlns=\"" + SCL_DATA_SERVICE_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>'",
+                        "   return '<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>'",
                 sclDataMarshaller::unmarshal
         );
     }
@@ -116,7 +116,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         "   let $minorVersion := xs:int($parts[2])\n" +
                         "   let $patchVersion := xs:int($parts[3])\n" +
                         "   order by $majorVersion, $minorVersion, $patchVersion\n" +
-                        "   return '<Item xmlns=\"" + SCL_DATA_SERVICE_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>' ",
+                        "   return '<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>' ",
                 sclDataMarshaller::unmarshal
         );
     }
