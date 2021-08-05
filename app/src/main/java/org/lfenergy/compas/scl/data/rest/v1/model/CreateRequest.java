@@ -5,10 +5,10 @@
 package org.lfenergy.compas.scl.data.rest.v1.model;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.lfenergy.compas.core.commons.constraint.FilenameValid;
 import org.lfenergy.compas.core.commons.constraint.XmlAnyElementValid;
 import org.w3c.dom.Element;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.*;
 import java.util.List;
@@ -20,7 +20,7 @@ import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_NS_URI;
 @XmlRootElement(name = "CreateRequest", namespace = SCL_DATA_SERVICE_V1_NS_URI)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CreateRequest {
-    @NotBlank
+    @FilenameValid
     @Schema(description = "The name that will be stored as Private Element and can later be used to determine the filename.",
             example = "STATION-0012312")
     @XmlElement(name = "Name", namespace = SCL_DATA_SERVICE_V1_NS_URI, required = true)
