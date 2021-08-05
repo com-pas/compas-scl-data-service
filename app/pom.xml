@@ -37,13 +37,20 @@ SPDX-License-Identifier: Apache-2.0
         <dependency>
             <groupId>org.lfenergy.compas.scl.data</groupId>
             <artifactId>service</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.lfenergy.compas.scl.data</groupId>
             <artifactId>repository-basex</artifactId>
-            <version>${project.version}</version>
             <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.lfenergy.compas.core</groupId>
+            <artifactId>commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lfenergy.compas.core</groupId>
+            <artifactId>rest-commons</artifactId>
         </dependency>
 
         <dependency>
@@ -69,6 +76,10 @@ SPDX-License-Identifier: Apache-2.0
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-container-image-docker</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-validator</artifactId>
         </dependency>
 
         <!-- Test Dependencies -->

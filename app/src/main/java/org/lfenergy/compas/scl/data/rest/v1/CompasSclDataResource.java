@@ -3,13 +3,14 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest.v1;
 
+import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
-import org.lfenergy.compas.scl.data.rest.model.*;
+import org.lfenergy.compas.scl.data.rest.v1.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
-import org.lfenergy.compas.scl.data.util.SclElementConverter;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.UUID;
@@ -20,7 +21,7 @@ import static org.lfenergy.compas.scl.data.rest.Constants.*;
 public class CompasSclDataResource {
     private CompasSclDataService compasSclDataService;
 
-    private SclElementConverter converter = new SclElementConverter();
+    private ElementConverter converter = new ElementConverter();
 
     @Inject
     public CompasSclDataResource(CompasSclDataService compasSclDataService) {
@@ -31,9 +32,9 @@ public class CompasSclDataResource {
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public CreateResponse create(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                 CreateRequest request) {
+                                 @Valid CreateRequest request) {
         var response = new CreateResponse();
-        response.setId(compasSclDataService.create(type, request.getName(), request.getScl()));
+        response.setId(compasSclDataService.create(type, request.getName(), request.getElements().get(0)));
         return response;
     }
 
@@ -102,8 +103,8 @@ public class CompasSclDataResource {
     @Produces(MediaType.APPLICATION_XML)
     public void update(@PathParam(TYPE_PATH_PARAM) SclType type,
                        @PathParam(ID_PATH_PARAM) UUID id,
-                       UpdateRequest request) {
-        compasSclDataService.update(type, id, request.getChangeSetType(), request.getScl());
+                       @Valid UpdateRequest request) {
+        compasSclDataService.update(type, id, request.getChangeSetType(), request.getElements().get(0));
     }
 
     @DELETE

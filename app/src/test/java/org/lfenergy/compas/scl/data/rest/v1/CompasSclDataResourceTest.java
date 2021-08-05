@@ -8,23 +8,25 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
-import org.lfenergy.compas.scl.data.rest.model.CreateRequest;
-import org.lfenergy.compas.scl.data.rest.model.UpdateRequest;
+import org.lfenergy.compas.scl.data.rest.v1.model.CreateRequest;
+import org.lfenergy.compas.scl.data.rest.v1.model.UpdateRequest;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
-import org.lfenergy.compas.scl.data.util.SclElementConverter;
 import org.w3c.dom.Element;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.path.xml.config.XmlPathConfig.xmlPathConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.lfenergy.compas.scl.data.Constants.SCL_NS_URI;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_ELEMENT_NAME;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_NS_URI;
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
 import static org.mockito.Mockito.*;
 
@@ -34,7 +36,7 @@ class CompasSclDataResourceTest {
     @InjectMock
     private CompasSclDataService compasSclDataService;
 
-    private final SclElementConverter converter = new SclElementConverter();
+    private final ElementConverter converter = new ElementConverter();
 
     @Test
     void list_WhenCalled_ThenItemResponseRetrieved() {
@@ -191,8 +193,9 @@ class CompasSclDataResourceTest {
         var scl = readSCL();
 
         var request = new CreateRequest();
-        request.setScl(scl);
         request.setName(name);
+        request.setElements(new ArrayList<>());
+        request.getElements().add(scl);
 
         when(compasSclDataService.create(eq(type), eq(name), any(Element.class))).thenReturn(uuid);
 
@@ -218,8 +221,9 @@ class CompasSclDataResourceTest {
         var scl = readSCL();
 
         var request = new UpdateRequest();
-        request.setScl(scl);
         request.setChangeSetType(changeSetType);
+        request.setElements(new ArrayList<>());
+        request.getElements().add(scl);
 
         doNothing().when(compasSclDataService).update(eq(type), eq(uuid), eq(changeSetType), any(Element.class));
 
@@ -275,6 +279,6 @@ class CompasSclDataResourceTest {
         var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd");
         assert inputStream != null;
 
-        return converter.convertToElement(inputStream);
+        return converter.convertToElement(inputStream, SCL_ELEMENT_NAME, SCL_NS_URI);
     }
 }

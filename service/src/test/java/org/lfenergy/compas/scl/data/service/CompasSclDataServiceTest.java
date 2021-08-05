@@ -6,11 +6,12 @@ package org.lfenergy.compas.scl.data.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.lfenergy.compas.core.commons.ElementConverter;
+import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
-import org.lfenergy.compas.scl.data.util.SclElementConverter;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,7 +21,8 @@ import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.lfenergy.compas.scl.data.Constants.*;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,12 +34,12 @@ class CompasSclDataServiceTest {
 
     private CompasSclDataService compasSclDataService;
 
-    private final SclElementConverter converter = new SclElementConverter();
+    private final ElementConverter converter = new ElementConverter();
     private final SclElementProcessor processor = new SclElementProcessor();
 
     @BeforeEach
     void beforeEach() {
-        compasSclDataService = new CompasSclDataService(compasSclDataRepository);
+        compasSclDataService = new CompasSclDataService(compasSclDataRepository, processor);
     }
 
     @Test
@@ -141,23 +143,21 @@ class CompasSclDataServiceTest {
     }
 
     @Test
-    void update_WhenCalledWithoutCompasElements_ThenRepositoryIsCalled() {
+    void update_WhenCalledPreviousSclDoesNotContainHeader_ThenExceptionIsThrown() {
         var type = SclType.SCD;
-        var name = "JUSTSOMENAME";
         var uuid = UUID.randomUUID();
         var changeSet = ChangeSetType.MAJOR;
         var scl = readSCL();
+
         var previousScl = readSCL();
-        createCompasPrivate(previousScl, name, type);
-
+        // Remove the Header from the previous version.
+        processor.getChildNodeByName(previousScl, SCL_HEADER_ELEMENT_NAME)
+            .ifPresent(element -> previousScl.removeChild(element));
         when(compasSclDataRepository.findByUUID(type, uuid)).thenReturn(previousScl);
-        doNothing().when(compasSclDataRepository).create(type, uuid, scl, currentVersion.getNextVersion(changeSet));
 
-        compasSclDataService.update(type, uuid, changeSet, scl);
-
-        assertCompasExtenions(scl, name, type);
-        verify(compasSclDataRepository, times(1)).create(type, uuid, scl, currentVersion.getNextVersion(changeSet));
-        verify(compasSclDataRepository, times(1)).findByUUID(type, uuid);
+        var exception = assertThrows(CompasSclDataServiceException.class,
+                            () -> compasSclDataService.update(type, uuid, changeSet, scl));
+        assertEquals(HEADER_NOT_FOUND_ERROR_CODE, exception.getErrorCode());
     }
 
     @Test
@@ -202,7 +202,7 @@ class CompasSclDataServiceTest {
         var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd");
         assert inputStream != null;
 
-        var scl = converter.convertToElement(inputStream);
+        var scl = converter.convertToElement(inputStream, SCL_ELEMENT_NAME, SCL_NS_URI);
         var header = processor.getSclHeader(scl).orElseGet(() -> processor.addSclHeader(scl));
         header.setAttribute(SCL_HEADER_ID_ATTR, UUID.randomUUID().toString());
         header.setAttribute(SCL_HEADER_VERSION_ATTR, currentVersion.toString());

@@ -7,12 +7,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.basex.BaseXClientFactory;
 import org.lfenergy.compas.scl.data.basex.BaseXServerJUnitExtension;
+import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
-import org.lfenergy.compas.scl.data.util.SclElementConverter;
+import org.lfenergy.compas.scl.data.util.SclDataModelMarshaller;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.w3c.dom.Element;
@@ -20,9 +22,10 @@ import org.w3c.dom.Element;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.lfenergy.compas.scl.data.Constants.SCL_HEADER_ID_ATTR;
-import static org.lfenergy.compas.scl.data.Constants.SCL_HEADER_VERSION_ATTR;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.createClientFactory;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_QUERY_ERROR_CODE;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
 
 @ExtendWith({MockitoExtension.class, BaseXServerJUnitExtension.class})
 class CompasSclDataBaseXRepositoryTest {
@@ -32,8 +35,9 @@ class CompasSclDataBaseXRepositoryTest {
 
     private CompasSclDataBaseXRepository repository;
 
-    private final SclElementConverter converter = new SclElementConverter();
+    private final ElementConverter converter = new ElementConverter();
     private final SclElementProcessor processor = new SclElementProcessor();
+    private final SclDataModelMarshaller marshaller = new SclDataModelMarshaller();
 
     @BeforeAll
     static void beforeAll() {
@@ -43,7 +47,7 @@ class CompasSclDataBaseXRepositoryTest {
     @BeforeEach
     void beforeEach() throws Exception {
         factory.createClient().executeXQuery("db:create('" + TYPE + "')");
-        repository = new CompasSclDataBaseXRepository(factory);
+        repository = new CompasSclDataBaseXRepository(factory, converter, marshaller);
     }
 
     @Test
@@ -124,9 +128,10 @@ class CompasSclDataBaseXRepositoryTest {
     void find_WhenCalledWithUnknownUUID_ThenExceptionIsThrown() {
         var uuid = UUID.randomUUID();
 
-        assertThrows(SclDataRepositoryException.class, () -> {
+        var exception = assertThrows(CompasSclDataServiceException.class, () -> {
             repository.findByUUID(TYPE, uuid);
         });
+        assertEquals(BASEX_QUERY_ERROR_CODE, exception.getErrorCode());
     }
 
     @Test
@@ -191,9 +196,10 @@ class CompasSclDataBaseXRepositoryTest {
         assertEquals(getIdFromHeader(scl), getIdFromHeader(foundScl));
 
         repository.delete(TYPE, uuid, version);
-        assertThrows(SclDataRepositoryException.class, () -> {
+        var exception = assertThrows(CompasSclDataServiceException.class, () -> {
             repository.findByUUID(TYPE, uuid);
         });
+        assertEquals(BASEX_QUERY_ERROR_CODE, exception.getErrorCode());
     }
 
     @Test
@@ -216,21 +222,24 @@ class CompasSclDataBaseXRepositoryTest {
         assertEquals(getVersionFromHeader(scl), getVersionFromHeader(foundScl));
 
         repository.delete(TYPE, uuid);
-        assertThrows(SclDataRepositoryException.class, () -> {
+        var exception = assertThrows(CompasSclDataServiceException.class, () -> {
             repository.findByUUID(TYPE, uuid);
         });
+        assertEquals(BASEX_QUERY_ERROR_CODE, exception.getErrorCode());
     }
 
     private String getIdFromHeader(Element scl) {
         var header = processor.getSclHeader(scl)
-                .orElseThrow(() -> new SclDataRepositoryException("Header not found in SCL!"));
+                .orElseThrow(() ->
+                        new CompasSclDataServiceException(HEADER_NOT_FOUND_ERROR_CODE, "Header not found in SCL!"));
         return processor.getAttributeValue(header, SCL_HEADER_ID_ATTR)
                 .orElse("");
     }
 
     private String getVersionFromHeader(Element scl) {
         var header = processor.getSclHeader(scl)
-                .orElseThrow(() -> new SclDataRepositoryException("Header not found in SCL!"));
+                .orElseThrow(() ->
+                        new CompasSclDataServiceException(HEADER_NOT_FOUND_ERROR_CODE, "Header not found in SCL!"));
         return processor.getAttributeValue(header, SCL_HEADER_VERSION_ATTR)
                 .orElse("");
     }
@@ -239,7 +248,7 @@ class CompasSclDataBaseXRepositoryTest {
         var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd");
         assert inputStream != null;
 
-        var scl = converter.convertToElement(inputStream);
+        var scl = converter.convertToElement(inputStream, SCL_ELEMENT_NAME, SCL_NS_URI);
         var header = processor.getSclHeader(scl).orElseGet(() -> processor.addSclHeader(scl));
         header.setAttribute(SCL_HEADER_ID_ATTR, uuid.toString());
         header.setAttribute(SCL_HEADER_VERSION_ATTR, version.toString());
