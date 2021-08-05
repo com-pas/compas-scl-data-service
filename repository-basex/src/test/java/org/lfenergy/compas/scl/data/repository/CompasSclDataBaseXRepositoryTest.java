@@ -22,7 +22,7 @@ import org.w3c.dom.Element;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.lfenergy.compas.scl.data.Constants.*;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.createClientFactory;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_QUERY_ERROR_CODE;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;

@@ -10,7 +10,7 @@ import org.w3c.dom.NodeList;
 
 import java.util.*;
 
-import static org.lfenergy.compas.scl.data.Constants.*;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
 import static org.w3c.dom.Node.ELEMENT_NODE;
 
@@ -29,7 +29,7 @@ public class SclElementProcessor {
     public void fixDefaultPrefix(Node root) {
         var oldNamespacePrefixes = new HashSet<String>();
         // Use a stack to walk through all child nodes.
-        var nodes = new Stack<Node>();
+        var nodes = new ArrayDeque<Node>();
         // Start with the root node.
         nodes.push(root);
 

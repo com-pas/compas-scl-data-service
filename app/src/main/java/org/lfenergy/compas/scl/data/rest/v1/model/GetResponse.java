@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.scl.data.rest.model;
+package org.lfenergy.compas.scl.data.rest.v1.model;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.w3c.dom.Element;
@@ -12,9 +12,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import static org.lfenergy.compas.scl.data.Constants.SCL_DATA_SERVICE_NS_URI;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERVICE_V1_NS_URI;
 
-@XmlRootElement(name = "GetResponse", namespace = SCL_DATA_SERVICE_NS_URI)
+@XmlRootElement(name = "GetResponse", namespace = SCL_DATA_SERVICE_V1_NS_URI)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GetResponse {
     @Schema(example = "SCL XML...")

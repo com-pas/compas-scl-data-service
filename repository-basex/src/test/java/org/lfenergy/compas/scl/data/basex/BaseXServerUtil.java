@@ -22,7 +22,7 @@ public final class BaseXServerUtil {
     }
 
     public static BaseXServer createServer(int portNumber) throws IOException {
-        System.setProperty("org.basex.path", "build/basex");
+        System.setProperty("org.basex.path", "target/basex");
         return new BaseXServer("-p" + portNumber);
     }
 

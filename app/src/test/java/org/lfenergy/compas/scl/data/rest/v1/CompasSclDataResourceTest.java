@@ -13,19 +13,20 @@ import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
-import org.lfenergy.compas.scl.data.rest.model.CreateRequest;
-import org.lfenergy.compas.scl.data.rest.model.UpdateRequest;
+import org.lfenergy.compas.scl.data.rest.v1.model.CreateRequest;
+import org.lfenergy.compas.scl.data.rest.v1.model.UpdateRequest;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 import org.w3c.dom.Element;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.path.xml.config.XmlPathConfig.xmlPathConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.lfenergy.compas.scl.data.Constants.SCL_ELEMENT_NAME;
-import static org.lfenergy.compas.scl.data.Constants.SCL_NS_URI;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_ELEMENT_NAME;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_NS_URI;
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
 import static org.mockito.Mockito.*;
 
@@ -192,8 +193,9 @@ class CompasSclDataResourceTest {
         var scl = readSCL();
 
         var request = new CreateRequest();
-        request.setScl(scl);
         request.setName(name);
+        request.setElements(new ArrayList<>());
+        request.getElements().add(scl);
 
         when(compasSclDataService.create(eq(type), eq(name), any(Element.class))).thenReturn(uuid);
 
@@ -219,8 +221,9 @@ class CompasSclDataResourceTest {
         var scl = readSCL();
 
         var request = new UpdateRequest();
-        request.setScl(scl);
         request.setChangeSetType(changeSetType);
+        request.setElements(new ArrayList<>());
+        request.getElements().add(scl);
 
         doNothing().when(compasSclDataService).update(eq(type), eq(uuid), eq(changeSetType), any(Element.class));
 

@@ -4,8 +4,8 @@
 package org.lfenergy.compas.scl.data.rest.v1;
 
 import org.lfenergy.compas.scl.data.model.SclType;
-import org.lfenergy.compas.scl.data.rest.model.Type;
-import org.lfenergy.compas.scl.data.rest.model.TypeListResponse;
+import org.lfenergy.compas.scl.data.rest.v1.model.Type;
+import org.lfenergy.compas.scl.data.rest.v1.model.TypeListResponse;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

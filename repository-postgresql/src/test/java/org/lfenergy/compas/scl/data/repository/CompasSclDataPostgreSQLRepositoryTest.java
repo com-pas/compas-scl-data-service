@@ -16,8 +16,8 @@ import javax.xml.namespace.QName;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.lfenergy.compas.scl.data.Constants.SCL_ELEMENT_NAME;
-import static org.lfenergy.compas.scl.data.Constants.SCL_NS_URI;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_ELEMENT_NAME;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_NS_URI;
 
 @ExtendWith(MockitoExtension.class)
 class CompasSclDataPostgreSQLRepositoryTest {
