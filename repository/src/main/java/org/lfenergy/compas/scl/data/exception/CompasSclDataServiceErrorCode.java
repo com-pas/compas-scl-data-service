@@ -16,4 +16,5 @@ public class CompasSclDataServiceErrorCode {
     public static final String BASEX_CLIENT_CREATION_ERROR_CODE = "SDS-1000";
     public static final String BASEX_QUERY_ERROR_CODE = "SDS-1001";
     public static final String BASEX_COMMAND_ERROR_CODE = "SDS-1002";
+    public static final String NO_DATA_FOUND_ERROR_CODE = "SDS-1003";
 }
