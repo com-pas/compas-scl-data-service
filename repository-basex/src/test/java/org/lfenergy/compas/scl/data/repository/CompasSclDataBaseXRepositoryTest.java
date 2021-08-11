@@ -169,8 +169,9 @@ class CompasSclDataBaseXRepositoryTest {
         var scl = readSCL(uuid, version);
         repository.create(TYPE, uuid, scl, version);
 
+        var unknownVersion = new Version(1, 1, 1);
         var exception = assertThrows(CompasNoDataFoundException.class, () -> {
-            repository.findByUUID(TYPE, uuid, new Version(1, 1, 1));
+            repository.findByUUID(TYPE, uuid, unknownVersion);
         });
         assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
     }

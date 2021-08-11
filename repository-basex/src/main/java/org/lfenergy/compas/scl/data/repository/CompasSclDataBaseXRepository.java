@@ -121,7 +121,8 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                 sclDataMarshaller::unmarshal);
 
         if (items.isEmpty()) {
-            throw new CompasNoDataFoundException("No versions found for type '" + type + "' with ID '" + id + "'");
+            var message = String.format("No versions found for type '%s' with ID '%s'", type, id);
+            throw new CompasNoDataFoundException(message);
         }
         return items;
     }
@@ -140,7 +141,8 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                 xmlString -> elementConverter.convertToElement(xmlString, SCL_ELEMENT_NAME, SCL_NS_URI));
 
         if (result.isEmpty()) {
-            throw new CompasNoDataFoundException("No record found for type '" + type + "' with ID '" + id + "'");
+            var message = String.format("No record found for type '%s' with ID '%s'", type, id);
+            throw new CompasNoDataFoundException(message);
         }
         return result.get(0);
     }
@@ -154,7 +156,8 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                 xmlString -> elementConverter.convertToElement(xmlString, SCL_ELEMENT_NAME, SCL_NS_URI));
 
         if (result.isEmpty()) {
-            throw new CompasNoDataFoundException("No record found for type '" + type + "' with ID '" + id + "' and version '" + version + "'");
+            var message = String.format("No record found for type '%s' with ID '%s' and version '%s'", type, id, version);
+            throw new CompasNoDataFoundException(message);
         }
         return result.get(0);
     }
