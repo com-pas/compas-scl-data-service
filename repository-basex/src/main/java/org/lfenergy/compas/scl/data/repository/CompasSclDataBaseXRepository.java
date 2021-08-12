@@ -6,6 +6,7 @@ package org.lfenergy.compas.scl.data.repository;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.basex.BaseXClient;
 import org.lfenergy.compas.scl.data.basex.BaseXClientFactory;
+import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
@@ -46,7 +47,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     private static final String DECLARE_COMPAS_NAMESPACE = "declare namespace compas=\"" + COMPAS_EXTENSION_NS_URI + "\";\n";
     private static final String DECLARE_LATEST_VERSION_FUNC =
             "declare function local:latest-version($db as xs:string, $id as xs:string)\n" +
-                    "   as document-node() { \n" +
+                    "   as document-node()? { \n" +
                     "      let $doc :=\n" +
                     "          (for $resource in db:open($db, $id)\n" +
                     "            let $parts := tokenize($resource/scl:SCL/scl:Header/@version, '\\.')\n" +
@@ -60,6 +61,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                     "};\n";
     private static final String DECLARE_DB_VARIABLE = "declare variable $db := '%s';\n";
     private static final String DECLARE_ID_VARIABLE = "declare variable $id := '%s';\n";
+    private static final String DECLARE_PATH_VARIABLE = "declare variable $path := '%s';\n";
 
     private final BaseXClientFactory baseXClientFactory;
     private final SclDataModelMarshaller sclDataMarshaller;
@@ -97,13 +99,12 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         "   let $version := $latestScl//scl:SCL/scl:Header/@version\n" +
                         "   let $name := $latestScl//scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + COMPAS_SCL_NAME_EXTENSION + "\n" +
                         "   return '<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>'",
-                sclDataMarshaller::unmarshal
-        );
+                sclDataMarshaller::unmarshal);
     }
 
     @Override
     public List<Item> listVersionsByUUID(SclType type, UUID id) {
-        return executeQuery(type, DECLARE_SCL_NS_URI +
+        var items = executeQuery(type, DECLARE_SCL_NS_URI +
                         DECLARE_COMPAS_NAMESPACE +
                         format(DECLARE_DB_VARIABLE, type) +
                         format(DECLARE_ID_VARIABLE, id) +
@@ -117,8 +118,13 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         "   let $patchVersion := xs:int($parts[3])\n" +
                         "   order by $majorVersion, $minorVersion, $patchVersion\n" +
                         "   return '<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>' ",
-                sclDataMarshaller::unmarshal
-        );
+                sclDataMarshaller::unmarshal);
+
+        if (items.isEmpty()) {
+            var message = String.format("No versions found for type '%s' with ID '%s'", type, id);
+            throw new CompasNoDataFoundException(message);
+        }
+        return items;
     }
 
     @Override
@@ -133,15 +139,26 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         format(DECLARE_ID_VARIABLE, id) +
                         "local:latest-version($db, $id)",
                 xmlString -> elementConverter.convertToElement(xmlString, SCL_ELEMENT_NAME, SCL_NS_URI));
+
+        if (result.isEmpty()) {
+            var message = String.format("No record found for type '%s' with ID '%s'", type, id);
+            throw new CompasNoDataFoundException(message);
+        }
         return result.get(0);
     }
 
     @Override
     public Element findByUUID(SclType type, UUID id, Version version) {
         // This find method searches for a specific version.
-        var result = executeQuery(type,
-                "doc('" + type + "/" + createDocumentPath(id, version) + "')",
+        var result = executeQuery(type, format(DECLARE_DB_VARIABLE, type) +
+                        format(DECLARE_PATH_VARIABLE, createDocumentPath(id, version)) +
+                        "db:open($db, $path)",
                 xmlString -> elementConverter.convertToElement(xmlString, SCL_ELEMENT_NAME, SCL_NS_URI));
+
+        if (result.isEmpty()) {
+            var message = String.format("No record found for type '%s' with ID '%s' and version '%s'", type, id, version);
+            throw new CompasNoDataFoundException(message);
+        }
         return result.get(0);
     }
 
