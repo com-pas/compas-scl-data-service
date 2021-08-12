@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.basex.BaseXClientFactory;
 import org.lfenergy.compas.scl.data.basex.BaseXServerJUnitExtension;
+import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.SclType;
@@ -24,8 +25,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.createClientFactory;
-import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_QUERY_ERROR_CODE;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_DATA_FOUND_ERROR_CODE;
 
 @ExtendWith({MockitoExtension.class, BaseXServerJUnitExtension.class})
 class CompasSclDataBaseXRepositoryTest {
@@ -107,6 +108,16 @@ class CompasSclDataBaseXRepositoryTest {
     }
 
     @Test
+    void listVersionsByUUID_WhenCalledWithUnknownID_ThenExceptionIsThrown() {
+        var uuid = UUID.randomUUID();
+
+        var exception = assertThrows(CompasNoDataFoundException.class, () -> {
+            repository.listVersionsByUUID(TYPE, uuid);
+        });
+        assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
+    }
+
+    @Test
     void listVersionsByUUID_WhenTwoVersionsOfARecordAdded_ThenAllRecordAreFound() {
         var version = new Version(1, 0, 0);
         var uuid = UUID.randomUUID();
@@ -125,13 +136,61 @@ class CompasSclDataBaseXRepositoryTest {
     }
 
     @Test
-    void find_WhenCalledWithUnknownUUID_ThenExceptionIsThrown() {
+    void findByUUID_WhenCalledWithUnknownUUID_ThenExceptionIsThrown() {
         var uuid = UUID.randomUUID();
 
-        var exception = assertThrows(CompasSclDataServiceException.class, () -> {
+        var exception = assertThrows(CompasNoDataFoundException.class, () -> {
             repository.findByUUID(TYPE, uuid);
         });
-        assertEquals(BASEX_QUERY_ERROR_CODE, exception.getErrorCode());
+        assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
+    }
+
+    @Test
+    void findByUUID_WhenTwoVersionsOfARecordAdded_ThenLastRecordIsFound() {
+        var version = new Version(1, 0, 0);
+        var uuid = UUID.randomUUID();
+        var scl = readSCL(uuid, version);
+        repository.create(TYPE, uuid, scl, version);
+        version = new Version(1, 1, 0);
+        scl = readSCL(uuid, version);
+        repository.create(TYPE, uuid, scl, version);
+
+        var foundScl = repository.findByUUID(TYPE, uuid);
+
+        assertNotNull(foundScl);
+        assertEquals(uuid.toString(), getIdFromHeader(foundScl));
+        assertEquals(version.toString(), getVersionFromHeader(foundScl));
+    }
+
+    @Test
+    void findByUUIDWithVersion_WhenCalledWithUnknownVersion_ThenExceptionIsThrown() {
+        var version = new Version(1, 0, 0);
+        var uuid = UUID.randomUUID();
+        var scl = readSCL(uuid, version);
+        repository.create(TYPE, uuid, scl, version);
+
+        var unknownVersion = new Version(1, 1, 1);
+        var exception = assertThrows(CompasNoDataFoundException.class, () -> {
+            repository.findByUUID(TYPE, uuid, unknownVersion);
+        });
+        assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
+    }
+
+    @Test
+    void findByUUIDWithVersion_WhenTwoVersionsOfARecordAdded_ThenCorrectRecordIsFound() {
+        var expectedVersion = new Version(1, 0, 0);
+        var uuid = UUID.randomUUID();
+        var scl = readSCL(uuid, expectedVersion);
+        repository.create(TYPE, uuid, scl, expectedVersion);
+        var version = new Version(1, 1, 0);
+        scl = readSCL(uuid, version);
+        repository.create(TYPE, uuid, scl, version);
+
+        var foundScl = repository.findByUUID(TYPE, uuid, expectedVersion);
+
+        assertNotNull(foundScl);
+        assertEquals(uuid.toString(), getIdFromHeader(foundScl));
+        assertEquals(expectedVersion.toString(), getVersionFromHeader(foundScl));
     }
 
     @Test
@@ -196,10 +255,10 @@ class CompasSclDataBaseXRepositoryTest {
         assertEquals(getIdFromHeader(scl), getIdFromHeader(foundScl));
 
         repository.delete(TYPE, uuid, version);
-        var exception = assertThrows(CompasSclDataServiceException.class, () -> {
+        var exception = assertThrows(CompasNoDataFoundException.class, () -> {
             repository.findByUUID(TYPE, uuid);
         });
-        assertEquals(BASEX_QUERY_ERROR_CODE, exception.getErrorCode());
+        assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
     }
 
     @Test
@@ -222,10 +281,10 @@ class CompasSclDataBaseXRepositoryTest {
         assertEquals(getVersionFromHeader(scl), getVersionFromHeader(foundScl));
 
         repository.delete(TYPE, uuid);
-        var exception = assertThrows(CompasSclDataServiceException.class, () -> {
+        var exception = assertThrows(CompasNoDataFoundException.class, () -> {
             repository.findByUUID(TYPE, uuid);
         });
-        assertEquals(BASEX_QUERY_ERROR_CODE, exception.getErrorCode());
+        assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
     }
 
     private String getIdFromHeader(Element scl) {
