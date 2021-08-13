@@ -81,6 +81,10 @@ SPDX-License-Identifier: Apache-2.0
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-hibernate-validator</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-oidc</artifactId>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>

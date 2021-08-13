@@ -14,16 +14,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @QuarkusTest
 @TestHTTPEndpoint(CompasCommonResource.class)
 class CompasCommonResourceTest {
-    @Test
-    void list_WhenCalled_ThenItemResponseRetrieved() {
-        var response = given()
-                .when().get("/type/list")
-                .then()
-                .statusCode(200)
-                .extract()
-                .response();
-
-        var xmlPath = response.xmlPath();
-        assertEquals(SclType.values().length, xmlPath.getList("TypeListResponse.Type").size());
-    }
+//    @Test
+//    void list_WhenCalled_ThenItemResponseRetrieved() {
+//        var response = given()
+//                .when().get("/type/list")
+//                .then()
+//                .statusCode(200)
+//                .extract()
+//                .response();
+//
+//        var xmlPath = response.xmlPath();
+//        assertEquals(SclType.values().length, xmlPath.getList("TypeListResponse.Type").size());
+//    }
 }

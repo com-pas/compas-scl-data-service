@@ -7,6 +7,7 @@ import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.rest.v1.model.Type;
 import org.lfenergy.compas.scl.data.rest.v1.model.TypeListResponse;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public class CompasCommonResource {
     @GET
     @Path("/type/list")
+    @RolesAllowed("Read")
     @Produces(MediaType.APPLICATION_XML)
     public TypeListResponse list() {
         var response = new TypeListResponse();
