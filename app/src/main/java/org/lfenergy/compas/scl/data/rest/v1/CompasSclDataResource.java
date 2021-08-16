@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest.v1;
 
-import org.jboss.logging.Logger;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
@@ -21,8 +20,6 @@ import static org.lfenergy.compas.scl.data.rest.Constants.*;
 
 @Path("/scl/v1/{" + TYPE_PATH_PARAM + "}")
 public class CompasSclDataResource {
-    private static final Logger LOG = Logger.getLogger(CompasSclDataResource.class);
-
     private CompasSclDataService compasSclDataService;
 
     private ElementConverter converter = new ElementConverter();
