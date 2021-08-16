@@ -6,6 +6,7 @@ package org.lfenergy.compas.scl.data.rest.v1;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.core.commons.ElementConverter;
@@ -39,6 +40,7 @@ class CompasSclDataResourceTest {
     private final ElementConverter converter = new ElementConverter();
 
     @Test
+    @TestSecurity(user = "test-user", roles = {READ_ROLE})
     void list_WhenCalled_ThenItemResponseRetrieved() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
@@ -64,6 +66,7 @@ class CompasSclDataResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "test-user", roles = {READ_ROLE})
     void listVersionsByUUID_WhenCalled_ThenItemResponseRetrieved() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
@@ -90,6 +93,7 @@ class CompasSclDataResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "test-user", roles = {READ_ROLE})
     void findByUUID_WhenCalled_ThenSCLResponseRetrieved() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
@@ -113,6 +117,7 @@ class CompasSclDataResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "test-user", roles = {READ_ROLE})
     void findByUUIDAndVersion_WhenCalled_ThenSCLResponseRetrieved() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
@@ -138,6 +143,7 @@ class CompasSclDataResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "test-user", roles = {READ_ROLE})
     void findRawSCLByUUID_WhenCalledOnlySCL_ThenSCLRetrieved() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
@@ -161,6 +167,7 @@ class CompasSclDataResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "test-user", roles = {READ_ROLE})
     void findRawSCLByUUIDAndVersion_WhenCalled_ThenSCLRetrieved() {
         var type = SclType.SCD;
         var uuid = UUID.randomUUID();
@@ -186,6 +193,7 @@ class CompasSclDataResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "test-user", roles = {CREATE_ROLE})
     void create_WhenCalled_ThenServiceCalledAndUUIDRetrieved() {
         var uuid = UUID.randomUUID();
         var type = SclType.SCD;
@@ -214,6 +222,7 @@ class CompasSclDataResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "test-user", roles = {UPDATE_ROLE})
     void update_WhenCalled_ThenServiceCalledAndNewUUIDRetrieved() {
         var uuid = UUID.randomUUID();
         var type = SclType.SCD;
@@ -240,6 +249,7 @@ class CompasSclDataResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "test-user", roles = {DELETE_ROLE})
     void deleteAll_WhenCalled_ThenServiceCalled() {
         var uuid = UUID.randomUUID();
         var type = SclType.SCD;
@@ -257,6 +267,7 @@ class CompasSclDataResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "test-user", roles = {DELETE_ROLE})
     void deleteVersion_WhenCalled_ThenServiceCalled() {
         var uuid = UUID.randomUUID();
         var type = SclType.SCD;

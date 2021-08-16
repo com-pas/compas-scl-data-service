@@ -5,16 +5,19 @@ package org.lfenergy.compas.scl.data.rest.v1;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.model.SclType;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.lfenergy.compas.scl.data.rest.Constants.READ_ROLE;
 
 @QuarkusTest
 @TestHTTPEndpoint(CompasCommonResource.class)
 class CompasCommonResourceTest {
     @Test
+    @TestSecurity(user = "test-user", roles = {READ_ROLE})
     void list_WhenCalled_ThenItemResponseRetrieved() {
         var response = given()
                 .when().get("/type/list")
