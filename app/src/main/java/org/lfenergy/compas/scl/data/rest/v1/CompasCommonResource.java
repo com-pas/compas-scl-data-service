@@ -15,11 +15,13 @@ import javax.ws.rs.core.MediaType;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static org.lfenergy.compas.scl.data.rest.Constants.READ_ROLE;
+
 @Path("/common/v1/")
 public class CompasCommonResource {
     @GET
     @Path("/type/list")
-    @RolesAllowed("Read")
+    @RolesAllowed(READ_ROLE)
     @Produces(MediaType.APPLICATION_XML)
     public TypeListResponse list() {
         var response = new TypeListResponse();

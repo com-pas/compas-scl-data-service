@@ -33,7 +33,7 @@ public class CompasSclDataResource {
     }
 
     @POST
-    @RolesAllowed("Create")
+    @RolesAllowed(CREATE_ROLE)
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public CreateResponse create(@PathParam(TYPE_PATH_PARAM) SclType type,
@@ -45,7 +45,7 @@ public class CompasSclDataResource {
 
     @GET
     @Path("/list")
-    @RolesAllowed("Read")
+    @RolesAllowed(READ_ROLE)
     @Produces(MediaType.APPLICATION_XML)
     public ListResponse list(@PathParam(TYPE_PATH_PARAM) SclType type) {
         var response = new ListResponse();
@@ -55,7 +55,7 @@ public class CompasSclDataResource {
 
     @GET
     @Path("/{" + ID_PATH_PARAM + "}/versions")
-    @RolesAllowed("Read")
+    @RolesAllowed(READ_ROLE)
     @Produces(MediaType.APPLICATION_XML)
     public VersionsResponse listVersionsByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
                                                @PathParam(ID_PATH_PARAM) UUID id) {
@@ -66,7 +66,7 @@ public class CompasSclDataResource {
 
     @GET
     @Path("/{" + ID_PATH_PARAM + "}")
-    @RolesAllowed("Read")
+    @RolesAllowed(READ_ROLE)
     @Produces(MediaType.APPLICATION_XML)
     public GetResponse findByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
                                   @PathParam(ID_PATH_PARAM) UUID id) {
@@ -77,7 +77,7 @@ public class CompasSclDataResource {
 
     @GET
     @Path("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
-    @RolesAllowed("Read")
+    @RolesAllowed(READ_ROLE)
     @Produces(MediaType.APPLICATION_XML)
     public GetResponse findByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
                                             @PathParam(ID_PATH_PARAM) UUID id,
@@ -89,7 +89,7 @@ public class CompasSclDataResource {
 
     @GET
     @Path("/{" + ID_PATH_PARAM + "}/scl")
-    @RolesAllowed("Read")
+    @RolesAllowed(READ_ROLE)
     @Produces(MediaType.APPLICATION_XML)
     public String findRawSCLByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
                                    @PathParam(ID_PATH_PARAM) UUID id) {
@@ -99,7 +99,7 @@ public class CompasSclDataResource {
 
     @GET
     @Path("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}/scl")
-    @RolesAllowed("Read")
+    @RolesAllowed(READ_ROLE)
     @Produces(MediaType.APPLICATION_XML)
     public String findRawSCLByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
                                              @PathParam(ID_PATH_PARAM) UUID id,
@@ -110,7 +110,7 @@ public class CompasSclDataResource {
 
     @PUT
     @Path("/{" + ID_PATH_PARAM + "}")
-    @RolesAllowed("Update")
+    @RolesAllowed(UPDATE_ROLE)
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
     public void update(@PathParam(TYPE_PATH_PARAM) SclType type,
@@ -121,7 +121,7 @@ public class CompasSclDataResource {
 
     @DELETE
     @Path("/{" + ID_PATH_PARAM + "}")
-    @RolesAllowed("Delete")
+    @RolesAllowed(DELETE_ROLE)
     @Produces(MediaType.APPLICATION_XML)
     public void deleteAll(@PathParam(TYPE_PATH_PARAM) SclType type,
                           @PathParam(ID_PATH_PARAM) UUID id) {
@@ -130,7 +130,7 @@ public class CompasSclDataResource {
 
     @DELETE
     @Path("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
-    @RolesAllowed("Delete")
+    @RolesAllowed(DELETE_ROLE)
     @Produces(MediaType.APPLICATION_XML)
     public void deleteVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
                               @PathParam(ID_PATH_PARAM) UUID id,
