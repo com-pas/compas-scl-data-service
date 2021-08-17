@@ -6,6 +6,7 @@ package org.lfenergy.compas.scl.data.rest.v1;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.core.commons.ElementConverter;
@@ -32,15 +33,20 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 @TestHTTPEndpoint(CompasSclDataResource.class)
-class CompasSclDataResourceTest {
+@TestSecurity(user = "test-reader", roles = {"SCD_" + READ_ROLE})
+class CompasSclDataResourceAsReaderTest {
     @InjectMock
     private CompasSclDataService compasSclDataService;
 
     private final ElementConverter converter = new ElementConverter();
 
+    protected SclType getType() {
+        return SclType.SCD;
+    }
+
     @Test
     void list_WhenCalled_ThenItemResponseRetrieved() {
-        var type = SclType.SCD;
+        var type = getType();
         var uuid = UUID.randomUUID();
         var name = "name";
         var version = "1.0.0";
@@ -65,7 +71,7 @@ class CompasSclDataResourceTest {
 
     @Test
     void listVersionsByUUID_WhenCalled_ThenItemResponseRetrieved() {
-        var type = SclType.SCD;
+        var type = getType();
         var uuid = UUID.randomUUID();
         var name = "Name";
         var version = "1.0.0";
@@ -91,7 +97,7 @@ class CompasSclDataResourceTest {
 
     @Test
     void findByUUID_WhenCalled_ThenSCLResponseRetrieved() {
-        var type = SclType.SCD;
+        var type = getType();
         var uuid = UUID.randomUUID();
         var scl = readSCL();
 
@@ -114,7 +120,7 @@ class CompasSclDataResourceTest {
 
     @Test
     void findByUUIDAndVersion_WhenCalled_ThenSCLResponseRetrieved() {
-        var type = SclType.SCD;
+        var type = getType();
         var uuid = UUID.randomUUID();
         var scl = readSCL();
         var version = new Version(1, 2, 3);
@@ -139,7 +145,7 @@ class CompasSclDataResourceTest {
 
     @Test
     void findRawSCLByUUID_WhenCalledOnlySCL_ThenSCLRetrieved() {
-        var type = SclType.SCD;
+        var type = getType();
         var uuid = UUID.randomUUID();
         var scl = readSCL();
 
@@ -162,7 +168,7 @@ class CompasSclDataResourceTest {
 
     @Test
     void findRawSCLByUUIDAndVersion_WhenCalled_ThenSCLRetrieved() {
-        var type = SclType.SCD;
+        var type = getType();
         var uuid = UUID.randomUUID();
         var scl = readSCL();
         var version = new Version(1, 2, 3);
@@ -188,7 +194,7 @@ class CompasSclDataResourceTest {
     @Test
     void create_WhenCalled_ThenServiceCalledAndUUIDRetrieved() {
         var uuid = UUID.randomUUID();
-        var type = SclType.SCD;
+        var type = getType();
         var name = "StationName";
         var scl = readSCL();
 
@@ -199,24 +205,21 @@ class CompasSclDataResourceTest {
 
         when(compasSclDataService.create(eq(type), eq(name), any(Element.class))).thenReturn(uuid);
 
-        var response = given()
+        given()
                 .pathParam(TYPE_PATH_PARAM, type)
                 .contentType(ContentType.XML)
                 .body(request)
                 .when().post()
                 .then()
-                .statusCode(200)
-                .extract()
-                .response();
+                .statusCode(403);
 
-        assertEquals(uuid.toString(), response.xmlPath().getString("CreateResponse.Id"));
-        verify(compasSclDataService, times(1)).create(eq(type), eq(name), any(Element.class));
+        verifyNoInteractions(compasSclDataService);
     }
 
     @Test
     void update_WhenCalled_ThenServiceCalledAndNewUUIDRetrieved() {
         var uuid = UUID.randomUUID();
-        var type = SclType.SCD;
+        var type = getType();
         var changeSetType = ChangeSetType.MAJOR;
         var scl = readSCL();
 
@@ -234,15 +237,15 @@ class CompasSclDataResourceTest {
                 .body(request)
                 .when().put("/{" + ID_PATH_PARAM + "}")
                 .then()
-                .statusCode(204);
+                .statusCode(403);
 
-        verify(compasSclDataService, times(1)).update(eq(type), eq(uuid), eq(changeSetType), any(Element.class));
+        verifyNoInteractions(compasSclDataService);
     }
 
     @Test
     void deleteAll_WhenCalled_ThenServiceCalled() {
         var uuid = UUID.randomUUID();
-        var type = SclType.SCD;
+        var type = getType();
 
         doNothing().when(compasSclDataService).delete(type, uuid);
 
@@ -251,15 +254,15 @@ class CompasSclDataResourceTest {
                 .pathParam(ID_PATH_PARAM, uuid)
                 .when().delete("/{" + ID_PATH_PARAM + "}")
                 .then()
-                .statusCode(204);
+                .statusCode(403);
 
-        verify(compasSclDataService, times(1)).delete(type, uuid);
+        verifyNoInteractions(compasSclDataService);
     }
 
     @Test
     void deleteVersion_WhenCalled_ThenServiceCalled() {
         var uuid = UUID.randomUUID();
-        var type = SclType.SCD;
+        var type = getType();
         var version = new Version(1, 2, 3);
 
         doNothing().when(compasSclDataService).delete(type, uuid, version);
@@ -270,9 +273,9 @@ class CompasSclDataResourceTest {
                 .pathParam(VERSION_PATH_PARAM, version.toString())
                 .when().delete("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
                 .then()
-                .statusCode(204);
+                .statusCode(403);
 
-        verify(compasSclDataService, times(1)).delete(type, uuid, version);
+        verifyNoInteractions(compasSclDataService);
     }
 
     private Element readSCL() {

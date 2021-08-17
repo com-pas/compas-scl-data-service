@@ -3,12 +3,14 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest.v1;
 
+import io.quarkus.security.Authenticated;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.v1.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -17,15 +19,18 @@ import java.util.UUID;
 
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
 
+@Authenticated
+@RequestScoped
 @Path("/scl/v1/{" + TYPE_PATH_PARAM + "}")
 public class CompasSclDataResource {
-    private CompasSclDataService compasSclDataService;
-
-    private ElementConverter converter = new ElementConverter();
+    private final CompasSclDataService compasSclDataService;
+    private final ElementConverter converter;
 
     @Inject
-    public CompasSclDataResource(CompasSclDataService compasSclDataService) {
+    public CompasSclDataResource(CompasSclDataService compasSclDataService,
+                                 ElementConverter converter) {
         this.compasSclDataService = compasSclDataService;
+        this.converter = converter;
     }
 
     @POST
