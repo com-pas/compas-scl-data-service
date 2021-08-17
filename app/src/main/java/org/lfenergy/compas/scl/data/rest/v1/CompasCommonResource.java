@@ -32,7 +32,7 @@ public class CompasCommonResource {
     @Path("/type/list")
     @Produces(MediaType.APPLICATION_XML)
     public TypeListResponse list() {
-        // Retrieve the roles the loggedin user has.
+        // Retrieve the roles the logged in user has.
         var roles = securityIdentity.getRoles();
 
         var response = new TypeListResponse();
