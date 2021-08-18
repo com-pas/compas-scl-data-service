@@ -8,10 +8,13 @@ import io.quarkus.security.identity.SecurityIdentity;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.rest.v1.model.Type;
 import org.lfenergy.compas.scl.data.rest.v1.model.TypeListResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -25,13 +28,17 @@ import static org.lfenergy.compas.scl.data.rest.Constants.READ_ROLE;
 @RequestScoped
 @Path("/common/v1/")
 public class CompasCommonResource {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompasCommonResource.class);
+
     @Inject
     SecurityIdentity securityIdentity;
 
     @GET
     @Path("/type/list")
     @Produces(MediaType.APPLICATION_XML)
-    public TypeListResponse list() {
+    public TypeListResponse list(@HeaderParam("Authorization") String authHeader) {
+        LOGGER.debug("Authorization Header '{}'", authHeader);
+
         // Retrieve the roles the logged in user has.
         var roles = securityIdentity.getRoles();
 
