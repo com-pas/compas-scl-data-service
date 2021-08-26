@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.util;
 
-import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
+import org.lfenergy.compas.scl.data.model.Item;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

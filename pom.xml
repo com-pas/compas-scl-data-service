@@ -25,7 +25,6 @@ SPDX-License-Identifier: Apache-2.0
         <sonarqube-plugin.version>3.2.0</sonarqube-plugin.version>
 
         <compas.core.version>0.2.1</compas.core.version>
-        <jakarta-bind-api.version>2.3.3</jakarta-bind-api.version>
         <jakarta-cdi-api.version>2.0.2</jakarta-cdi-api.version>
         <microprofile-config-api.version>2.0</microprofile-config-api.version>
         <slf4j.version>1.7.30</slf4j.version>
@@ -91,9 +90,9 @@ SPDX-License-Identifier: Apache-2.0
             </dependency>
 
             <dependency>
-                <groupId>jakarta.xml.bind</groupId>
-                <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>${jakarta-bind-api.version}</version>
+                <groupId>org.jboss.spec.javax.xml.bind</groupId>
+                <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
+                <version>2.0.1.Final</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.enterprise</groupId>
@@ -126,11 +125,6 @@ SPDX-License-Identifier: Apache-2.0
                 <groupId>org.basex</groupId>
                 <artifactId>basex</artifactId>
                 <version>${basex.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-impl</artifactId>
-                <version>3.0.2</version>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
