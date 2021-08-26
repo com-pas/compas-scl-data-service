@@ -9,7 +9,7 @@ registries:
     type: maven-repository
     url: https://maven.pkg.github.com/com-pas/*
     username: OWNER
-    password: ${{ secrets.GITHUB_TOKEN }}
+    password: ${{ secrets.ORG_GITHUB_ACTION_SECRET }}
 
 updates:
   # Maintain dependencies for GitHub Actions
