@@ -30,6 +30,6 @@ updates:
     ignore:
       # Next two dependencies shouldn't be upgrade, because RestEasy isn't using newer version. (2.3.X)
       - dependency-name: jakarta.xml.bind:jakarta.xml.bind-api
-        versions: [ "(3.0,)" ]
+        versions: [ "[3.0,)" ]
       - dependency-name: com.sun.xml.bind:jaxb-impl
-        versions: [ "(3.0,)" ]
+        versions: [ "[3.0,)" ]
