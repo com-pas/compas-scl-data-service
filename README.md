@@ -87,7 +87,7 @@ Below environment variable(s) can be used to configure which claims are used to 
 
 | Environment variable             | Java Property                  | Description                                   | Example          |
 | -------------------------------- | ------------------------------ | --------------------------------------------- | ---------------- |
-| USERINFO_NAME_CLAIMNAME          | compas.userifno.name.claimname | The Name of the user logged in.               | name             |
+| USERINFO_NAME_CLAIMNAME          | compas.userinfo.name.claimname | The Name of the user logged in.               | name             |
 
 ## Security
 
