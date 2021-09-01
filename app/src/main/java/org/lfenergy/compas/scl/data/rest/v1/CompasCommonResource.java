@@ -4,10 +4,12 @@
 package org.lfenergy.compas.scl.data.rest.v1;
 
 import io.quarkus.security.Authenticated;
-import io.quarkus.security.identity.SecurityIdentity;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.lfenergy.compas.scl.data.model.SclType;
+import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.rest.v1.model.Type;
 import org.lfenergy.compas.scl.data.rest.v1.model.TypeListResponse;
+import org.lfenergy.compas.scl.data.rest.v1.model.UserInfoResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,16 +33,19 @@ public class CompasCommonResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompasCommonResource.class);
 
     @Inject
-    SecurityIdentity securityIdentity;
+    JsonWebToken jsonWebToken;
+
+    @Inject
+    UserInfoProperties userInfoProperties;
 
     @GET
     @Path("/type/list")
     @Produces(MediaType.APPLICATION_XML)
     public TypeListResponse list(@HeaderParam("Authorization") String authHeader) {
-        LOGGER.debug("Authorization Header '{}'", authHeader);
+        LOGGER.trace("Authorization Header '{}'", authHeader);
 
         // Retrieve the roles the logged in user has.
-        var roles = securityIdentity.getRoles();
+        var roles = jsonWebToken.getGroups();
 
         var response = new TypeListResponse();
         response.setTypes(
@@ -50,6 +55,17 @@ public class CompasCommonResource {
                         .map(sclType -> new Type(sclType.name(), sclType.getDescription()))
                         .sorted(Comparator.comparing(Type::getDescription))
                         .collect(Collectors.toList()));
+        return response;
+    }
+
+    @GET
+    @Path("/userinfo")
+    @Produces(MediaType.APPLICATION_XML)
+    public UserInfoResponse getUserInfo(@HeaderParam("Authorization") String authHeader) {
+        LOGGER.trace("Authorization Header '{}'", authHeader);
+
+        var response = new UserInfoResponse();
+        response.setName(jsonWebToken.getClaim(userInfoProperties.name()));
         return response;
     }
 }
