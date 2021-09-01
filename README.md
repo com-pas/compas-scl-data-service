@@ -72,6 +72,23 @@ You can then execute your native executable with: `./app/target/code-with-quarku
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.html
 .
 
+## Environment variables
+
+Below environment variable(s) can be used to configure the connection to BaseX, if BaseX Server is used.
+
+| Environment variable             | Java Property             | Description                                   | Example          |
+| -------------------------------- | ------------------------- | --------------------------------------------- | ---------------- |
+| BASEX_HOST                       | basex.host                | Name of the Host where BaseX runs.            | localhost        |
+| BASEX_PORT                       | basex.port                | Port on the Host on which BaseX runs.         | 1984             |
+| BASEX_USERNAME                   | basex.username            | Username under which the application logs in. | admin            |
+| BASEX_PASSWORD                   | basex.password            | Password of the username used above.          | admin            |
+
+Below environment variable(s) can be used to configure which claims are used to fill the UserInfo response.
+
+| Environment variable             | Java Property                  | Description                                   | Example          |
+| -------------------------------- | ------------------------------ | --------------------------------------------- | ---------------- |
+| USERINFO_NAME_CLAIMNAME          | compas.userinfo.name.claimname | The Name of the user logged in.               | name             |
+
 ## Security
 
 To use most of the endpoints the users needs to be authenticated using JWT in the authorization header. There are 4
