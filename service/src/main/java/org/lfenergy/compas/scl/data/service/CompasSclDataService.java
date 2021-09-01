@@ -85,12 +85,13 @@ public class CompasSclDataService {
      * Create a new record for the passed SCL XML File with the passed name for a specific type.
      * A new UUID is generated to be set and also the CoMPAS Private Elements are added on SCL Level.
      *
-     * @param type The type to create it for.
-     * @param name The name that will be stored as CoMPAS Private extension.
-     * @param scl  The SCL XML File to store.
+     * @param type    The type to create it for.
+     * @param name    The name that will be stored as CoMPAS Private extension.
+     * @param comment
+     * @param scl     The SCL XML File to store.
      * @return The ID of the new created SCL XML File in the database.
      */
-    public UUID create(SclType type, String name, Element scl) {
+    public UUID create(SclType type, String name, String who, String comment, Element scl) {
         // Make sure the SCL Namespace is the default prefix.
         sclElementProcessor.fixDefaultPrefix(scl);
 
@@ -100,11 +101,12 @@ public class CompasSclDataService {
         var version = new Version(1, 0, 0);
         var header = sclElementProcessor.getSclHeader(scl)
                 .orElseGet(() -> sclElementProcessor.addSclHeader(scl));
-        header.setAttribute(SCL_HEADER_ID_ATTR, id.toString());
-        header.setAttribute(SCL_HEADER_VERSION_ATTR, version.toString());
+        header.setAttribute(SCL_ID_ATTR, id.toString());
+        header.setAttribute(SCL_VERSION_ATTR, version.toString());
 
         // Set name and type to SCL before storing the SCL.
         setSclCompasPrivateElement(scl, Optional.empty(), Optional.of(name), type);
+        createHistoryItem(scl, "SCL created", who, comment, version);
 
         repository.create(type, id, scl, version);
         return id;
@@ -119,9 +121,10 @@ public class CompasSclDataService {
      * @param type          The type to update it for.
      * @param id            The UUID of the record to update.
      * @param changeSetType The type of change to determine the new version.
+     * @param comment
      * @param scl           The SCL XML File with the updated content.
      */
-    public void update(SclType type, UUID id, ChangeSetType changeSetType, Element scl) {
+    public void update(SclType type, UUID id, ChangeSetType changeSetType, String who, String comment, Element scl) {
         // Make sure the SCL Namespace is the default prefix.
         sclElementProcessor.fixDefaultPrefix(scl);
 
@@ -130,15 +133,16 @@ public class CompasSclDataService {
         var currentHeader = sclElementProcessor.getSclHeader(currentScl)
                 .orElseThrow(() ->
                         new CompasSclDataServiceException(HEADER_NOT_FOUND_ERROR_CODE, "Previous version doesn't contain header!"));
-        var version = new Version(currentHeader.getAttribute(SCL_HEADER_VERSION_ATTR));
+        var version = new Version(currentHeader.getAttribute(SCL_VERSION_ATTR));
         version = version.getNextVersion(changeSetType);
         var header = sclElementProcessor.getSclHeader(scl)
                 .orElseGet(() -> sclElementProcessor.addSclHeader(scl));
-        header.setAttribute(SCL_HEADER_ID_ATTR, id.toString());
-        header.setAttribute(SCL_HEADER_VERSION_ATTR, version.toString());
+        header.setAttribute(SCL_ID_ATTR, id.toString());
+        header.setAttribute(SCL_VERSION_ATTR, version.toString());
 
         // Add name and type to SCL before storing the SCL.
         setSclCompasPrivateElement(scl, Optional.of(currentScl), Optional.empty(), type);
+        createHistoryItem(scl, "SCL updated", who, comment, version);
 
         repository.create(type, id, scl, version);
     }
@@ -167,9 +171,9 @@ public class CompasSclDataService {
     /**
      * Create/update the CoMPAS private element on the SCL Element for the given file.
      *
-     * @param scl      the SCL file to edit.
-     * @param name     the name to add
-     * @param fileType the file type to add.
+     * @param scl      The SCL file to edit.
+     * @param name     The name to add
+     * @param fileType The file type to add.
      */
     private void setSclCompasPrivateElement(Element scl, Optional<Element> currentScl, Optional<String> name, SclType fileType) {
         var compasPrivate = sclElementProcessor.getCompasPrivate(scl)
@@ -202,5 +206,25 @@ public class CompasSclDataService {
                         element -> element.setTextContent(fileType.toString()),
                         () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION, fileType.toString())
                 );
+    }
+
+    /**
+     * Add a Hitem to the current or added History Element from the Header.
+     *
+     * @param scl     The SCL file to edit.
+     * @param message The message set on the Hitem.
+     * @param who     The user that made the change.
+     * @param comment If filled the comment that will be added to the message.
+     * @param version The version set on the Hitem.
+     */
+    private void createHistoryItem(Element scl, String message, String who, String comment, Version version) {
+        var fullmessage = message;
+        if (comment != null && !comment.isBlank()) {
+            fullmessage += ", " + comment;
+        }
+
+        var header = sclElementProcessor.getSclHeader(scl)
+                .orElseGet(() -> sclElementProcessor.addSclHeader(scl));
+        sclElementProcessor.addHistoryItem(header, who, fullmessage, version);
     }
 }

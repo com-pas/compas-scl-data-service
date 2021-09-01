@@ -10,4 +10,7 @@ import io.smallrye.config.WithName;
 public interface UserInfoProperties {
     @WithName("name.claimname")
     String name();
+
+    @WithName("who.claimname")
+    String who();
 }

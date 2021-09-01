@@ -4,11 +4,15 @@
 package org.lfenergy.compas.scl.data.rest.v1;
 
 import io.quarkus.security.Authenticated;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.rest.v1.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -23,8 +27,16 @@ import static org.lfenergy.compas.scl.data.rest.Constants.*;
 @RequestScoped
 @Path("/scl/v1/{" + TYPE_PATH_PARAM + "}")
 public class CompasSclDataResource {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataResource.class);
+
     private final CompasSclDataService compasSclDataService;
     private final ElementConverter converter;
+
+    @Inject
+    JsonWebToken jsonWebToken;
+
+    @Inject
+    UserInfoProperties userInfoProperties;
 
     @Inject
     public CompasSclDataResource(CompasSclDataService compasSclDataService,
@@ -38,8 +50,11 @@ public class CompasSclDataResource {
     @Produces(MediaType.APPLICATION_XML)
     public CreateResponse create(@PathParam(TYPE_PATH_PARAM) SclType type,
                                  @Valid CreateRequest request) {
+        String who = jsonWebToken.getClaim(userInfoProperties.who());
+        LOGGER.trace("Username used for Who {}", who);
+
         var response = new CreateResponse();
-        response.setId(compasSclDataService.create(type, request.getName(), request.getElements().get(0)));
+        response.setId(compasSclDataService.create(type, request.getName(), who, request.getComment(), request.getElements().get(0)));
         return response;
     }
 
@@ -109,7 +124,10 @@ public class CompasSclDataResource {
     public void update(@PathParam(TYPE_PATH_PARAM) SclType type,
                        @PathParam(ID_PATH_PARAM) UUID id,
                        @Valid UpdateRequest request) {
-        compasSclDataService.update(type, id, request.getChangeSetType(), request.getElements().get(0));
+        String who = jsonWebToken.getClaim(userInfoProperties.who());
+        LOGGER.trace("Username used for Who {}", who);
+
+        compasSclDataService.update(type, id, request.getChangeSetType(), who, request.getComment(), request.getElements().get(0));
     }
 
     @DELETE

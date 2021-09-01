@@ -7,6 +7,8 @@ import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import io.quarkus.test.security.TestSecurity;
+import io.quarkus.test.security.jwt.Claim;
+import io.quarkus.test.security.jwt.JwtSecurity;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.core.commons.ElementConverter;
@@ -33,7 +35,11 @@ import static org.mockito.Mockito.*;
 
 @QuarkusTest
 @TestHTTPEndpoint(CompasSclDataResource.class)
-@TestSecurity(user = "test-reader", roles = {"SCD_" + READ_ROLE, "SCD_" + CREATE_ROLE, "SCD_" + UPDATE_ROLE, "SCD_" + DELETE_ROLE})
+@TestSecurity(user = "test-editor", roles = {"SCD_" + READ_ROLE, "SCD_" + CREATE_ROLE, "SCD_" + UPDATE_ROLE, "SCD_" + DELETE_ROLE})
+@JwtSecurity(claims = {
+        // Default the claim "name" is configured for Who, so we will set this claim for the test.
+        @Claim(key = "name", value = "Test Editor")
+})
 class CompasSclDataResourceAsEditorTest {
     @InjectMock
     private CompasSclDataService compasSclDataService;
@@ -192,14 +198,16 @@ class CompasSclDataResourceAsEditorTest {
         var uuid = UUID.randomUUID();
         var type = SclType.SCD;
         var name = "StationName";
+        var comment = "Some comments";
         var scl = readSCL();
 
         var request = new CreateRequest();
         request.setName(name);
+        request.setComment(comment);
         request.setElements(new ArrayList<>());
         request.getElements().add(scl);
 
-        when(compasSclDataService.create(eq(type), eq(name), any(Element.class))).thenReturn(uuid);
+        when(compasSclDataService.create(eq(type), eq(name), eq("Test Editor"), eq(comment), any(Element.class))).thenReturn(uuid);
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -212,7 +220,7 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         assertEquals(uuid.toString(), response.xmlPath().getString("CreateResponse.Id"));
-        verify(compasSclDataService, times(1)).create(eq(type), eq(name), any(Element.class));
+        verify(compasSclDataService, times(1)).create(eq(type), eq(name), eq("Test Editor"), eq(comment), any(Element.class));
     }
 
     @Test
@@ -220,14 +228,16 @@ class CompasSclDataResourceAsEditorTest {
         var uuid = UUID.randomUUID();
         var type = SclType.SCD;
         var changeSetType = ChangeSetType.MAJOR;
+        var comment = "Some comments";
         var scl = readSCL();
 
         var request = new UpdateRequest();
         request.setChangeSetType(changeSetType);
+        request.setComment(comment);
         request.setElements(new ArrayList<>());
         request.getElements().add(scl);
 
-        doNothing().when(compasSclDataService).update(eq(type), eq(uuid), eq(changeSetType), any(Element.class));
+        doNothing().when(compasSclDataService).update(eq(type), eq(uuid), eq(changeSetType), eq("Test Editor"), eq(comment), any(Element.class));
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -238,7 +248,7 @@ class CompasSclDataResourceAsEditorTest {
                 .then()
                 .statusCode(204);
 
-        verify(compasSclDataService, times(1)).update(eq(type), eq(uuid), eq(changeSetType), any(Element.class));
+        verify(compasSclDataService, times(1)).update(eq(type), eq(uuid), eq(changeSetType), eq("Test Editor"), eq(comment), any(Element.class));
     }
 
     @Test
