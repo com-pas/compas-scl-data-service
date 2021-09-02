@@ -38,9 +38,11 @@ import static org.mockito.Mockito.*;
 @TestSecurity(user = "test-editor", roles = {"SCD_" + READ_ROLE, "SCD_" + CREATE_ROLE, "SCD_" + UPDATE_ROLE, "SCD_" + DELETE_ROLE})
 @JwtSecurity(claims = {
         // Default the claim "name" is configured for Who, so we will set this claim for the test.
-        @Claim(key = "name", value = "Test Editor")
+        @Claim(key = "name", value = CompasSclDataResourceAsEditorTest.USERNAME)
 })
 class CompasSclDataResourceAsEditorTest {
+    public static final String USERNAME = "Test Editor";
+
     @InjectMock
     private CompasSclDataService compasSclDataService;
 
@@ -207,7 +209,7 @@ class CompasSclDataResourceAsEditorTest {
         request.setElements(new ArrayList<>());
         request.getElements().add(scl);
 
-        when(compasSclDataService.create(eq(type), eq(name), eq("Test Editor"), eq(comment), any(Element.class))).thenReturn(uuid);
+        when(compasSclDataService.create(eq(type), eq(name), eq(USERNAME), eq(comment), any(Element.class))).thenReturn(uuid);
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -220,7 +222,7 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         assertEquals(uuid.toString(), response.xmlPath().getString("CreateResponse.Id"));
-        verify(compasSclDataService, times(1)).create(eq(type), eq(name), eq("Test Editor"), eq(comment), any(Element.class));
+        verify(compasSclDataService, times(1)).create(eq(type), eq(name), eq(USERNAME), eq(comment), any(Element.class));
     }
 
     @Test
@@ -237,7 +239,7 @@ class CompasSclDataResourceAsEditorTest {
         request.setElements(new ArrayList<>());
         request.getElements().add(scl);
 
-        doNothing().when(compasSclDataService).update(eq(type), eq(uuid), eq(changeSetType), eq("Test Editor"), eq(comment), any(Element.class));
+        doNothing().when(compasSclDataService).update(eq(type), eq(uuid), eq(changeSetType), eq(USERNAME), eq(comment), any(Element.class));
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -248,7 +250,7 @@ class CompasSclDataResourceAsEditorTest {
                 .then()
                 .statusCode(204);
 
-        verify(compasSclDataService, times(1)).update(eq(type), eq(uuid), eq(changeSetType), eq("Test Editor"), eq(comment), any(Element.class));
+        verify(compasSclDataService, times(1)).update(eq(type), eq(uuid), eq(changeSetType), eq(USERNAME), eq(comment), any(Element.class));
     }
 
     @Test
