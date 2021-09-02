@@ -105,7 +105,7 @@ class CompasSclDataServiceTest {
 
         assertNotNull(uuid);
         assertCompasExtenions(scl, name, type);
-        assertHistoryItem(scl, initialVersion);
+        assertHistoryItem(scl, initialVersion, comment);
         verify(compasSclDataRepository, times(1)).create(eq(type), any(UUID.class), eq(scl), eq(initialVersion));
     }
 
@@ -113,7 +113,7 @@ class CompasSclDataServiceTest {
     void create_WhenCalledWithCompasExtension_ThenRepositoryIsCalledAndUUIDIsReturned() {
         var type = SclType.SCD;
         var name = "JUSTSOMENAME";
-        var comment = "Some comments";
+        var comment = "";
         var who = "User A";
 
         var scl = readSCL();
@@ -125,7 +125,7 @@ class CompasSclDataServiceTest {
 
         assertNotNull(uuid);
         assertCompasExtenions(scl, name, type);
-        assertHistoryItem(scl, initialVersion);
+        assertHistoryItem(scl, initialVersion, comment);
         verify(compasSclDataRepository, times(1)).create(eq(type), any(UUID.class), eq(scl), eq(initialVersion));
     }
 
@@ -135,7 +135,6 @@ class CompasSclDataServiceTest {
         var name = "JUSTSOMENAME";
         var uuid = UUID.randomUUID();
         var changeSet = ChangeSetType.MAJOR;
-        var comment = "Some comments";
         var who = "User A";
         var nextVersion = initialVersion.getNextVersion(changeSet);
 
@@ -147,10 +146,10 @@ class CompasSclDataServiceTest {
         when(compasSclDataRepository.findByUUID(type, uuid)).thenReturn(previousScl);
         doNothing().when(compasSclDataRepository).create(type, uuid, scl, nextVersion);
 
-        compasSclDataService.update(type, uuid, changeSet, who, comment, scl);
+        compasSclDataService.update(type, uuid, changeSet, who, null, scl);
 
         assertCompasExtenions(scl, name, type);
-        assertHistoryItem(scl, nextVersion);
+        assertHistoryItem(scl, nextVersion, null);
         verify(compasSclDataRepository, times(1)).create(type, uuid, scl, nextVersion);
         verify(compasSclDataRepository, times(1)).findByUUID(type, uuid);
     }
@@ -213,7 +212,7 @@ class CompasSclDataServiceTest {
         assertEquals(type.toString(), typeElement.get().getTextContent());
     }
 
-    private void assertHistoryItem(Element scl, Version version) {
+    private void assertHistoryItem(Element scl, Version version, String comment) {
         var header = processor.getSclHeader(scl);
         assertTrue(header.isPresent());
 
@@ -225,6 +224,9 @@ class CompasSclDataServiceTest {
         // The last item should be the one added.
         var item = items.get(items.size() - 1);
         assertEquals(version.toString(), item.getAttribute(SCL_VERSION_ATTR));
+        if (comment != null && !comment.isEmpty()) {
+            assertTrue(item.getAttribute(SCL_WHAT_ATTR).contains(comment));
+        }
     }
 
     private Element readSCL() {
