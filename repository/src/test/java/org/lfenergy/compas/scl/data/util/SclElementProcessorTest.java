@@ -6,6 +6,7 @@ package org.lfenergy.compas.scl.data.util;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
+import org.lfenergy.compas.scl.data.model.Version;
 import org.w3c.dom.Element;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,7 +61,7 @@ class SclElementProcessorTest {
 
         assertTrue(result.isPresent());
         var header = result.get();
-        assertEquals("1.0.0", header.getAttribute(SCL_HEADER_VERSION_ATTR));
+        assertEquals("1.0.0", header.getAttribute(SCL_VERSION_ATTR));
     }
 
     @Test
@@ -151,6 +152,53 @@ class SclElementProcessorTest {
         foundElement = processor.getChildNodeByName(compasPrivate.get(), COMPAS_SCL_NAME_EXTENSION);
         assertTrue(foundElement.isPresent());
         assertEquals(foundElement.get(), result);
+    }
+
+    @Test
+    void addHistoryItem_WhenCalledWithoutHistoryElement_ThenElementIsAdded() {
+        var version = new Version("1.3.2");
+        var username = "The Tester";
+        var message = "The Message";
+
+        var scl = readSCL("scl_without_history.scd");
+        var header = processor.getSclHeader(scl);
+        assertTrue(header.isPresent());
+
+        var historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME);
+        assertFalse(historyElement.isPresent());
+
+        var result = processor.addHistoryItem(header.get(), username, message, version);
+        assertNotNull(result);
+
+        historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME);
+        assertTrue(historyElement.isPresent());
+        var hItemElement = processor.getChildNodeByName(historyElement.get(), SCL_HITEM_ELEMENT_NAME);
+        assertTrue(hItemElement.isPresent());
+        assertEquals(version.toString(), hItemElement.get().getAttribute(SCL_VERSION_ATTR));
+        assertTrue(hItemElement.get().hasAttribute(SCL_REVISION_ATTR));
+        assertTrue(hItemElement.get().hasAttribute(SCL_WHEN_ATTR));
+        assertEquals(username, hItemElement.get().getAttribute(SCL_WHO_ATTR));
+        assertEquals(message, hItemElement.get().getAttribute(SCL_WHAT_ATTR));
+    }
+
+    @Test
+    void addHistoryItem_WhenCalledWithHistoryItemElement_ThenElementIsAdded() {
+        var version = new Version("1.3.2");
+        var scl = readSCL("scl_with_history.scd");
+        var header = processor.getSclHeader(scl);
+        assertTrue(header.isPresent());
+
+        var historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME);
+        assertTrue(historyElement.isPresent());
+
+        var result = processor.addHistoryItem(header.get(), "The Tester", "The Message", version);
+        assertNotNull(result);
+        assertEquals(version.toString(), result.getAttribute(SCL_VERSION_ATTR));
+
+        historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME);
+        assertTrue(historyElement.isPresent());
+        var hItemElements = processor.getChildNodesByName(historyElement.get(), SCL_HITEM_ELEMENT_NAME);
+        assertEquals(2, hItemElements.size());
     }
 
     @Test

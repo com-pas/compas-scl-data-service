@@ -291,7 +291,7 @@ class CompasSclDataBaseXRepositoryTest {
         var header = processor.getSclHeader(scl)
                 .orElseThrow(() ->
                         new CompasSclDataServiceException(HEADER_NOT_FOUND_ERROR_CODE, "Header not found in SCL!"));
-        return processor.getAttributeValue(header, SCL_HEADER_ID_ATTR)
+        return processor.getAttributeValue(header, SCL_ID_ATTR)
                 .orElse("");
     }
 
@@ -299,7 +299,7 @@ class CompasSclDataBaseXRepositoryTest {
         var header = processor.getSclHeader(scl)
                 .orElseThrow(() ->
                         new CompasSclDataServiceException(HEADER_NOT_FOUND_ERROR_CODE, "Header not found in SCL!"));
-        return processor.getAttributeValue(header, SCL_HEADER_VERSION_ATTR)
+        return processor.getAttributeValue(header, SCL_VERSION_ATTR)
                 .orElse("");
     }
 
@@ -309,8 +309,8 @@ class CompasSclDataBaseXRepositoryTest {
 
         var scl = converter.convertToElement(inputStream, SCL_ELEMENT_NAME, SCL_NS_URI);
         var header = processor.getSclHeader(scl).orElseGet(() -> processor.addSclHeader(scl));
-        header.setAttribute(SCL_HEADER_ID_ATTR, uuid.toString());
-        header.setAttribute(SCL_HEADER_VERSION_ATTR, version.toString());
+        header.setAttribute(SCL_ID_ATTR, uuid.toString());
+        header.setAttribute(SCL_VERSION_ATTR, version.toString());
         return scl;
     }
 }

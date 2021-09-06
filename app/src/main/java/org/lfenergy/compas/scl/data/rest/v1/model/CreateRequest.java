@@ -26,6 +26,10 @@ public class CreateRequest {
     @XmlElement(name = "Name", namespace = SCL_DATA_SERVICE_V1_NS_URI, required = true)
     private String name;
 
+    @Schema(description = "Comment that will be added to the new history record.")
+    @XmlElement(name = "Comment", namespace = SCL_DATA_SERVICE_V1_NS_URI)
+    private String comment;
+
     @Size(min = 1, max = 1, message = "{org.lfenergy.compas.XmlAnyElementValid.moreElements.message}")
     @XmlAnyElementValid(elementName = "SCL", elementNamespace = SCL_NS_URI)
     @Schema(description = "Can contain one element, named 'SCL', containing a SCL XML Definition")
@@ -38,6 +42,14 @@ public class CreateRequest {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public List<Element> getElements() {

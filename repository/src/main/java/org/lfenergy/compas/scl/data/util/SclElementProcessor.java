@@ -4,10 +4,12 @@
 package org.lfenergy.compas.scl.data.util;
 
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
+import org.lfenergy.compas.scl.data.model.Version;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
@@ -130,6 +132,39 @@ public class SclElementProcessor {
         element.setTextContent(value);
         compasPrivate.appendChild(element);
         return element;
+    }
+
+    /**
+     * Add a Hitem to the History Element from the Header. If the Header doesn't contain a History Element
+     * this Element will also be created. The revision attribute will be empty, the when will be set to the
+     * current date.
+     *
+     * @param header      The Header Element from SCL under which the History Element can be found/added.
+     * @param who         Teh name of the user that made the change (who).
+     * @param fullmessage The message that will be set (what).
+     * @param version     The version to be set (version).
+     * @return The Hitem created and added to the History Element.
+     */
+    public Element addHistoryItem(Element header, String who, String fullmessage, Version version) {
+        var formatter = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssXXX");
+        var document = header.getOwnerDocument();
+
+        var history = getChildNodesByName(header, SCL_HISTORY_ELEMENT_NAME).stream().findFirst()
+                .orElseGet(() -> {
+                    Element newHistory = document.createElementNS(SCL_NS_URI, SCL_HISTORY_ELEMENT_NAME);
+                    header.appendChild(newHistory);
+                    return newHistory;
+                });
+
+        Element hItem = document.createElementNS(SCL_NS_URI, SCL_HITEM_ELEMENT_NAME);
+        hItem.setAttribute(SCL_VERSION_ATTR, version.toString());
+        hItem.setAttribute(SCL_REVISION_ATTR, "");
+        hItem.setAttribute(SCL_WHEN_ATTR, formatter.format(new Date()));
+        hItem.setAttribute(SCL_WHO_ATTR, who);
+        hItem.setAttribute(SCL_WHAT_ATTR, fullmessage);
+        history.appendChild(hItem);
+
+        return hItem;
     }
 
     /**

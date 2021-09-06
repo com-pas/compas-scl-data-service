@@ -196,14 +196,14 @@ class CompasSclDataResourceAsReaderTest {
         var uuid = UUID.randomUUID();
         var type = getType();
         var name = "StationName";
+        var comment = "Some comments";
         var scl = readSCL();
 
         var request = new CreateRequest();
         request.setName(name);
+        request.setComment(comment);
         request.setElements(new ArrayList<>());
         request.getElements().add(scl);
-
-        when(compasSclDataService.create(eq(type), eq(name), any(Element.class))).thenReturn(uuid);
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -221,14 +221,14 @@ class CompasSclDataResourceAsReaderTest {
         var uuid = UUID.randomUUID();
         var type = getType();
         var changeSetType = ChangeSetType.MAJOR;
+        var comment = "Some comments";
         var scl = readSCL();
 
         var request = new UpdateRequest();
         request.setChangeSetType(changeSetType);
+        request.setComment(comment);
         request.setElements(new ArrayList<>());
         request.getElements().add(scl);
-
-        doNothing().when(compasSclDataService).update(eq(type), eq(uuid), eq(changeSetType), any(Element.class));
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
