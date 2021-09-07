@@ -26,14 +26,15 @@ SPDX-License-Identifier: Apache-2.0
 
         <compas.core.version>0.2.1</compas.core.version>
         <jakarta-bind-api.version>2.3.3</jakarta-bind-api.version>
+        <jaxb-impl.version>2.3.5</jaxb-impl.version>
         <jakarta-cdi-api.version>2.0.2</jakarta-cdi-api.version>
         <microprofile-config-api.version>2.0</microprofile-config-api.version>
-        <slf4j.version>1.7.30</slf4j.version>
+        <slf4j.version>1.7.32</slf4j.version>
 
         <!-- Test -->
         <basex.version>9.2.4</basex.version>
         <junit-jupiter.version>5.7.2</junit-jupiter.version>
-        <mockito-junit-jupiter.version>3.11.2</mockito-junit-jupiter.version>
+        <mockito-junit-jupiter.version>3.12.4</mockito-junit-jupiter.version>
         <openpojo.version>0.9.1</openpojo.version>
     </properties>
 
@@ -96,6 +97,11 @@ SPDX-License-Identifier: Apache-2.0
                 <version>${jakarta-bind-api.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>${jaxb-impl.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>jakarta.enterprise</groupId>
                 <artifactId>jakarta.enterprise.cdi-api</artifactId>
                 <version>${jakarta-cdi-api.version}</version>
@@ -126,11 +132,6 @@ SPDX-License-Identifier: Apache-2.0
                 <groupId>org.basex</groupId>
                 <artifactId>basex</artifactId>
                 <version>${basex.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-impl</artifactId>
-                <version>2.3.3</version>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
@@ -176,7 +177,7 @@ SPDX-License-Identifier: Apache-2.0
                 <plugin>
                     <groupId>org.jboss.jandex</groupId>
                     <artifactId>jandex-maven-plugin</artifactId>
-                    <version>1.1.0</version>
+                    <version>1.1.1</version>
                     <executions>
                         <execution>
                             <id>make-index</id>
@@ -204,7 +205,7 @@ SPDX-License-Identifier: Apache-2.0
                 <sonar.language>java</sonar.language>
 
                 <!-- JaCoCo Properties -->
-                <jacoco.version>0.8.6</jacoco.version>
+                <jacoco.version>0.8.7</jacoco.version>
                 <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
                 <sonar.coverage.jacoco.xmlReportPaths>
                     target/site/jacoco/jacoco.xml,
@@ -258,7 +259,7 @@ SPDX-License-Identifier: Apache-2.0
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-source-plugin</artifactId>
-                            <version>3.2.0</version>
+                            <version>3.2.1</version>
                             <executions>
                                 <execution>
                                     <id>attach-sources</id>

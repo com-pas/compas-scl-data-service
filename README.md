@@ -71,3 +71,66 @@ You can then execute your native executable with: `./app/target/code-with-quarku
 
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.html
 .
+
+## Environment variables
+
+Below environment variable(s) can be used to configure the connection to BaseX, if BaseX Server is used.
+
+| Environment variable             | Java Property             | Description                                   | Example          |
+| -------------------------------- | ------------------------- | --------------------------------------------- | ---------------- |
+| BASEX_HOST                       | basex.host                | Name of the Host where BaseX runs.            | localhost        |
+| BASEX_PORT                       | basex.port                | Port on the Host on which BaseX runs.         | 1984             |
+| BASEX_USERNAME                   | basex.username            | Username under which the application logs in. | admin            |
+| BASEX_PASSWORD                   | basex.password            | Password of the username used above.          | admin            |
+
+Below environment variable(s) can be used to configure which claims are used to fill the UserInfo response.
+
+| Environment variable             | Java Property                  | Description                                   | Example          |
+| -------------------------------- | ------------------------------ | --------------------------------------------- | ---------------- |
+| USERINFO_NAME_CLAIMNAME          | compas.userinfo.name.claimname | The Name of the user logged in.               | name             |
+| USERINFO_WHO_CLAIMNAME           | compas.userinfo.who.claimname  | The Name of the user used in the Who History. | name             |
+
+## Security
+
+To use most of the endpoints the users needs to be authenticated using JWT in the authorization header. There are 4
+environment variables that can be set in the container to configure the validation/processing of the JWT.
+
+| Environment variable             | Java Property                    | Description                                        | Example                                                                |
+| -------------------------------- | -------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------- |
+| JWT_VERIFY_KEY                   | smallrye.jwt.verify.key.location | Location of certificates to verify the JWT.        | http://localhost:8089/auth/realms/compas/protocol/openid-connect/certs |
+| JWT_VERIFY_ISSUER                | mp.jwt.verify.issuer             | The issuer of the JWT.                             | http://localhost:8089/auth/realms/compas                               |
+| JWT_VERIFY_CLIENT_ID             | mp.jwt.verify.audiences          | The Client ID that should be in the "aud" claim.   | scl-data-service                                                       |
+| JWT_GROUPS_PATH                  | smallrye.jwt.path.groups         | The JSON Path where to find the roles of the user. | resource_access/scl-data-service/roles                                 |
+
+The application uses the following list of roles. The fine-grained roles are built up of the types of SCL Files this
+service supports and the rights READ/CREATE/UPDATE/DElETE. This way the mapping of the roles to groups/users can be
+configured as needed.
+
+- ICD_CREATE
+- ICD_DELETE
+- ICD_READ
+- ICD_UPDATE
+- SCD_CREATE
+- SCD_DELETE
+- SCD_READ
+- SCD_UPDATE
+- SSD_CREATE
+- SSD_DELETE
+- SSD_READ
+- SSD_UPDATE
+- ISD_CREATE
+- ISD_DELETE
+- ISD_READ
+- ISD_UPDATE
+- CID_CREATE
+- CID_DELETE
+- CID_READ
+- CID_UPDATE
+- IID_CREATE
+- IID_DELETE
+- IID_READ
+- IID_UPDATE
+- SED_CREATE
+- SED_DELETE
+- SED_READ
+- SED_UPDATE

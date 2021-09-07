@@ -28,6 +28,10 @@ public class UpdateRequest {
     @XmlElement(name = "ChangeSet", namespace = SCL_DATA_SERVICE_V1_NS_URI, required = true)
     private ChangeSetType changeSetType;
 
+    @Schema(description = "Comment that will be added to the new history record.")
+    @XmlElement(name = "Comment", namespace = SCL_DATA_SERVICE_V1_NS_URI)
+    private String comment;
+
     @XmlAnyElement
     @Size(min = 1, max = 1, message = "{org.lfenergy.compas.XmlAnyElementValid.moreElements.message}")
     @Schema(description = "Can contain one element, named 'SCL', containing a SCL XML Definition")
@@ -40,6 +44,14 @@ public class UpdateRequest {
 
     public void setChangeSetType(ChangeSetType changeSetType) {
         this.changeSetType = changeSetType;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public List<Element> getElements() {
