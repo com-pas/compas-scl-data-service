@@ -29,7 +29,7 @@ Check [basexhttp on DockerHub](https://hub.docker.com/r/basex/basexhttp/) for a 
 You can run your application in dev mode that enables live coding using:
 
 ```shell script
-./mvnw package io.quarkus:quarkus-maven-plugin:2.0.0.Final:dev
+./mvnw package io.quarkus:quarkus-maven-plugin:2.2.2.Final:dev
 ```
 
 > **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.

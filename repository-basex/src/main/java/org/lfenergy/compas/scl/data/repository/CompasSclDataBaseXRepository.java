@@ -98,6 +98,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         "   let $latestScl := local:latest-version($db, $id)\n" +
                         "   let $version := $latestScl//scl:SCL/scl:Header/@version\n" +
                         "   let $name := $latestScl//scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + COMPAS_SCL_NAME_EXTENSION + "\n" +
+                        "   order by fn:lower-case($name)\n" +
                         "   return '<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>'",
                 sclDataMarshaller::unmarshal);
     }
