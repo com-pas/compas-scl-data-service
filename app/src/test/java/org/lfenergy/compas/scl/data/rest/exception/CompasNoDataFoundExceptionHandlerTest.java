@@ -4,7 +4,7 @@
 package org.lfenergy.compas.scl.data.rest.exception;
 
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.core.rest.model.ErrorResponse;
+import org.lfenergy.compas.core.jaxrs.model.ErrorResponse;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
