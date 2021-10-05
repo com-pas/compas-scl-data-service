@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest.exception;
 
-import org.lfenergy.compas.core.rest.model.ErrorResponse;
+import org.lfenergy.compas.core.jaxrs.model.ErrorResponse;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 
 import javax.ws.rs.core.Response;
