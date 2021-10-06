@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import static io.restassured.RestAssured.given;
 
 @QuarkusTest
-class HealthCheckTest {
+public class HealthCheckTest {
     @Test
     void testLivenessEndpoint() {
         given()
