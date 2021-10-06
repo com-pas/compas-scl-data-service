@@ -2,10 +2,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.scl.data;
+package org.lfenergy.compas.scl.data.rest;
 
 import io.quarkus.test.junit.NativeImageTest;
-import org.lfenergy.compas.scl.data.rest.HealthCheckTest;
 
 @NativeImageTest
 class NativeHealthCheckIT extends HealthCheckTest {
