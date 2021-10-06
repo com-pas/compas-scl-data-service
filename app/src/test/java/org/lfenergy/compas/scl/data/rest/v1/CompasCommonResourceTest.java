@@ -84,7 +84,8 @@ class CompasCommonResourceTest {
                 .response();
 
         var xmlPath = response.xmlPath();
-        var name = xmlPath.get("UserInfoResponse.Name");
-        assertEquals("Test User", name);
+        assertEquals("Test User", xmlPath.get("UserInfoResponse.Name"));
+        assertEquals(10, xmlPath.getInt("UserInfoResponse.SessionWarning"));
+        assertEquals(15, xmlPath.getInt("UserInfoResponse.SessionExpires"));
     }
 }

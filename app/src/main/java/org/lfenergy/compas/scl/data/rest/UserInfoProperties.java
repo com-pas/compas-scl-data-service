@@ -13,4 +13,10 @@ public interface UserInfoProperties {
 
     @WithName("who.claimname")
     String who();
+
+    @WithName("session.warning")
+    int sessionWarning();
+
+    @WithName("session.expires")
+    int sessionExpires();
 }

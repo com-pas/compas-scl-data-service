@@ -83,12 +83,15 @@ Below environment variable(s) can be used to configure the connection to BaseX, 
 | BASEX_USERNAME                   | basex.username            | Username under which the application logs in. | admin            |
 | BASEX_PASSWORD                   | basex.password            | Password of the username used above.          | admin            |
 
-Below environment variable(s) can be used to configure which claims are used to fill the UserInfo response.
+Below environment variable(s) can be used to configure which claims and information are used to fill the UserInfo
+response.
 
-| Environment variable             | Java Property                  | Description                                   | Example          |
-| -------------------------------- | ------------------------------ | --------------------------------------------- | ---------------- |
-| USERINFO_NAME_CLAIMNAME          | compas.userinfo.name.claimname | The Name of the user logged in.               | name             |
-| USERINFO_WHO_CLAIMNAME           | compas.userinfo.who.claimname  | The Name of the user used in the Who History. | name             |
+| Environment variable             | Java Property                   | Description                                                 | Example          |
+| -------------------------------- | ------------------------------- | ----------------------------------------------------------- | ---------------- |
+| USERINFO_NAME_CLAIMNAME          | compas.userinfo.name.claimname  | The Name of the user logged in.                             | name             |
+| USERINFO_WHO_CLAIMNAME           | compas.userinfo.who.claimname   | The Name of the user used in the Who History.               | name             |
+| USERINFO_SESSION_WARNING         | compas.userinfo.session.warning | Number of minutes a Session Warning can be displayed.       | 20               |
+| USERINFO_SESSION_EXPIRES         | compas.userinfo.session.expires | Number of minutes a Session Expires to display in Frontend. | 30               |
 
 ## Security
 
