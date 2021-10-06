@@ -14,6 +14,9 @@ SPDX-License-Identifier: Apache-2.0
     <packaging>pom</packaging>
 
     <properties>
+        <quarkus.container-image.group>lfenergycompas</quarkus.container-image.group>
+        <quarkus.container-image.name>compas-scl-data-service</quarkus.container-image.name>
+
         <maven.compiler.parameters>true</maven.compiler.parameters>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
