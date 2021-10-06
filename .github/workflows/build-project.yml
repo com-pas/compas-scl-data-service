@@ -24,5 +24,5 @@ jobs:
       with:
         output_file: custom_maven_settings.xml
         servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
-    - name: Build with Maven
-      run: ./mvnw -s custom_maven_settings.xml -B clean verify
+    - name: Build with Maven using the 'Native' profile
+      run: ./mvnw -s custom_maven_settings.xml -B clean verify -Pnative
