@@ -18,7 +18,10 @@ SPDX-License-Identifier: Apache-2.0
     <packaging>jar</packaging>
 
     <properties>
-        <quarkus.platform.version>2.2.3.Final</quarkus.platform.version>
+        <quarkus.platform.version>2.3.0.Final</quarkus.platform.version>
+
+        <quarkus.container-image.group>lfenergycompas</quarkus.container-image.group>
+        <quarkus.container-image.name>compas-scl-data-service</quarkus.container-image.name>
     </properties>
 
     <dependencyManagement>
@@ -50,7 +53,7 @@ SPDX-License-Identifier: Apache-2.0
         </dependency>
         <dependency>
             <groupId>org.lfenergy.compas.core</groupId>
-            <artifactId>rest-commons</artifactId>
+            <artifactId>jaxrs-commons</artifactId>
         </dependency>
 
         <dependency>
@@ -156,7 +159,9 @@ SPDX-License-Identifier: Apache-2.0
 
             <properties>
                 <quarkus.package.type>native</quarkus.package.type>
-                <quarkus.native.container-build>true</quarkus.native.container-build> <!-- Allows for creating a Linux executable without GraalVM being installed -->
+                <!-- Allows for creating a Linux executable without GraalVM being installed -->
+                <quarkus.native.container-build>true</quarkus.native.container-build>
+                <quarkus.native.additional-build-args>-H:ReflectionConfigurationFiles=reflection-config.json</quarkus.native.additional-build-args>
             </properties>
 
             <build>
@@ -202,8 +207,6 @@ SPDX-License-Identifier: Apache-2.0
             <properties>
                 <!-- Properties only used for publishing a native docker image (default to Docker Hub) -->
                 <quarkus.container-image.build>true</quarkus.container-image.build>
-                <quarkus.container-image.group>lfenergycompas</quarkus.container-image.group>
-                <quarkus.container-image.name>compas-scl-data-service</quarkus.container-image.name>
                 <quarkus.container-image.push>true</quarkus.container-image.push>
                 <quarkus.container-image.additional-tags>latest</quarkus.container-image.additional-tags>
             </properties>

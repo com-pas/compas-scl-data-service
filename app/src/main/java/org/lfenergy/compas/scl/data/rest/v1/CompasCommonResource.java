@@ -66,6 +66,8 @@ public class CompasCommonResource {
 
         var response = new UserInfoResponse();
         response.setName(jsonWebToken.getClaim(userInfoProperties.name()));
+        response.setSessionWarning(userInfoProperties.sessionWarning());
+        response.setSessionExpires(userInfoProperties.sessionExpires());
         return response;
     }
 }

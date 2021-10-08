@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <sonarqube-plugin.version>3.2.0</sonarqube-plugin.version>
 
-        <compas.core.version>0.4.0</compas.core.version>
+        <compas.core.version>0.5.0</compas.core.version>
         <jakarta-bind-api.version>2.3.3</jakarta-bind-api.version>
         <jaxb-impl.version>2.3.5</jaxb-impl.version>
         <jakarta-cdi-api.version>2.0.2</jakarta-cdi-api.version>
@@ -87,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0
             </dependency>
             <dependency>
                 <groupId>org.lfenergy.compas.core</groupId>
-                <artifactId>rest-commons</artifactId>
+                <artifactId>jaxrs-commons</artifactId>
                 <version>${compas.core.version}</version>
             </dependency>
 
