@@ -45,6 +45,9 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
 
     private static final String DECLARE_SCL_NS_URI = "declare namespace scl=\"" + SCL_NS_URI + "\";\n";
     private static final String DECLARE_COMPAS_NAMESPACE = "declare namespace compas=\"" + COMPAS_EXTENSION_NS_URI + "\";\n";
+    // This find method always searches for the latest version.
+    // Retrieve all versions using db:list-details function.
+    // Sort the result descending, this way the last version is the first.
     private static final String DECLARE_LATEST_VERSION_FUNC =
             "declare function local:latest-version($db as xs:string, $id as xs:string)\n" +
                     "   as document-node()? { \n" +
@@ -127,10 +130,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
 
     @Override
     public String findByUUID(SclType type, UUID id) {
-        // This find method always searches for the latest version.
-        // Retrieve all versions using db:list-details function.
-        // Sort the result descending, this way the last version is the first.
-        // Use this path to retrieve the document with the doc function.
+        // This find method always searches for the latest version and returns this.
         var result = executeQuery(type, DECLARE_SCL_NS_URI +
                 DECLARE_LATEST_VERSION_FUNC +
                 format(DECLARE_DB_VARIABLE, type) +
@@ -161,9 +161,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     @Override
     public SclMetaInfo findMetaInfoByUUID(SclType type, UUID id) {
         // This find method always searches for the latest version.
-        // Retrieve all versions using db:list-details function.
-        // Sort the result descending, this way the last version is the first.
-        // Use this path to retrieve the document with the doc function.
+        // Extracts the needed information from the document and returns this.
         var metaInfo = executeQuery(type, DECLARE_SCL_NS_URI +
                         DECLARE_COMPAS_NAMESPACE +
                         DECLARE_LATEST_VERSION_FUNC +
