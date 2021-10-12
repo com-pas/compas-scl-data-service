@@ -3,8 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.util;
 
-import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
+import org.lfenergy.compas.scl.data.model.Item;
+import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +33,22 @@ public class SclDataModelMarshaller {
         }
     }
 
-    public Item unmarshal(String xml) {
+    public Item unmarshalItem(String xml) {
+        return unmarshal(xml, Item.class);
+    }
+
+    public SclMetaInfo unmarshalSclMetaInfo(String xml) {
+        return unmarshal(xml, SclMetaInfo.class);
+    }
+
+    private <T> T unmarshal(String xml, Class<T> clazz) {
         try {
             var source = new StreamSource(new StringReader(xml));
-            return jaxbUnmarshaller.unmarshal(source, Item.class).getValue();
+            return jaxbUnmarshaller.unmarshal(source, clazz).getValue();
         } catch (JAXBException exp) {
-            LOGGER.error("Unmarshalling problem: {}", exp.getLocalizedMessage(), exp);
-            throw new CompasSclDataServiceException(UNMARSHAL_ERROR_CODE, "Error unmarshalling!");
+            LOGGER.error("Unmarshalling problem to class '{}': {}", clazz.getName(), exp.getLocalizedMessage(), exp);
+            throw new CompasSclDataServiceException(UNMARSHAL_ERROR_CODE, "Error unmarshalling to class '" +
+                    clazz.getName() + "'!");
         }
     }
 }

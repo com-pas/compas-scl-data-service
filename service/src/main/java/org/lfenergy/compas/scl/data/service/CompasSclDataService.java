@@ -4,7 +4,8 @@
 
 package org.lfenergy.compas.scl.data.service;
 
-import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
+import org.lfenergy.compas.core.commons.ElementConverter;
+import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
@@ -15,12 +16,15 @@ import org.w3c.dom.Element;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
-import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_SCL_ELEMENT_FOUND_ERROR_CODE;
 
 /**
  * Service class that will be using a Repository instance to retrieve, create, update, delete SCL XML Files.
@@ -29,11 +33,14 @@ import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCo
 @ApplicationScoped
 public class CompasSclDataService {
     private final CompasSclDataRepository repository;
+    private final ElementConverter converter;
     private final SclElementProcessor sclElementProcessor;
 
     @Inject
-    public CompasSclDataService(CompasSclDataRepository repository, SclElementProcessor sclElementProcessor) {
+    public CompasSclDataService(CompasSclDataRepository repository, ElementConverter converter,
+                                SclElementProcessor sclElementProcessor) {
         this.repository = repository;
+        this.converter = converter;
         this.sclElementProcessor = sclElementProcessor;
     }
 
@@ -65,7 +72,7 @@ public class CompasSclDataService {
      * @param id   The UUID of the record to search for.
      * @return The latest version of the SCL XML Files.
      */
-    public Element findByUUID(SclType type, UUID id) {
+    public String findByUUID(SclType type, UUID id) {
         return repository.findByUUID(type, id);
     }
 
@@ -77,7 +84,7 @@ public class CompasSclDataService {
      * @param version The version to search for.
      * @return The found version of the SCL XML Files.
      */
-    public Element findByUUID(SclType type, UUID id, Version version) {
+    public String findByUUID(SclType type, UUID id, Version version) {
         return repository.findByUUID(type, id, version);
     }
 
@@ -87,29 +94,31 @@ public class CompasSclDataService {
      *
      * @param type    The type to create it for.
      * @param name    The name that will be stored as CoMPAS Private extension.
-     * @param comment
-     * @param scl     The SCL XML File to store.
+     * @param comment Some comments that will be added to the THistory entry being added.
+     * @param sclData The SCL XML File to store.
      * @return The ID of the new created SCL XML File in the database.
      */
-    public UUID create(SclType type, String name, String who, String comment, Element scl) {
-        // Make sure the SCL Namespace is the default prefix.
-        sclElementProcessor.fixDefaultPrefix(scl);
+    public String create(SclType type, String name, String who, String comment, String sclData) {
+        var scl = converter.convertToElement(new BufferedInputStream(new ByteArrayInputStream(sclData.getBytes(StandardCharsets.UTF_8))), SCL_ELEMENT_NAME, SCL_NS_URI);
+        if (scl == null) {
+            throw new CompasException(NO_SCL_ELEMENT_FOUND_ERROR_CODE, "No valid SCL found in the passed SCL Data.");
+        }
 
         // A unique ID is generated to store it under.
         var id = UUID.randomUUID();
-        // When the SCL is create the version will be set to 1.0.0
+        // When the SCL is created the version will be set to 1.0.0
         var version = new Version(1, 0, 0);
-        var header = sclElementProcessor.getSclHeader(scl)
-                .orElseGet(() -> sclElementProcessor.addSclHeader(scl));
-        header.setAttribute(SCL_ID_ATTR, id.toString());
-        header.setAttribute(SCL_VERSION_ATTR, version.toString());
 
-        // Set name and type to SCL before storing the SCL.
-        setSclCompasPrivateElement(scl, Optional.empty(), Optional.of(name), type);
-        createHistoryItem(scl, "SCL created", who, comment, version);
+        // Update the Header of the SCL (or create if not exists.)
+        var header = createOrUpdateHeader(scl, id, version);
+        createHistoryItem(header, "SCL created", who, comment, version);
 
-        repository.create(type, id, scl, version);
-        return id;
+        // Update or add the Compas Private Element to the SCL File.
+        setSclCompasPrivateElement(scl, Optional.of(name), type);
+
+        var newSclData = converter.convertToString(scl);
+        repository.create(type, id, name, newSclData, version);
+        return newSclData;
     }
 
     /**
@@ -121,30 +130,30 @@ public class CompasSclDataService {
      * @param type          The type to update it for.
      * @param id            The UUID of the record to update.
      * @param changeSetType The type of change to determine the new version.
-     * @param comment
-     * @param scl           The SCL XML File with the updated content.
+     * @param comment       Some comments that will be added to the THistory entry being added.
+     * @param sclData       The SCL XML File with the updated content.
      */
-    public void update(SclType type, UUID id, ChangeSetType changeSetType, String who, String comment, Element scl) {
-        // Make sure the SCL Namespace is the default prefix.
-        sclElementProcessor.fixDefaultPrefix(scl);
+    public String update(SclType type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData) {
+        var scl = converter.convertToElement(new BufferedInputStream(new ByteArrayInputStream(sclData.getBytes(StandardCharsets.UTF_8))), SCL_ELEMENT_NAME, SCL_NS_URI);
+        if (scl == null) {
+            throw new CompasException(NO_SCL_ELEMENT_FOUND_ERROR_CODE, "No valid SCL found in the passed SCL Data.");
+        }
 
-        var currentScl = repository.findByUUID(type, id);
+        var currentSclMetaInfo = repository.findMetaInfoByUUID(type, id);
         // We always add a new version to the database, so add version record to the SCL and create a new record.
-        var currentHeader = sclElementProcessor.getSclHeader(currentScl)
-                .orElseThrow(() ->
-                        new CompasSclDataServiceException(HEADER_NOT_FOUND_ERROR_CODE, "Previous version doesn't contain header!"));
-        var version = new Version(currentHeader.getAttribute(SCL_VERSION_ATTR));
+        var version = new Version(currentSclMetaInfo.getVersion());
         version = version.getNextVersion(changeSetType);
-        var header = sclElementProcessor.getSclHeader(scl)
-                .orElseGet(() -> sclElementProcessor.addSclHeader(scl));
-        header.setAttribute(SCL_ID_ATTR, id.toString());
-        header.setAttribute(SCL_VERSION_ATTR, version.toString());
 
-        // Add name and type to SCL before storing the SCL.
-        setSclCompasPrivateElement(scl, Optional.of(currentScl), Optional.empty(), type);
-        createHistoryItem(scl, "SCL updated", who, comment, version);
+        // Update the Header of the SCL (or create if not exists.)
+        var header = createOrUpdateHeader(scl, id, version);
+        createHistoryItem(header, "SCL updated", who, comment, version);
 
-        repository.create(type, id, scl, version);
+        // Update or add the Compas Private Element to the SCL File.
+        setSclCompasPrivateElement(scl, Optional.ofNullable(currentSclMetaInfo.getName()), type);
+
+        var newSclData = converter.convertToString(scl);
+        repository.create(type, id, currentSclMetaInfo.getName(), newSclData, version);
+        return newSclData;
     }
 
     /**
@@ -169,35 +178,40 @@ public class CompasSclDataService {
     }
 
     /**
+     * Retrieve the Header from the SCL Fiel or create one if it doesn't exists and set the ID and
+     * version on the Header.
+     *
+     * @param scl     The SCL file to edit.
+     * @param id      The ID of the SCL File.
+     * @param version The Version of the SCL File.
+     * @return The header that was found or created.
+     */
+    private Element createOrUpdateHeader(Element scl, UUID id, Version version) {
+        var header = sclElementProcessor.getSclHeader(scl)
+                .orElseGet(() -> sclElementProcessor.addSclHeader(scl));
+        header.setAttribute(SCL_ID_ATTR, id.toString());
+        header.setAttribute(SCL_VERSION_ATTR, version.toString());
+        return header;
+    }
+
+    /**
      * Create/update the CoMPAS private element on the SCL Element for the given file.
      *
      * @param scl      The SCL file to edit.
-     * @param name     The name to add
+     * @param name     The name to add.
      * @param fileType The file type to add.
      */
-    private void setSclCompasPrivateElement(Element scl, Optional<Element> currentScl, Optional<String> name, SclType fileType) {
+    private void setSclCompasPrivateElement(Element scl, Optional<String> name, SclType fileType) {
         var compasPrivate = sclElementProcessor.getCompasPrivate(scl)
                 .orElseGet(() -> sclElementProcessor.addCompasPrivate(scl));
 
-        // If the new SCL contains the Name Element we will use that value (or set the new name if passed to this method)
-        // Otherwise if there is no Name Element there are 2 options, if the new name is passed that will be used to create a Name Element
-        // If no name is passed, but a previous version of the SCL exists, we will copy the Name Element from there.
         sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_NAME_EXTENSION)
                 .ifPresentOrElse(
                         // Override the value of the element with the name passed.
                         element -> name.ifPresent(element::setTextContent),
-                        () -> name.ifPresentOrElse(
+                        () -> name.ifPresent(
                                 // Add the Compas Element and give it a value with the name passed.
-                                value -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, value),
-                                // Retrieve the name from the previous version and copy that value, if present, to the
-                                // new Element that will be added.
-                                () -> currentScl
-                                        .flatMap(sclElementProcessor::getCompasPrivate)
-                                        .flatMap(previousCompasPrivate ->
-                                                sclElementProcessor.getChildNodeByName(previousCompasPrivate, COMPAS_SCL_NAME_EXTENSION))
-                                        .ifPresent(previousSclName ->
-                                                sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, previousSclName.getTextContent()))
-                        )
+                                value -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, value))
                 );
 
         // Always set the file type as private element.
@@ -211,20 +225,17 @@ public class CompasSclDataService {
     /**
      * Add a Hitem to the current or added History Element from the Header.
      *
-     * @param scl     The SCL file to edit.
+     * @param header  The header of SCL file to edit.
      * @param message The message set on the Hitem.
      * @param who     The user that made the change.
      * @param comment If filled the comment that will be added to the message.
      * @param version The version set on the Hitem.
      */
-    private void createHistoryItem(Element scl, String message, String who, String comment, Version version) {
+    private void createHistoryItem(Element header, String message, String who, String comment, Version version) {
         var fullmessage = message;
         if (comment != null && !comment.isBlank()) {
             fullmessage += ", " + comment;
         }
-
-        var header = sclElementProcessor.getSclHeader(scl)
-                .orElseGet(() -> sclElementProcessor.addSclHeader(scl));
         sclElementProcessor.addHistoryItem(header, who, fullmessage, version);
     }
 }

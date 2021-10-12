@@ -7,60 +7,21 @@ import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
-import static org.w3c.dom.Node.ELEMENT_NODE;
 
 /**
  * Support class to work with the SCL XML in a generic way as W3C Element/Node class.
  * This way multiple versions of the SCL XSD can easily be supported.
  */
 public class SclElementProcessor {
-    /**
-     * Make sure that the SCL XSD Namespace will be the default namespace used on the passed
-     * Node and all it's child nodes. Attributes aren't fixed, because these use the "null" namespace
-     * as they are marked as "unqualified" in the XSD (attributeFormDefault="unqualified").
-     *
-     * @param root The root node from which to start, will mostly be the SCL XML Element.
-     */
-    public void fixDefaultPrefix(Node root) {
-        var oldNamespacePrefixes = new HashSet<String>();
-        // Use a stack to walk through all child nodes.
-        var nodes = new ArrayDeque<Node>();
-        // Start with the root node.
-        nodes.push(root);
-
-        while (!nodes.isEmpty()) {
-            var node = nodes.pop();
-            if (SCL_NS_URI.equals(node.getNamespaceURI())
-                    && node.getPrefix() != null && !node.getPrefix().isBlank()) {
-                // The namespace is the SCL XSD Namespace, but with a prefix, so we will fix that.
-                oldNamespacePrefixes.add(node.getPrefix());
-                node.setPrefix("");
-            }
-
-            // Push all the Child Nodes (Type Element) on the Stack and continue with these.
-            NodeList childNodes = node.getChildNodes();
-            if (childNodes != null) {
-                for (int i = 0, count = childNodes.getLength(); i < count; ++i) {
-                    var childNode = childNodes.item(i);
-                    if (childNode.getNodeType() == ELEMENT_NODE) {
-                        nodes.push(childNode);
-                    }
-                }
-            }
-        }
-
-        oldNamespacePrefixes.forEach(
-                prefix -> root.getAttributes().removeNamedItem("xmlns:" + prefix)
-        );
-    }
-
     /**
      * Search for the SCL Header in the SCL Root Element and return that.
      *

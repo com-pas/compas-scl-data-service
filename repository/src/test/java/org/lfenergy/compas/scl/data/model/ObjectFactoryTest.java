@@ -21,4 +21,17 @@ class ObjectFactoryTest {
         assertEquals(Item.class, itemElement.getDeclaredType());
         assertEquals(item, itemElement.getValue());
     }
+
+    @Test
+    void createSclMetaInfo_WhenMethodsCalled_ThenObjectsAreCreated() {
+        var objectFactory = new ObjectFactory();
+
+        var metaInfo = objectFactory.createSclMetaInfo();
+        assertNotNull(metaInfo);
+
+        var sclMetaInfoElement = objectFactory.createSclMetaInfo(metaInfo);
+        assertNotNull(sclMetaInfoElement);
+        assertEquals(SclMetaInfo.class, sclMetaInfoElement.getDeclaredType());
+        assertEquals(metaInfo, sclMetaInfoElement.getValue());
+    }
 }

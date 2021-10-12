@@ -3,23 +3,23 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.repository;
 
-import org.lfenergy.compas.core.commons.ElementConverter;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.lfenergy.compas.scl.data.basex.BaseXClient;
 import org.lfenergy.compas.scl.data.basex.BaseXClientFactory;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.Item;
+import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.util.SclDataModelMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,15 +65,12 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
 
     private final BaseXClientFactory baseXClientFactory;
     private final SclDataModelMarshaller sclDataMarshaller;
-    private final ElementConverter elementConverter;
 
     @Inject
     public CompasSclDataBaseXRepository(BaseXClientFactory baseXClientFactory,
-                                        ElementConverter elementConverter,
                                         SclDataModelMarshaller sclDataMarshaller) {
         this.baseXClientFactory = baseXClientFactory;
         this.sclDataMarshaller = sclDataMarshaller;
-        this.elementConverter = elementConverter;
 
         // At startup create all needed databases.
         Arrays.stream(SclType.values()).forEach(type ->
@@ -100,7 +97,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         "   let $name := $latestScl//scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + COMPAS_SCL_NAME_EXTENSION + "\n" +
                         "   order by fn:lower-case($name)\n" +
                         "   return '<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>'",
-                sclDataMarshaller::unmarshal);
+                sclDataMarshaller::unmarshalItem);
     }
 
     @Override
@@ -119,7 +116,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         "   let $patchVersion := xs:int($parts[3])\n" +
                         "   order by $majorVersion, $minorVersion, $patchVersion\n" +
                         "   return '<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>' ",
-                sclDataMarshaller::unmarshal);
+                sclDataMarshaller::unmarshalItem);
 
         if (items.isEmpty()) {
             var message = String.format("No versions found for type '%s' with ID '%s'", type, id);
@@ -129,17 +126,16 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public Element findByUUID(SclType type, UUID id) {
+    public String findByUUID(SclType type, UUID id) {
         // This find method always searches for the latest version.
         // Retrieve all versions using db:list-details function.
         // Sort the result descending, this way the last version is the first.
         // Use this path to retrieve the document with the doc function.
         var result = executeQuery(type, DECLARE_SCL_NS_URI +
-                        DECLARE_LATEST_VERSION_FUNC +
-                        format(DECLARE_DB_VARIABLE, type) +
-                        format(DECLARE_ID_VARIABLE, id) +
-                        "local:latest-version($db, $id)",
-                xmlString -> elementConverter.convertToElement(xmlString, SCL_ELEMENT_NAME, SCL_NS_URI));
+                DECLARE_LATEST_VERSION_FUNC +
+                format(DECLARE_DB_VARIABLE, type) +
+                format(DECLARE_ID_VARIABLE, id) +
+                "local:latest-version($db, $id)");
 
         if (result.isEmpty()) {
             var message = String.format("No record found for type '%s' with ID '%s'", type, id);
@@ -149,12 +145,11 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public Element findByUUID(SclType type, UUID id, Version version) {
+    public String findByUUID(SclType type, UUID id, Version version) {
         // This find method searches for a specific version.
         var result = executeQuery(type, format(DECLARE_DB_VARIABLE, type) +
-                        format(DECLARE_PATH_VARIABLE, createDocumentPath(id, version)) +
-                        "db:open($db, $path)",
-                xmlString -> elementConverter.convertToElement(xmlString, SCL_ELEMENT_NAME, SCL_NS_URI));
+                format(DECLARE_PATH_VARIABLE, createDocumentPath(id, version)) +
+                "db:open($db, $path)");
 
         if (result.isEmpty()) {
             var message = String.format("No record found for type '%s' with ID '%s' and version '%s'", type, id, version);
@@ -164,8 +159,36 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public void create(SclType type, UUID id, Element scl, Version version) {
-        var inputStream = new ByteArrayInputStream(elementConverter.convertToString(scl).getBytes(StandardCharsets.UTF_8));
+    public SclMetaInfo findMetaInfoByUUID(SclType type, UUID id) {
+        // This find method always searches for the latest version.
+        // Retrieve all versions using db:list-details function.
+        // Sort the result descending, this way the last version is the first.
+        // Use this path to retrieve the document with the doc function.
+        var metaInfo = executeQuery(type, DECLARE_SCL_NS_URI +
+                        DECLARE_COMPAS_NAMESPACE +
+                        DECLARE_LATEST_VERSION_FUNC +
+                        format(DECLARE_DB_VARIABLE, type) +
+                        format(DECLARE_ID_VARIABLE, id) +
+                        "let $resource := local:latest-version($db, $id)" +
+                        "return if ($resource)\n" +
+                        "then (\n" +
+                        "  let $id := $resource/scl:SCL/scl:Header/@id\n" +
+                        "  let $name := $resource/scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + COMPAS_SCL_NAME_EXTENSION + "\n" +
+                        "  let $version := $resource/scl:SCL/scl:Header/@version\n" +
+                        "  return '<SclMetaInfo xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></SclMetaInfo>'\n" +
+                        ")\n",
+                sclDataMarshaller::unmarshalSclMetaInfo);
+
+        if (metaInfo.isEmpty()) {
+            var message = String.format("No meta info found for type '%s' with ID '%s'", type, id);
+            throw new CompasNoDataFoundException(message);
+        }
+        return metaInfo.get(0);
+    }
+
+    @Override
+    public void create(SclType type, UUID id, String name, String scl, Version version) {
+        var inputStream = new ReaderInputStream(new StringReader(scl), StandardCharsets.UTF_8);
         executeCommand(client -> {
             openDatabase(client, type);
             client.add(createDocumentPath(id, version) + "/scl.xml", inputStream);
@@ -195,6 +218,11 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                 + "/" + version.getMajorVersion()
                 + "/" + version.getMinorVersion()
                 + "/" + version.getPatchVersion();
+    }
+
+    private List<String> executeQuery(SclType type, String query) {
+        // When the Document (as String) is just returned without mapping.
+        return executeQuery(type, query, xmlString -> xmlString);
     }
 
     private <R> List<R> executeQuery(SclType type, String query, ResultRowMapper<R> mapper) {

@@ -8,13 +8,12 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.UUID;
 
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERVICE_V1_NS_URI;
 
-@XmlRootElement(name = "CreateResponse", namespace = SCL_DATA_SERVICE_V1_NS_URI)
+@XmlRootElement(name = "UpdateResponse", namespace = SCL_DATA_SERVICE_V1_NS_URI)
 @XmlAccessorType(XmlAccessType.FIELD)
-public class CreateResponse {
+public class UpdateResponse {
     @XmlElement(name = "SclData", namespace = SCL_DATA_SERVICE_V1_NS_URI, required = true)
     private String sclData;
 
