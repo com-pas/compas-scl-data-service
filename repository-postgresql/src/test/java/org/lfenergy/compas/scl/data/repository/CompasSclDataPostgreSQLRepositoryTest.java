@@ -52,7 +52,7 @@ class CompasSclDataPostgreSQLRepositoryTest {
     }
 
     @Test
-    void findMetaInfoByUUID_WhenCalledWithVersion_ThenUnsupportedExceptionThrown() {
+    void findMetaInfoByUUID_WhenCalled_ThenUnsupportedExceptionThrown() {
         var uuid = UUID.randomUUID();
         assertThrows(UnsupportedOperationException.class, () -> {
             repository.findMetaInfoByUUID(SclType.SCD, uuid);
