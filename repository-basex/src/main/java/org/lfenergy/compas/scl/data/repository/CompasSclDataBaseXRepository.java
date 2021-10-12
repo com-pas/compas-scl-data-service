@@ -66,6 +66,10 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     private static final String DECLARE_ID_VARIABLE = "declare variable $id := '%s';\n";
     private static final String DECLARE_PATH_VARIABLE = "declare variable $path := '%s';\n";
 
+    private static final String SCL_HEADER_ID_XPATH = "/scl:SCL/scl:Header/@id";
+    private static final String SCL_HEADER_VERSION_XPATH = "/scl:SCL/scl:Header/@version";
+    private static final String COMPAS_NAME_EXTENSION_XPATH = "/scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + COMPAS_SCL_NAME_EXTENSION;
+
     private final BaseXClientFactory baseXClientFactory;
     private final SclDataModelMarshaller sclDataMarshaller;
 
@@ -93,11 +97,11 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         DECLARE_LATEST_VERSION_FUNC +
                         format(DECLARE_DB_VARIABLE, type) +
                         "for $resource in db:open($db)\n" +
-                        "   let $id := $resource/scl:SCL/scl:Header/@id\n" +
+                        "   let $id := $resource" + SCL_HEADER_ID_XPATH + "\n" +
                         "   group by $id\n" +
                         "   let $latestScl := local:latest-version($db, $id)\n" +
-                        "   let $version := $latestScl//scl:SCL/scl:Header/@version\n" +
-                        "   let $name := $latestScl//scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + COMPAS_SCL_NAME_EXTENSION + "\n" +
+                        "   let $version := $latestScl" + SCL_HEADER_VERSION_XPATH + "\n" +
+                        "   let $name := $latestScl" + COMPAS_NAME_EXTENSION_XPATH + "\n" +
                         "   order by fn:lower-case($name)\n" +
                         "   return '<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>'",
                 sclDataMarshaller::unmarshalItem);
@@ -110,9 +114,9 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         format(DECLARE_DB_VARIABLE, type) +
                         format(DECLARE_ID_VARIABLE, id) +
                         "for $resource in db:open($db, $id)\n" +
-                        "   let $id := $resource/scl:SCL/scl:Header/@id\n" +
-                        "   let $name := $resource/scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + COMPAS_SCL_NAME_EXTENSION + "\n" +
-                        "   let $version := $resource/scl:SCL/scl:Header/@version\n" +
+                        "   let $id := $resource" + SCL_HEADER_ID_XPATH + "\n" +
+                        "   let $version := $resource" + SCL_HEADER_VERSION_XPATH + "\n" +
+                        "   let $name := $resource" + COMPAS_NAME_EXTENSION_XPATH + "\n" +
                         "   let $parts := tokenize($version, '\\.')\n" +
                         "   let $majorVersion := xs:int($parts[1])\n" +
                         "   let $minorVersion := xs:int($parts[2])\n" +
@@ -170,9 +174,9 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         "let $resource := local:latest-version($db, $id)" +
                         "return if ($resource)\n" +
                         "then (\n" +
-                        "  let $id := $resource/scl:SCL/scl:Header/@id\n" +
-                        "  let $name := $resource/scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + COMPAS_SCL_NAME_EXTENSION + "\n" +
-                        "  let $version := $resource/scl:SCL/scl:Header/@version\n" +
+                        "  let $id := $resource" + SCL_HEADER_ID_XPATH + "\n" +
+                        "  let $version := $resource" + SCL_HEADER_VERSION_XPATH + "\n" +
+                        "  let $name := $resource" + COMPAS_NAME_EXTENSION_XPATH + "\n" +
                         "  return '<SclMetaInfo xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></SclMetaInfo>'\n" +
                         ")\n",
                 sclDataMarshaller::unmarshalSclMetaInfo);
