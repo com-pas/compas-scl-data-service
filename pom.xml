@@ -29,6 +29,7 @@ SPDX-License-Identifier: Apache-2.0
         <jaxb-impl.version>2.3.5</jaxb-impl.version>
         <jakarta-cdi-api.version>2.0.2</jakarta-cdi-api.version>
         <microprofile-config-api.version>2.0</microprofile-config-api.version>
+        <apache.commons-io.version>2.11.0</apache.commons-io.version>
         <slf4j.version>1.7.32</slf4j.version>
 
         <!-- Test -->
@@ -112,6 +113,12 @@ SPDX-License-Identifier: Apache-2.0
                 <version>${microprofile-config-api.version}</version>
             </dependency>
             <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${apache.commons-io.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
@@ -120,11 +127,6 @@ SPDX-License-Identifier: Apache-2.0
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>1.2</version>
             </dependency>
 
             <!-- Test -->

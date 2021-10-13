@@ -18,4 +18,13 @@ public class ObjectFactory {
     public JAXBElement<Item> createItem(Item value) {
         return new JAXBElement<>(new QName("", ""), Item.class, value);
     }
+
+    public SclMetaInfo createSclMetaInfo() {
+        return new SclMetaInfo();
+    }
+
+    @XmlElementDecl(namespace = "", name = "SclMetaInfo")
+    public JAXBElement<SclMetaInfo> createSclMetaInfo(SclMetaInfo value) {
+        return new JAXBElement<>(new QName("", ""), SclMetaInfo.class, value);
+    }
 }

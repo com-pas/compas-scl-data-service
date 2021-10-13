@@ -4,9 +4,9 @@
 package org.lfenergy.compas.scl.data.repository;
 
 import org.lfenergy.compas.scl.data.model.Item;
+import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
-import org.w3c.dom.Element;
 
 import java.util.List;
 import java.util.UUID;
@@ -40,7 +40,16 @@ public interface CompasSclDataRepository {
      * @param id   The ID of the SCL to search for.
      * @return The SCL XML File Content that is search for.
      */
-    Element findByUUID(SclType type, UUID id);
+    String findByUUID(SclType type, UUID id);
+
+    /**
+     * Return the meta info of the latest version of a specific SCL Entry.
+     *
+     * @param type The type of SCL to search for the specific SCL.
+     * @param id   The ID of the SCL to search for.
+     * @return The Meta Info of SCL Entry that is search for.
+     */
+    SclMetaInfo findMetaInfoByUUID(SclType type, UUID id);
 
     /**
      * Return the specific version of a specific SCL Entry.
@@ -50,7 +59,7 @@ public interface CompasSclDataRepository {
      * @param version The version of the ScL to search for.
      * @return The SCL XML File Content that is search for.
      */
-    Element findByUUID(SclType type, UUID id, Version version);
+    String findByUUID(SclType type, UUID id, Version version);
 
     /**
      * Create a new entry for the passed UUID with the version number passed.
@@ -61,10 +70,11 @@ public interface CompasSclDataRepository {
      *
      * @param type    The type of SCL to store it in.
      * @param id      The ID of the new entry to be created.
+     * @param name    The name of the SCL to be stored.
      * @param scl     The SCL XML File content to store.
      * @param version The version of the new entry to be created.
      */
-    void create(SclType type, UUID id, Element scl, Version version);
+    void create(SclType type, UUID id, String name, String scl, Version version);
 
     /**
      * Delete all versions for a specific SCL File using it's ID.

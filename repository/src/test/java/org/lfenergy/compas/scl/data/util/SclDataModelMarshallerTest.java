@@ -12,14 +12,14 @@ import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCo
 
 class SclDataModelMarshallerTest {
     @Test
-    void unmarshal_WhenItemXMLPassed_ThenItemObjectReturned() {
+    void unmarshalItem_WhenItemXMLPassed_ThenItemObjectReturned() {
         var id = "ID";
         var name = "NAME";
         var version = "VERSION";
         var xml = "<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>" + id + "</Id><Name>" + name + "</Name><Version>" + version + "</Version></Item>";
 
         var marshaller = new SclDataModelMarshaller();
-        var item = marshaller.unmarshal(xml);
+        var item = marshaller.unmarshalItem(xml);
 
         assertNotNull(item);
         assertEquals(id, item.getId());
@@ -28,12 +28,39 @@ class SclDataModelMarshallerTest {
     }
 
     @Test
-    void unmarshal_WhenInvalidXMLPassed_ThenExceptionThrown() {
+    void unmarshalItem_WhenInvalidXMLPassed_ThenExceptionThrown() {
         var xml = "<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"></Item Invalid>";
 
         var marshaller = new SclDataModelMarshaller();
         var exception = assertThrows(CompasSclDataServiceException.class, () -> {
-            marshaller.unmarshal(xml);
+            marshaller.unmarshalItem(xml);
+        });
+        assertEquals(UNMARSHAL_ERROR_CODE, exception.getErrorCode());
+    }
+
+    @Test
+    void unmarshalSclMetaInfo_WhenItemXMLPassed_ThenItemObjectReturned() {
+        var id = "ID";
+        var name = "NAME";
+        var version = "VERSION";
+        var xml = "<SclMetaInfo xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>" + id + "</Id><Name>" + name + "</Name><Version>" + version + "</Version></SclMetaInfo>";
+
+        var marshaller = new SclDataModelMarshaller();
+        var item = marshaller.unmarshalSclMetaInfo(xml);
+
+        assertNotNull(item);
+        assertEquals(id, item.getId());
+        assertEquals(name, item.getName());
+        assertEquals(version, item.getVersion());
+    }
+
+    @Test
+    void unmarshalSclMetaInfo_WhenInvalidXMLPassed_ThenExceptionThrown() {
+        var xml = "<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"></Item Invalid>";
+
+        var marshaller = new SclDataModelMarshaller();
+        var exception = assertThrows(CompasSclDataServiceException.class, () -> {
+            marshaller.unmarshalSclMetaInfo(xml);
         });
         assertEquals(UNMARSHAL_ERROR_CODE, exception.getErrorCode());
     }

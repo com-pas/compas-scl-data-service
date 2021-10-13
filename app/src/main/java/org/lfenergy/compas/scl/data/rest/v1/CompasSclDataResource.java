@@ -5,7 +5,6 @@ package org.lfenergy.compas.scl.data.rest.v1;
 
 import io.quarkus.security.Authenticated;
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
@@ -30,7 +29,6 @@ public class CompasSclDataResource {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataResource.class);
 
     private final CompasSclDataService compasSclDataService;
-    private final ElementConverter converter;
 
     @Inject
     JsonWebToken jsonWebToken;
@@ -39,10 +37,8 @@ public class CompasSclDataResource {
     UserInfoProperties userInfoProperties;
 
     @Inject
-    public CompasSclDataResource(CompasSclDataService compasSclDataService,
-                                 ElementConverter converter) {
+    public CompasSclDataResource(CompasSclDataService compasSclDataService) {
         this.compasSclDataService = compasSclDataService;
-        this.converter = converter;
     }
 
     @POST
@@ -54,7 +50,8 @@ public class CompasSclDataResource {
         LOGGER.trace("Username used for Who {}", who);
 
         var response = new CreateResponse();
-        response.setId(compasSclDataService.create(type, request.getName(), who, request.getComment(), request.getElements().get(0)));
+        response.setSclData(compasSclDataService.create(type, request.getName(), who, request.getComment(),
+                request.getSclData()));
         return response;
     }
 
@@ -83,7 +80,7 @@ public class CompasSclDataResource {
     public GetResponse findByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
                                   @PathParam(ID_PATH_PARAM) UUID id) {
         var response = new GetResponse();
-        response.setScl(compasSclDataService.findByUUID(type, id));
+        response.setSclData(compasSclDataService.findByUUID(type, id));
         return response;
     }
 
@@ -94,40 +91,24 @@ public class CompasSclDataResource {
                                             @PathParam(ID_PATH_PARAM) UUID id,
                                             @PathParam(VERSION_PATH_PARAM) Version version) {
         var response = new GetResponse();
-        response.setScl(compasSclDataService.findByUUID(type, id, version));
+        response.setSclData(compasSclDataService.findByUUID(type, id, version));
         return response;
-    }
-
-    @GET
-    @Path("/{" + ID_PATH_PARAM + "}/scl")
-    @Produces(MediaType.APPLICATION_XML)
-    public String findRawSCLByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                   @PathParam(ID_PATH_PARAM) UUID id) {
-        var scl = compasSclDataService.findByUUID(type, id);
-        return converter.convertToString(scl, false);
-    }
-
-    @GET
-    @Path("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}/scl")
-    @Produces(MediaType.APPLICATION_XML)
-    public String findRawSCLByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
-                                             @PathParam(ID_PATH_PARAM) UUID id,
-                                             @PathParam(VERSION_PATH_PARAM) Version version) {
-        var scl = compasSclDataService.findByUUID(type, id, version);
-        return converter.convertToString(scl, false);
     }
 
     @PUT
     @Path("/{" + ID_PATH_PARAM + "}")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public void update(@PathParam(TYPE_PATH_PARAM) SclType type,
-                       @PathParam(ID_PATH_PARAM) UUID id,
-                       @Valid UpdateRequest request) {
+    public UpdateResponse update(@PathParam(TYPE_PATH_PARAM) SclType type,
+                                 @PathParam(ID_PATH_PARAM) UUID id,
+                                 @Valid UpdateRequest request) {
         String who = jsonWebToken.getClaim(userInfoProperties.who());
         LOGGER.trace("Username used for Who {}", who);
 
-        compasSclDataService.update(type, id, request.getChangeSetType(), who, request.getComment(), request.getElements().get(0));
+        var response = new UpdateResponse();
+        response.setSclData(compasSclDataService.update(type, id, request.getChangeSetType(), who, request.getComment(),
+                request.getSclData()));
+        return response;
     }
 
     @DELETE
