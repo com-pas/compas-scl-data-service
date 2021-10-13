@@ -10,7 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class CompasSclDataServiceConfigurationTest {
     @Test
     void constructor_WhenCalled_ThenNoExceptions() {
-        new CompasSclDataServiceConfiguration();
+        var config = new CompasSclDataServiceConfiguration();
+        assertNotNull(config);
     }
 
     @Test

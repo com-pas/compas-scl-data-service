@@ -5,9 +5,12 @@ package org.lfenergy.compas.scl.data.rest;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 class CompasReflectionConfigurationTest {
     @Test
     void constructor_WhenCalled_ThenNoExceptions() {
-        new CompasReflectionConfiguration();
+        var config = new CompasReflectionConfiguration();
+        assertNotNull(config);
     }
 }
