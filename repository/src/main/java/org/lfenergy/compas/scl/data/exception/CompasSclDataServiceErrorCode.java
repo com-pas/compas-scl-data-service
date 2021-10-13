@@ -12,6 +12,7 @@ public class CompasSclDataServiceErrorCode {
     public static final String CREATION_ERROR_CODE = "SDS-0002";
     public static final String UNMARSHAL_ERROR_CODE = "SDS-0003";
     public static final String HEADER_NOT_FOUND_ERROR_CODE = "SDS-0004";
+    public static final String NO_SCL_ELEMENT_FOUND_ERROR_CODE = "SDS-0005";
 
     public static final String BASEX_CLIENT_CREATION_ERROR_CODE = "SDS-1000";
     public static final String BASEX_QUERY_ERROR_CODE = "SDS-1001";

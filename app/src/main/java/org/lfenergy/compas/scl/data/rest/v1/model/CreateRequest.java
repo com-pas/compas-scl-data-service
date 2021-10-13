@@ -6,15 +6,13 @@ package org.lfenergy.compas.scl.data.rest.v1.model;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.lfenergy.compas.core.commons.constraint.FilenameValid;
-import org.lfenergy.compas.core.commons.constraint.XmlAnyElementValid;
-import org.w3c.dom.Element;
 
-import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.*;
-import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERVICE_V1_NS_URI;
-import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_NS_URI;
 
 @Schema(description = "A request to create a new entry in the database containing the SCL Element content.")
 @XmlRootElement(name = "CreateRequest", namespace = SCL_DATA_SERVICE_V1_NS_URI)
@@ -30,11 +28,8 @@ public class CreateRequest {
     @XmlElement(name = "Comment", namespace = SCL_DATA_SERVICE_V1_NS_URI)
     private String comment;
 
-    @Size(min = 1, max = 1, message = "{org.lfenergy.compas.XmlAnyElementValid.moreElements.message}")
-    @XmlAnyElementValid(elementName = "SCL", elementNamespace = SCL_NS_URI)
-    @Schema(description = "Can contain one element, named 'SCL', containing a SCL XML Definition")
-    @XmlAnyElement
-    private List<Element> elements;
+    @XmlElement(name = "SclData", namespace = SCL_DATA_SERVICE_V1_NS_URI)
+    private String sclData;
 
     public String getName() {
         return name;
@@ -52,12 +47,12 @@ public class CreateRequest {
         this.comment = comment;
     }
 
-    public List<Element> getElements() {
-        return elements;
+    public String getSclData() {
+        return sclData;
     }
 
-    public void setElements(List<Element> elements) {
-        this.elements = elements;
+    public void setSclData(String sclData) {
+        this.sclData = sclData;
     }
 }
 

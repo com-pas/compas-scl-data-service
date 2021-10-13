@@ -4,12 +4,9 @@
 
 package org.lfenergy.compas.scl.data.rest.v1.model;
 
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.w3c.dom.Element;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERVICE_V1_NS_URI;
@@ -17,15 +14,14 @@ import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERV
 @XmlRootElement(name = "GetResponse", namespace = SCL_DATA_SERVICE_V1_NS_URI)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GetResponse {
-    @Schema(example = "SCL XML...")
-    @XmlAnyElement
-    protected Element scl;
+    @XmlElement(name = "SclData", namespace = SCL_DATA_SERVICE_V1_NS_URI, required = true)
+    private String sclData;
 
-    public Element getScl() {
-        return scl;
+    public String getSclData() {
+        return sclData;
     }
 
-    public void setScl(Element scl) {
-        this.scl = scl;
+    public void setSclData(String sclData) {
+        this.sclData = sclData;
     }
 }
