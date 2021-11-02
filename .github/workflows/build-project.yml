@@ -7,13 +7,13 @@ name: Build Project
 on:
   push:
     branches:
-      - /refs/heads/*
-      - !main
-      - !develop
+      - '*'
+      - '!main'
+      - '!develop'
   pull_request:
     branches:
-      - main
-      - develop
+      - 'main'
+      - 'develop'
 
 jobs:
   build:
