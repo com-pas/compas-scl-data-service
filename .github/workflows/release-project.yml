@@ -23,7 +23,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-      - name: Cache register
+      - name: Cache Docker Register
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
