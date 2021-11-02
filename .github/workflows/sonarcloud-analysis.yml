@@ -4,7 +4,7 @@
 
 name: SonarCloud Analysis
 
-on: [ pull_request, push ]
+on: push
 
 jobs:
   build:
