@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest.v1.model;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.lfenergy.compas.scl.data.model.Item;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -13,9 +14,11 @@ import java.util.List;
 
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERVICE_V1_NS_URI;
 
+@Schema(description = "Response from retrieving a all SCL Meta Information for a SCL Type or all versions of a SCL.")
 @XmlRootElement(name = "ListResponse", namespace = SCL_DATA_SERVICE_V1_NS_URI)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ListResponse {
+    @Schema(description = "List of found SCL Entries in the database.")
     @XmlElement(name = "Item", namespace = SCL_DATA_SERVICE_V1_NS_URI)
     private List<Item> items;
 

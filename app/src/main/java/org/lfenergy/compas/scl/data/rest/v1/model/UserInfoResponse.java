@@ -12,18 +12,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERVICE_V1_NS_URI;
 
+@Schema(description = "Response with User information, like name and session timeouts.")
 @XmlRootElement(name = "UserInfoResponse", namespace = SCL_DATA_SERVICE_V1_NS_URI)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class UserInfoResponse {
-    @Schema(description = "The name of the user retrieved from the JWT Claim.")
+    @Schema(description = "The name of the user retrieved from the JWT Claim.",
+            example = "John Johnson")
     @XmlElement(name = "Name", namespace = SCL_DATA_SERVICE_V1_NS_URI)
     private String name;
 
-    @Schema(description = "The number of minutes when the frontend isn't used and a warning message will be shown.")
+    @Schema(description = "The number of minutes when the frontend isn't used and a warning message will be shown.",
+            example = "20")
     @XmlElement(name = "SessionWarning", namespace = SCL_DATA_SERVICE_V1_NS_URI)
     private int sessionWarning;
 
-    @Schema(description = "The number of minutes when the session will expire and a expired message will be shown if the frontend isn't used.")
+    @Schema(description = "The number of minutes when the session will expire and a expired message will be shown if the frontend isn't used.",
+            example = "30")
     @XmlElement(name = "SessionExpires", namespace = SCL_DATA_SERVICE_V1_NS_URI)
     private int sessionExpires;
 

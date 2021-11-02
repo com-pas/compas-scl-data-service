@@ -3,15 +3,20 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.model;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 
 import java.util.Objects;
 
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.UNKNOWN_CHANGE_SET_TYPE_ERROR_CODE;
 
+@Schema(description = "Presenting the version logic used in CoMPAS.")
 public class Version {
+    @Schema(description = "The major version.", example = "2")
     private final int majorVersion;
+    @Schema(description = "The minor version.", example = "1")
     private final int minorVersion;
+    @Schema(description = "The patch version.", example = "3")
     private final int patchVersion;
 
     public Version(String version) {
