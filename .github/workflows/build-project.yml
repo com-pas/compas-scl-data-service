@@ -4,7 +4,16 @@
 
 name: Build Project
 
-on: push
+on:
+  push:
+    branches:
+      - /refs/heads/*
+      - !main
+      - !develop
+  pull_request:
+    branches:
+      - main
+      - develop
 
 jobs:
   build:
