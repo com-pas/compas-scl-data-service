@@ -29,6 +29,7 @@ SPDX-License-Identifier: Apache-2.0
         <jaxb-impl.version>2.3.5</jaxb-impl.version>
         <jakarta-cdi-api.version>2.0.2</jakarta-cdi-api.version>
         <microprofile-config-api.version>2.0</microprofile-config-api.version>
+        <microprofile-openapi-api.version>2.0.1-RC1</microprofile-openapi-api.version>
         <apache.commons-io.version>2.11.0</apache.commons-io.version>
         <slf4j.version>1.7.32</slf4j.version>
 
@@ -112,6 +113,12 @@ SPDX-License-Identifier: Apache-2.0
                 <artifactId>microprofile-config-api</artifactId>
                 <version>${microprofile-config-api.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.eclipse.microprofile.openapi</groupId>
+                <artifactId>microprofile-openapi-api</artifactId>
+                <version>${microprofile-openapi-api.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>

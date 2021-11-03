@@ -3,31 +3,36 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.model;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERVICE_V1_NS_URI;
 
+@Schema(description = "Item found in the database with all basic information about a SCL.")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Item {
-    @XmlElement(
-            name = "Id",
+    @Schema(description = "The ID of the SCL as stored in the database. Often a UUID.",
+            example = "123e4567-e89b-12d3-a456-426614174000")
+    @XmlElement(name = "Id",
             namespace = SCL_DATA_SERVICE_V1_NS_URI,
-            required = true
-    )
+            required = true)
     private String id;
-    @XmlElement(
-            name = "Name",
+
+    @Schema(description = "The name of the SCL. This can also be used as part of the filename.",
+            example = "STATION-0012312")
+    @XmlElement(name = "Name",
             namespace = SCL_DATA_SERVICE_V1_NS_URI,
-            required = true
-    )
+            required = true)
     private String name;
-    @XmlElement(
-            name = "Version",
+
+    @Schema(description = "The version of the SCL.",
+            example = "1.2.4")
+    @XmlElement(name = "Version",
             namespace = SCL_DATA_SERVICE_V1_NS_URI,
-            required = true
-    )
+            required = true)
     private String version;
 
     public Item() {
