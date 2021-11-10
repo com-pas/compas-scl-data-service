@@ -4,6 +4,9 @@
 
 package org.lfenergy.compas.scl.data.model;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+@Schema(description = "Type of SCL stored. Used for filtering later.")
 public enum SclType {
     SSD("Substation Specification Description"),
     IID("IED Instance Description"),

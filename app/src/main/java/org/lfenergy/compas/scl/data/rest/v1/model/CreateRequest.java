@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERVICE_V1_NS_URI;
 
-@Schema(description = "A request to create a new entry in the database containing the SCL Element content.")
+@Schema(description = "Request to create a new entry in the database containing the SCL Element content.")
 @XmlRootElement(name = "CreateRequest", namespace = SCL_DATA_SERVICE_V1_NS_URI)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CreateRequest {
@@ -24,10 +24,12 @@ public class CreateRequest {
     @XmlElement(name = "Name", namespace = SCL_DATA_SERVICE_V1_NS_URI, required = true)
     private String name;
 
-    @Schema(description = "Comment that will be added to the new history record.")
+    @Schema(description = "Comment that will be added to the new history record.", example = "New substation configuration for X")
     @XmlElement(name = "Comment", namespace = SCL_DATA_SERVICE_V1_NS_URI)
     private String comment;
 
+    @Schema(description = "The XML Content of the SCL added as CDATA. The content should contain a XML according to the IEC 61850 standard.",
+            example = "<![CDATA[<SCL xmlns=\"http://www.iec.ch/61850/2003/SCL\">....</SCL>]]")
     @XmlElement(name = "SclData", namespace = SCL_DATA_SERVICE_V1_NS_URI)
     private String sclData;
 
