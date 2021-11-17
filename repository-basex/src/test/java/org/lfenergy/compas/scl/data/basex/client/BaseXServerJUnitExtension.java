@@ -34,7 +34,7 @@ public class BaseXServerJUnitExtension implements BeforeAllCallback, ExtensionCo
             server = createServer(portNumber);
 
             // The following line registers a callback hook when the root test context is shut down
-            context.getRoot().getStore(GLOBAL).put("PostgreSQLServerJUnitExtension", this);
+            context.getRoot().getStore(GLOBAL).put("BaseXServerJUnitExtension", this);
         }
         // free the access
         lock.unlock();
