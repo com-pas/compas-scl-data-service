@@ -24,7 +24,6 @@ public class PostgreSQLServerJUnitExtension implements BeforeAllCallback, Extens
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLServerJUnitExtension.class);
 
     private static EmbeddedPostgres pg;
-    private static DataSource dataSource;
 
     // Gate keeper to prevent multiple Threads within the same routine
     private final static Lock lock = new ReentrantLock();
@@ -33,15 +32,12 @@ public class PostgreSQLServerJUnitExtension implements BeforeAllCallback, Extens
     public void beforeAll(final ExtensionContext context) throws Exception {
         // lock the access so only one Thread has access to it
         lock.lock();
-        if (dataSource == null) {
+        if (pg == null) {
             pg = EmbeddedPostgres.builder()
                     .start();
 
-            // It does not matter which database it will be after all. We just use the default.
-            dataSource = pg.getPostgresDatabase();
-
             // We will also run Flyway to upgrade the database.
-            CompasFlywayMigrator migrator = new CompasFlywayMigrator(dataSource);
+            CompasFlywayMigrator migrator = new CompasFlywayMigrator(pg.getPostgresDatabase());
             migrator.migrate();
 
             // The following line registers a callback hook when the root test context is shut down
@@ -61,6 +57,7 @@ public class PostgreSQLServerJUnitExtension implements BeforeAllCallback, Extens
     }
 
     public static DataSource getDataSource() {
-        return dataSource;
+        // It does not matter which database it will be after all. We just use the default.
+        return pg.getPostgresDatabase();
     }
 }

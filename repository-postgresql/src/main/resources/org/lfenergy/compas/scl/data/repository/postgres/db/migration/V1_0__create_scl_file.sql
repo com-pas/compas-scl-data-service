@@ -15,7 +15,7 @@ create table scl_file (
     type varchar(3) not null,
     name varchar(255) not null,
     scl_data text not null,
-    primary key (id, version)
+    primary key (id, major_version, minor_version, patch_version)
 );
 
 create index scl_file_type on scl_file(type);
