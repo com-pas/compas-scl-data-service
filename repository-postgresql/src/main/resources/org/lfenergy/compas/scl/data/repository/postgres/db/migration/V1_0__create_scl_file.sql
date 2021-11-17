@@ -1,3 +1,9 @@
+/**
+  SPDX-FileCopyrightText: 2021 Alliander N.V.
+
+  SPDX-License-Identifier: Apache-2.0
+*/
+
 --
 -- Creating table to hold SCL Data. The SCL is identified by it's ID, but there can be multiple versions.
 --
