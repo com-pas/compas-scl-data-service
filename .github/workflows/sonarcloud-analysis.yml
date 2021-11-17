@@ -56,7 +56,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./mvnw -s custom_maven_settings.xml -B -Pbasex,sonar \
+          ./mvnw -s custom_maven_settings.xml -B -P basex,sonar \
           -Dsonar.projectKey=com-pas_compas-scl-data-service \
           -Dsonar.organization=com-pas \
           -Dsonar.host.url=https://sonarcloud.io \
