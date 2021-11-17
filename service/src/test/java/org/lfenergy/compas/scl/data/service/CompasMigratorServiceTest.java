@@ -10,8 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CompasMigratorServiceTest {
@@ -23,8 +23,9 @@ class CompasMigratorServiceTest {
 
     @Test
     void migrate_WhenCalled_ThenMigratorIsCalled() {
-        compasMigratorService.migrate();
+        when(compasMigrator.migrate()).thenReturn(true);
 
+        assertTrue(compasMigratorService.migrate());
         verify(compasMigrator, times(1)).migrate();
     }
 }

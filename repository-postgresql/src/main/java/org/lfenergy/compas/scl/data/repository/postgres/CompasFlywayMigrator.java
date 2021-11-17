@@ -39,9 +39,10 @@ public class CompasFlywayMigrator implements CompasMigrator {
     }
 
     @Override
-    public void migrate() {
+    public boolean migrate() {
         // After the bean is created we will execute the migration to the latest version.
         LOGGER.info("Migrating database using Flyway.");
-        flyway.migrate();
+        var result = flyway.migrate();
+        return result.success;
     }
 }

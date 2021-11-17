@@ -17,7 +17,7 @@ public class CompasMigratorService {
         this.compasMigrator = compasMigrator;
     }
 
-    public void migrate() {
-        compasMigrator.migrate();
+    public boolean migrate() {
+        return compasMigrator.migrate();
     }
 }

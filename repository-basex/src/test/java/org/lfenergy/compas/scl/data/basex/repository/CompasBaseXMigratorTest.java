@@ -8,6 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @ExtendWith({MockitoExtension.class})
 class CompasBaseXMigratorTest {
     @InjectMocks
@@ -16,7 +18,7 @@ class CompasBaseXMigratorTest {
     @Test
     void migrate_WhenCalled_ThenMigratorIsCalled() {
         // Call should just work, because nothing is done.
-        compasBaseXMigrator.migrate();
+        assertTrue(compasBaseXMigrator.migrate());
     }
 
 }

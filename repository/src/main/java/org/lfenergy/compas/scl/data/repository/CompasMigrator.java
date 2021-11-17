@@ -10,6 +10,8 @@ package org.lfenergy.compas.scl.data.repository;
 public interface CompasMigrator {
     /**
      * Method called to migrate the database to the new version of the software.
+     *
+     * @return Indicates if the migrations was successful.
      */
-    void migrate();
+    boolean migrate();
 }

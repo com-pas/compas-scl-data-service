@@ -13,7 +13,8 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class CompasBaseXMigrator implements CompasMigrator {
     @Override
-    public void migrate() {
+    public boolean migrate() {
         // For now there is no migration needed in the BaseX Implementation of the repository.
+        return true;
     }
 }
