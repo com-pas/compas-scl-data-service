@@ -14,7 +14,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, PostgreSQLServerJUnitExtension.class})
 class CompasSclDataPostgreSQLRepositoryTest {
     private CompasSclDataPostgreSQLRepository repository;
 
