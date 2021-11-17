@@ -21,7 +21,7 @@ to [documentation](doc/compas-scl-data-service.md).
 
 There are currently two database implementations available.
 
-- For more information about the BaseX Implementation go to [BaseX](doc/basex.md).
+- For more information about the BaseX Implementation go to [BaseX](doc/basex.md). (Profile activated by default.)
 - For more information about the PostgreSQL Implementation go to [PostgreSQL](doc/postgresql.md).
 
 > **Note:** When switching between implementation it's a good practise to first execute a maven clean to remove

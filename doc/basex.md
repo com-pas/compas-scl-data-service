@@ -42,7 +42,7 @@ docker run --rm --name compas_basex \
 You can run the following command to build the BaseX version of the application.
 
 ```shell script
-./mvnw -P basex clean verify
+./mvnw clean verify
 ```
 
 ### Running the application in dev mode
@@ -50,7 +50,7 @@ You can run the following command to build the BaseX version of the application.
 You can run your application in dev mode that enables live coding using:
 
 ```shell script
-./mvnw -P basex -DskipTests=true -Dquarkus.profile=dev,prod-basex package io.quarkus:quarkus-maven-plugin::dev
+./mvnw -Dquarkus.profile=dev,prod-basex package io.quarkus:quarkus-maven-plugin::dev
 ```
 
 ### Creating a native executable
@@ -58,7 +58,7 @@ You can run your application in dev mode that enables live coding using:
 You can create a native executable using:
 
 ```shell script
-./mvnw -P basex,native package
+./mvnw -P native package
 ```
 
 This will run the native executable build in a container, because in the native profile the property

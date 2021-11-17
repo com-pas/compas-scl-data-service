@@ -146,6 +146,10 @@ SPDX-License-Identifier: Apache-2.0
         <profile>
             <id>basex</id>
 
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+
             <properties>
                 <quarkus.profile>prod,prod-basex</quarkus.profile>
             </properties>
