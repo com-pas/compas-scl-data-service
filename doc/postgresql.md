@@ -15,7 +15,9 @@ Table: scl_file
 | Column            | Type                 | Required  | Description                                                        |
 | ----------------- | -------------------- | ----------| ------------------------------------------------------------------ |
 | id                | uuid                 | True      | Unique ID generated according to standards                         |
-| version           | varchar(20)          | True      | Versioning according to [Semantic Versioning](https://semver.org/) |
+| major_version     | smallint             | True      | Versioning according to [Semantic Versioning](https://semver.org/) |
+| minor_version     | smallint             | True      | Versioning according to [Semantic Versioning](https://semver.org/) |
+| patch_version     | smallint             | True      | Versioning according to [Semantic Versioning](https://semver.org/) |
 | type              | varchar(3)           | True      | The type of SCL stored                                             |
 | name              | varchar(255)         | True      | The name of the SCL File                                           |
 | scl_data          | text                 | True      | The SCL XML Content                                                |

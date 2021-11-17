@@ -9,8 +9,6 @@ import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -24,15 +22,12 @@ import static javax.transaction.Transactional.TxType.SUPPORTS;
 
 @ApplicationScoped
 public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepository {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataPostgreSQLRepository.class);
-
     public static final String NOT_IMPLEMENTED = "Not implemented!";
 
     private DataSource dataSource;
 
     @Inject
     public CompasSclDataPostgreSQLRepository(DataSource dataSource) {
-        LOGGER.info("Starting PostgreSQL Repository.");
         this.dataSource = dataSource;
     }
 
