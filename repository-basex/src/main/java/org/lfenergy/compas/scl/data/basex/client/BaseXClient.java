@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.scl.data.basex;
+package org.lfenergy.compas.scl.data.basex.client;
 
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 

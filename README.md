@@ -21,70 +21,13 @@ to [documentation](doc/compas-scl-data-service.md).
 
 There are currently two database implementations available.
 
+- For more information about the BaseX Implementation go to [BaseX](doc/basex.md).
 - For more information about the PostgreSQL Implementation go to [PostgreSQL](doc/postgresql.md).
 
-## Application depends on a running BaseX instance
+> **Note:** When switching between implementation it's a good practise to first execute a maven clean to remove
+> old dependencies from the target directory in the app module.
 
-Check [basexhttp on DockerHub](https://hub.docker.com/r/basex/basexhttp/) for a running BaseX docker container.
-
-## Running the application in dev mode
-
-You can run your application in dev mode that enables live coding using:
-
-```shell script
-./mvnw package io.quarkus:quarkus-maven-plugin:2.2.3.Final:dev
-```
-
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
-
-## Packaging and running the application
-
-The application can be packaged using:
-
-```shell script
-./mvnw package
-```
-
-It produces the `quarkus-run.jar` file in the `app/target/quarkus-app/` directory. Be aware that it’s not an _über-jar_ as
-the dependencies are copied into the `app/target/quarkus-app/lib/` directory.
-
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
-```
-
-The application is now runnable using `java -jar app/target/quarkus-app/quarkus-run.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Pnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./mvnw package -Pnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./app/target/code-with-quarkus-local-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.html
-.
-
-## Environment variables
-
-Below environment variable(s) can be used to configure the connection to BaseX, if BaseX Server is used.
-
-| Environment variable             | Java Property             | Description                                   | Example          |
-| -------------------------------- | ------------------------- | --------------------------------------------- | ---------------- |
-| BASEX_HOST                       | basex.host                | Name of the Host where BaseX runs.            | localhost        |
-| BASEX_PORT                       | basex.port                | Port on the Host on which BaseX runs.         | 1984             |
-| BASEX_USERNAME                   | basex.username            | Username under which the application logs in. | admin            |
-| BASEX_PASSWORD                   | basex.password            | Password of the username used above.          | admin            |
+## Common Environment variables
 
 Below environment variable(s) can be used to configure which claims and information are used to fill the UserInfo
 response.

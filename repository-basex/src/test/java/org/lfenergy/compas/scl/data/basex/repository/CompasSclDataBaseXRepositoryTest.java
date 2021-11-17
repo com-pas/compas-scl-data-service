@@ -1,15 +1,15 @@
 // SPDX-FileCopyrightText: 2021 Alliander N.V.
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.repository;
+package org.lfenergy.compas.scl.data.basex.repository;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.core.commons.ElementConverter;
-import org.lfenergy.compas.scl.data.basex.BaseXClientFactory;
-import org.lfenergy.compas.scl.data.basex.BaseXServerJUnitExtension;
+import org.lfenergy.compas.scl.data.basex.client.BaseXClientFactory;
+import org.lfenergy.compas.scl.data.basex.client.BaseXServerJUnitExtension;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
@@ -23,7 +23,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
-import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.createClientFactory;
+import static org.lfenergy.compas.scl.data.basex.client.BaseXServerUtil.createClientFactory;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_DATA_FOUND_ERROR_CODE;
 

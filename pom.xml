@@ -31,6 +31,7 @@ SPDX-License-Identifier: Apache-2.0
         <microprofile-config-api.version>2.0</microprofile-config-api.version>
         <microprofile-openapi-api.version>3.0-RC5</microprofile-openapi-api.version>
         <apache.commons-io.version>2.11.0</apache.commons-io.version>
+        <flyway.version>8.0.4</flyway.version>
         <slf4j.version>1.7.32</slf4j.version>
 
         <!-- Test -->
@@ -81,6 +82,11 @@ SPDX-License-Identifier: Apache-2.0
                 <artifactId>repository-basex</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.lfenergy.compas.scl.data</groupId>
+                <artifactId>repository-postgresql</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.lfenergy.compas.core</groupId>
@@ -103,6 +109,7 @@ SPDX-License-Identifier: Apache-2.0
                 <artifactId>jaxb-impl</artifactId>
                 <version>${jaxb-impl.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>jakarta.enterprise</groupId>
                 <artifactId>jakarta.enterprise.cdi-api</artifactId>
@@ -123,6 +130,12 @@ SPDX-License-Identifier: Apache-2.0
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${apache.commons-io.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${flyway.version}</version>
             </dependency>
 
             <dependency>

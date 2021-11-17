@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: 2021 Alliander N.V.
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.repository;
+package org.lfenergy.compas.scl.data.basex.repository;
 
 import org.apache.commons.io.input.ReaderInputStream;
-import org.lfenergy.compas.scl.data.basex.BaseXClient;
-import org.lfenergy.compas.scl.data.basex.BaseXClientFactory;
+import org.lfenergy.compas.scl.data.basex.client.BaseXClient;
+import org.lfenergy.compas.scl.data.basex.client.BaseXClientFactory;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclDataModelMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

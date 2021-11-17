@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2021 Alliander N.V.
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.repository;
+package org.lfenergy.compas.scl.data.repository.postgres;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
-import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
@@ -16,8 +16,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class CompasSclDataPostgreSQLRepositoryTest {
-    @InjectMocks
     private CompasSclDataPostgreSQLRepository repository;
+
+    @BeforeEach
+    void beforeEach() {
+        repository = new CompasSclDataPostgreSQLRepository(PostgreSQLServerJUnitExtension.getDataSource());
+    }
 
     @Test
     void list_WhenCalled_ThenUnsupportedExceptionThrown() {
