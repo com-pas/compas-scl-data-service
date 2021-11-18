@@ -17,6 +17,10 @@ SPDX-License-Identifier: Apache-2.0
     <artifactId>repository-basex</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <basex.version>9.2.4</basex.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.lfenergy.compas.scl.data</groupId>
@@ -52,10 +56,18 @@ SPDX-License-Identifier: Apache-2.0
 
         <!-- Test Dependencies -->
         <dependency>
-            <groupId>org.basex</groupId>
-            <artifactId>basex</artifactId>
+            <groupId>org.lfenergy.compas.scl.data</groupId>
+            <artifactId>repository</artifactId>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.basex</groupId>
+            <artifactId>basex</artifactId>
+            <version>${basex.version}</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>

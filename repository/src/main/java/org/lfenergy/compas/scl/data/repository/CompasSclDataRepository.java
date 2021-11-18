@@ -68,13 +68,14 @@ public interface CompasSclDataRepository {
      * When a entry is updated the service layer will increase the version and always create a new entry
      * in the repository.
      *
-     * @param type    The type of SCL to store it in.
-     * @param id      The ID of the new entry to be created.
-     * @param name    The name of the SCL to be stored.
-     * @param scl     The SCL XML File content to store.
-     * @param version The version of the new entry to be created.
+     * @param type     The type of SCL to store it in.
+     * @param id       The ID of the new entry to be created.
+     * @param name     The name of the SCL to be stored.
+     * @param scl      The SCL XML File content to store.
+     * @param version  The version of the new entry to be created.
+     * @param username The user that created the new entry.
      */
-    void create(SclType type, UUID id, String name, String scl, Version version);
+    void create(SclType type, UUID id, String name, String scl, Version version, String username);
 
     /**
      * Delete all versions for a specific SCL File using it's ID.

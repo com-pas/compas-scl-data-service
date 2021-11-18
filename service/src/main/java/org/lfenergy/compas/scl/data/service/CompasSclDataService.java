@@ -6,6 +6,7 @@ package org.lfenergy.compas.scl.data.service;
 
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
+import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclType;
@@ -16,6 +17,7 @@ import org.w3c.dom.Element;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +25,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static javax.transaction.Transactional.TxType.REQUIRED;
+import static javax.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_SCL_ELEMENT_FOUND_ERROR_CODE;
 
@@ -50,6 +54,7 @@ public class CompasSclDataService {
      * @param type The type to search for.
      * @return The List of Items found.
      */
+    @Transactional(SUPPORTS)
     public List<Item> list(SclType type) {
         return repository.list(type);
     }
@@ -61,8 +66,14 @@ public class CompasSclDataService {
      * @param id   The UUID of the record to search for.
      * @return The list of versions found.
      */
+    @Transactional(SUPPORTS)
     public List<Item> listVersionsByUUID(SclType type, UUID id) {
-        return repository.listVersionsByUUID(type, id);
+        var items = repository.listVersionsByUUID(type, id);
+        if (items.isEmpty()) {
+            var message = String.format("No versions found for type '%s' with ID '%s'", type, id);
+            throw new CompasNoDataFoundException(message);
+        }
+        return items;
     }
 
     /**
@@ -72,6 +83,7 @@ public class CompasSclDataService {
      * @param id   The UUID of the record to search for.
      * @return The latest version of the SCL XML Files.
      */
+    @Transactional(SUPPORTS)
     public String findByUUID(SclType type, UUID id) {
         return repository.findByUUID(type, id);
     }
@@ -84,6 +96,7 @@ public class CompasSclDataService {
      * @param version The version to search for.
      * @return The found version of the SCL XML Files.
      */
+    @Transactional(SUPPORTS)
     public String findByUUID(SclType type, UUID id, Version version) {
         return repository.findByUUID(type, id, version);
     }
@@ -98,6 +111,7 @@ public class CompasSclDataService {
      * @param sclData The SCL XML File to store.
      * @return The ID of the new created SCL XML File in the database.
      */
+    @Transactional(REQUIRED)
     public String create(SclType type, String name, String who, String comment, String sclData) {
         var scl = converter.convertToElement(new BufferedInputStream(new ByteArrayInputStream(sclData.getBytes(StandardCharsets.UTF_8))), SCL_ELEMENT_NAME, SCL_NS_URI);
         if (scl == null) {
@@ -117,7 +131,7 @@ public class CompasSclDataService {
         setSclCompasPrivateElement(scl, Optional.of(name), type);
 
         var newSclData = converter.convertToString(scl);
-        repository.create(type, id, name, newSclData, version);
+        repository.create(type, id, name, newSclData, version, who);
         return newSclData;
     }
 
@@ -133,6 +147,7 @@ public class CompasSclDataService {
      * @param comment       Some comments that will be added to the THistory entry being added.
      * @param sclData       The SCL XML File with the updated content.
      */
+    @Transactional(REQUIRED)
     public String update(SclType type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData) {
         var scl = converter.convertToElement(new BufferedInputStream(new ByteArrayInputStream(sclData.getBytes(StandardCharsets.UTF_8))), SCL_ELEMENT_NAME, SCL_NS_URI);
         if (scl == null) {
@@ -152,7 +167,7 @@ public class CompasSclDataService {
         setSclCompasPrivateElement(scl, Optional.ofNullable(currentSclMetaInfo.getName()), type);
 
         var newSclData = converter.convertToString(scl);
-        repository.create(type, id, currentSclMetaInfo.getName(), newSclData, version);
+        repository.create(type, id, currentSclMetaInfo.getName(), newSclData, version, who);
         return newSclData;
     }
 
@@ -162,6 +177,7 @@ public class CompasSclDataService {
      * @param type The type of SCL where to find the SCL File
      * @param id   The ID of the SCL File to delete.
      */
+    @Transactional(REQUIRED)
     public void delete(SclType type, UUID id) {
         repository.delete(type, id);
     }
@@ -173,6 +189,7 @@ public class CompasSclDataService {
      * @param id      The ID of the SCL File to delete.
      * @param version The version of that SCL File to delete.
      */
+    @Transactional(REQUIRED)
     public void delete(SclType type, UUID id, Version version) {
         repository.delete(type, id, version);
     }
