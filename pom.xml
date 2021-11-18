@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
         <jakarta-bind-api.version>2.3.3</jakarta-bind-api.version>
         <jaxb-impl.version>2.3.5</jaxb-impl.version>
         <jakarta-cdi-api.version>2.0.2</jakarta-cdi-api.version>
-        <microprofile-config-api.version>2.0</microprofile-config-api.version>
+        <microprofile-config-api.version>3.0</microprofile-config-api.version>
         <microprofile-openapi-api.version>3.0-RC5</microprofile-openapi-api.version>
         <apache.commons-io.version>2.11.0</apache.commons-io.version>
         <flyway.version>8.0.4</flyway.version>
