@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2021 Alliander N.V.
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.basex;
+package org.lfenergy.compas.scl.data.basex.client;
 
 import org.basex.BaseXServer;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -11,8 +11,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
-import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.createServer;
-import static org.lfenergy.compas.scl.data.basex.BaseXServerUtil.getFreePortNumber;
+import static org.lfenergy.compas.scl.data.basex.client.BaseXServerUtil.createServer;
+import static org.lfenergy.compas.scl.data.basex.client.BaseXServerUtil.getFreePortNumber;
 
 /**
  * JUnit extension to start a BaseX Server. This server should only be started and stopped once for all
@@ -34,7 +34,7 @@ public class BaseXServerJUnitExtension implements BeforeAllCallback, ExtensionCo
             server = createServer(portNumber);
 
             // The following line registers a callback hook when the root test context is shut down
-            context.getRoot().getStore(GLOBAL).put("BaseXServerExtension", this);
+            context.getRoot().getStore(GLOBAL).put("BaseXServerJUnitExtension", this);
         }
         // free the access
         lock.unlock();
