@@ -16,6 +16,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,13 +78,9 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
             try (var resultSet = stmt.executeQuery()) {
                 while (resultSet.next()) {
-                    var version = new Version(resultSet.getInt(MAJOR_VERSION_FIELD),
-                            resultSet.getInt(MINOR_VERSION_FIELD),
-                            resultSet.getInt(PATCH_VERSION_FIELD));
-                    items.add(
-                            new Item(resultSet.getString(ID_FIELD),
-                                    resultSet.getString(NAME_FIELD),
-                                    version.toString()));
+                    items.add(new Item(resultSet.getString(ID_FIELD),
+                            resultSet.getString(NAME_FIELD),
+                            createVersion(resultSet)));
                 }
             }
         } catch (SQLException exp) {
@@ -109,13 +106,9 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
             try (var resultSet = stmt.executeQuery()) {
                 while (resultSet.next()) {
-                    var version = new Version(resultSet.getInt(MAJOR_VERSION_FIELD),
-                            resultSet.getInt(MINOR_VERSION_FIELD),
-                            resultSet.getInt(PATCH_VERSION_FIELD));
-                    items.add(
-                            new Item(id.toString(),
-                                    resultSet.getString(NAME_FIELD),
-                                    version.toString()));
+                    items.add(new Item(id.toString(),
+                            resultSet.getString(NAME_FIELD),
+                            createVersion(resultSet)));
                 }
             }
         } catch (SQLException exp) {
@@ -179,12 +172,9 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             try (var resultSet = stmt.executeQuery()) {
                 // We need to only retrieve the first row, because that's the latest version.
                 if (resultSet.next()) {
-                    var version = new Version(resultSet.getInt(MAJOR_VERSION_FIELD),
-                            resultSet.getInt(MINOR_VERSION_FIELD),
-                            resultSet.getInt(PATCH_VERSION_FIELD));
                     return new SclMetaInfo(resultSet.getString(ID_FIELD),
                             resultSet.getString(NAME_FIELD),
-                            version.toString());
+                            createVersion(resultSet));
                 }
                 var message = String.format("No meta info found for type '%s' with ID '%s'", type, id);
                 throw new CompasNoDataFoundException(message);
@@ -252,5 +242,12 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         } catch (SQLException exp) {
             throw new CompasSclDataServiceException(POSTGRES_DELETE_ERROR_CODE, "Error removing SCL (version) from database!", exp);
         }
+    }
+
+    private String createVersion(ResultSet resultSet) throws SQLException {
+        var version = new Version(resultSet.getInt(MAJOR_VERSION_FIELD),
+                resultSet.getInt(MINOR_VERSION_FIELD),
+                resultSet.getInt(PATCH_VERSION_FIELD));
+        return version.toString();
     }
 }
