@@ -87,8 +87,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 }
             }
         } catch (SQLException exp) {
-            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE,
-                    "Error select meta info from database!", exp);
+            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE, "Error listing scl entries from database!", exp);
         }
         return items;
     }
@@ -98,7 +97,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     public List<Item> listVersionsByUUID(SclType type, UUID id) {
         var sql = "select id, name, major_version, minor_version, patch_version"
                 + "  from scl_file"
-                + " where id = ?"
+                + " where id   = ?"
                 + " and   type = ?"
                 + " order by major_version, minor_version, patch_version";
 
@@ -120,8 +119,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 }
             }
         } catch (SQLException exp) {
-            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE,
-                    "Error select meta info from database!", exp);
+            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE, "Error selecting versions from database!", exp);
         }
         return items;
     }
@@ -140,8 +138,8 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     public String findByUUID(SclType type, UUID id, Version version) {
         var sql = "select scl_data "
                 + "  from scl_file "
-                + " where id = ?"
-                + " and   type = ?"
+                + " where id            = ?"
+                + " and   type          = ?"
                 + " and   major_version = ? "
                 + " and   minor_version = ? "
                 + " and   patch_version = ? ";
@@ -161,8 +159,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 throw new CompasNoDataFoundException(message);
             }
         } catch (SQLException exp) {
-            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE,
-                    "Error select scl data from database!", exp);
+            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE, "Error select scl data from database!", exp);
         }
     }
 
@@ -171,7 +168,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     public SclMetaInfo findMetaInfoByUUID(SclType type, UUID id) {
         var sql = "select id, name, major_version, minor_version, patch_version"
                 + "  from scl_file"
-                + " where id = ?"
+                + " where id   = ?"
                 + " and   type = ?"
                 + " order by major_version desc, minor_version desc, patch_version desc";
         try (var connection = dataSource.getConnection();
@@ -193,8 +190,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 throw new CompasNoDataFoundException(message);
             }
         } catch (SQLException exp) {
-            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE,
-                    "Error select meta info from database!", exp);
+            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE, "Error select meta info from database!", exp);
         }
     }
 
@@ -216,8 +212,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             stmt.setString(8, scl);
             stmt.executeUpdate();
         } catch (SQLException exp) {
-            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE,
-                    "Error inserting SCL to database!", exp);
+            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error inserting SCL to database!", exp);
         }
     }
 
@@ -225,7 +220,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Transactional(REQUIRED)
     public void delete(SclType type, UUID id) {
         var sql = "delete from scl_file "
-                + " where id = ?"
+                + " where id   = ?"
                 + " and   type = ?";
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
@@ -233,8 +228,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             stmt.setString(2, type.name());
             stmt.executeUpdate();
         } catch (SQLException exp) {
-            throw new CompasSclDataServiceException(POSTGRES_DELETE_ERROR_CODE,
-                    "Error removing SCL from database!", exp);
+            throw new CompasSclDataServiceException(POSTGRES_DELETE_ERROR_CODE, "Error removing SCL from database!", exp);
         }
     }
 
@@ -242,8 +236,8 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Transactional(REQUIRED)
     public void delete(SclType type, UUID id, Version version) {
         var sql = "delete from scl_file "
-                + " where id = ?"
-                + " and   type = ?"
+                + " where id            = ?"
+                + " and   type          = ?"
                 + " and   major_version = ? "
                 + " and   minor_version = ? "
                 + " and   patch_version = ? ";
@@ -256,8 +250,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             stmt.setInt(5, version.getPatchVersion());
             stmt.executeUpdate();
         } catch (SQLException exp) {
-            throw new CompasSclDataServiceException(POSTGRES_DELETE_ERROR_CODE,
-                    "Error removing SCL (version) from database!", exp);
+            throw new CompasSclDataServiceException(POSTGRES_DELETE_ERROR_CODE, "Error removing SCL (version) from database!", exp);
         }
     }
 }

@@ -73,9 +73,9 @@ public interface CompasSclDataRepository {
      * @param name     The name of the SCL to be stored.
      * @param scl      The SCL XML File content to store.
      * @param version  The version of the new entry to be created.
-     * @param username The user that created the new entry.
+     * @param who      The user that created the new entry.
      */
-    void create(SclType type, UUID id, String name, String scl, Version version, String username);
+    void create(SclType type, UUID id, String name, String scl, Version version, String who);
 
     /**
      * Delete all versions for a specific SCL File using it's ID.

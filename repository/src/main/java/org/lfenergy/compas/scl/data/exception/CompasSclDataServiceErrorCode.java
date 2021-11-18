@@ -19,7 +19,7 @@ public class CompasSclDataServiceErrorCode {
     public static final String BASEX_QUERY_ERROR_CODE = "SDS-1001";
     public static final String BASEX_COMMAND_ERROR_CODE = "SDS-1002";
 
-    public static final String POSTGRES_SELECT_ERROR_CODE = "SDS-2001";
-    public static final String POSTGRES_INSERT_ERROR_CODE = "SDS-2002";
-    public static final String POSTGRES_DELETE_ERROR_CODE = "SDS-2003";
+    public static final String POSTGRES_SELECT_ERROR_CODE = "SDS-2000";
+    public static final String POSTGRES_INSERT_ERROR_CODE = "SDS-2001";
+    public static final String POSTGRES_DELETE_ERROR_CODE = "SDS-2002";
 }

@@ -136,12 +136,11 @@ public abstract class AbstractCompasSclDataRepository {
     void findByUUID_WhenTwoVersionsOfARecordAdded_ThenLastRecordIsFound() {
         var version = new Version(1, 0, 0);
         var uuid = UUID.randomUUID();
-        var name = "SCL-Name";
         var scl = readSCL(uuid, version, NAME_1);
-        getRepository().create(TYPE, uuid, name, scl, version, WHO);
+        getRepository().create(TYPE, uuid, NAME_1, scl, version, WHO);
         version = new Version(1, 1, 0);
         scl = readSCL(uuid, version, NAME_2);
-        getRepository().create(TYPE, uuid, name, scl, version, WHO);
+        getRepository().create(TYPE, uuid, NAME_2, scl, version, WHO);
 
         var foundScl = getRepository().findByUUID(TYPE, uuid);
 
@@ -154,9 +153,8 @@ public abstract class AbstractCompasSclDataRepository {
     void findByUUIDWithVersion_WhenCalledWithUnknownVersion_ThenExceptionIsThrown() {
         var version = new Version(1, 0, 0);
         var uuid = UUID.randomUUID();
-        var name = "SCL-Name";
         var scl = readSCL(uuid, version, NAME_1);
-        getRepository().create(TYPE, uuid, name, scl, version, WHO);
+        getRepository().create(TYPE, uuid, NAME_1, scl, version, WHO);
 
         var unknownVersion = new Version(1, 1, 1);
         var exception = assertThrows(CompasNoDataFoundException.class, () -> {
@@ -169,12 +167,11 @@ public abstract class AbstractCompasSclDataRepository {
     void findByUUIDWithVersion_WhenTwoVersionsOfARecordAdded_ThenCorrectRecordIsFound() {
         var expectedVersion = new Version(1, 0, 0);
         var uuid = UUID.randomUUID();
-        var name = "SCL-Name";
         var scl = readSCL(uuid, expectedVersion, NAME_1);
-        getRepository().create(TYPE, uuid, name, scl, expectedVersion, WHO);
+        getRepository().create(TYPE, uuid, NAME_1, scl, expectedVersion, WHO);
         var version = new Version(1, 1, 0);
         scl = readSCL(uuid, version, NAME_1);
-        getRepository().create(TYPE, uuid, name, scl, version, WHO);
+        getRepository().create(TYPE, uuid, NAME_1, scl, version, WHO);
 
         var foundScl = getRepository().findByUUID(TYPE, uuid, expectedVersion);
 
@@ -215,9 +212,8 @@ public abstract class AbstractCompasSclDataRepository {
     void createAndFind_WhenSclAdded_ThenScLStoredAndLastVersionCanBeFound() {
         var version = new Version(1, 0, 0);
         var uuid = UUID.randomUUID();
-        var name = "SCL-Name";
         var scl = readSCL(uuid, version, NAME_1);
-        getRepository().create(TYPE, uuid, name, scl, version, WHO);
+        getRepository().create(TYPE, uuid, NAME_1, scl, version, WHO);
 
         var foundScl = getRepository().findByUUID(TYPE, uuid);
 
@@ -230,13 +226,12 @@ public abstract class AbstractCompasSclDataRepository {
     void createAndFind_WhenMoreVersionOfSclAdded_ThenDefaultSCLLastVersionReturned() {
         var version = new Version(1, 0, 0);
         var uuid = UUID.randomUUID();
-        var name = "SCL-Name";
         var scl = readSCL(uuid, version, NAME_1);
-        getRepository().create(TYPE, uuid, name, scl, version, WHO);
+        getRepository().create(TYPE, uuid, NAME_1, scl, version, WHO);
 
         var nextVersion = version.getNextVersion(ChangeSetType.MAJOR);
         var nextScl = readSCL(uuid, nextVersion, NAME_1);
-        getRepository().create(TYPE, uuid, name, nextScl, nextVersion, WHO);
+        getRepository().create(TYPE, uuid, NAME_1, nextScl, nextVersion, WHO);
 
         var foundScl = getRepository().findByUUID(TYPE, uuid);
 
@@ -249,13 +244,12 @@ public abstract class AbstractCompasSclDataRepository {
     void createAndFind_WhenMoreVersionOfSCLAdded_ThenSCLOldVersionCanBeFound() {
         var version = new Version(1, 0, 0);
         var uuid = UUID.randomUUID();
-        var name = "SCL-Name";
         var scl = readSCL(uuid, version, NAME_1);
-        getRepository().create(TYPE, uuid, name, scl, version, WHO);
+        getRepository().create(TYPE, uuid, NAME_1, scl, version, WHO);
 
         var nextVersion = version.getNextVersion(ChangeSetType.MAJOR);
         var nextScl = readSCL(uuid, nextVersion, NAME_1);
-        getRepository().create(TYPE, uuid, name, nextScl, nextVersion, WHO);
+        getRepository().create(TYPE, uuid, NAME_1, nextScl, nextVersion, WHO);
 
         var foundScl = getRepository().findByUUID(TYPE, uuid, version);
 
@@ -268,10 +262,9 @@ public abstract class AbstractCompasSclDataRepository {
     void createAndDelete_WhenSclAddedAndDelete_ThenScLStoredAndRemoved() {
         var version = new Version(1, 0, 0);
         var uuid = UUID.randomUUID();
-        var name = "SCL-Name";
         var scl = readSCL(uuid, version, NAME_1);
 
-        getRepository().create(TYPE, uuid, name, scl, version, WHO);
+        getRepository().create(TYPE, uuid, NAME_1, scl, version, WHO);
         var foundScl = getRepository().findByUUID(TYPE, uuid);
         assertNotNull(foundScl);
         assertEquals(getIdFromHeader(scl), getIdFromHeader(foundScl));
@@ -287,17 +280,16 @@ public abstract class AbstractCompasSclDataRepository {
     void createAndDeleteAll_WhenSclAddedAndDelete_ThenScLStoredAndRemoved() {
         var version = new Version(1, 0, 0);
         var uuid = UUID.randomUUID();
-        var name = "SCL-Name";
         var scl = readSCL(uuid, version, NAME_1);
 
-        getRepository().create(TYPE, uuid, name, scl, version, WHO);
+        getRepository().create(TYPE, uuid, NAME_1, scl, version, WHO);
         var foundScl = getRepository().findByUUID(TYPE, uuid);
         assertNotNull(foundScl);
         assertEquals(getIdFromHeader(scl), getIdFromHeader(foundScl));
         assertEquals(getVersionFromHeader(scl), getVersionFromHeader(foundScl));
 
         version = version.getNextVersion(ChangeSetType.MAJOR);
-        getRepository().create(TYPE, uuid, name, scl, version, WHO);
+        getRepository().create(TYPE, uuid, NAME_1, scl, version, WHO);
         foundScl = getRepository().findByUUID(TYPE, uuid);
         assertNotNull(foundScl);
         assertEquals(getIdFromHeader(scl), getIdFromHeader(foundScl));
