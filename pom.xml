@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0
         <microprofile-config-api.version>2.0</microprofile-config-api.version>
         <microprofile-openapi-api.version>3.0-RC5</microprofile-openapi-api.version>
         <apache.commons-io.version>2.11.0</apache.commons-io.version>
-        <flyway.version>8.0.4</flyway.version>
+        <flyway.version>8.0.5</flyway.version>
         <slf4j.version>1.7.32</slf4j.version>
 
         <!-- Test -->
