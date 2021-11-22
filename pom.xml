@@ -35,7 +35,6 @@ SPDX-License-Identifier: Apache-2.0
         <slf4j.version>1.7.32</slf4j.version>
 
         <!-- Test -->
-        <basex.version>9.2.4</basex.version>
         <junit-jupiter.version>5.8.1</junit-jupiter.version>
         <mockito-junit-jupiter.version>4.0.0</mockito-junit-jupiter.version>
         <openpojo.version>0.9.1</openpojo.version>
@@ -151,10 +150,13 @@ SPDX-License-Identifier: Apache-2.0
 
             <!-- Test -->
             <dependency>
-                <groupId>org.basex</groupId>
-                <artifactId>basex</artifactId>
-                <version>${basex.version}</version>
+                <groupId>org.lfenergy.compas.scl.data</groupId>
+                <artifactId>repository</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
             </dependency>
+
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-api</artifactId>
@@ -214,6 +216,13 @@ SPDX-License-Identifier: Apache-2.0
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.2.0</version>
+                    <executions>
+                      <execution>
+                        <goals>
+                          <goal>test-jar</goal>
+                        </goals>
+                      </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

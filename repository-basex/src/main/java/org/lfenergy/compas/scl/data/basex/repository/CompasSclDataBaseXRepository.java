@@ -110,7 +110,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
 
     @Override
     public List<Item> listVersionsByUUID(SclType type, UUID id) {
-        var items = executeQuery(type, DECLARE_SCL_NS_URI +
+        return executeQuery(type, DECLARE_SCL_NS_URI +
                         DECLARE_COMPAS_NAMESPACE +
                         format(DECLARE_DB_VARIABLE, type) +
                         format(DECLARE_ID_VARIABLE, id) +
@@ -125,12 +125,6 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         "   order by $majorVersion, $minorVersion, $patchVersion\n" +
                         "   return '<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>' ",
                 sclDataMarshaller::unmarshalItem);
-
-        if (items.isEmpty()) {
-            var message = String.format("No versions found for type '%s' with ID '%s'", type, id);
-            throw new CompasNoDataFoundException(message);
-        }
-        return items;
     }
 
     @Override
@@ -190,7 +184,8 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public void create(SclType type, UUID id, String name, String scl, Version version) {
+    public void create(SclType type, UUID id, String name, String scl, Version version, String who) {
+        // Who is ignored in the BaseX implementation.
         var inputStream = new ReaderInputStream(new StringReader(scl), StandardCharsets.UTF_8);
         executeCommand(client -> {
             openDatabase(client, type);

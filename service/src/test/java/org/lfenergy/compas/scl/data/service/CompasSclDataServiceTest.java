@@ -11,21 +11,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
-import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.data.model.SclMetaInfo;
-import org.lfenergy.compas.scl.data.model.SclType;
-import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
+import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_DATA_FOUND_ERROR_CODE;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_SCL_ELEMENT_FOUND_ERROR_CODE;
 import static org.mockito.Mockito.*;
 
@@ -58,13 +58,28 @@ class CompasSclDataServiceTest {
     }
 
     @Test
-    void listVersionsByUUID_WhenCalled_ThenRepositoryIsCalled() {
+    void listVersionsByUUID_WhenCalledAndRepositoryReturnItemList_ThenListIsReturned() {
         var uuid = UUID.randomUUID();
-        when(compasSclDataRepository.listVersionsByUUID(SCL_TYPE, uuid)).thenReturn(emptyList());
+        var expectedResult = List.of(new Item());
+        when(compasSclDataRepository.listVersionsByUUID(SCL_TYPE, uuid)).thenReturn(expectedResult);
 
         var result = compasSclDataService.listVersionsByUUID(SCL_TYPE, uuid);
 
         assertNotNull(result);
+        assertEquals(expectedResult.size(), result.size());
+        assertEquals(expectedResult.get(0), result.get(0));
+        verify(compasSclDataRepository, times(1)).listVersionsByUUID(SCL_TYPE, uuid);
+    }
+
+    @Test
+    void listVersionsByUUID_WhenCalledAndRepositoryReturnsEmptyList_ThenExceptionIsThrown() {
+        var uuid = UUID.randomUUID();
+        when(compasSclDataRepository.listVersionsByUUID(SCL_TYPE, uuid)).thenReturn(emptyList());
+
+        var exception = assertThrows(CompasNoDataFoundException.class, () -> {
+            compasSclDataService.listVersionsByUUID(SCL_TYPE, uuid);
+        });
+        assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
         verify(compasSclDataRepository, times(1)).listVersionsByUUID(SCL_TYPE, uuid);
     }
 
@@ -99,14 +114,14 @@ class CompasSclDataServiceTest {
 
         var scl = readSCL();
 
-        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION));
+        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who));
 
         scl = compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
 
         assertNotNull(scl);
         assertCompasExtenions(scl, name);
         assertHistoryItem(scl, INITIAL_VERSION, comment);
-        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION));
+        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who));
     }
 
     @Test
@@ -118,14 +133,14 @@ class CompasSclDataServiceTest {
         var scl = readSCL();
         scl = createCompasPrivate(scl, "JUSTANOTHERNAME");
 
-        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION));
+        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who));
 
         scl = compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
 
         assertNotNull(scl);
         assertCompasExtenions(scl, name);
         assertHistoryItem(scl, INITIAL_VERSION, comment);
-        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION));
+        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who));
     }
 
     @Test
@@ -155,14 +170,14 @@ class CompasSclDataServiceTest {
 
         var sclMetaInfo = new SclMetaInfo(uuid.toString(), name, INITIAL_VERSION.toString());
         when(compasSclDataRepository.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
-        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(name), anyString(), eq(nextVersion));
+        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(name), anyString(), eq(nextVersion), eq(who));
 
         scl = compasSclDataService.update(SCL_TYPE, uuid, changeSet, who, null, scl);
 
         assertNotNull(scl);
         assertCompasExtenions(scl, name);
         assertHistoryItem(scl, nextVersion, null);
-        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(name), anyString(), eq(nextVersion));
+        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(name), anyString(), eq(nextVersion), eq(who));
         verify(compasSclDataRepository, times(1)).findMetaInfoByUUID(SCL_TYPE, uuid);
     }
 
@@ -178,14 +193,14 @@ class CompasSclDataServiceTest {
 
         var sclMetaInfo = new SclMetaInfo(uuid.toString(), name, INITIAL_VERSION.toString());
         when(compasSclDataRepository.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
-        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(name), anyString(), eq(nextVersion));
+        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(name), anyString(), eq(nextVersion), eq(who));
 
         scl = compasSclDataService.update(SCL_TYPE, uuid, changeSet, who, null, scl);
 
         assertNotNull(scl);
         assertCompasExtenions(scl, name);
         assertHistoryItem(scl, nextVersion, null);
-        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(name), anyString(), eq(nextVersion));
+        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(name), anyString(), eq(nextVersion), eq(who));
         verify(compasSclDataRepository, times(1)).findMetaInfoByUUID(SCL_TYPE, uuid);
     }
 

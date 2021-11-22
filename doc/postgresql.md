@@ -47,7 +47,7 @@ docker run --rm --name compas_postgres \
 You can run the following command to build the BaseX version of the application.
 
 ```shell script
-./mvnw -P !basex,postgres clean verify
+./mvnw -P postgres clean verify
 ```
 
 ### Running the application in dev mode
@@ -55,6 +55,6 @@ You can run the following command to build the BaseX version of the application.
 You can run your application in dev mode that enables live coding using:
 
 ```shell script
-./mvnw -P !basex,postgres -DskipTests=true -Dquarkus.profile=dev,prod-postgres package io.quarkus:quarkus-maven-plugin::dev
+./mvnw -P postgres -DskipTests=true -Dquarkus.profile=dev,prod-postgres package io.quarkus:quarkus-maven-plugin::dev
 ```
 
