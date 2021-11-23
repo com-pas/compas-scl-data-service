@@ -159,11 +159,16 @@ SPDX-License-Identifier: Apache-2.0
                 <extensions>true</extensions>
                 <executions>
                     <execution>
+                        <id>build-generic</id>
+                        <goals>
+                            <goal>generate-code</goal>
+                            <goal>generate-code-tests</goal>
+                        </goals>
+                    </execution>
+                    <execution>
                         <id>build-basex</id>
                         <goals>
                             <goal>build</goal>
-                            <goal>generate-code</goal>
-                            <goal>generate-code-tests</goal>
                         </goals>
                         <configuration>
                             <properties>
@@ -180,8 +185,6 @@ SPDX-License-Identifier: Apache-2.0
                         <id>build-postgresql</id>
                         <goals>
                             <goal>build</goal>
-                            <goal>generate-code</goal>
-                            <goal>generate-code-tests</goal>
                         </goals>
                         <configuration>
                             <properties>
