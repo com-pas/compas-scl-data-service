@@ -7,25 +7,19 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class CompasSclDataServiceConfigurationTest {
-    @Test
-    void constructor_WhenCalled_ThenNoExceptions() {
-        var config = new CompasSclDataServiceConfiguration();
-        assertNotNull(config);
-    }
-
+class CompasSclDataServiceCommonConfigurationTest {
     @Test
     void createElementConverter_WhenCalled_ThenObjectReturned() {
-        assertNotNull(new CompasSclDataServiceConfiguration().createElementConverter());
+        assertNotNull(new CompasSclDataServiceCommonConfiguration().createElementConverter());
     }
 
     @Test
     void creatSclElementProcessor_WhenCalled_ThenObjectReturned() {
-        assertNotNull(new CompasSclDataServiceConfiguration().creatSclElementProcessor());
+        assertNotNull(new CompasSclDataServiceCommonConfiguration().creatSclElementProcessor());
     }
 
     @Test
     void createSclDataModelMarshaller_WhenCalled_ThenObjectReturned() {
-        assertNotNull(new CompasSclDataServiceConfiguration().createSclDataModelMarshaller());
+        assertNotNull(new CompasSclDataServiceCommonConfiguration().createSclDataModelMarshaller());
     }
 }

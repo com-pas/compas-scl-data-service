@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2021 Alliander N.V.
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.repository.postgres;
+package org.lfenergy.compas.scl.data.repository.postgresql;
 
 import com.opentable.db.postgres.embedded.EmbeddedPostgres;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
@@ -37,8 +38,11 @@ public class PostgreSQLServerJUnitExtension implements BeforeAllCallback, Extens
                     .start();
 
             // We will also run Flyway to upgrade the database.
-            CompasFlywayMigrator migrator = new CompasFlywayMigrator(pg.getPostgresDatabase());
-            migrator.migrate();
+            Flyway flyway = Flyway.configure()
+                    .dataSource(pg.getPostgresDatabase())
+                    .locations("classpath:org/lfenergy/compas/scl/data/repository/postgresql/db/migration")
+                    .load();
+            flyway.migrate();
 
             // The following line registers a callback hook when the root test context is shut down
             context.getRoot().getStore(GLOBAL).put("PostgreSQLServerJUnitExtension", this);

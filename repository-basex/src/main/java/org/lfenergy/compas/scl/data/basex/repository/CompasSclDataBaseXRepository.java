@@ -17,8 +17,6 @@ import org.lfenergy.compas.scl.data.util.SclDataModelMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +38,6 @@ import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCo
  * every entries is stored under &lt;ID&gt;/&lt;Major version&gt;/&lt;Minor version&gt;/&lt;Patch version&gt;/scl.xml.
  * This combination is always unique and easy to use.
  */
-@ApplicationScoped
 public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataBaseXRepository.class);
 
@@ -74,7 +71,6 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     private final BaseXClientFactory baseXClientFactory;
     private final SclDataModelMarshaller sclDataMarshaller;
 
-    @Inject
     public CompasSclDataBaseXRepository(BaseXClientFactory baseXClientFactory,
                                         SclDataModelMarshaller sclDataMarshaller) {
         this.baseXClientFactory = baseXClientFactory;

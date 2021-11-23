@@ -30,7 +30,7 @@ Check [PostgreSQL on DockerHub](https://hub.docker.com/_/postgres?tab=descriptio
 container. Use the following command to start the docker container.
 
 ```shell
-docker run --rm --name compas_postgres \
+docker run --rm --name compas_postgresql \
    -e POSTGRES_PASSWORD=postgres \
    -e POSTGRES_DB=compas \
    -e PGDATA=/var/lib/postgresql/data/compas \

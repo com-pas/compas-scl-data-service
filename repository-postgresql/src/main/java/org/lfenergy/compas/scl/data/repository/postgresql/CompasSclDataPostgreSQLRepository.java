@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.scl.data.repository.postgres;
+package org.lfenergy.compas.scl.data.repository.postgresql;
 
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
@@ -12,8 +12,6 @@ import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
 import java.sql.ResultSet;
@@ -26,7 +24,6 @@ import static javax.transaction.Transactional.TxType.REQUIRED;
 import static javax.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
 
-@ApplicationScoped
 public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepository {
     private static final String ID_FIELD = "id";
     private static final String MAJOR_VERSION_FIELD = "major_version";
@@ -37,7 +34,6 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     private final DataSource dataSource;
 
-    @Inject
     public CompasSclDataPostgreSQLRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }

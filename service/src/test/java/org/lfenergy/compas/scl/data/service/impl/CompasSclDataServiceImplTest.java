@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2021 Alliander N.V.
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.service;
+package org.lfenergy.compas.scl.data.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +14,7 @@ import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
+import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,7 +31,7 @@ import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCo
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CompasSclDataServiceTest {
+class CompasSclDataServiceImplTest {
     private static final Version INITIAL_VERSION = new Version("1.0.0");
     private static final SclType SCL_TYPE = SclType.SCD;
 
@@ -44,7 +45,7 @@ class CompasSclDataServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        compasSclDataService = new CompasSclDataService(compasSclDataRepository, converter, processor);
+        compasSclDataService = new CompasSclDataServiceImpl(compasSclDataRepository, converter, processor);
     }
 
     @Test
