@@ -25,6 +25,17 @@ import static javax.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
 
 public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepository {
+    private static final String SElECT_METADATA_CLAUSE = "select id, name, major_version, minor_version, patch_version ";
+    private static final String FROM_CLAUSE = " from scl_file ";
+    private static final String DELETE_FROM_CLAUSE = "delete " + FROM_CLAUSE;
+    private static final String WHERE_CLAUSE = " where ";
+    private static final String AND_CLAUSE = " and ";
+    private static final String ORDER_BY_CLAUSE = " order by id, major_version, minor_version, patch_version";
+
+    private static final String FILTER_ON_TYPE = "type = ?";
+    private static final String FILTER_ON_ID = "id = ?";
+    private static final String FILTER_ON_VERSION = "major_version = ? and minor_version = ? and patch_version = ? ";
+
     private static final String ID_FIELD = "id";
     private static final String MAJOR_VERSION_FIELD = "major_version";
     private static final String MINOR_VERSION_FIELD = "minor_version";
@@ -41,31 +52,31 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     @Transactional(SUPPORTS)
     public List<Item> list(SclType type) {
-        var sql = "select id, name, major_version, minor_version, patch_version" +
-                "    from scl_file outer_scl" +
-                "   where type = ?" +
-                "   and   (id, major_version, minor_version, patch_version) in (" +
-                //    Last select the maximum patch version with the major/minor version per id.
-                "     select id, major_version, minor_version, max(patch_version)" +
-                "       from scl_file patch_scl" +
-                "      where patch_scl.type = outer_scl.type" +
-                "      and   (id, major_version, minor_version) in (" +
-                //         Next select the maximum minor version with the major version per id.
-                "          select id, major_version, max(minor_version)" +
-                "            from scl_file minor_scl" +
-                "           where minor_scl.type = outer_scl.type" +
-                "           and   (id, major_version) in (" +
-                //              First select the maximum major version per id.
-                "               select id, max(major_version)" +
-                "                 from scl_file major_scl" +
-                "                where major_scl.type = outer_scl.type" +
-                "                group by id" +
-                "           )" +
-                "           group by id, major_version" +
-                "      )" +
-                "      group by id, major_version, minor_version" +
-                " )" +
-                " order by id, major_version, minor_version, patch_version";
+        var sql = SElECT_METADATA_CLAUSE
+                + FROM_CLAUSE
+                + WHERE_CLAUSE + FILTER_ON_TYPE
+                + "   and   (id, major_version, minor_version, patch_version) in ("
+                //      Last select the maximum patch version with the major/minor version per id.
+                + "     select id, major_version, minor_version, max(patch_version)"
+                + "       from scl_file patch_scl"
+                + "      where patch_scl.type = scl_file.type"
+                + "      and   (id, major_version, minor_version) in ("
+                //           Next select the maximum minor version with the major version per id.
+                + "          select id, major_version, max(minor_version)"
+                + "            from scl_file minor_scl"
+                + "           where minor_scl.type = scl_file.type"
+                + "           and   (id, major_version) in ("
+                //                First select the maximum major version per id.
+                + "               select id, max(major_version)"
+                + "                 from scl_file major_scl"
+                + "                where major_scl.type = scl_file.type"
+                + "                group by id"
+                + "           )"
+                + "           group by id, major_version"
+                + "      )"
+                + "      group by id, major_version, minor_version"
+                + " )"
+                + ORDER_BY_CLAUSE;
 
         var items = new ArrayList<Item>();
         try (var connection = dataSource.getConnection();
@@ -88,11 +99,11 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     @Transactional(SUPPORTS)
     public List<Item> listVersionsByUUID(SclType type, UUID id) {
-        var sql = "select id, name, major_version, minor_version, patch_version"
-                + "  from scl_file"
-                + " where id   = ?"
-                + " and   type = ?"
-                + " order by major_version, minor_version, patch_version";
+        var sql = SElECT_METADATA_CLAUSE
+                + FROM_CLAUSE
+                + WHERE_CLAUSE + FILTER_ON_ID
+                + AND_CLAUSE + FILTER_ON_TYPE
+                + ORDER_BY_CLAUSE;
 
         var items = new ArrayList<Item>();
         try (var connection = dataSource.getConnection();
@@ -126,12 +137,11 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Transactional(SUPPORTS)
     public String findByUUID(SclType type, UUID id, Version version) {
         var sql = "select scl_data "
-                + "  from scl_file "
-                + " where id            = ?"
-                + " and   type          = ?"
-                + " and   major_version = ? "
-                + " and   minor_version = ? "
-                + " and   patch_version = ? ";
+                + FROM_CLAUSE
+                + WHERE_CLAUSE + FILTER_ON_ID
+                + AND_CLAUSE + FILTER_ON_TYPE
+                + AND_CLAUSE + FILTER_ON_VERSION;
+
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, id);
@@ -155,11 +165,12 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     @Transactional(SUPPORTS)
     public SclMetaInfo findMetaInfoByUUID(SclType type, UUID id) {
-        var sql = "select id, name, major_version, minor_version, patch_version"
-                + "  from scl_file"
-                + " where id   = ?"
-                + " and   type = ?"
+        var sql = SElECT_METADATA_CLAUSE
+                + FROM_CLAUSE
+                + WHERE_CLAUSE + FILTER_ON_ID
+                + AND_CLAUSE + FILTER_ON_TYPE
                 + " order by major_version desc, minor_version desc, patch_version desc";
+
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, id);
@@ -205,9 +216,10 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     @Transactional(REQUIRED)
     public void delete(SclType type, UUID id) {
-        var sql = "delete from scl_file "
-                + " where id   = ?"
-                + " and   type = ?";
+        var sql = DELETE_FROM_CLAUSE
+                + WHERE_CLAUSE + FILTER_ON_ID
+                + AND_CLAUSE + FILTER_ON_TYPE;
+
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, id);
@@ -221,12 +233,11 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     @Transactional(REQUIRED)
     public void delete(SclType type, UUID id, Version version) {
-        var sql = "delete from scl_file "
-                + " where id            = ?"
-                + " and   type          = ?"
-                + " and   major_version = ? "
-                + " and   minor_version = ? "
-                + " and   patch_version = ? ";
+        var sql = DELETE_FROM_CLAUSE
+                + WHERE_CLAUSE + FILTER_ON_ID
+                + AND_CLAUSE + FILTER_ON_TYPE
+                + AND_CLAUSE + FILTER_ON_VERSION;
+        
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, id);

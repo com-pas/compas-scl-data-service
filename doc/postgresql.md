@@ -44,10 +44,10 @@ docker run --rm --name compas_postgresql \
 
 ### Building the application
 
-You can run the following command to build the BaseX version of the application.
+You can run the following command to build the PostgreSQL version of the application.
 
 ```shell script
-./mvnw -P postgres clean verify
+./mvnw clean verify
 ```
 
 ### Running the application in dev mode
@@ -55,6 +55,21 @@ You can run the following command to build the BaseX version of the application.
 You can run your application in dev mode that enables live coding using:
 
 ```shell script
-./mvnw -P postgres -DskipTests=true -Dquarkus.profile=dev,prod-postgres package io.quarkus:quarkus-maven-plugin::dev
+./mvnw -DskipTests=true -Dquarkus.profile=dev-postgres package io.quarkus:quarkus-maven-plugin::dev
 ```
 
+### Creating a native executable
+
+You can create a native executable using:
+
+```shell script
+./mvnw -P native package
+```
+
+This will run the native executable build in a container. In the native profile the property
+"quarkus.native.container-build" is set to 'true'.
+
+You can then execute your native executable with: `./app/target/postgresql-quarkus-app/app-local-SNAPSHOT-runner`
+
+If you want to learn more about building native executables, please see https://quarkus.io/guides/maven-tooling.html
+and https://quarkus.io/guides/writing-native-applications-tips.
