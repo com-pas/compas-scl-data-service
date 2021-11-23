@@ -55,7 +55,7 @@ You can run the following command to build the PostgreSQL version of the applica
 You can run your application in dev mode that enables live coding using:
 
 ```shell script
-./mvnw -DskipTests=true -Dquarkus.profile=dev-postgres package io.quarkus:quarkus-maven-plugin::dev
+./mvnw -DskipTests=true -Dquarkus.profile=dev-postgresql package io.quarkus:quarkus-maven-plugin::dev
 ```
 
 ### Creating a native executable
