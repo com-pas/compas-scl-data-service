@@ -25,7 +25,7 @@ import static javax.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
 
 public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepository {
-    private static final String SElECT_METADATA_CLAUSE = "select id, name, major_version, minor_version, patch_version ";
+    private static final String SELECT_METADATA_CLAUSE = "select id, name, major_version, minor_version, patch_version ";
     private static final String FROM_CLAUSE = " from scl_file ";
     private static final String DELETE_FROM_CLAUSE = "delete " + FROM_CLAUSE;
     private static final String WHERE_CLAUSE = " where ";
@@ -52,7 +52,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     @Transactional(SUPPORTS)
     public List<Item> list(SclType type) {
-        var sql = SElECT_METADATA_CLAUSE
+        var sql = SELECT_METADATA_CLAUSE
                 + FROM_CLAUSE
                 + WHERE_CLAUSE + FILTER_ON_TYPE
                 + "   and   (id, major_version, minor_version, patch_version) in ("
@@ -99,7 +99,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     @Transactional(SUPPORTS)
     public List<Item> listVersionsByUUID(SclType type, UUID id) {
-        var sql = SElECT_METADATA_CLAUSE
+        var sql = SELECT_METADATA_CLAUSE
                 + FROM_CLAUSE
                 + WHERE_CLAUSE + FILTER_ON_ID
                 + AND_CLAUSE + FILTER_ON_TYPE
@@ -165,7 +165,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     @Transactional(SUPPORTS)
     public SclMetaInfo findMetaInfoByUUID(SclType type, UUID id) {
-        var sql = SElECT_METADATA_CLAUSE
+        var sql = SELECT_METADATA_CLAUSE
                 + FROM_CLAUSE
                 + WHERE_CLAUSE + FILTER_ON_ID
                 + AND_CLAUSE + FILTER_ON_TYPE
@@ -237,7 +237,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 + WHERE_CLAUSE + FILTER_ON_ID
                 + AND_CLAUSE + FILTER_ON_TYPE
                 + AND_CLAUSE + FILTER_ON_VERSION;
-        
+
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, id);

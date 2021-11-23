@@ -19,7 +19,7 @@ class CompasSclDataPostgreSQLRepositoryTest extends AbstractCompasSclDataReposit
     }
 
     @BeforeEach
-    void beforeEach() throws Exception {
+    void beforeEach() {
         repository = new CompasSclDataPostgreSQLRepository(PostgreSQLServerJUnitExtension.getDataSource());
     }
 }
