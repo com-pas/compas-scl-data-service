@@ -16,8 +16,8 @@ on:
       - 'develop'
 
 jobs:
-  build:
-    name: Build
+  sonar-check:
+    name: Sonar Check
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
