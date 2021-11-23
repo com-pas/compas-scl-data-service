@@ -4,11 +4,15 @@
 package org.lfenergy.compas.scl.data.rest;
 
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl.data.basex.client.BaseXClient;
 import org.lfenergy.compas.scl.data.basex.client.BaseXClientFactory;
 import org.lfenergy.compas.scl.data.util.SclDataModelMarshaller;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class CompasSclDataServiceBaseXConfigurationTest {
     @Test
@@ -18,10 +22,11 @@ class CompasSclDataServiceBaseXConfigurationTest {
     }
 
     @Test
-    void creatCompasSclDataRepositoryProduction_WhenCalled_ThenObjectReturned() {
+    void creatCompasSclDataRepositoryProduction_WhenCalled_ThenObjectReturned() throws IOException {
         var baseXClientFactory = mock(BaseXClientFactory.class);
-        ;
         var sclDataModelMarshaller = mock(SclDataModelMarshaller.class);
+
+        when(baseXClientFactory.createClient()).thenReturn(mock(BaseXClient.class));
 
         assertNotNull(new CompasSclDataServiceBaseXConfiguration()
                 .creatCompasSclDataRepositoryProduction(baseXClientFactory, sclDataModelMarshaller));
@@ -34,10 +39,11 @@ class CompasSclDataServiceBaseXConfigurationTest {
     }
 
     @Test
-    void creatCompasSclDataRepositoryDevelopment_WhenCalled_ThenObjectReturned() {
+    void creatCompasSclDataRepositoryDevelopment_WhenCalled_ThenObjectReturned() throws IOException {
         var baseXClientFactory = mock(BaseXClientFactory.class);
-        ;
         var sclDataModelMarshaller = mock(SclDataModelMarshaller.class);
+
+        when(baseXClientFactory.createClient()).thenReturn(mock(BaseXClient.class));
 
         assertNotNull(new CompasSclDataServiceBaseXConfiguration()
                 .creatCompasSclDataRepositoryDevelopment(baseXClientFactory, sclDataModelMarshaller));
