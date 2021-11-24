@@ -31,12 +31,13 @@ SPDX-License-Identifier: Apache-2.0
         <microprofile-config-api.version>2.0</microprofile-config-api.version>
         <microprofile-openapi-api.version>3.0-RC5</microprofile-openapi-api.version>
         <apache.commons-io.version>2.11.0</apache.commons-io.version>
+        <flyway.version>7.15.0</flyway.version>
+        <postgresql.version>42.3.1</postgresql.version>
         <slf4j.version>1.7.32</slf4j.version>
 
         <!-- Test -->
-        <basex.version>9.2.4</basex.version>
         <junit-jupiter.version>5.8.1</junit-jupiter.version>
-        <mockito-junit-jupiter.version>4.0.0</mockito-junit-jupiter.version>
+        <mockito-junit-jupiter.version>4.1.0</mockito-junit-jupiter.version>
         <openpojo.version>0.9.1</openpojo.version>
     </properties>
 
@@ -81,6 +82,11 @@ SPDX-License-Identifier: Apache-2.0
                 <artifactId>repository-basex</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.lfenergy.compas.scl.data</groupId>
+                <artifactId>repository-postgresql</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.lfenergy.compas.core</groupId>
@@ -103,6 +109,7 @@ SPDX-License-Identifier: Apache-2.0
                 <artifactId>jaxb-impl</artifactId>
                 <version>${jaxb-impl.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>jakarta.enterprise</groupId>
                 <artifactId>jakarta.enterprise.cdi-api</artifactId>
@@ -126,6 +133,17 @@ SPDX-License-Identifier: Apache-2.0
             </dependency>
 
             <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
@@ -138,10 +156,13 @@ SPDX-License-Identifier: Apache-2.0
 
             <!-- Test -->
             <dependency>
-                <groupId>org.basex</groupId>
-                <artifactId>basex</artifactId>
-                <version>${basex.version}</version>
+                <groupId>org.lfenergy.compas.scl.data</groupId>
+                <artifactId>repository</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
             </dependency>
+
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-api</artifactId>
@@ -201,6 +222,13 @@ SPDX-License-Identifier: Apache-2.0
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.2.0</version>
+                    <executions>
+                      <execution>
+                        <goals>
+                          <goal>test-jar</goal>
+                        </goals>
+                      </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

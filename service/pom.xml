@@ -23,11 +23,6 @@ SPDX-License-Identifier: Apache-2.0
             <artifactId>repository</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>jakarta.enterprise</groupId>
-            <artifactId>jakarta.enterprise.cdi-api</artifactId>
-        </dependency>
-
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.mockito</groupId>
