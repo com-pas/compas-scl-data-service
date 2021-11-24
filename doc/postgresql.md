@@ -6,9 +6,9 @@ SPDX-License-Identifier: Apache-2.0
 
 # PostgreSQL Implementation
 
-## BaseX Environment variables
+## PostgreSQL Environment variables
 
-Below environment variable(s) can be used to configure the connection to BaseX, if BaseX Server is used.
+Below environment variable(s) can be used to configure the connection to PostgreSQL, if PostgreSQL Server is used.
 
 | Environment variable             | Java Property               | Description                                   | Example          |
 | -------------------------------- | --------------------------- | --------------------------------------------- | ---------------- |
