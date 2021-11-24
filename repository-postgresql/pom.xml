@@ -17,36 +17,29 @@ SPDX-License-Identifier: Apache-2.0
     <artifactId>repository-postgresql</artifactId>
     <packaging>jar</packaging>
 
-    <properties>
-        <postgresql.version>42.3.1</postgresql.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.lfenergy.compas.scl.data</groupId>
             <artifactId>repository</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>jakarta.enterprise</groupId>
-            <artifactId>jakarta.enterprise.cdi-api</artifactId>
-        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.lfenergy.compas.scl.data</groupId>
             <artifactId>repository</artifactId>
             <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

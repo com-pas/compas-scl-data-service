@@ -9,9 +9,11 @@ on:
     types: [released]
 
 jobs:
-  push_to_registry:
-    name: Build and publish
+  release_project:
+    name: Release project
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -56,6 +58,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Deploy with Maven to GitHub Packages and Docker Hub
-        run: ./mvnw -B -s custom_maven_settings.xml -P basex,release,native clean deploy
+        run: ./mvnw -B -s custom_maven_settings.xml -P release,native clean deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

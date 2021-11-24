@@ -41,6 +41,18 @@ SPDX-License-Identifier: Apache-2.0
             <groupId>org.lfenergy.compas.scl.data</groupId>
             <artifactId>service</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.lfenergy.compas.scl.data</groupId>
+            <artifactId>repository</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lfenergy.compas.scl.data</groupId>
+            <artifactId>repository-basex</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lfenergy.compas.scl.data</groupId>
+            <artifactId>repository-postgresql</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.lfenergy.compas.core</groupId>
@@ -61,6 +73,14 @@ SPDX-License-Identifier: Apache-2.0
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-jaxb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-jwt</artifactId>
         </dependency>
         <dependency>
@@ -73,15 +93,23 @@ SPDX-License-Identifier: Apache-2.0
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-resteasy-jaxb</artifactId>
+            <artifactId>quarkus-agroal</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-narayana-jta</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-flyway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-container-image-docker</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-hibernate-validator</artifactId>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -131,95 +159,61 @@ SPDX-License-Identifier: Apache-2.0
                 <extensions>true</extensions>
                 <executions>
                     <execution>
+                        <id>build-generic</id>
                         <goals>
-                            <goal>build</goal>
                             <goal>generate-code</goal>
                             <goal>generate-code-tests</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>build-basex</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <quarkus.profile>prod-basex</quarkus.profile>
+                                <quarkus.package.output-directory>basex-quarkus-app</quarkus.package.output-directory>
+                                <quarkus.docker.dockerfile-jvm-path>src/main/docker/Dockerfile-basex.jvm</quarkus.docker.dockerfile-jvm-path>
+                                <quarkus.docker.dockerfile-native-path>src/main/docker/Dockerfile-basex.native</quarkus.docker.dockerfile-native-path>
+                                <quarkus.container-image.tag>${project.version}-basex</quarkus.container-image.tag>
+                                <quarkus.container-image.additional-tags>latest-basex</quarkus.container-image.additional-tags>
+                            </properties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>build-postgresql</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <quarkus.profile>prod-postgresql</quarkus.profile>
+                                <quarkus.package.output-directory>postgresql-quarkus-app</quarkus.package.output-directory>
+                                <quarkus.docker.dockerfile-jvm-path>src/main/docker/Dockerfile-postgresql.jvm</quarkus.docker.dockerfile-jvm-path>
+                                <quarkus.docker.dockerfile-native-path>src/main/docker/Dockerfile-postgresql.native</quarkus.docker.dockerfile-native-path>
+                                <quarkus.container-image.tag>${project.version}-postgresql</quarkus.container-image.tag>
+                                <quarkus.container-image.additional-tags>latest-postgresql</quarkus.container-image.additional-tags>
+                            </properties>
+                        </configuration>
+                    </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                        <maven.home>${maven.home}</maven.home>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>
 
     <profiles>
-        <profile>
-            <id>basex</id>
-
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-
-            <properties>
-                <quarkus.profile>prod,prod-basex</quarkus.profile>
-            </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>org.lfenergy.compas.scl.data</groupId>
-                    <artifactId>repository-basex</artifactId>
-                    <scope>runtime</scope>
-                </dependency>
-            </dependencies>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <systemPropertyVariables>
-                                <quarkus.test.profile>test,prod-basex</quarkus.test.profile>
-                                <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                                <maven.home>${maven.home}</maven.home>
-                            </systemPropertyVariables>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>postgres</id>
-
-            <properties>
-                <quarkus.profile>prod,prod-postgres</quarkus.profile>
-            </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>org.lfenergy.compas.scl.data</groupId>
-                    <artifactId>repository-postgresql</artifactId>
-                    <scope>runtime</scope>
-                </dependency>
-
-                <dependency>
-                    <groupId>io.quarkus</groupId>
-                    <artifactId>quarkus-narayana-jta</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>io.quarkus</groupId>
-                    <artifactId>quarkus-agroal</artifactId>
-                </dependency>
-            </dependencies>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <systemPropertyVariables>
-                                <quarkus.test.profile>test,prod-postgres</quarkus.test.profile>
-                                <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                                <maven.home>${maven.home}</maven.home>
-                            </systemPropertyVariables>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
         <profile>
             <id>native</id>
 
@@ -237,13 +231,14 @@ SPDX-License-Identifier: Apache-2.0
                         <version>${surefire-plugin.version}</version>
                         <executions>
                             <execution>
+                                <id>integration-test-basex</id>
                                 <goals>
                                     <goal>integration-test</goal>
                                     <goal>verify</goal>
                                 </goals>
                                 <configuration>
                                     <systemPropertyVariables>
-                                        <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
+                                        <native.image.path>${project.build.directory}/basex-quarkus-app/${project.build.finalName}-runner</native.image.path>
                                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                                         <maven.home>${maven.home}</maven.home>
                                     </systemPropertyVariables>
@@ -273,7 +268,6 @@ SPDX-License-Identifier: Apache-2.0
                 <!-- Properties only used for publishing a native docker image (default to Docker Hub) -->
                 <quarkus.container-image.build>true</quarkus.container-image.build>
                 <quarkus.container-image.push>true</quarkus.container-image.push>
-                <quarkus.container-image.additional-tags>latest</quarkus.container-image.additional-tags>
             </properties>
         </profile>
     </profiles>

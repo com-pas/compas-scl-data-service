@@ -50,7 +50,7 @@ You can run the following command to build the BaseX version of the application.
 You can run your application in dev mode that enables live coding using:
 
 ```shell script
-./mvnw -Dquarkus.profile=dev,prod-basex package io.quarkus:quarkus-maven-plugin::dev
+./mvnw -DskipTests=true -Dquarkus.profile=dev-basex package io.quarkus:quarkus-maven-plugin::dev
 ```
 
 ### Creating a native executable
@@ -61,9 +61,10 @@ You can create a native executable using:
 ./mvnw -P native package
 ```
 
-This will run the native executable build in a container, because in the native profile the property
+This will run the native executable build in a container. In the native profile the property
 "quarkus.native.container-build" is set to 'true'.
 
-You can then execute your native executable with: `./app/target/app-local-SNAPSHOT-runner`
+You can then execute your native executable with: `./app/target/basex-quarkus-app/app-local-SNAPSHOT-runner`
 
-If you want to learn more about building native executables, please see https://quarkus.io/guides/maven-tooling.html.
+If you want to learn more about building native executables, please see https://quarkus.io/guides/maven-tooling.html
+and https://quarkus.io/guides/writing-native-applications-tips.
