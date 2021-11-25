@@ -17,6 +17,10 @@ SPDX-License-Identifier: Apache-2.0
     <artifactId>repository-postgresql</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <flyway.version>8.0.5</flyway.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.lfenergy.compas.scl.data</groupId>
@@ -32,6 +36,9 @@ SPDX-License-Identifier: Apache-2.0
             <scope>test</scope>
         </dependency>
 
+        <!-- Only configure this dependency here, because Quarkus may use a older version.
+             We only use Flyway in this project during testing. Runtime Quarkus is responsible.
+          -->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>

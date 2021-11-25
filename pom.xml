@@ -25,19 +25,11 @@ SPDX-License-Identifier: Apache-2.0
         <sonarqube-plugin.version>3.2.0</sonarqube-plugin.version>
 
         <compas.core.version>0.6.0</compas.core.version>
-        <jakarta-bind-api.version>2.3.3</jakarta-bind-api.version>
-        <jaxb-impl.version>2.3.5</jaxb-impl.version>
-        <jakarta-cdi-api.version>2.0.2</jakarta-cdi-api.version>
-        <microprofile-config-api.version>2.0</microprofile-config-api.version>
-        <microprofile-openapi-api.version>3.0-RC5</microprofile-openapi-api.version>
-        <apache.commons-io.version>2.11.0</apache.commons-io.version>
-        <flyway.version>8.0.5</flyway.version>
-        <postgresql.version>42.3.1</postgresql.version>
-        <slf4j.version>1.7.32</slf4j.version>
 
-        <!-- Test -->
-        <junit-jupiter.version>5.8.1</junit-jupiter.version>
-        <mockito-junit-jupiter.version>4.1.0</mockito-junit-jupiter.version>
+        <quarkus.platform.version>2.5.0.Final</quarkus.platform.version>
+        <jaxb-impl.version>2.3.5</jaxb-impl.version>
+        <microprofile-openapi-api.version>3.0-RC5</microprofile-openapi-api.version>
+        <slf4j.version>1.7.32</slf4j.version>
         <openpojo.version>0.9.1</openpojo.version>
     </properties>
 
@@ -67,6 +59,14 @@ SPDX-License-Identifier: Apache-2.0
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-universe-bom</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <dependency>
                 <groupId>org.lfenergy.compas.scl.data</groupId>
                 <artifactId>service</artifactId>
@@ -100,47 +100,15 @@ SPDX-License-Identifier: Apache-2.0
             </dependency>
 
             <dependency>
-                <groupId>jakarta.xml.bind</groupId>
-                <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>${jakarta-bind-api.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.sun.xml.bind</groupId>
                 <artifactId>jaxb-impl</artifactId>
                 <version>${jaxb-impl.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>jakarta.enterprise</groupId>
-                <artifactId>jakarta.enterprise.cdi-api</artifactId>
-                <version>${jakarta-cdi-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.microprofile.config</groupId>
-                <artifactId>microprofile-config-api</artifactId>
-                <version>${microprofile-config-api.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.eclipse.microprofile.openapi</groupId>
                 <artifactId>microprofile-openapi-api</artifactId>
                 <version>${microprofile-openapi-api.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>${apache.commons-io.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-core</artifactId>
-                <version>${flyway.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>${postgresql.version}</version>
             </dependency>
 
             <dependency>
@@ -163,21 +131,6 @@ SPDX-License-Identifier: Apache-2.0
                 <scope>test</scope>
             </dependency>
 
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-api</artifactId>
-                <version>${junit-jupiter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-engine</artifactId>
-                <version>${junit-jupiter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-junit-jupiter</artifactId>
-                <version>${mockito-junit-jupiter.version}</version>
-            </dependency>
             <dependency>
                 <groupId>com.openpojo</groupId>
                 <artifactId>openpojo</artifactId>
