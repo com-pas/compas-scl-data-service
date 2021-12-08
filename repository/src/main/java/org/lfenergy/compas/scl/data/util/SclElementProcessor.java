@@ -107,7 +107,7 @@ public class SclElementProcessor {
      * @return The Hitem created and added to the History Element.
      */
     public Element addHistoryItem(Element header, String who, String fullmessage, Version version) {
-        var formatter = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssXXX");
+        var formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
         var document = header.getOwnerDocument();
 
         var history = getChildNodesByName(header, SCL_HISTORY_ELEMENT_NAME).stream().findFirst()
