@@ -168,7 +168,7 @@ SPDX-License-Identifier: Apache-2.0
                         </configuration>
                     </execution>
                     <!-- Put this build execution as last, because we will use this image to do a basic native check (NativeHealthCheckIT).
-                         This information is written in "quarkus-artifacts.properties" and used by the integration tests.
+                         This information is written in "target\quarkus-artifact.properties" and used by the integration tests (failsafe).
                          Sadly there is only 1 file create, so this build overwrites the one from postgresql.
                       -->
                     <execution>
