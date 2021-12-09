@@ -6,6 +6,22 @@ SPDX-License-Identifier: Apache-2.0
 
 # PostgreSQL Implementation
 
+## PostgreSQL Environment variables
+
+Below environment variable(s) can be used to configure the connection to PostgreSQL, if PostgreSQL Server is used.
+
+| Environment variable             | Java Property               | Description                                   | Example          |
+| -------------------------------- | --------------------------- | --------------------------------------------- | ---------------- |
+| POSTGRESQL_HOST                  | -                           | Name of the Host where PostgreSQL runs.       | localhost        |
+| POSTGRESQL_PORT                  | -                           | Port on the Host on which PostgreSQL runs.    | 5432             |
+| POSTGRESQL_DB                    | -                           | The database used in PostgreSQL               | compas           |
+| POSTGRESQL_USERNAME              | quarkus.datasource.username | Username under which the application logs in. | postgres         |
+| POSTGRESQL_PASSWORD              | quarkus.datasource.password | Password of the username used above.          | postgres         |
+
+The variables POSTGRESQL_HOST, POSTGRESQL_PORT and POSTGRESQL_DB are used to created the JDBC URL in the property file.
+The value is build like 'jdbc:postgresql://${POSTGRESQL_HOST}:${POSTGRESQL_PORT}/${POSTGRESQL_DB}'. The variables have
+respectively the following defaults, 'localhost', '5432' and 'compas'.
+
 ## Database Model
 
 For the SCL Data Service the following table is automatically created using FlyWay.

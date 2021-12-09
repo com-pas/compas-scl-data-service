@@ -18,23 +18,9 @@ SPDX-License-Identifier: Apache-2.0
     <packaging>jar</packaging>
 
     <properties>
-        <quarkus.platform.version>2.4.2.Final</quarkus.platform.version>
-
         <quarkus.container-image.group>lfenergy</quarkus.container-image.group>
         <quarkus.container-image.name>compas-scl-data-service</quarkus.container-image.name>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.quarkus</groupId>
-                <artifactId>quarkus-universe-bom</artifactId>
-                <version>${quarkus.platform.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -166,22 +152,6 @@ SPDX-License-Identifier: Apache-2.0
                         </goals>
                     </execution>
                     <execution>
-                        <id>build-basex</id>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                        <configuration>
-                            <properties>
-                                <quarkus.profile>prod-basex</quarkus.profile>
-                                <quarkus.package.output-directory>basex-quarkus-app</quarkus.package.output-directory>
-                                <quarkus.docker.dockerfile-jvm-path>src/main/docker/Dockerfile-basex.jvm</quarkus.docker.dockerfile-jvm-path>
-                                <quarkus.docker.dockerfile-native-path>src/main/docker/Dockerfile-basex.native</quarkus.docker.dockerfile-native-path>
-                                <quarkus.container-image.tag>${project.version}-basex</quarkus.container-image.tag>
-                                <quarkus.container-image.additional-tags>latest-basex</quarkus.container-image.additional-tags>
-                            </properties>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>build-postgresql</id>
                         <goals>
                             <goal>build</goal>
@@ -194,6 +164,26 @@ SPDX-License-Identifier: Apache-2.0
                                 <quarkus.docker.dockerfile-native-path>src/main/docker/Dockerfile-postgresql.native</quarkus.docker.dockerfile-native-path>
                                 <quarkus.container-image.tag>${project.version}-postgresql</quarkus.container-image.tag>
                                 <quarkus.container-image.additional-tags>latest-postgresql</quarkus.container-image.additional-tags>
+                            </properties>
+                        </configuration>
+                    </execution>
+                    <!-- Put this build execution as last, because we will use this image to do a basic native check (NativeHealthCheckIT).
+                         This information is written in "target\quarkus-artifact.properties" and used by the integration tests (failsafe).
+                         Sadly there is only 1 file create, so this build overwrites the one from postgresql.
+                      -->
+                    <execution>
+                        <id>build-basex</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <quarkus.profile>prod-basex</quarkus.profile>
+                                <quarkus.package.output-directory>basex-quarkus-app</quarkus.package.output-directory>
+                                <quarkus.docker.dockerfile-jvm-path>src/main/docker/Dockerfile-basex.jvm</quarkus.docker.dockerfile-jvm-path>
+                                <quarkus.docker.dockerfile-native-path>src/main/docker/Dockerfile-basex.native</quarkus.docker.dockerfile-native-path>
+                                <quarkus.container-image.tag>${project.version}-basex</quarkus.container-image.tag>
+                                <quarkus.container-image.additional-tags>latest-basex</quarkus.container-image.additional-tags>
                             </properties>
                         </configuration>
                     </execution>
@@ -219,8 +209,8 @@ SPDX-License-Identifier: Apache-2.0
 
             <properties>
                 <quarkus.package.type>native</quarkus.package.type>
-                <!-- Allows for creating a Linux executable without GraalVM being installed -->
-                <quarkus.native.container-build>true</quarkus.native.container-build>
+                <quarkus.native.container-build>true</quarkus.native.container-build> <!-- Allows for creating a Linux executable without GraalVM being installed -->
+                <quarkus.container-image.build>true</quarkus.container-image.build> <!-- Also make a Docker Image, so the native test will be executed against the container -->
             </properties>
 
             <build>
