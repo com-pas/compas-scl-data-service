@@ -8,9 +8,9 @@ import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclMetaInfo;
-import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
+import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
@@ -48,7 +48,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public List<Item> list(SclType type) {
+    public List<Item> list(SclFileType type) {
         var sql = SELECT_METADATA_CLAUSE
                 + FROM_CLAUSE
                 + WHERE_CLAUSE + FILTER_ON_TYPE
@@ -94,7 +94,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public List<Item> listVersionsByUUID(SclType type, UUID id) {
+    public List<Item> listVersionsByUUID(SclFileType type, UUID id) {
         var sql = SELECT_METADATA_CLAUSE
                 + FROM_CLAUSE
                 + WHERE_CLAUSE + FILTER_ON_ID
@@ -121,7 +121,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public String findByUUID(SclType type, UUID id) {
+    public String findByUUID(SclFileType type, UUID id) {
         // Use the find meta info to retrieve info about the latest version.
         var metaInfo = findMetaInfoByUUID(type, id);
         // Next return the data using the meta info.
@@ -129,7 +129,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public String findByUUID(SclType type, UUID id, Version version) {
+    public String findByUUID(SclFileType type, UUID id, Version version) {
         var sql = SELECT_DATA_CLAUSE
                 + FROM_CLAUSE
                 + WHERE_CLAUSE + FILTER_ON_ID
@@ -157,7 +157,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public SclMetaInfo findMetaInfoByUUID(SclType type, UUID id) {
+    public SclMetaInfo findMetaInfoByUUID(SclFileType type, UUID id) {
         var sql = SELECT_METADATA_CLAUSE
                 + FROM_CLAUSE
                 + WHERE_CLAUSE + FILTER_ON_ID
@@ -185,7 +185,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public void create(SclType type, UUID id, String name, String scl, Version version, String who) {
+    public void create(SclFileType type, UUID id, String name, String scl, Version version, String who) {
         var sql = "insert into scl_file(id, major_version, minor_version, patch_version, type, name, created_by, scl_data)"
                 + "     values (?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -206,7 +206,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public void delete(SclType type, UUID id) {
+    public void delete(SclFileType type, UUID id) {
         var sql = DELETE_FROM_CLAUSE
                 + WHERE_CLAUSE + FILTER_ON_ID
                 + AND_CLAUSE + FILTER_ON_TYPE;
@@ -222,7 +222,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public void delete(SclType type, UUID id, Version version) {
+    public void delete(SclFileType type, UUID id, Version version) {
         var sql = DELETE_FROM_CLAUSE
                 + WHERE_CLAUSE + FILTER_ON_ID
                 + AND_CLAUSE + FILTER_ON_TYPE

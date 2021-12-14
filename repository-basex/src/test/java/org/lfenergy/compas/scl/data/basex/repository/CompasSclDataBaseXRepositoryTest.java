@@ -8,10 +8,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl.data.basex.client.BaseXClientFactory;
 import org.lfenergy.compas.scl.data.basex.client.BaseXServerJUnitExtension;
-import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.repository.AbstractCompasSclDataRepository;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclDataModelMarshaller;
+import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ class CompasSclDataBaseXRepositoryTest extends AbstractCompasSclDataRepository {
 
         // To make it possible to re-run the test over and over (in your IDE),
         // Create all the database, because this will cause to old ones to be removed.
-        Arrays.stream(SclType.values())
+        Arrays.stream(SclFileType.values())
                 .forEach(type -> {
                     try {
                         factory.createClient().executeXQuery("db:create('" + type + "')");

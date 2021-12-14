@@ -8,9 +8,9 @@ import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
+import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import java.util.UUID;
 
@@ -20,16 +20,16 @@ import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCo
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_DATA_FOUND_ERROR_CODE;
 
 public abstract class AbstractCompasSclDataRepository {
-    protected static final SclType TYPE = SclType.SCD;
+    protected static final SclFileType TYPE = SclFileType.SCD;
     protected static final String NAME_1 = "SCL-NAME1";
     protected static final String NAME_2 = "SCL-NAME2";
     protected static final String WHO = "User 1";
 
     // Use different types, so tests don't conflict with each other.
-    protected static final SclType LIST1_TYPE = SclType.CID;
-    protected static final SclType LIST2_TYPE = SclType.ICD;
-    protected static final SclType LIST3_TYPE = SclType.IID;
-    protected static final SclType LIST4_TYPE = SclType.ISD;
+    protected static final SclFileType LIST1_TYPE = SclFileType.CID;
+    protected static final SclFileType LIST2_TYPE = SclFileType.ICD;
+    protected static final SclFileType LIST3_TYPE = SclFileType.IID;
+    protected static final SclFileType LIST4_TYPE = SclFileType.ISD;
 
     protected final ElementConverter converter = new ElementConverter();
     protected final SclElementProcessor processor = new SclElementProcessor();

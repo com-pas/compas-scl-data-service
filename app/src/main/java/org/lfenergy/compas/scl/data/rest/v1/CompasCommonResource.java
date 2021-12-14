@@ -5,11 +5,11 @@ package org.lfenergy.compas.scl.data.rest.v1;
 
 import io.quarkus.security.Authenticated;
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.rest.v1.model.Type;
 import org.lfenergy.compas.scl.data.rest.v1.model.TypeListResponse;
 import org.lfenergy.compas.scl.data.rest.v1.model.UserInfoResponse;
+import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,10 +49,10 @@ public class CompasCommonResource {
 
         var response = new TypeListResponse();
         response.setTypes(
-                Arrays.stream(SclType.values())
+                Arrays.stream(SclFileType.values())
                         // Filter on the type the user has read rights.
-                        .filter(sclType -> roles.contains(sclType.name() + "_" + READ_ROLE))
-                        .map(sclType -> new Type(sclType.name(), sclType.getDescription()))
+                        .filter(sclFileType -> roles.contains(sclFileType.name() + "_" + READ_ROLE))
+                        .map(sclFileType -> new Type(sclFileType.name(), sclFileType.getDescription()))
                         .sorted(Comparator.comparing(Type::getDescription))
                         .collect(Collectors.toList()));
         return response;
