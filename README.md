@@ -83,4 +83,8 @@ configured as needed.
 - SED_DELETE
 - SED_READ
 - SED_UPDATE
+- STD_CREATE
+- STD_DELETE
+- STD_READ
+- STD_UPDATE
 

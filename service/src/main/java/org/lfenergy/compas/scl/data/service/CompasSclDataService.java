@@ -5,8 +5,8 @@ package org.lfenergy.compas.scl.data.service;
 
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
-import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -17,26 +17,26 @@ import static javax.transaction.Transactional.TxType.SUPPORTS;
 
 public interface CompasSclDataService {
     @Transactional(SUPPORTS)
-    List<Item> list(SclType type);
+    List<Item> list(SclFileType type);
 
     @Transactional(SUPPORTS)
-    List<Item> listVersionsByUUID(SclType type, UUID id);
+    List<Item> listVersionsByUUID(SclFileType type, UUID id);
 
     @Transactional(SUPPORTS)
-    String findByUUID(SclType type, UUID id);
+    String findByUUID(SclFileType type, UUID id);
 
     @Transactional(SUPPORTS)
-    String findByUUID(SclType type, UUID id, Version version);
+    String findByUUID(SclFileType type, UUID id, Version version);
 
     @Transactional(REQUIRED)
-    String create(SclType type, String name, String who, String comment, String sclData);
+    String create(SclFileType type, String name, String who, String comment, String sclData);
 
     @Transactional(REQUIRED)
-    String update(SclType type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData);
+    String update(SclFileType type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData);
 
     @Transactional(REQUIRED)
-    void delete(SclType type, UUID id);
+    void delete(SclFileType type, UUID id);
 
     @Transactional(REQUIRED)
-    void delete(SclType type, UUID id, Version version);
+    void delete(SclFileType type, UUID id, Version version);
 }

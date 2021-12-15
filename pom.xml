@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <sonarqube-plugin.version>3.2.0</sonarqube-plugin.version>
 
-        <compas.core.version>0.6.0</compas.core.version>
+        <compas.core.version>0.7.0</compas.core.version>
 
         <quarkus.platform.version>2.4.2.Final</quarkus.platform.version>
         <jaxb-impl.version>2.3.5</jaxb-impl.version>
@@ -91,6 +91,11 @@ SPDX-License-Identifier: Apache-2.0
             <dependency>
                 <groupId>org.lfenergy.compas.core</groupId>
                 <artifactId>commons</artifactId>
+                <version>${compas.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.lfenergy.compas.core</groupId>
+                <artifactId>scl-extension</artifactId>
                 <version>${compas.core.version}</version>
             </dependency>
             <dependency>

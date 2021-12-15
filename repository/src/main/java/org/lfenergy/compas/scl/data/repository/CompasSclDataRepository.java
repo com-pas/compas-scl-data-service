@@ -5,8 +5,8 @@ package org.lfenergy.compas.scl.data.repository;
 
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclMetaInfo;
-import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -27,7 +27,7 @@ public interface CompasSclDataRepository {
      * @return The list of entries found for the passed type.
      */
     @Transactional(SUPPORTS)
-    List<Item> list(SclType type);
+    List<Item> list(SclFileType type);
 
     /**
      * List all versions for a specific SCL Entry for a type of SCL.
@@ -37,7 +37,7 @@ public interface CompasSclDataRepository {
      * @return The list of versions found for that specific sCl Entry.
      */
     @Transactional(SUPPORTS)
-    List<Item> listVersionsByUUID(SclType type, UUID id);
+    List<Item> listVersionsByUUID(SclFileType type, UUID id);
 
     /**
      * Return the latest version of a specific SCL Entry.
@@ -47,7 +47,7 @@ public interface CompasSclDataRepository {
      * @return The SCL XML File Content that is search for.
      */
     @Transactional(SUPPORTS)
-    String findByUUID(SclType type, UUID id);
+    String findByUUID(SclFileType type, UUID id);
 
     /**
      * Return the meta info of the latest version of a specific SCL Entry.
@@ -57,7 +57,7 @@ public interface CompasSclDataRepository {
      * @return The Meta Info of SCL Entry that is search for.
      */
     @Transactional(SUPPORTS)
-    SclMetaInfo findMetaInfoByUUID(SclType type, UUID id);
+    SclMetaInfo findMetaInfoByUUID(SclFileType type, UUID id);
 
     /**
      * Return the specific version of a specific SCL Entry.
@@ -68,7 +68,7 @@ public interface CompasSclDataRepository {
      * @return The SCL XML File Content that is search for.
      */
     @Transactional(SUPPORTS)
-    String findByUUID(SclType type, UUID id, Version version);
+    String findByUUID(SclFileType type, UUID id, Version version);
 
     /**
      * Create a new entry for the passed UUID with the version number passed.
@@ -77,15 +77,15 @@ public interface CompasSclDataRepository {
      * When a entry is updated the service layer will increase the version and always create a new entry
      * in the repository.
      *
-     * @param type     The type of SCL to store it in.
-     * @param id       The ID of the new entry to be created.
-     * @param name     The name of the SCL to be stored.
-     * @param scl      The SCL XML File content to store.
-     * @param version  The version of the new entry to be created.
-     * @param who      The user that created the new entry.
+     * @param type    The type of SCL to store it in.
+     * @param id      The ID of the new entry to be created.
+     * @param name    The name of the SCL to be stored.
+     * @param scl     The SCL XML File content to store.
+     * @param version The version of the new entry to be created.
+     * @param who     The user that created the new entry.
      */
     @Transactional(REQUIRED)
-    void create(SclType type, UUID id, String name, String scl, Version version, String who);
+    void create(SclFileType type, UUID id, String name, String scl, Version version, String who);
 
     /**
      * Delete all versions for a specific SCL File using it's ID.
@@ -94,7 +94,7 @@ public interface CompasSclDataRepository {
      * @param id   The ID of the SCL File to delete.
      */
     @Transactional(REQUIRED)
-    void delete(SclType type, UUID id);
+    void delete(SclFileType type, UUID id);
 
     /**
      * Delete passed versions for a specific SCL File using it's ID.
@@ -104,5 +104,5 @@ public interface CompasSclDataRepository {
      * @param version The version of that SCL File to delete.
      */
     @Transactional(REQUIRED)
-    void delete(SclType type, UUID id, Version version);
+    void delete(SclFileType type, UUID id, Version version);
 }

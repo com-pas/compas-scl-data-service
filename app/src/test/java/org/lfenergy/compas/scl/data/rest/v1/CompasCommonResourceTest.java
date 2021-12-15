@@ -30,10 +30,10 @@ class CompasCommonResourceTest {
 
         var xmlPath = response.xmlPath();
         // User has read rights for 2 types, so these types are returned.
-        var sclTypes = xmlPath.getList("TypeListResponse.Type.Code");
-        assertEquals(2, sclTypes.size());
-        assertEquals("IID", sclTypes.get(0));
-        assertEquals("SCD", sclTypes.get(1));
+        var sclFileTypes = xmlPath.getList("TypeListResponse.Type.Code");
+        assertEquals(2, sclFileTypes.size());
+        assertEquals("IID", sclFileTypes.get(0));
+        assertEquals("SCD", sclFileTypes.get(1));
     }
 
     @Test
@@ -48,9 +48,9 @@ class CompasCommonResourceTest {
 
         var xmlPath = response.xmlPath();
         // User has read rights for one type, so this type is returned.
-        var sclTypes = xmlPath.getList("TypeListResponse.Type.Code");
-        assertEquals(1, sclTypes.size());
-        assertEquals("SCD", sclTypes.get(0));
+        var sclFileTypes = xmlPath.getList("TypeListResponse.Type.Code");
+        assertEquals(1, sclFileTypes.size());
+        assertEquals("SCD", sclFileTypes.get(0));
     }
 
     @Test
@@ -65,8 +65,8 @@ class CompasCommonResourceTest {
 
         var xmlPath = response.xmlPath();
         // User has read rights for no types, so empty list is returned.
-        var sclTypes = xmlPath.getList("TypeListResponse.Type.Code");
-        assertEquals(0, sclTypes.size());
+        var sclFileTypes = xmlPath.getList("TypeListResponse.Type.Code");
+        assertEquals(0, sclFileTypes.size());
     }
 
     @Test

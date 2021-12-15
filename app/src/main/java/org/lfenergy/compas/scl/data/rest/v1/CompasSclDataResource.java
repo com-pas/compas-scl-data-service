@@ -5,11 +5,11 @@ package org.lfenergy.compas.scl.data.rest.v1;
 
 import io.quarkus.security.Authenticated;
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.rest.v1.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
+import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public class CompasSclDataResource {
     @POST
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public CreateResponse create(@PathParam(TYPE_PATH_PARAM) SclType type,
+    public CreateResponse create(@PathParam(TYPE_PATH_PARAM) SclFileType type,
                                  @Valid CreateRequest request) {
         String who = jsonWebToken.getClaim(userInfoProperties.who());
         LOGGER.trace("Username used for Who {}", who);
@@ -58,7 +58,7 @@ public class CompasSclDataResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_XML)
-    public ListResponse list(@PathParam(TYPE_PATH_PARAM) SclType type) {
+    public ListResponse list(@PathParam(TYPE_PATH_PARAM) SclFileType type) {
         var response = new ListResponse();
         response.setItems(compasSclDataService.list(type));
         return response;
@@ -67,7 +67,7 @@ public class CompasSclDataResource {
     @GET
     @Path("/{" + ID_PATH_PARAM + "}/versions")
     @Produces(MediaType.APPLICATION_XML)
-    public VersionsResponse listVersionsByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
+    public VersionsResponse listVersionsByUUID(@PathParam(TYPE_PATH_PARAM) SclFileType type,
                                                @PathParam(ID_PATH_PARAM) UUID id) {
         var response = new VersionsResponse();
         response.setItems(compasSclDataService.listVersionsByUUID(type, id));
@@ -77,7 +77,7 @@ public class CompasSclDataResource {
     @GET
     @Path("/{" + ID_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
-    public GetResponse findByUUID(@PathParam(TYPE_PATH_PARAM) SclType type,
+    public GetResponse findByUUID(@PathParam(TYPE_PATH_PARAM) SclFileType type,
                                   @PathParam(ID_PATH_PARAM) UUID id) {
         var response = new GetResponse();
         response.setSclData(compasSclDataService.findByUUID(type, id));
@@ -87,7 +87,7 @@ public class CompasSclDataResource {
     @GET
     @Path("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
-    public GetResponse findByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
+    public GetResponse findByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclFileType type,
                                             @PathParam(ID_PATH_PARAM) UUID id,
                                             @PathParam(VERSION_PATH_PARAM) Version version) {
         var response = new GetResponse();
@@ -99,7 +99,7 @@ public class CompasSclDataResource {
     @Path("/{" + ID_PATH_PARAM + "}")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public UpdateResponse update(@PathParam(TYPE_PATH_PARAM) SclType type,
+    public UpdateResponse update(@PathParam(TYPE_PATH_PARAM) SclFileType type,
                                  @PathParam(ID_PATH_PARAM) UUID id,
                                  @Valid UpdateRequest request) {
         String who = jsonWebToken.getClaim(userInfoProperties.who());
@@ -114,7 +114,7 @@ public class CompasSclDataResource {
     @DELETE
     @Path("/{" + ID_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
-    public void deleteAll(@PathParam(TYPE_PATH_PARAM) SclType type,
+    public void deleteAll(@PathParam(TYPE_PATH_PARAM) SclFileType type,
                           @PathParam(ID_PATH_PARAM) UUID id) {
         compasSclDataService.delete(type, id);
     }
@@ -122,7 +122,7 @@ public class CompasSclDataResource {
     @DELETE
     @Path("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
-    public void deleteVersion(@PathParam(TYPE_PATH_PARAM) SclType type,
+    public void deleteVersion(@PathParam(TYPE_PATH_PARAM) SclFileType type,
                               @PathParam(ID_PATH_PARAM) UUID id,
                               @PathParam(VERSION_PATH_PARAM) Version version) {
         compasSclDataService.delete(type, id, version);
