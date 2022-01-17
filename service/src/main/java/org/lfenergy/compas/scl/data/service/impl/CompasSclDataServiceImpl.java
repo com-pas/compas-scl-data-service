@@ -9,11 +9,11 @@ import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
-import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
+import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.w3c.dom.Element;
 
 import javax.transaction.Transactional;
@@ -53,7 +53,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
      */
     @Override
     @Transactional(SUPPORTS)
-    public List<Item> list(SclType type) {
+    public List<Item> list(SclFileType type) {
         return repository.list(type);
     }
 
@@ -66,7 +66,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
      */
     @Override
     @Transactional(SUPPORTS)
-    public List<Item> listVersionsByUUID(SclType type, UUID id) {
+    public List<Item> listVersionsByUUID(SclFileType type, UUID id) {
         var items = repository.listVersionsByUUID(type, id);
         if (items.isEmpty()) {
             var message = String.format("No versions found for type '%s' with ID '%s'", type, id);
@@ -84,7 +84,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
      */
     @Override
     @Transactional(SUPPORTS)
-    public String findByUUID(SclType type, UUID id) {
+    public String findByUUID(SclFileType type, UUID id) {
         return repository.findByUUID(type, id);
     }
 
@@ -98,7 +98,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
      */
     @Override
     @Transactional(SUPPORTS)
-    public String findByUUID(SclType type, UUID id, Version version) {
+    public String findByUUID(SclFileType type, UUID id, Version version) {
         return repository.findByUUID(type, id, version);
     }
 
@@ -114,7 +114,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
      */
     @Override
     @Transactional(REQUIRED)
-    public String create(SclType type, String name, String who, String comment, String sclData) {
+    public String create(SclFileType type, String name, String who, String comment, String sclData) {
         var scl = converter.convertToElement(new BufferedInputStream(new ByteArrayInputStream(sclData.getBytes(StandardCharsets.UTF_8))), SCL_ELEMENT_NAME, SCL_NS_URI);
         if (scl == null) {
             throw new CompasException(NO_SCL_ELEMENT_FOUND_ERROR_CODE, "No valid SCL found in the passed SCL Data.");
@@ -151,7 +151,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
      */
     @Override
     @Transactional(REQUIRED)
-    public String update(SclType type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData) {
+    public String update(SclFileType type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData) {
         var scl = converter.convertToElement(new BufferedInputStream(new ByteArrayInputStream(sclData.getBytes(StandardCharsets.UTF_8))), SCL_ELEMENT_NAME, SCL_NS_URI);
         if (scl == null) {
             throw new CompasException(NO_SCL_ELEMENT_FOUND_ERROR_CODE, "No valid SCL found in the passed SCL Data.");
@@ -182,7 +182,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
      */
     @Override
     @Transactional(REQUIRED)
-    public void delete(SclType type, UUID id) {
+    public void delete(SclFileType type, UUID id) {
         repository.delete(type, id);
     }
 
@@ -195,7 +195,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
      */
     @Override
     @Transactional(REQUIRED)
-    public void delete(SclType type, UUID id, Version version) {
+    public void delete(SclFileType type, UUID id, Version version) {
         repository.delete(type, id, version);
     }
 
@@ -223,7 +223,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
      * @param name     The name to add.
      * @param fileType The file type to add.
      */
-    private void setSclCompasPrivateElement(Element scl, Optional<String> name, SclType fileType) {
+    private void setSclCompasPrivateElement(Element scl, Optional<String> name, SclFileType fileType) {
         var compasPrivate = sclElementProcessor.getCompasPrivate(scl)
                 .orElseGet(() -> sclElementProcessor.addCompasPrivate(scl));
 

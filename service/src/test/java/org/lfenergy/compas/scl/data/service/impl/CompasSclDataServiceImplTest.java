@@ -12,10 +12,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
-import org.lfenergy.compas.scl.data.model.*;
+import org.lfenergy.compas.scl.data.model.ChangeSetType;
+import org.lfenergy.compas.scl.data.model.Item;
+import org.lfenergy.compas.scl.data.model.SclMetaInfo;
+import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
+import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -33,7 +37,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CompasSclDataServiceImplTest {
     private static final Version INITIAL_VERSION = new Version("1.0.0");
-    private static final SclType SCL_TYPE = SclType.SCD;
+    private static final SclFileType SCL_TYPE = SclFileType.SCD;
 
     @Mock
     private CompasSclDataRepository compasSclDataRepository;

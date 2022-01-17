@@ -10,10 +10,10 @@ import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclMetaInfo;
-import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclDataModelMarshaller;
+import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +77,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
         this.sclDataMarshaller = sclDataMarshaller;
 
         // At startup create all needed databases.
-        Arrays.stream(SclType.values()).forEach(type ->
+        Arrays.stream(SclFileType.values()).forEach(type ->
                 executeCommand(client -> {
                     client.executeXQuery(
                             format(DECLARE_DB_VARIABLE, type) +
@@ -88,7 +88,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public List<Item> list(SclType type) {
+    public List<Item> list(SclFileType type) {
         return executeQuery(type, DECLARE_SCL_NS_URI +
                         DECLARE_COMPAS_NAMESPACE +
                         DECLARE_LATEST_VERSION_FUNC +
@@ -105,7 +105,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public List<Item> listVersionsByUUID(SclType type, UUID id) {
+    public List<Item> listVersionsByUUID(SclFileType type, UUID id) {
         return executeQuery(type, DECLARE_SCL_NS_URI +
                         DECLARE_COMPAS_NAMESPACE +
                         format(DECLARE_DB_VARIABLE, type) +
@@ -124,7 +124,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public String findByUUID(SclType type, UUID id) {
+    public String findByUUID(SclFileType type, UUID id) {
         // This find method always searches for the latest version and returns this.
         var result = executeQuery(type, DECLARE_SCL_NS_URI +
                 DECLARE_LATEST_VERSION_FUNC +
@@ -140,7 +140,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public String findByUUID(SclType type, UUID id, Version version) {
+    public String findByUUID(SclFileType type, UUID id, Version version) {
         // This find method searches for a specific version.
         var result = executeQuery(type, format(DECLARE_DB_VARIABLE, type) +
                 format(DECLARE_PATH_VARIABLE, createDocumentPath(id, version)) +
@@ -154,7 +154,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public SclMetaInfo findMetaInfoByUUID(SclType type, UUID id) {
+    public SclMetaInfo findMetaInfoByUUID(SclFileType type, UUID id) {
         // This find method always searches for the latest version.
         // Extracts the needed information from the document and returns this.
         var metaInfo = executeQuery(type, DECLARE_SCL_NS_URI +
@@ -180,7 +180,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public void create(SclType type, UUID id, String name, String scl, Version version, String who) {
+    public void create(SclFileType type, UUID id, String name, String scl, Version version, String who) {
         // Who is ignored in the BaseX implementation.
         var inputStream = new ReaderInputStream(new StringReader(scl), StandardCharsets.UTF_8);
         executeCommand(client -> {
@@ -192,7 +192,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public void delete(SclType type, UUID id) {
+    public void delete(SclFileType type, UUID id) {
         executeCommand(client -> {
             client.executeXQuery("db:delete('" + type + "', '" + id + "')");
             return true;
@@ -200,7 +200,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public void delete(SclType type, UUID id, Version version) {
+    public void delete(SclFileType type, UUID id, Version version) {
         executeCommand(client -> {
             client.executeXQuery("db:delete('" + type + "', '" + createDocumentPath(id, version) + "')");
             return true;
@@ -214,12 +214,12 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                 + "/" + version.getPatchVersion();
     }
 
-    private List<String> executeQuery(SclType type, String query) {
+    private List<String> executeQuery(SclFileType type, String query) {
         // When the Document (as String) is just returned without mapping.
         return executeQuery(type, query, xmlString -> xmlString);
     }
 
-    private <R> List<R> executeQuery(SclType type, String query, ResultRowMapper<R> mapper) {
+    private <R> List<R> executeQuery(SclFileType type, String query, ResultRowMapper<R> mapper) {
         return executeCommand(client -> {
             try {
                 var response = new ArrayList<R>();
@@ -240,7 +240,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
         });
     }
 
-    private void openDatabase(BaseXClient client, SclType type) throws IOException {
+    private void openDatabase(BaseXClient client, SclFileType type) throws IOException {
         client.execute("OPEN " + type);
     }
 

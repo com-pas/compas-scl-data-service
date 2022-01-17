@@ -13,11 +13,11 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
-import org.lfenergy.compas.scl.data.model.SclType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.v1.model.CreateRequest;
 import org.lfenergy.compas.scl.data.rest.v1.model.UpdateRequest;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
+import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -45,7 +45,7 @@ class CompasSclDataResourceAsEditorTest {
 
     @Test
     void list_WhenCalled_ThenItemResponseRetrieved() {
-        var type = SclType.SCD;
+        var type = SclFileType.SCD;
         var uuid = UUID.randomUUID();
         var name = "name";
         var version = "1.0.0";
@@ -70,7 +70,7 @@ class CompasSclDataResourceAsEditorTest {
 
     @Test
     void listVersionsByUUID_WhenCalled_ThenItemResponseRetrieved() {
-        var type = SclType.SCD;
+        var type = SclFileType.SCD;
         var uuid = UUID.randomUUID();
         var name = "Name";
         var version = "1.0.0";
@@ -96,7 +96,7 @@ class CompasSclDataResourceAsEditorTest {
 
     @Test
     void findByUUID_WhenCalled_ThenSCLResponseRetrieved() throws IOException {
-        var type = SclType.SCD;
+        var type = SclFileType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL();
 
@@ -119,7 +119,7 @@ class CompasSclDataResourceAsEditorTest {
 
     @Test
     void findByUUIDAndVersion_WhenCalled_ThenSCLResponseRetrieved() throws IOException {
-        var type = SclType.SCD;
+        var type = SclFileType.SCD;
         var uuid = UUID.randomUUID();
         var scl = readSCL();
         var version = new Version(1, 2, 3);
@@ -144,7 +144,7 @@ class CompasSclDataResourceAsEditorTest {
 
     @Test
     void create_WhenCalled_ThenServiceCalledAndUUIDRetrieved() throws IOException {
-        var type = SclType.SCD;
+        var type = SclFileType.SCD;
         var name = "StationName";
         var comment = "Some comments";
         var scl = readSCL();
@@ -173,7 +173,7 @@ class CompasSclDataResourceAsEditorTest {
     @Test
     void update_WhenCalled_ThenServiceCalledAndNewUUIDRetrieved() throws IOException {
         var uuid = UUID.randomUUID();
-        var type = SclType.SCD;
+        var type = SclFileType.SCD;
         var changeSetType = ChangeSetType.MAJOR;
         var comment = "Some comments";
         var scl = readSCL();
@@ -203,7 +203,7 @@ class CompasSclDataResourceAsEditorTest {
     @Test
     void deleteAll_WhenCalled_ThenServiceCalled() {
         var uuid = UUID.randomUUID();
-        var type = SclType.SCD;
+        var type = SclFileType.SCD;
 
         doNothing().when(compasSclDataService).delete(type, uuid);
 
@@ -220,7 +220,7 @@ class CompasSclDataResourceAsEditorTest {
     @Test
     void deleteVersion_WhenCalled_ThenServiceCalled() {
         var uuid = UUID.randomUUID();
-        var type = SclType.SCD;
+        var type = SclFileType.SCD;
         var version = new Version(1, 2, 3);
 
         doNothing().when(compasSclDataService).delete(type, uuid, version);
