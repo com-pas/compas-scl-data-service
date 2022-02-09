@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0
         <quarkus.platform.version>2.7.1.Final</quarkus.platform.version>
         <jaxb-impl.version>2.3.6</jaxb-impl.version>
         <microprofile-openapi-api.version>3.0</microprofile-openapi-api.version>
-        <slf4j.version>1.7.35</slf4j.version>
+        <slf4j.version>1.7.36</slf4j.version>
         <openpojo.version>0.9.1</openpojo.version>
     </properties>
 
