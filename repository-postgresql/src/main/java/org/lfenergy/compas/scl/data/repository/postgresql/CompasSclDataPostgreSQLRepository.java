@@ -28,7 +28,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private static final String DELETE_FROM_CLAUSE = "delete " + FROM_CLAUSE;
     private static final String WHERE_CLAUSE = " where ";
     private static final String AND_CLAUSE = " and ";
-    private static final String ORDER_BY_CLAUSE = " order by id, major_version, minor_version, patch_version";
+    private static final String ORDER_BY_CLAUSE = " order by name, major_version, minor_version, patch_version";
 
     private static final String FILTER_ON_TYPE = "type = ?";
     private static final String FILTER_ON_ID = "id = ?";
