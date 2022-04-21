@@ -163,49 +163,74 @@ class CompasSclDataServiceImplTest {
     }
 
     @Test
-    void update_WhenCalledWithCompasElements_ThenSCLReturnedWithCorrectCompasExtensionAndHistory() throws IOException {
-        var name = "JUSTSOMENAME";
+    void update_WhenCalledWithoutCompasElements_ThenSCLReturnedWithCorrectCompasExtensionAndHistory() throws IOException {
+        var previousName = "Previous SCL Filename";
         var uuid = UUID.randomUUID();
         var changeSet = ChangeSetType.MAJOR;
         var who = "User A";
         var nextVersion = INITIAL_VERSION.getNextVersion(changeSet);
 
         var scl = readSCL();
-        scl = createCompasPrivate(scl, name);
 
-        var sclMetaInfo = new SclMetaInfo(uuid.toString(), name, INITIAL_VERSION.toString());
+        var sclMetaInfo = new SclMetaInfo(uuid.toString(), previousName, INITIAL_VERSION.toString());
         when(compasSclDataRepository.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
-        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(name), anyString(), eq(nextVersion), eq(who));
+        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who));
 
         scl = compasSclDataService.update(SCL_TYPE, uuid, changeSet, who, null, scl);
 
         assertNotNull(scl);
-        assertCompasExtenions(scl, name);
+        assertCompasExtenions(scl, previousName);
         assertHistoryItem(scl, nextVersion, null);
-        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(name), anyString(), eq(nextVersion), eq(who));
+        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who));
         verify(compasSclDataRepository, times(1)).findMetaInfoByUUID(SCL_TYPE, uuid);
     }
 
     @Test
-    void update_WhenCalledWithoutCompasElements_ThenSCLReturnedWithCorrectCompasExtensionAndHistory() throws IOException {
-        var name = "JUSTSOMENAME";
+    void update_WhenCalledWithCompasElementsAndNewName_ThenSCLReturnedWithCorrectCompasExtensionWithNewNameAndHistory() throws IOException {
+        var previousName = "Previous SCL Filename";
+        var newName = "New SCL Filename";
         var uuid = UUID.randomUUID();
         var changeSet = ChangeSetType.MAJOR;
         var who = "User A";
         var nextVersion = INITIAL_VERSION.getNextVersion(changeSet);
 
         var scl = readSCL();
+        scl = createCompasPrivate(scl, newName);
 
-        var sclMetaInfo = new SclMetaInfo(uuid.toString(), name, INITIAL_VERSION.toString());
+        var sclMetaInfo = new SclMetaInfo(uuid.toString(), previousName, INITIAL_VERSION.toString());
         when(compasSclDataRepository.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
-        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(name), anyString(), eq(nextVersion), eq(who));
+        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(newName), anyString(), eq(nextVersion), eq(who));
 
         scl = compasSclDataService.update(SCL_TYPE, uuid, changeSet, who, null, scl);
 
         assertNotNull(scl);
-        assertCompasExtenions(scl, name);
+        assertCompasExtenions(scl, newName);
         assertHistoryItem(scl, nextVersion, null);
-        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(name), anyString(), eq(nextVersion), eq(who));
+        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(newName), anyString(), eq(nextVersion), eq(who));
+        verify(compasSclDataRepository, times(1)).findMetaInfoByUUID(SCL_TYPE, uuid);
+    }
+
+    @Test
+    void update_WhenCalledWithCompasElementsAndSameName_ThenSCLReturnedWithCorrectCompasExtensionWithSameNameAndHistory() throws IOException {
+        var previousName = "Previous SCL Filename";
+        var uuid = UUID.randomUUID();
+        var changeSet = ChangeSetType.MAJOR;
+        var who = "User A";
+        var nextVersion = INITIAL_VERSION.getNextVersion(changeSet);
+
+        var scl = readSCL();
+        scl = createCompasPrivate(scl, previousName);
+
+        var sclMetaInfo = new SclMetaInfo(uuid.toString(), previousName, INITIAL_VERSION.toString());
+        when(compasSclDataRepository.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
+        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who));
+
+        scl = compasSclDataService.update(SCL_TYPE, uuid, changeSet, who, null, scl);
+
+        assertNotNull(scl);
+        assertCompasExtenions(scl, previousName);
+        assertHistoryItem(scl, nextVersion, null);
+        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who));
         verify(compasSclDataRepository, times(1)).findMetaInfoByUUID(SCL_TYPE, uuid);
     }
 
