@@ -171,6 +171,33 @@ class CompasSclDataResourceAsEditorTest {
     }
 
     @Test
+    void create_WhenCalledWithInvalidName_ThenErrorReturned() throws IOException {
+        var type = SclFileType.SCD;
+        var invalidName = "tes/*.ssd.";
+        var comment = "Some comments";
+        var scl = readSCL();
+
+        var request = new CreateRequest();
+        request.setName(invalidName);
+        request.setComment(comment);
+        request.setSclData(scl);
+
+        var response = given()
+                .pathParam(TYPE_PATH_PARAM, type)
+                .contentType(ContentType.XML)
+                .body(request)
+                .when().post()
+                .then()
+                .statusCode(400)
+                .extract()
+                .response();
+
+        var xpath = response.xmlPath();
+        assertEquals("CORE-8000", xpath.getString("ErrorResponse.ErrorMessage.Code"));
+        assertEquals("create.request.name", xpath.getString("ErrorResponse.ErrorMessage.Property"));
+    }
+
+    @Test
     void update_WhenCalled_ThenServiceCalledAndNewUUIDRetrieved() throws IOException {
         var uuid = UUID.randomUUID();
         var type = SclFileType.SCD;
