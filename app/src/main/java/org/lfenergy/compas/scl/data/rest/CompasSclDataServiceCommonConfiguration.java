@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
@@ -16,6 +17,10 @@ import javax.enterprise.inject.Produces;
 /**
  * Create Beans from other dependencies that are used in the application.
  */
+@RegisterForReflection(targets = {
+        org.lfenergy.compas.core.jaxrs.model.ErrorResponse.class,
+        org.lfenergy.compas.core.jaxrs.model.ErrorMessage.class
+})
 public class CompasSclDataServiceCommonConfiguration {
     @Produces
     @ApplicationScoped

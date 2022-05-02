@@ -130,7 +130,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
         createHistoryItem(header, "SCL created", who, comment, version);
 
         // Update or add the Compas Private Element to the SCL File.
-        setSclCompasPrivateElement(scl, Optional.of(name), type);
+        setSclCompasPrivateElement(scl, name, type);
 
         var newSclData = converter.convertToString(scl);
         repository.create(type, id, name, newSclData, version, who);
@@ -167,10 +167,11 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
         createHistoryItem(header, "SCL updated", who, comment, version);
 
         // Update or add the Compas Private Element to the SCL File.
-        setSclCompasPrivateElement(scl, Optional.ofNullable(currentSclMetaInfo.getName()), type);
+        var newSclName = getFilenameFromXML(scl).orElse(currentSclMetaInfo.getName());
+        setSclCompasPrivateElement(scl, newSclName, type);
 
         var newSclData = converter.convertToString(scl);
-        repository.create(type, id, currentSclMetaInfo.getName(), newSclData, version, who);
+        repository.create(type, id, newSclName, newSclData, version, who);
         return newSclData;
     }
 
@@ -217,23 +218,36 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
     }
 
     /**
+     * Retrieve the CoMPAS SCL Filename from the private element of CoMPAS.
+     *
+     * @param scl The SCL file to edit.
+     * @return If there was a private SclName the value of this tag.
+     */
+    private Optional<String> getFilenameFromXML(Element scl) {
+        return sclElementProcessor.getCompasPrivate(scl)
+                .stream()
+                .map(compasPrivate -> sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_NAME_EXTENSION))
+                .flatMap(Optional::stream)
+                .map(Element::getTextContent)
+                .findFirst();
+    }
+
+    /**
      * Create/update the CoMPAS private element on the SCL Element for the given file.
      *
      * @param scl      The SCL file to edit.
      * @param name     The name to add.
      * @param fileType The file type to add.
      */
-    private void setSclCompasPrivateElement(Element scl, Optional<String> name, SclFileType fileType) {
+    private void setSclCompasPrivateElement(Element scl, String name, SclFileType fileType) {
         var compasPrivate = sclElementProcessor.getCompasPrivate(scl)
                 .orElseGet(() -> sclElementProcessor.addCompasPrivate(scl));
 
         sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_NAME_EXTENSION)
                 .ifPresentOrElse(
                         // Override the value of the element with the name passed.
-                        element -> name.ifPresent(element::setTextContent),
-                        () -> name.ifPresent(
-                                // Add the Compas Element and give it a value with the name passed.
-                                value -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, value))
+                        element -> element.setTextContent(name),
+                        () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, name)
                 );
 
         // Always set the file type as private element.
