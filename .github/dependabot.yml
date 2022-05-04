@@ -33,3 +33,9 @@ updates:
         versions: [ "[3.0,)" ]
       - dependency-name: com.sun.xml.bind:jaxb-impl
         versions: [ "[3.0,)" ]
+
+  - package-ecosystem: "docker"
+    directory: "/app/src/main/docker/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
