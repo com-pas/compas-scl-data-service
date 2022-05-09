@@ -6,7 +6,7 @@ name: Release Project
 
 on:
   release:
-    types: [released]
+    types: [ released ]
 
 jobs:
   release_project:
@@ -58,6 +58,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Deploy with Maven to GitHub Packages and Docker Hub
-        run: ./mvnw -B -s custom_maven_settings.xml -P release,native clean deploy
+        run: ./mvnw -B -s custom_maven_settings.xml -Pnative-image,release clean deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
