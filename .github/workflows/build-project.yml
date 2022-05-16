@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
       - name: Cache Docker Register
         uses: actions/cache@v3
         with:
@@ -48,9 +48,9 @@ jobs:
         with:
           output_file: custom_maven_settings.xml
           servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
-      - name: Build Native with Maven
+      - name: Build with Maven (Pull Request)
         if: ${{ github.event_name == 'pull_request' }}
-        run: ./mvnw -s custom_maven_settings.xml -B -P native clean verify
-      - name: Build with Maven
+        run: ./mvnw -s custom_maven_settings.xml -B -Pnative-image clean verify
+      - name: Build with Maven (Push)
         if: ${{ github.event_name == 'push' }}
         run: ./mvnw -s custom_maven_settings.xml -B clean verify
