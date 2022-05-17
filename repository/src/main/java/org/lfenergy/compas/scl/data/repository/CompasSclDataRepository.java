@@ -71,6 +71,16 @@ public interface CompasSclDataRepository {
     String findByUUID(SclFileType type, UUID id, Version version);
 
     /**
+     * Return the specific version of a specific SCL Entry.
+     *
+     * @param type    The type of SCL to search for the specific SCL.
+     * @param id      The ID of the SCL to search for.
+     * @return True if name is already used by another SCL File of the same File type, otherwise false.
+     */
+    @Transactional(SUPPORTS)
+    boolean hasDuplicateSclName(SclFileType type, String name);
+
+    /**
      * Create a new entry for the passed UUID with the version number passed.
      * <p>
      * For a complete new entry the service layer will create a new UUID and set the version to 1.0.0.

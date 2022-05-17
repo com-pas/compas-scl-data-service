@@ -156,6 +156,11 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
+    public boolean hasDuplicateSclName(SclFileType type, String name) {
+        return false;
+    }
+
+    @Override
     public SclMetaInfo findMetaInfoByUUID(SclFileType type, UUID id) {
         var sql = SELECT_METADATA_CLAUSE
                 + FROM_CLAUSE

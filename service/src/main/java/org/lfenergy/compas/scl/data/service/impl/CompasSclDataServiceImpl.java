@@ -14,6 +14,8 @@ import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import javax.transaction.Transactional;
@@ -27,6 +29,7 @@ import java.util.UUID;
 import static javax.transaction.Transactional.TxType.REQUIRED;
 import static javax.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.DULPICATE_SCL_NAME_ERROR_CODE;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_SCL_ELEMENT_FOUND_ERROR_CODE;
 
 /**
@@ -34,6 +37,9 @@ import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCo
  * These methods contain standard behaviour that is executed for every type of repository.
  */
 public class CompasSclDataServiceImpl implements CompasSclDataService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataServiceImpl.class);
+
     private final CompasSclDataRepository repository;
     private final ElementConverter converter;
     private final SclElementProcessor sclElementProcessor;
@@ -120,6 +126,10 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
             throw new CompasException(NO_SCL_ELEMENT_FOUND_ERROR_CODE, "No valid SCL found in the passed SCL Data.");
         }
 
+        if (hasDuplicateSclName(type, name)) {
+            throw new CompasException(DULPICATE_SCL_NAME_ERROR_CODE, "Given name of SCL File already used.");
+        }
+
         // A unique ID is generated to store it under.
         var id = UUID.randomUUID();
         // When the SCL is created the version will be set to 1.0.0
@@ -158,6 +168,14 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
         }
 
         var currentSclMetaInfo = repository.findMetaInfoByUUID(type, id);
+        var newFileName = getFilenameFromXML(scl);
+
+        if (newFileName.isPresent()
+            && !newFileName.get().equals(currentSclMetaInfo.getName())
+            && hasDuplicateSclName(type, newFileName.get())) {
+            throw new CompasException(DULPICATE_SCL_NAME_ERROR_CODE, "Given name of SCL File already used.");
+        }
+
         // We always add a new version to the database, so add version record to the SCL and create a new record.
         var version = new Version(currentSclMetaInfo.getVersion());
         version = version.getNextVersion(changeSetType);
@@ -167,7 +185,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
         createHistoryItem(header, "SCL updated", who, comment, version);
 
         // Update or add the Compas Private Element to the SCL File.
-        var newSclName = getFilenameFromXML(scl).orElse(currentSclMetaInfo.getName());
+        var newSclName = newFileName.orElse(currentSclMetaInfo.getName());
         setSclCompasPrivateElement(scl, newSclName, type);
 
         var newSclData = converter.convertToString(scl);
@@ -198,6 +216,10 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
     @Transactional(REQUIRED)
     public void delete(SclFileType type, UUID id, Version version) {
         repository.delete(type, id, version);
+    }
+
+    private boolean hasDuplicateSclName(SclFileType type, String name) {
+        return repository.hasDuplicateSclName(type, name);
     }
 
     /**
