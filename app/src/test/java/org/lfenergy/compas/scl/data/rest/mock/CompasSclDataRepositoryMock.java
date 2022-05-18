@@ -43,7 +43,7 @@ public class CompasSclDataRepositoryMock implements CompasSclDataRepository {
     }
 
     @Override
-    public boolean hasDuplicateSclName(SclFileType type, UUID id) {
+    public boolean hasDuplicateSclName(SclFileType type, String name) {
         throw new IllegalStateException("Mock method using Mockito. Only needed to startup.");
     }
 

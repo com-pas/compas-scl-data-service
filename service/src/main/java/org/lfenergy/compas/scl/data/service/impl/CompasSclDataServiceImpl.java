@@ -37,9 +37,6 @@ import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCo
  * These methods contain standard behaviour that is executed for every type of repository.
  */
 public class CompasSclDataServiceImpl implements CompasSclDataService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataServiceImpl.class);
-
     private final CompasSclDataRepository repository;
     private final ElementConverter converter;
     private final SclElementProcessor sclElementProcessor;
