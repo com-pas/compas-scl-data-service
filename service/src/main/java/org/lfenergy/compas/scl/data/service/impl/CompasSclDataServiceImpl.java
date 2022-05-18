@@ -27,7 +27,7 @@ import java.util.UUID;
 import static javax.transaction.Transactional.TxType.REQUIRED;
 import static javax.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
-import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.DULPICATE_SCL_NAME_ERROR_CODE;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.DUPLICATE_SCL_NAME_ERROR_CODE;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_SCL_ELEMENT_FOUND_ERROR_CODE;
 
 /**
@@ -122,7 +122,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
         }
 
         if (hasDuplicateSclName(type, name)) {
-            throw new CompasException(DULPICATE_SCL_NAME_ERROR_CODE, "Given name of SCL File already used.");
+            throw new CompasException(DUPLICATE_SCL_NAME_ERROR_CODE, "Given name of SCL File already used.");
         }
 
         // A unique ID is generated to store it under.
@@ -168,7 +168,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
         if (newFileName.isPresent()
             && !newFileName.get().equals(currentSclMetaInfo.getName())
             && hasDuplicateSclName(type, newFileName.get())) {
-            throw new CompasException(DULPICATE_SCL_NAME_ERROR_CODE, "Given name of SCL File already used.");
+            throw new CompasException(DUPLICATE_SCL_NAME_ERROR_CODE, "Given name of SCL File already used.");
         }
 
         // We always add a new version to the database, so add version record to the SCL and create a new record.
