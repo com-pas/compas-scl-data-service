@@ -11,8 +11,6 @@ import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
@@ -24,8 +22,6 @@ import java.util.UUID;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
 
 public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepository {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataPostgreSQLRepository.class);
     private static final String SELECT_METADATA_CLAUSE = "select id, name, major_version, minor_version, patch_version ";
     private static final String SELECT_DATA_CLAUSE = "select scl_data ";
     private static final String FROM_CLAUSE = " from scl_file ";

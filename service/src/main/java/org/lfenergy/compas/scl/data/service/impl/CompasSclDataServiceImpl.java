@@ -14,8 +14,6 @@ import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 
 import javax.transaction.Transactional;
