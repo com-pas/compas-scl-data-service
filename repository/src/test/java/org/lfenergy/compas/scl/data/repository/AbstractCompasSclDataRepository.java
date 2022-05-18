@@ -181,6 +181,16 @@ public abstract class AbstractCompasSclDataRepository {
     }
 
     @Test
+    void hasDuplicateSclName_WhenUsingSclNameThatHasNotBeenUsedYet_ThenNoDuplicateIsFound() {
+        var expectedVersion = new Version(1, 0, 0);
+        var uuid = UUID.randomUUID();
+        var scl = readSCL(uuid, expectedVersion, NAME_1);
+        getRepository().create(TYPE, uuid, NAME_1, scl, expectedVersion, WHO);
+
+        assertFalse(getRepository().hasDuplicateSclName(TYPE, "Some other name"));
+    }
+
+    @Test
     void findMetaInfoByUUID_WhenTwoVersionsOfARecordAdded_ThenLastRecordIsFound() {
         var version = new Version(1, 0, 0);
         var uuid = UUID.randomUUID();
@@ -320,7 +330,7 @@ public abstract class AbstractCompasSclDataRepository {
                 .orElse("");
     }
 
-    private String readSCL(UUID uuid, Version version, String name) {
+    protected String readSCL(UUID uuid, Version version, String name) {
         var inputStream = getClass().getResourceAsStream("/scl/scl.scd");
         assert inputStream != null;
 
