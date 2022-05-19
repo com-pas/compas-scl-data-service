@@ -154,6 +154,11 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
+    public boolean hasDuplicateSclName(SclFileType type, String name) {
+        return false;
+    }
+
+    @Override
     public SclMetaInfo findMetaInfoByUUID(SclFileType type, UUID id) {
         // This find method always searches for the latest version.
         // Extracts the needed information from the document and returns this.
