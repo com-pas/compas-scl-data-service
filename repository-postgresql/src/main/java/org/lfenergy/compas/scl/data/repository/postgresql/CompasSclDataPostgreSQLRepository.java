@@ -174,7 +174,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             }
             return false;
         } catch (SQLException exp) {
-            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE, "Error select meta info from database!", exp);
+            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE, "Error selecting latest versions from database!", exp);
         }
     }
 

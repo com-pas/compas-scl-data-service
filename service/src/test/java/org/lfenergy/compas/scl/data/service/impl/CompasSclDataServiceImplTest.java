@@ -118,6 +118,7 @@ class CompasSclDataServiceImplTest {
 
         var scl = readSCL();
 
+        when(compasSclDataRepository.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(false);
         doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who));
 
         scl = compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
@@ -137,6 +138,7 @@ class CompasSclDataServiceImplTest {
         var scl = readSCL();
         scl = createCompasPrivate(scl, "JUSTANOTHERNAME");
 
+        when(compasSclDataRepository.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(false);
         doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who));
 
         scl = compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
@@ -145,6 +147,22 @@ class CompasSclDataServiceImplTest {
         assertCompasExtenions(scl, name);
         assertHistoryItem(scl, INITIAL_VERSION, comment);
         verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who));
+    }
+
+    @Test
+    void create_WhenCalledWithDuplicateSclName_ThenCompasExceptionThrown() throws IOException {
+        var name = "JUSTSOMENAME";
+        var comment = "";
+        var who = "User A";
+
+        var scl = readSCL();
+
+        when(compasSclDataRepository.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(true);
+        var exception = assertThrows(CompasException.class, () -> {
+            compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
+        });
+        assertEquals(DUPLICATE_SCL_NAME_ERROR_CODE, exception.getErrorCode());
+        verify(compasSclDataRepository, times(1)).hasDuplicateSclName(SCL_TYPE, name);
     }
 
     @Test
