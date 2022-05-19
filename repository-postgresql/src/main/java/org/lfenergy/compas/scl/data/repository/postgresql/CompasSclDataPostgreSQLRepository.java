@@ -158,7 +158,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     public boolean hasDuplicateSclName(SclFileType type, String name) {
         var sql = "SELECT DISTINCT ON (id) m.* "
-                + "FROM scl_file m "
+                + FROM_CLAUSE + "m "
                 + "WHERE m.type=? "
                 + "ORDER BY m.id, m.major_version desc, m.minor_version desc, m.patch_version desc";
 

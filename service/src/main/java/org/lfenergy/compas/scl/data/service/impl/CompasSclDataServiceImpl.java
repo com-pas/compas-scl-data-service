@@ -121,7 +121,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
             throw new CompasException(NO_SCL_ELEMENT_FOUND_ERROR_CODE, "No valid SCL found in the passed SCL Data.");
         }
 
-        if (hasDuplicateSclName(type, name)) {
+        if (repository.hasDuplicateSclName(type, name)) {
             throw new CompasException(DUPLICATE_SCL_NAME_ERROR_CODE, "Given name of SCL File already used.");
         }
 
@@ -167,7 +167,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
 
         if (newFileName.isPresent()
             && !newFileName.get().equals(currentSclMetaInfo.getName())
-            && hasDuplicateSclName(type, newFileName.get())) {
+            && repository.hasDuplicateSclName(type, newFileName.get())) {
             throw new CompasException(DUPLICATE_SCL_NAME_ERROR_CODE, "Given name of SCL File already used.");
         }
 
@@ -211,10 +211,6 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
     @Transactional(REQUIRED)
     public void delete(SclFileType type, UUID id, Version version) {
         repository.delete(type, id, version);
-    }
-
-    private boolean hasDuplicateSclName(SclFileType type, String name) {
-        return repository.hasDuplicateSclName(type, name);
     }
 
     /**

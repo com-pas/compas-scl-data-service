@@ -74,7 +74,7 @@ public interface CompasSclDataRepository {
      * Return the specific version of a specific SCL Entry.
      *
      * @param type    The type of SCL to search for the specific SCL.
-     * @param id      The ID of the SCL to search for.
+     * @param name    The name of the SCL used for checking duplicates.
      * @return True if name is already used by another SCL File of the same File type, otherwise false.
      */
     @Transactional(SUPPORTS)
