@@ -156,6 +156,29 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
+    public boolean hasDuplicateSclName(SclFileType type, String name) {
+        var sql = "SELECT DISTINCT ON (id) * "
+                + FROM_CLAUSE
+                + "WHERE type=? "
+                + "ORDER BY id, major_version desc, minor_version desc, patch_version desc";
+
+        try (var connection = dataSource.getConnection();
+             var stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, type.name());
+
+            try (var resultSet = stmt.executeQuery()) {
+                while (resultSet.next()) {
+                    var usedName = resultSet.getString(NAME_FIELD);
+                    if (usedName.equals(name)) return true;
+                }
+            }
+            return false;
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE, "Error selecting latest versions from database!", exp);
+        }
+    }
+
+    @Override
     public SclMetaInfo findMetaInfoByUUID(SclFileType type, UUID id) {
         var sql = SELECT_METADATA_CLAUSE
                 + FROM_CLAUSE
