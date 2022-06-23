@@ -89,9 +89,9 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         var xmlPath = response.xmlPath();
-        assertEquals(uuid.toString(), xmlPath.get("ListResponse.Item[0].Id"));
-        assertEquals(name, xmlPath.get("ListResponse.Item[0].Name"));
-        assertEquals(version, xmlPath.get("ListResponse.Item[0].Version"));
+        assertEquals(uuid.toString(), xmlPath.get("VersionsResponse.ItemHistory[0].Id"));
+        assertEquals(name, xmlPath.get("VersionsResponse.ItemHistory[0].Name"));
+        assertEquals(version, xmlPath.get("VersionsResponse.ItemHistory[0].Version"));
         verify(compasSclDataService, times(1)).listVersionsByUUID(type, uuid);
     }
 
