@@ -8,8 +8,8 @@ import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
+import org.lfenergy.compas.scl.data.model.HistoryItem;
 import org.lfenergy.compas.scl.data.model.Item;
-import org.lfenergy.compas.scl.data.model.ItemHistory;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
@@ -68,7 +68,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
      */
     @Override
     @Transactional(SUPPORTS)
-    public List<ItemHistory> listVersionsByUUID(SclFileType type, UUID id) {
+    public List<HistoryItem> listVersionsByUUID(SclFileType type, UUID id) {
         var items = repository.listVersionsByUUID(type, id);
         if (items.isEmpty()) {
             var message = String.format("No versions found for type '%s' with ID '%s'", type, id);

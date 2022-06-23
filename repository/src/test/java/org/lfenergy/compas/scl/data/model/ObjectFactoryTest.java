@@ -23,15 +23,15 @@ class ObjectFactoryTest {
     }
 
     @Test
-    void createItemHistory_WhenMethodsCalled_ThenObjectsAreCreated() {
+    void createHistoryItem_WhenMethodsCalled_ThenObjectsAreCreated() {
         var objectFactory = new ObjectFactory();
 
-        var item = objectFactory.createItemHistory();
+        var item = objectFactory.createHistoryItem();
         assertNotNull(item);
 
-        var itemElement = objectFactory.createItemHistory(item);
+        var itemElement = objectFactory.createHistoryItem(item);
         assertNotNull(itemElement);
-        assertEquals(ItemHistory.class, itemElement.getDeclaredType());
+        assertEquals(HistoryItem.class, itemElement.getDeclaredType());
         assertEquals(item, itemElement.getValue());
     }
 

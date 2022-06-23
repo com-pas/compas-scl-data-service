@@ -14,8 +14,8 @@ public class ObjectFactory {
         return new Item();
     }
 
-    public ItemHistory createItemHistory() {
-        return new ItemHistory();
+    public HistoryItem createHistoryItem() {
+        return new HistoryItem();
     }
 
     @XmlElementDecl(namespace = "", name = "Item")
@@ -23,9 +23,9 @@ public class ObjectFactory {
         return new JAXBElement<>(new QName("", ""), Item.class, value);
     }
 
-    @XmlElementDecl(namespace = "", name = "ItemHistory")
-    public JAXBElement<ItemHistory> createItemHistory(ItemHistory value) {
-        return new JAXBElement<>(new QName("", ""), ItemHistory.class, value);
+    @XmlElementDecl(namespace = "", name = "HistoryItem")
+    public JAXBElement<HistoryItem> createHistoryItem(HistoryItem value) {
+        return new JAXBElement<>(new QName("", ""), HistoryItem.class, value);
     }
 
     public SclMetaInfo createSclMetaInfo() {

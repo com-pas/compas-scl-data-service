@@ -9,10 +9,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ItemHistoryTest extends AbstractPojoTester {
+class HistoryItemTest extends AbstractPojoTester {
     @Override
     protected Class<?> getClassToBeTested() {
-        return ItemHistory.class;
+        return HistoryItem.class;
     }
 
     @Test
@@ -24,7 +24,7 @@ class ItemHistoryTest extends AbstractPojoTester {
         var when = "when";
         var what = "what";
 
-        var item = new ItemHistory(id, name, version, who, when, what);
+        var item = new HistoryItem(id, name, version, who, when, what);
 
         assertEquals(id, item.getId());
         assertEquals(name, item.getName());

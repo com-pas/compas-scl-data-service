@@ -13,7 +13,7 @@ import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERV
 
 @Schema(description = "Item found in the database with all basic information including version info about a SCL.")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ItemHistory extends Item {
+public class HistoryItem extends Item {
     @Schema(description = "Who created this version of the SCL.",
             example = "John Doe")
     @XmlElement(name = "Who",
@@ -35,10 +35,10 @@ public class ItemHistory extends Item {
             required = true)
     private String what;
 
-    public ItemHistory() {
+    public HistoryItem() {
     }
 
-    public ItemHistory(String id, String name, String version, String who, String when, String what) {
+    public HistoryItem(String id, String name, String version, String who, String when, String what) {
         super(id, name, version);
         this.who = who;
         this.when = when;

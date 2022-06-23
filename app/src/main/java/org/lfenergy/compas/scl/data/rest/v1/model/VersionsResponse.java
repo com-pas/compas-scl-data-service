@@ -4,7 +4,7 @@
 package org.lfenergy.compas.scl.data.rest.v1.model;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.lfenergy.compas.scl.data.model.ItemHistory;
+import org.lfenergy.compas.scl.data.model.HistoryItem;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -19,14 +19,14 @@ import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERV
 @XmlAccessorType(XmlAccessType.FIELD)
 public class VersionsResponse {
     @Schema(description = "List of found Versions of a specific SCL in the database.")
-    @XmlElement(name = "ItemHistory", namespace = SCL_DATA_SERVICE_V1_NS_URI)
-    private List<ItemHistory> items;
+    @XmlElement(name = "HistoryItem", namespace = SCL_DATA_SERVICE_V1_NS_URI)
+    private List<HistoryItem> items;
 
-    public List<ItemHistory> getItems() {
+    public List<HistoryItem> getItems() {
         return items;
     }
 
-    public void setItems(List<ItemHistory> items) {
+    public void setItems(List<HistoryItem> items) {
         this.items = items;
     }
 }

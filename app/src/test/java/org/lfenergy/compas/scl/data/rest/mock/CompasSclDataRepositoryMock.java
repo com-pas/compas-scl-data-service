@@ -4,8 +4,8 @@
 package org.lfenergy.compas.scl.data.rest.mock;
 
 import io.quarkus.test.Mock;
+import org.lfenergy.compas.scl.data.model.HistoryItem;
 import org.lfenergy.compas.scl.data.model.Item;
-import org.lfenergy.compas.scl.data.model.ItemHistory;
 import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
@@ -24,7 +24,7 @@ public class CompasSclDataRepositoryMock implements CompasSclDataRepository {
     }
 
     @Override
-    public List<ItemHistory> listVersionsByUUID(SclFileType type, UUID id) {
+    public List<HistoryItem> listVersionsByUUID(SclFileType type, UUID id) {
         throw new IllegalStateException("Mock method using Mockito. Only needed to startup.");
     }
 

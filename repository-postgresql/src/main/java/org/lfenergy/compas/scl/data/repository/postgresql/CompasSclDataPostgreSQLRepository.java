@@ -6,8 +6,8 @@ package org.lfenergy.compas.scl.data.repository.postgresql;
 
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
+import org.lfenergy.compas.scl.data.model.HistoryItem;
 import org.lfenergy.compas.scl.data.model.Item;
-import org.lfenergy.compas.scl.data.model.ItemHistory;
 import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
@@ -112,7 +112,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public List<ItemHistory> listVersionsByUUID(SclFileType type, UUID id) {
+    public List<HistoryItem> listVersionsByUUID(SclFileType type, UUID id) {
         var sql = SELECT_METADATA_CLAUSE
                 + SELECT_HEADER_INFO_CLAUSE
                 + FROM_CLAUSE
@@ -121,7 +121,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 + AND_CLAUSE + FILTER_ON_TYPE
                 + " order by scl_file.major_version, scl_file.minor_version, scl_file.patch_version";
 
-        var items = new ArrayList<ItemHistory>();
+        var items = new ArrayList<HistoryItem>();
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, id);
@@ -129,7 +129,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
             try (var resultSet = stmt.executeQuery()) {
                 while (resultSet.next()) {
-                    items.add(new ItemHistory(id.toString(),
+                    items.add(new HistoryItem(id.toString(),
                             resultSet.getString(NAME_FIELD),
                             createVersion(resultSet),
                             resultSet.getString(HITEM_WHO_FIELD),
