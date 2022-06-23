@@ -31,7 +31,7 @@ class ObjectFactoryTest {
 
         var itemElement = objectFactory.createItemHistory(item);
         assertNotNull(itemElement);
-        assertEquals(Item.class, itemElement.getDeclaredType());
+        assertEquals(ItemHistory.class, itemElement.getDeclaredType());
         assertEquals(item, itemElement.getValue());
     }
 
