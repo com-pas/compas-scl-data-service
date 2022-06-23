@@ -14,9 +14,18 @@ public class ObjectFactory {
         return new Item();
     }
 
+    public ItemHistory createItemHistory() {
+        return new ItemHistory();
+    }
+
     @XmlElementDecl(namespace = "", name = "Item")
     public JAXBElement<Item> createItem(Item value) {
         return new JAXBElement<>(new QName("", ""), Item.class, value);
+    }
+
+    @XmlElementDecl(namespace = "", name = "ItemHistory")
+    public JAXBElement<ItemHistory> createItemHistory(ItemHistory value) {
+        return new JAXBElement<>(new QName("", ""), ItemHistory.class, value);
     }
 
     public SclMetaInfo createSclMetaInfo() {

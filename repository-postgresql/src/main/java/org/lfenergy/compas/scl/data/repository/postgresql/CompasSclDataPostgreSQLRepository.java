@@ -7,6 +7,7 @@ package org.lfenergy.compas.scl.data.repository.postgresql;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.Item;
+import org.lfenergy.compas.scl.data.model.ItemHistory;
 import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
@@ -22,16 +23,31 @@ import java.util.UUID;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
 
 public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepository {
-    private static final String SELECT_METADATA_CLAUSE = "select id, name, major_version, minor_version, patch_version ";
-    private static final String SELECT_DATA_CLAUSE = "select scl_data ";
+    private static final String SELECT_METADATA_CLAUSE = "select scl_file.id, scl_file.name, scl_file.major_version, scl_file.minor_version, scl_file.patch_version ";
+    private static final String SELECT_DATA_CLAUSE = "select scl_file.scl_data ";
+    private static final String SELECT_HEADER_INFO_CLAUSE =
+            ", (xpath('/scl:Hitem/@who', scl_data.header, ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1] hitem_who " +
+                    ", (xpath('/scl:Hitem/@when', scl_data.header, ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1] hitem_when " +
+                    ", (xpath('/scl:Hitem/@what', scl_data.header, ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1] hitem_what ";
     private static final String FROM_CLAUSE = " from scl_file ";
+    private static final String JOIN_HEADER_CLAUSE = " left outer join (" +
+            "SELECT id, major_version, minor_version, patch_version," +
+            "       unnest(" +
+            "          xpath('/scl:SCL/scl:Header//scl:Hitem[(not(@revision) or @revision=\"\") and @version=\"' || major_version || '.' || minor_version || '.' || patch_version || '\"]' " +
+            "               , scl_data::xml " +
+            "               , ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']])) as header " +
+            "          from scl_file) scl_data " +
+            "  on scl_data.id = scl_file.id " +
+            " and scl_data.major_version = scl_file.major_version " +
+            " and scl_data.minor_version = scl_file.minor_version " +
+            " and scl_data.patch_version = scl_file.patch_version ";
     private static final String DELETE_FROM_CLAUSE = "delete " + FROM_CLAUSE;
     private static final String WHERE_CLAUSE = " where ";
     private static final String AND_CLAUSE = " and ";
 
-    private static final String FILTER_ON_TYPE = "type = ?";
-    private static final String FILTER_ON_ID = "id = ?";
-    private static final String FILTER_ON_VERSION = "major_version = ? and minor_version = ? and patch_version = ? ";
+    private static final String FILTER_ON_TYPE = "scl_file.type = ?";
+    private static final String FILTER_ON_ID = "scl_file.id = ?";
+    private static final String FILTER_ON_VERSION = "scl_file.major_version = ? and scl_file.minor_version = ? and scl_file.patch_version = ? ";
 
     private static final String ID_FIELD = "id";
     private static final String MAJOR_VERSION_FIELD = "major_version";
@@ -39,6 +55,9 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private static final String PATCH_VERSION_FIELD = "patch_version";
     private static final String NAME_FIELD = "name";
     private static final String SCL_DATA_FIELD = "scl_data";
+    private static final String HITEM_WHO_FIELD = "hitem_who";
+    private static final String HITEM_WHEN_FIELD = "hitem_when";
+    private static final String HITEM_WHAT_FIELD = "hitem_what";
 
     private final DataSource dataSource;
 
@@ -51,7 +70,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         var sql = SELECT_METADATA_CLAUSE
                 + FROM_CLAUSE
                 + WHERE_CLAUSE + FILTER_ON_TYPE
-                + "   and   (id, major_version, minor_version, patch_version) in ("
+                + "   and   (scl_file.id, scl_file.major_version, scl_file.minor_version, scl_file.patch_version) in ("
                 //      Last select the maximum patch version with the major/minor version per id.
                 + "     select id, major_version, minor_version, max(patch_version)"
                 + "       from scl_file patch_scl"
@@ -72,7 +91,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 + "      )"
                 + "      group by id, major_version, minor_version"
                 + " )"
-                + " order by name, major_version, minor_version, patch_version";
+                + " order by scl_file.name, scl_file.major_version, scl_file.minor_version, scl_file.patch_version";
 
         var items = new ArrayList<Item>();
         try (var connection = dataSource.getConnection();
@@ -93,14 +112,16 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public List<Item> listVersionsByUUID(SclFileType type, UUID id) {
+    public List<ItemHistory> listVersionsByUUID(SclFileType type, UUID id) {
         var sql = SELECT_METADATA_CLAUSE
+                + SELECT_HEADER_INFO_CLAUSE
                 + FROM_CLAUSE
+                + JOIN_HEADER_CLAUSE
                 + WHERE_CLAUSE + FILTER_ON_ID
                 + AND_CLAUSE + FILTER_ON_TYPE
-                + " order by major_version, minor_version, patch_version";
+                + " order by scl_file.major_version, scl_file.minor_version, scl_file.patch_version";
 
-        var items = new ArrayList<Item>();
+        var items = new ArrayList<ItemHistory>();
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, id);
@@ -108,9 +129,12 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
             try (var resultSet = stmt.executeQuery()) {
                 while (resultSet.next()) {
-                    items.add(new Item(id.toString(),
+                    items.add(new ItemHistory(id.toString(),
                             resultSet.getString(NAME_FIELD),
-                            createVersion(resultSet)));
+                            createVersion(resultSet),
+                            resultSet.getString(HITEM_WHO_FIELD),
+                            resultSet.getString(HITEM_WHEN_FIELD),
+                            resultSet.getString(HITEM_WHAT_FIELD)));
                 }
             }
         } catch (SQLException exp) {
@@ -157,10 +181,10 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     public boolean hasDuplicateSclName(SclFileType type, String name) {
-        var sql = "SELECT DISTINCT ON (id) * "
+        var sql = "SELECT DISTINCT ON (scl_file.id) * "
                 + FROM_CLAUSE
-                + "WHERE type=? "
-                + "ORDER BY id, major_version desc, minor_version desc, patch_version desc";
+                + "WHERE scl_file.type = ? "
+                + "ORDER BY scl_file.id, scl_file.major_version desc, scl_file.minor_version desc, scl_file.patch_version desc";
 
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
@@ -184,7 +208,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 + FROM_CLAUSE
                 + WHERE_CLAUSE + FILTER_ON_ID
                 + AND_CLAUSE + FILTER_ON_TYPE
-                + " order by major_version desc, minor_version desc, patch_version desc";
+                + " order by scl_file.major_version desc, scl_file.minor_version desc, scl_file.patch_version desc";
 
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {

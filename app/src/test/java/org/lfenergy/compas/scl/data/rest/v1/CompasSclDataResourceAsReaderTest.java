@@ -11,6 +11,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Item;
+import org.lfenergy.compas.scl.data.model.ItemHistory;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.v1.model.CreateRequest;
 import org.lfenergy.compas.scl.data.rest.v1.model.UpdateRequest;
@@ -68,7 +69,7 @@ class CompasSclDataResourceAsReaderTest {
         var version = "1.0.0";
 
         when(compasSclDataService.listVersionsByUUID(type, uuid))
-                .thenReturn(Collections.singletonList(new Item(uuid.toString(), name, version)));
+                .thenReturn(Collections.singletonList(new ItemHistory(uuid.toString(), name, version, null, null, null)));
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)

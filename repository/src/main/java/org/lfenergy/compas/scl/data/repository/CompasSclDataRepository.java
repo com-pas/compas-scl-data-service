@@ -4,6 +4,7 @@
 package org.lfenergy.compas.scl.data.repository;
 
 import org.lfenergy.compas.scl.data.model.Item;
+import org.lfenergy.compas.scl.data.model.ItemHistory;
 import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
@@ -37,7 +38,7 @@ public interface CompasSclDataRepository {
      * @return The list of versions found for that specific sCl Entry.
      */
     @Transactional(SUPPORTS)
-    List<Item> listVersionsByUUID(SclFileType type, UUID id);
+    List<ItemHistory> listVersionsByUUID(SclFileType type, UUID id);
 
     /**
      * Return the latest version of a specific SCL Entry.
@@ -73,8 +74,8 @@ public interface CompasSclDataRepository {
     /**
      * Return the specific version of a specific SCL Entry.
      *
-     * @param type    The type of SCL to search for the specific SCL.
-     * @param name    The name of the SCL used for checking duplicates.
+     * @param type The type of SCL to search for the specific SCL.
+     * @param name The name of the SCL used for checking duplicates.
      * @return True if name is already used by another SCL File of the same File type, otherwise false.
      */
     @Transactional(SUPPORTS)

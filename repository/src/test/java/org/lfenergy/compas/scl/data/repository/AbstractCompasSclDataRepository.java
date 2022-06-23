@@ -16,7 +16,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
-import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_DATA_FOUND_ERROR_CODE;
 
 public abstract class AbstractCompasSclDataRepository {
     protected static final SclFileType TYPE = SclFileType.SCD;
@@ -54,7 +55,9 @@ public abstract class AbstractCompasSclDataRepository {
 
         assertNotNull(items);
         assertEquals(1, items.size());
-        assertEquals(uuid.toString(), items.get(0).getId());
+        var item = items.get(0);
+        assertEquals(uuid.toString(), item.getId());
+        assertEquals(NAME_1, item.getName());
     }
 
     @Test
@@ -87,9 +90,10 @@ public abstract class AbstractCompasSclDataRepository {
 
         assertNotNull(items);
         assertEquals(1, items.size());
-        assertEquals(uuid.toString(), items.get(0).getId());
-        assertEquals(version.toString(), items.get(0).getVersion());
-        assertEquals(NAME_2, items.get(0).getName());
+        var item = items.get(0);
+        assertEquals(uuid.toString(), item.getId());
+        assertEquals(version.toString(), item.getVersion());
+        assertEquals(NAME_2, item.getName());
     }
 
     @Test
@@ -116,9 +120,15 @@ public abstract class AbstractCompasSclDataRepository {
 
         assertNotNull(items);
         assertEquals(2, items.size());
-        assertEquals(uuid.toString(), items.get(1).getId());
-        assertEquals(version.toString(), items.get(1).getVersion());
-        assertEquals(NAME_2, items.get(1).getName());
+        var item = items.get(1);
+        assertEquals(uuid.toString(), item.getId());
+        assertEquals(version.toString(), item.getVersion());
+        assertEquals(NAME_2, item.getName());
+
+        // Hardcoded Header from SCD File, so not related to parameters passed to create.
+        assertEquals("User 2", item.getWho());
+        assertEquals("2021-12-15", item.getWhen());
+        assertEquals("Some change 2", item.getWhat());
     }
 
     @Test
