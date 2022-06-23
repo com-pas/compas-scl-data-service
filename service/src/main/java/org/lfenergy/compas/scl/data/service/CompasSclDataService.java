@@ -4,6 +4,7 @@
 package org.lfenergy.compas.scl.data.service;
 
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
+import org.lfenergy.compas.scl.data.model.HistoryItem;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
@@ -20,7 +21,7 @@ public interface CompasSclDataService {
     List<Item> list(SclFileType type);
 
     @Transactional(SUPPORTS)
-    List<Item> listVersionsByUUID(SclFileType type, UUID id);
+    List<HistoryItem> listVersionsByUUID(SclFileType type, UUID id);
 
     @Transactional(SUPPORTS)
     String findByUUID(SclFileType type, UUID id);

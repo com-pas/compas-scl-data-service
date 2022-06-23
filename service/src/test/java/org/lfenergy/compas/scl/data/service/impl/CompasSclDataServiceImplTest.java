@@ -13,7 +13,7 @@ import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.data.model.Item;
+import org.lfenergy.compas.scl.data.model.HistoryItem;
 import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
@@ -64,7 +64,7 @@ class CompasSclDataServiceImplTest {
     @Test
     void listVersionsByUUID_WhenCalledAndRepositoryReturnItemList_ThenListIsReturned() {
         var uuid = UUID.randomUUID();
-        var expectedResult = List.of(new Item());
+        var expectedResult = List.of(new HistoryItem());
         when(compasSclDataRepository.listVersionsByUUID(SCL_TYPE, uuid)).thenReturn(expectedResult);
 
         var result = compasSclDataService.listVersionsByUUID(SCL_TYPE, uuid);

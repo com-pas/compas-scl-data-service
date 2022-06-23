@@ -8,6 +8,7 @@ import org.lfenergy.compas.scl.data.basex.client.BaseXClient;
 import org.lfenergy.compas.scl.data.basex.client.BaseXClientFactory;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
+import org.lfenergy.compas.scl.data.model.HistoryItem;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.Version;
@@ -105,7 +106,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     @Override
-    public List<Item> listVersionsByUUID(SclFileType type, UUID id) {
+    public List<HistoryItem> listVersionsByUUID(SclFileType type, UUID id) {
         return executeQuery(type, DECLARE_SCL_NS_URI +
                         DECLARE_COMPAS_NAMESPACE +
                         format(DECLARE_DB_VARIABLE, type) +
@@ -114,13 +115,21 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         "   let $id := $resource" + SCL_HEADER_ID_XPATH + "\n" +
                         "   let $version := $resource" + SCL_HEADER_VERSION_XPATH + "\n" +
                         "   let $name := $resource" + COMPAS_NAME_EXTENSION_XPATH + "\n" +
+                        "   let $header := $resource/scl:SCL/scl:Header/scl:History/scl:Hitem[(not(@revision) or @revision=\"\") and @version=$version]\n" +
                         "   let $parts := tokenize($version, '\\.')\n" +
                         "   let $majorVersion := xs:int($parts[1])\n" +
                         "   let $minorVersion := xs:int($parts[2])\n" +
                         "   let $patchVersion := xs:int($parts[3])\n" +
                         "   order by $majorVersion, $minorVersion, $patchVersion\n" +
-                        "   return '<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>' ",
-                sclDataMarshaller::unmarshalItem);
+                        "   return '<HistoryItem xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\">'" +
+                        "       || '  <Id>' || $id || '</Id>'" +
+                        "       || '  <Name>' || $name || '</Name>'" +
+                        "       || '  <Version>' || $version || '</Version>' " +
+                        "       || '  <Who>' || $header/@who || '</Who>' " +
+                        "       || '  <When>' || $header/@when || '</When>' " +
+                        "       || '  <What>' || $header/@what || '</What>' " +
+                        "       || '</HistoryItem>' ",
+                sclDataMarshaller::unmarshalHistoryItem);
     }
 
     @Override

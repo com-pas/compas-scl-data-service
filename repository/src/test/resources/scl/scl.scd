@@ -3,8 +3,14 @@
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-<SCL xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
-    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID" nameStructure="IEDName"/>
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007"
+     revision="B" release="4">
+    <Header id="HeaderID" version="version" revision="Revision" toolID="toolID" nameStructure="IEDName">
+        <History>
+            <Hitem version="1.0.0" revision="" when="2021-12-14" who="User 1" what="Some change 1"/>
+            <Hitem version="1.1.0" revision="" when="2021-12-15" who="User 2" what="Some change 2"/>
+        </History>
+    </Header>
     <IED name="IED_NAME">
         <AccessPoint name="AP_NAME">
             <Server>
@@ -59,7 +65,8 @@
             <DA fc="ST" dchg="false" qchg="false" dupd="false" name="origin" bType="Struct" type="DA3"/>
         </DOType>
         <DOType cdc="WYE" id="DO4">
-            <DA fc="DC" dchg="false" qchg="false" dupd="false" name="configRev" bType="VisString255" valKind="RO" valImport="false"/>
+            <DA fc="DC" dchg="false" qchg="false" dupd="false" name="configRev" bType="VisString255" valKind="RO"
+                valImport="false"/>
         </DOType>
         <DAType id="DA1">
             <BDA name="operTm" bType="Timestamp"/>
