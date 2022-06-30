@@ -4,6 +4,7 @@
 package org.lfenergy.compas.scl.data.util;
 
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
+import org.lfenergy.compas.scl.data.model.HistoryItem;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 import org.slf4j.Logger;
@@ -35,6 +36,10 @@ public class SclDataModelMarshaller {
 
     public Item unmarshalItem(String xml) {
         return unmarshal(xml, Item.class);
+    }
+
+    public HistoryItem unmarshalHistoryItem(String xml) {
+        return unmarshal(xml, HistoryItem.class);
     }
 
     public SclMetaInfo unmarshalSclMetaInfo(String xml) {

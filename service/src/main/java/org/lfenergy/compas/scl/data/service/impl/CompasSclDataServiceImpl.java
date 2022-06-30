@@ -8,6 +8,7 @@ import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
+import org.lfenergy.compas.scl.data.model.HistoryItem;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
@@ -67,7 +68,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
      */
     @Override
     @Transactional(SUPPORTS)
-    public List<Item> listVersionsByUUID(SclFileType type, UUID id) {
+    public List<HistoryItem> listVersionsByUUID(SclFileType type, UUID id) {
         var items = repository.listVersionsByUUID(type, id);
         if (items.isEmpty()) {
             var message = String.format("No versions found for type '%s' with ID '%s'", type, id);
@@ -166,8 +167,8 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
         var newFileName = getFilenameFromXML(scl);
 
         if (newFileName.isPresent()
-            && !newFileName.get().equals(currentSclMetaInfo.getName())
-            && repository.hasDuplicateSclName(type, newFileName.get())) {
+                && !newFileName.get().equals(currentSclMetaInfo.getName())
+                && repository.hasDuplicateSclName(type, newFileName.get())) {
             throw new CompasException(DUPLICATE_SCL_NAME_ERROR_CODE, "Given name of SCL File already used.");
         }
 

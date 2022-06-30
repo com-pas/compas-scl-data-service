@@ -23,6 +23,19 @@ class ObjectFactoryTest {
     }
 
     @Test
+    void createHistoryItem_WhenMethodsCalled_ThenObjectsAreCreated() {
+        var objectFactory = new ObjectFactory();
+
+        var item = objectFactory.createHistoryItem();
+        assertNotNull(item);
+
+        var itemElement = objectFactory.createHistoryItem(item);
+        assertNotNull(itemElement);
+        assertEquals(HistoryItem.class, itemElement.getDeclaredType());
+        assertEquals(item, itemElement.getValue());
+    }
+
+    @Test
     void createSclMetaInfo_WhenMethodsCalled_ThenObjectsAreCreated() {
         var objectFactory = new ObjectFactory();
 

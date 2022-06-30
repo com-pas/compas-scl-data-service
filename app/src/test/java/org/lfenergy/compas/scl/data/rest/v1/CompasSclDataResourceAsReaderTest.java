@@ -10,6 +10,7 @@ import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
+import org.lfenergy.compas.scl.data.model.HistoryItem;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.v1.model.CreateRequest;
@@ -68,7 +69,7 @@ class CompasSclDataResourceAsReaderTest {
         var version = "1.0.0";
 
         when(compasSclDataService.listVersionsByUUID(type, uuid))
-                .thenReturn(Collections.singletonList(new Item(uuid.toString(), name, version)));
+                .thenReturn(Collections.singletonList(new HistoryItem(uuid.toString(), name, version, null, null, null)));
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -80,9 +81,9 @@ class CompasSclDataResourceAsReaderTest {
                 .response();
 
         var xmlPath = response.xmlPath();
-        assertEquals(uuid.toString(), xmlPath.get("ListResponse.Item[0].Id"));
-        assertEquals(name, xmlPath.get("ListResponse.Item[0].Name"));
-        assertEquals(version, xmlPath.get("ListResponse.Item[0].Version"));
+        assertEquals(uuid.toString(), xmlPath.get("VersionsResponse.HistoryItem[0].Id"));
+        assertEquals(name, xmlPath.get("VersionsResponse.HistoryItem[0].Name"));
+        assertEquals(version, xmlPath.get("VersionsResponse.HistoryItem[0].Version"));
         verify(compasSclDataService, times(1)).listVersionsByUUID(type, uuid);
     }
 
