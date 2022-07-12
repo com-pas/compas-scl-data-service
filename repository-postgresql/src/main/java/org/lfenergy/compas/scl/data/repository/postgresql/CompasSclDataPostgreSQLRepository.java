@@ -33,7 +33,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private static final String JOIN_HEADER_CLAUSE = " left outer join (" +
             "SELECT id, major_version, minor_version, patch_version," +
             "       unnest(" +
-            "          xpath('/scl:SCL/scl:Header//scl:Hitem[(not(@revision) or @revision=\"\") and @version=\"' || major_version || '.' || minor_version || '.' || patch_version || '\"]' " +
+            "          xpath('(/scl:SCL/scl:Header//scl:Hitem[(not(@revision) or @revision=\"\") and @version=\"' || major_version || '.' || minor_version || '.' || patch_version || '\"])[1]' " +
             "               , scl_data::xml " +
             "               , ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']])) as header " +
             "          from scl_file) scl_data " +
