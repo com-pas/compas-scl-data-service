@@ -115,7 +115,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                         "   let $id := $resource" + SCL_HEADER_ID_XPATH + "\n" +
                         "   let $version := $resource" + SCL_HEADER_VERSION_XPATH + "\n" +
                         "   let $name := $resource" + COMPAS_NAME_EXTENSION_XPATH + "\n" +
-                        "   let $header := $resource/scl:SCL/scl:Header/scl:History/scl:Hitem[(not(@revision) or @revision=\"\") and @version=$version]\n" +
+                        "   let $header := ($resource/scl:SCL/scl:Header/scl:History/scl:Hitem[(not(@revision) or @revision=\"\") and @version=$version])[1]\n" +
                         "   let $parts := tokenize($version, '\\.')\n" +
                         "   let $majorVersion := xs:int($parts[1])\n" +
                         "   let $minorVersion := xs:int($parts[2])\n" +
