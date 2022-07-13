@@ -19,7 +19,7 @@ import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_DATA_FOUND_ERROR_CODE;
 
-public abstract class AbstractCompasSclDataRepository {
+public abstract class AbstractCompasSclDataRepositoryTest {
     protected static final SclFileType TYPE = SclFileType.SCD;
     protected static final String NAME_1 = "SCL-NAME1";
     protected static final String NAME_2 = "SCL-NAME2";

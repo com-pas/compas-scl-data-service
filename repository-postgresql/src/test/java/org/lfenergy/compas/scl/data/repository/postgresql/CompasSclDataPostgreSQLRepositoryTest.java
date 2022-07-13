@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl.data.model.Version;
-import org.lfenergy.compas.scl.data.repository.AbstractCompasSclDataRepository;
+import org.lfenergy.compas.scl.data.repository.AbstractCompasSclDataRepositoryTest;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -16,7 +16,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith({MockitoExtension.class, PostgreSQLServerJUnitExtension.class})
-class CompasSclDataPostgreSQLRepositoryTest extends AbstractCompasSclDataRepository {
+class CompasSclDataPostgreSQLRepositoryTest extends AbstractCompasSclDataRepositoryTest {
     private CompasSclDataPostgreSQLRepository repository;
 
     @Override
@@ -30,7 +30,7 @@ class CompasSclDataPostgreSQLRepositoryTest extends AbstractCompasSclDataReposit
     }
 
     /*
-     * TODO: Method beneath needs to be moved to AbstractCompasSclDataRepository
+     * TODO: Method beneath needs to be moved to AbstractCompasSclDataRepositoryTest
      * when hasDuplicateSclName has been implemented by CompasSclDataBaseXRepository. */
     @Test
     void hasDuplicateSclName_WhenUsingSclNameThatHasBeenUsedYet_ThenDuplicateIsFound() {
