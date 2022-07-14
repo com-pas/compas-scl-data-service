@@ -74,15 +74,16 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
         this.baseXClientFactory = baseXClientFactory;
         this.sclDataMarshaller = sclDataMarshaller;
 
+        var command = """
+                declare variable $db := '%s';
+                if (not(db:exists($db)))
+                then
+                  db:create($db)
+                """;
         // At startup create all needed databases.
         Arrays.stream(SclFileType.values()).forEach(type ->
                 executeCommand(client -> {
-                    client.executeXQuery("""
-                            declare variable $db := '%s';
-                            if (not(db:exists($db)))
-                            then
-                              db:create($db)
-                            """.formatted(type));
+                    client.executeXQuery(command.formatted(type));
                     return true;
                 }));
     }
