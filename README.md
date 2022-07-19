@@ -10,7 +10,7 @@ SPDX-License-Identifier: Apache-2.0
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5925/badge)](https://bestpractices.coreinfrastructure.org/projects/5925)
 [![Slack](https://raw.githubusercontent.com/com-pas/compas-architecture/master/public/LFEnergy-slack.svg)](http://lfenergy.slack.com/)
 
-# compas-scl-data-service
+# CoMPAS SCL Data Service
 
 Service to store and retrieve the SCL XML to a database.
 
@@ -21,8 +21,9 @@ to [documentation](doc/compas-scl-data-service.md).
 
 There are currently two database implementations available.
 
-- For more information about the BaseX Implementation go to [BaseX](doc/basex.md). (Profile activated by default.)
-- For more information about the PostgreSQL Implementation go to [PostgreSQL](doc/postgresql.md).
+- For more development information about the BaseX Implementation go to [BaseX](doc/basex.md). (Profile activated by
+  default.)
+- For more development information about the PostgreSQL Implementation go to [PostgreSQL](doc/postgresql.md).
 
 > **Note:** When switching between implementation it's a good practise to first execute a maven clean to remove
 > old dependencies from the target directory in the app module.
