@@ -68,8 +68,8 @@ There a some BaseX specific choices made in storing the SCL.
 
 There a some PostgreSQL choices made in storing the SCL.
 
-- For the PostgreSQL version we use FlyWay to maintain the database schema. All SCL XML Files are stored in a table
-  called `scl_file`.
+- For the PostgreSQL version we use FlyWay to maintain the database schema.
+- All SCL XML Files are stored in a table called `scl_file`.
 - For every new version of an SCL XML File a new record is created.
 - The full XML is stored in a text field `scl_data`.
 - We can use the XPath function of PostgreSQL to retrieve extra info from the XML.
