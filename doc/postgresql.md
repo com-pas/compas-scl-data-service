@@ -40,7 +40,31 @@ Table: scl_file
 
 ## Development
 
-### Application depends on a running PostgreSQL instance
+### Building the application
+
+You can use Maven to build the application and see if all tests are working using:
+
+```shell script
+./mvnw clean verify
+```
+
+This should normally be enough to also run the application, but there were cases that we need to build using:
+
+```shell script
+./mvnw clean install
+```
+
+This to make the local modules available for the app module to run the application.
+
+### Running the application in dev mode
+
+You can run your application in dev mode that enables live coding using:
+
+```shell script
+./mvnw -DskipTests=true -Dquarkus.profile=dev-postgresql package io.quarkus:quarkus-maven-plugin::dev
+```
+
+#### Application depends on a running PostgreSQL instance
 
 Check [PostgreSQL on DockerHub](https://hub.docker.com/_/postgres?tab=description) for a running PostgreSQL docker
 container. Use the following command to start the docker container.
@@ -56,36 +80,51 @@ docker run --rm --name compas_postgresql \
 ```
 
 > **Note:** Replace <LOCAL-DATA-DIR> with a directory on your local machine, for instance "~/postgres".
-> All data will be stored in this directory under "compas". This way data isn't lost after stopping the docker container.
+> All data will be stored in this directory under "compas". This way data isn't lost after stopping the docker
+> container.
 
-### Building the application
+#### Application depends on a running KeyCloak instance
 
-You can run the following command to build the PostgreSQL version of the application.
+Beside a PostgreSQL Database there is also a KeyCloak instance need to be running on port 8089 by default.
+See [README.md](../README.md#security) for default values, if custom keycloak is used.
 
-```shell script
-./mvnw clean verify
+There is a preconfigured keycloak instance available in
+the [CoMPAS Deployment Repository](https://github.com/com-pas/compas-deployment). This repository can be cloned and
+when going to this directory the following command can be executed to create a local Docker Image with configuration.
+
+```shell
+cd <CoMPAS Deployment Repository Directory>/compas/keycloak
+docker build -t compas_keycloak . 
 ```
 
-### Running the application in dev mode
+There is now a Docker Image `compas_keycloak` created that can be started using the following command
 
-You can run your application in dev mode that enables live coding using:
-
-```shell script
-./mvnw -DskipTests=true -Dquarkus.profile=dev-postgresql package io.quarkus:quarkus-maven-plugin::dev
+```shell
+docker run --rm --name compas_keycloak \
+   -p 8089:8080 
+   -d compas_keycloak:latest
 ```
 
-### Creating a native executable
+### Creating a Docker image with native executable
 
-You can create a native executable using:
+The releases created in the repository will create a docker image with a native executable. If you're running a Linux
+system it's possible to create and run the executable locally. You can create a Docker image with native executable
+using:
 
 ```shell script
-./mvnw -P native package
+./mvnw package -Pnative-image
 ```
-
-This will run the native executable build in a container. In the native profile the property
-"quarkus.native.container-build" is set to 'true'.
 
 You can then execute your native executable with: `./app/target/postgresql-quarkus-app/app-local-SNAPSHOT-runner`
 
-If you want to learn more about building native executables, please see https://quarkus.io/guides/maven-tooling.html
-and https://quarkus.io/guides/writing-native-applications-tips.
+### Creating a Docker image with JVM executable
+
+There is also a profile to create a Docker Image which runs the application using a JVM. You can create a Docker Image
+with JVM executable using:
+
+```shell script
+./mvnw package -Pjvm-image
+```
+
+The JVM Image can also (temporary) be created by the release action if there are problems creating or running the
+native executable.

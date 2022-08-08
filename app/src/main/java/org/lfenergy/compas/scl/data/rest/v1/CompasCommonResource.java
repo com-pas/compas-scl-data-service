@@ -22,7 +22,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.stream.Collectors;
 
 import static org.lfenergy.compas.scl.data.rest.Constants.READ_ROLE;
 
@@ -54,7 +53,7 @@ public class CompasCommonResource {
                         .filter(sclFileType -> roles.contains(sclFileType.name() + "_" + READ_ROLE))
                         .map(sclFileType -> new Type(sclFileType.name(), sclFileType.getDescription()))
                         .sorted(Comparator.comparing(Type::getDescription))
-                        .collect(Collectors.toList()));
+                        .toList());
         return response;
     }
 

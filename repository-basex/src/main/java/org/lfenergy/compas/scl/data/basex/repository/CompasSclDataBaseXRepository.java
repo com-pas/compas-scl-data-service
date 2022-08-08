@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static java.lang.String.format;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_COMMAND_ERROR_CODE;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_QUERY_ERROR_CODE;
@@ -42,32 +41,30 @@ import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCo
 public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataBaseXRepository.class);
 
-    private static final String DECLARE_SCL_NS_URI = "declare namespace scl=\"" + SCL_NS_URI + "\";\n";
-    private static final String DECLARE_COMPAS_NAMESPACE = "declare namespace compas=\"" + COMPAS_EXTENSION_NS_URI + "\";\n";
+    private static final String DECLARE_NS_AND_VARS = """
+            declare namespace scl    = "%s";
+            declare namespace compas = "%s";
+
+            declare variable $compasSclExtensionType     := '%s';
+            declare variable $compasDataServiceNamespace := '%s';
+            """.formatted(SCL_NS_URI, COMPAS_EXTENSION_NS_URI, COMPAS_SCL_EXTENSION_TYPE, SCL_DATA_SERVICE_V1_NS_URI);
     // This find method always searches for the latest version.
     // Retrieve all versions using db:list-details function.
     // Sort the result descending, this way the last version is the first.
-    private static final String DECLARE_LATEST_VERSION_FUNC =
-            "declare function local:latest-version($db as xs:string, $id as xs:string)\n" +
-                    "   as document-node()? { \n" +
-                    "      let $doc :=\n" +
-                    "          (for $resource in db:open($db, $id)\n" +
-                    "            let $parts := tokenize($resource/scl:SCL/scl:Header/@version, '\\.')\n" +
-                    "            let $majorVersion := xs:int($parts[1])\n" +
-                    "            let $minorVersion := xs:int($parts[2])\n" +
-                    "            let $patchVersion := xs:int($parts[3])\n" +
-                    "            order by $majorVersion descending, $minorVersion descending, $patchVersion descending\n" +
-                    "            return $resource\n" +
-                    "          )[1]\n" +
-                    "      return $doc\n" +
-                    "};\n";
-    private static final String DECLARE_DB_VARIABLE = "declare variable $db := '%s';\n";
-    private static final String DECLARE_ID_VARIABLE = "declare variable $id := '%s';\n";
-    private static final String DECLARE_PATH_VARIABLE = "declare variable $path := '%s';\n";
-
-    private static final String SCL_HEADER_ID_XPATH = "/scl:SCL/scl:Header/@id";
-    private static final String SCL_HEADER_VERSION_XPATH = "/scl:SCL/scl:Header/@version";
-    private static final String COMPAS_NAME_EXTENSION_XPATH = "/scl:SCL/scl:Private[@type='" + COMPAS_SCL_EXTENSION_TYPE + "']/compas:" + COMPAS_SCL_NAME_EXTENSION;
+    private static final String DECLARE_LATEST_VERSION_FUNC = """
+            declare function local:latest-version($db as xs:string, $id as xs:string) as document-node()? {
+              let $doc :=
+                (for $resource in db:open($db, $id)
+                  let $parts := tokenize($resource/scl:SCL/scl:Header/@version, '\\.')
+                  let $majorVersion := xs:int($parts[1])
+                  let $minorVersion := xs:int($parts[2])
+                  let $patchVersion := xs:int($parts[3])
+                  order by $majorVersion descending, $minorVersion descending, $patchVersion descending
+                  return $resource
+                )[1]
+                return $doc
+            };
+            """;
 
     private final BaseXClientFactory baseXClientFactory;
     private final SclDataModelMarshaller sclDataMarshaller;
@@ -77,69 +74,81 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
         this.baseXClientFactory = baseXClientFactory;
         this.sclDataMarshaller = sclDataMarshaller;
 
+        var command = """
+                declare variable $db := '%s';
+                if (not(db:exists($db)))
+                then
+                  db:create($db)
+                """;
         // At startup create all needed databases.
         Arrays.stream(SclFileType.values()).forEach(type ->
                 executeCommand(client -> {
-                    client.executeXQuery(
-                            format(DECLARE_DB_VARIABLE, type) +
-                                    "if (not(db:exists($db)))\n" +
-                                    "   then db:create($db)");
+                    client.executeXQuery(command.formatted(type));
                     return true;
                 }));
     }
 
     @Override
     public List<Item> list(SclFileType type) {
-        return executeQuery(type, DECLARE_SCL_NS_URI +
-                        DECLARE_COMPAS_NAMESPACE +
-                        DECLARE_LATEST_VERSION_FUNC +
-                        format(DECLARE_DB_VARIABLE, type) +
-                        "for $resource in db:open($db)\n" +
-                        "   let $id := $resource" + SCL_HEADER_ID_XPATH + "\n" +
-                        "   group by $id\n" +
-                        "   let $latestScl := local:latest-version($db, $id)\n" +
-                        "   let $version := $latestScl" + SCL_HEADER_VERSION_XPATH + "\n" +
-                        "   let $name := $latestScl" + COMPAS_NAME_EXTENSION_XPATH + "\n" +
-                        "   order by fn:lower-case($name)\n" +
-                        "   return '<Item xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></Item>'",
+        return executeQuery(type, """
+                        %s
+                        %s
+                        declare variable $db := '%s';
+                        for $resource in db:open($db)
+                          let $id := $resource/scl:SCL/scl:Header/@id
+                          group by $id
+                          let $latestScl := local:latest-version($db, $id)
+                          let $version := $latestScl/scl:SCL/scl:Header/@version
+                          let $name := $latestScl/scl:SCL/scl:Private[@type=$compasSclExtensionType]/compas:SclName
+                          order by fn:lower-case($name)
+                          return '<Item xmlns="' || $compasDataServiceNamespace || '">'
+                              || '  <Id>'      || $id      || '</Id>'
+                              || '  <Name>'    || $name    || '</Name>'
+                              || '  <Version>' || $version || '</Version>'
+                              || '</Item>'
+                        """.formatted(DECLARE_NS_AND_VARS, DECLARE_LATEST_VERSION_FUNC, type)
+                ,
                 sclDataMarshaller::unmarshalItem);
     }
 
     @Override
     public List<HistoryItem> listVersionsByUUID(SclFileType type, UUID id) {
-        return executeQuery(type, DECLARE_SCL_NS_URI +
-                        DECLARE_COMPAS_NAMESPACE +
-                        format(DECLARE_DB_VARIABLE, type) +
-                        format(DECLARE_ID_VARIABLE, id) +
-                        "for $resource in db:open($db, $id)\n" +
-                        "   let $id := $resource" + SCL_HEADER_ID_XPATH + "\n" +
-                        "   let $version := $resource" + SCL_HEADER_VERSION_XPATH + "\n" +
-                        "   let $name := $resource" + COMPAS_NAME_EXTENSION_XPATH + "\n" +
-                        "   let $header := ($resource/scl:SCL/scl:Header/scl:History/scl:Hitem[(not(@revision) or @revision=\"\") and @version=$version])[1]\n" +
-                        "   let $parts := tokenize($version, '\\.')\n" +
-                        "   let $majorVersion := xs:int($parts[1])\n" +
-                        "   let $minorVersion := xs:int($parts[2])\n" +
-                        "   let $patchVersion := xs:int($parts[3])\n" +
-                        "   order by $majorVersion, $minorVersion, $patchVersion\n" +
-                        "   return '<HistoryItem xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\">'" +
-                        "       || '  <Id>' || $id || '</Id>'" +
-                        "       || '  <Name>' || $name || '</Name>'" +
-                        "       || '  <Version>' || $version || '</Version>' " +
-                        "       || '  <Who>' || $header/@who || '</Who>' " +
-                        "       || '  <When>' || $header/@when || '</When>' " +
-                        "       || '  <What>' || $header/@what || '</What>' " +
-                        "       || '</HistoryItem>' ",
+        return executeQuery(type, """
+                        %s
+                        declare variable $db := '%s';
+                        declare variable $id := '%s';
+                        for $resource in db:open($db, $id)
+                           let $version := $resource/scl:SCL/scl:Header/@version
+                           let $name := $resource/scl:SCL/scl:Private[@type=$compasSclExtensionType]/compas:SclName
+                           let $header := ($resource/scl:SCL/scl:Header/scl:History/scl:Hitem[(not(@revision) or @revision="") and @version=$version])[1]
+                           let $parts := tokenize($version, '\\.')
+                           let $majorVersion := xs:int($parts[1])
+                           let $minorVersion := xs:int($parts[2])
+                           let $patchVersion := xs:int($parts[3])
+                           order by $majorVersion, $minorVersion, $patchVersion
+                           return '<HistoryItem xmlns="' || $compasDataServiceNamespace || '">'
+                               || '  <Id>'      || $id           || '</Id>'
+                               || '  <Name>'    || $name         || '</Name>'
+                               || '  <Version>' || $version      || '</Version>'
+                               || '  <Who>'     || $header/@who  || '</Who>'
+                               || '  <When>'    || $header/@when || '</When>'
+                               || '  <What>'    || $header/@what || '</What>'
+                               || '</HistoryItem>'
+                        """.formatted(DECLARE_NS_AND_VARS, type, id),
                 sclDataMarshaller::unmarshalHistoryItem);
     }
 
     @Override
     public String findByUUID(SclFileType type, UUID id) {
         // This find method always searches for the latest version and returns this.
-        var result = executeQuery(type, DECLARE_SCL_NS_URI +
-                DECLARE_LATEST_VERSION_FUNC +
-                format(DECLARE_DB_VARIABLE, type) +
-                format(DECLARE_ID_VARIABLE, id) +
-                "local:latest-version($db, $id)");
+        var result = executeQuery(type, """
+                %s
+                %s
+                declare variable $db := '%s';
+                declare variable $id := '%s';
+                local:latest-version($db, $id)
+                """.formatted(DECLARE_NS_AND_VARS, DECLARE_LATEST_VERSION_FUNC, type, id)
+        );
 
         if (result.isEmpty()) {
             var message = String.format("No record found for type '%s' with ID '%s'", type, id);
@@ -151,9 +160,12 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     @Override
     public String findByUUID(SclFileType type, UUID id, Version version) {
         // This find method searches for a specific version.
-        var result = executeQuery(type, format(DECLARE_DB_VARIABLE, type) +
-                format(DECLARE_PATH_VARIABLE, createDocumentPath(id, version)) +
-                "db:open($db, $path)");
+        var result = executeQuery(type, """
+                declare variable $db   := '%s';
+                declare variable $path := '%s';
+                db:open($db, $path)
+                """.formatted(type, createDocumentPath(id, version))
+        );
 
         if (result.isEmpty()) {
             var message = String.format("No record found for type '%s' with ID '%s' and version '%s'", type, id, version);
@@ -171,19 +183,23 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     public SclMetaInfo findMetaInfoByUUID(SclFileType type, UUID id) {
         // This find method always searches for the latest version.
         // Extracts the needed information from the document and returns this.
-        var metaInfo = executeQuery(type, DECLARE_SCL_NS_URI +
-                        DECLARE_COMPAS_NAMESPACE +
-                        DECLARE_LATEST_VERSION_FUNC +
-                        format(DECLARE_DB_VARIABLE, type) +
-                        format(DECLARE_ID_VARIABLE, id) +
-                        "let $resource := local:latest-version($db, $id)" +
-                        "return if ($resource)\n" +
-                        "then (\n" +
-                        "  let $id := $resource" + SCL_HEADER_ID_XPATH + "\n" +
-                        "  let $version := $resource" + SCL_HEADER_VERSION_XPATH + "\n" +
-                        "  let $name := $resource" + COMPAS_NAME_EXTENSION_XPATH + "\n" +
-                        "  return '<SclMetaInfo xmlns=\"" + SCL_DATA_SERVICE_V1_NS_URI + "\"><Id>' || $id || '</Id><Name>' || $name || '</Name><Version>' || $version || '</Version></SclMetaInfo>'\n" +
-                        ")\n",
+        var metaInfo = executeQuery(type, """
+                                %s
+                                %s
+                                declare variable $db := '%s';
+                                declare variable $id := '%s';
+                                let $resource := local:latest-version($db, $id)
+                                return if ($resource)
+                                then (
+                                  let $version := $resource/scl:SCL/scl:Header/@version
+                                  let $name := $resource/scl:SCL/scl:Private[@type=$compasSclExtensionType]/compas:SclName
+                                  return '<SclMetaInfo xmlns="' || $compasDataServiceNamespace || '">'
+                                      || '  <Id>'      || $id      || '</Id>'
+                                      || '  <Name>'    || $name    || '</Name>'
+                                      || '  <Version>' || $version || '</Version>'
+                                      || '</SclMetaInfo>'
+                                )
+                        """.formatted(DECLARE_NS_AND_VARS, DECLARE_LATEST_VERSION_FUNC, type, id),
                 sclDataMarshaller::unmarshalSclMetaInfo);
 
         if (metaInfo.isEmpty()) {
@@ -208,7 +224,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     @Override
     public void delete(SclFileType type, UUID id) {
         executeCommand(client -> {
-            client.executeXQuery("db:delete('" + type + "', '" + id + "')");
+            client.executeXQuery("db:delete('%s', '%s')".formatted(type, id));
             return true;
         });
     }
@@ -216,7 +232,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     @Override
     public void delete(SclFileType type, UUID id, Version version) {
         executeCommand(client -> {
-            client.executeXQuery("db:delete('" + type + "', '" + createDocumentPath(id, version) + "')");
+            client.executeXQuery("db:delete('%s', '%s')".formatted(type, createDocumentPath(id, version)));
             return true;
         });
     }
@@ -255,7 +271,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     }
 
     private void openDatabase(BaseXClient client, SclFileType type) throws IOException {
-        client.execute("OPEN " + type);
+        client.execute("OPEN %s".formatted(type));
     }
 
     private void closeDatabase(BaseXClient client) throws IOException {
