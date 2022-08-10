@@ -166,8 +166,8 @@ public class SclElementProcessor {
         if (childNodes.getLength() > 0) {
             for (int i = 0; i < childNodes.getLength(); i++) {
                 Node node = childNodes.item(i);
-                if (node instanceof Element && localName.equals(node.getLocalName())) {
-                    foundElements.add((Element) node);
+                if (node instanceof Element element && localName.equals(element.getLocalName())) {
+                    foundElements.add(element);
                 }
             }
         }
