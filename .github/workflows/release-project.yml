@@ -33,7 +33,7 @@ jobs:
       - name: Extract tag name
         id: extract_tagname
         shell: bash
-        # Extra the tagname form the git reference, value of GITHUB_REF will be something like refs/tags/<tag_name>.
+        # Extract the tag name from the git reference, value of GITHUB_REF will be something like refs/tags/<tag_name>.
         run: echo "##[set-output name=tagname;]$(echo ${GITHUB_REF##*/})"
 
       - name: Set up JDK 17
