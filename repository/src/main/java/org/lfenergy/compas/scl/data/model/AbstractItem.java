@@ -34,10 +34,10 @@ public abstract class AbstractItem {
             required = true)
     private String version;
 
-    public AbstractItem() {
+    protected AbstractItem() {
     }
 
-    public AbstractItem(String id, String name, String version) {
+    protected AbstractItem(String id, String name, String version) {
         this.id = id;
         this.name = name;
         this.version = version;

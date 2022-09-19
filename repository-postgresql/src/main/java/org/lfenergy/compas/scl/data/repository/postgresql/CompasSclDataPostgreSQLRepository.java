@@ -316,10 +316,10 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         // Sadly no generics in JDBC so we need to check what the Array() method returns.
         if (sqlArray.getArray() instanceof Object[] objectArray) {
             Arrays.stream(objectArray)
-                    .forEach(arrayObject -> {
-                        // Just use toString() to return the value of the PostgreSQL Object.
-                        labelsList.add(arrayObject.toString());
-                    });
+                    .forEach(arrayObject ->
+                            // Just use toString() to return the value of the PostgreSQL Object.
+                            labelsList.add(arrayObject.toString())
+                    );
         }
         return labelsList;
     }
