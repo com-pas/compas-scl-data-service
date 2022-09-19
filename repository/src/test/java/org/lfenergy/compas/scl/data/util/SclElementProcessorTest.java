@@ -12,8 +12,7 @@ import org.w3c.dom.Element;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
-import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_SCL_EXTENSION_TYPE;
-import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_SCL_NAME_EXTENSION;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.*;
 
 class SclElementProcessorTest {
     private SclElementProcessor processor = new SclElementProcessor();
@@ -94,9 +93,8 @@ class SclElementProcessorTest {
         var foundElement = processor.getCompasPrivate(scl);
         assertFalse(foundElement.isPresent());
 
-        var exception = assertThrows(CompasSclDataServiceException.class, () -> {
-            processor.addCompasPrivate(scl);
-        });
+        var exception = assertThrows(CompasSclDataServiceException.class,
+                () -> processor.addCompasPrivate(scl));
         assertEquals(HEADER_NOT_FOUND_ERROR_CODE, exception.getErrorCode());
     }
 
@@ -107,7 +105,8 @@ class SclElementProcessorTest {
 
         var compasPrivate = processor.getCompasPrivate(scl);
         assertTrue(compasPrivate.isPresent());
-        var foundElement = processor.getChildNodeByName(compasPrivate.get(), COMPAS_SCL_NAME_EXTENSION);
+        var foundElement = processor.getChildNodeByName(compasPrivate.get(), COMPAS_SCL_NAME_EXTENSION,
+                COMPAS_EXTENSION_NS_URI);
         assertFalse(foundElement.isPresent());
 
         var result = processor.addCompasElement(compasPrivate.get(), COMPAS_SCL_NAME_EXTENSION, value);
@@ -115,7 +114,8 @@ class SclElementProcessorTest {
         assertNotNull(result);
         assertEquals(COMPAS_SCL_NAME_EXTENSION, result.getLocalName());
         assertEquals(value, result.getTextContent());
-        foundElement = processor.getChildNodeByName(compasPrivate.get(), COMPAS_SCL_NAME_EXTENSION);
+        foundElement = processor.getChildNodeByName(compasPrivate.get(), COMPAS_SCL_NAME_EXTENSION,
+                COMPAS_EXTENSION_NS_URI);
         assertTrue(foundElement.isPresent());
         assertEquals(foundElement.get(), result);
     }
@@ -130,15 +130,15 @@ class SclElementProcessorTest {
         var header = processor.getSclHeader(scl);
         assertTrue(header.isPresent());
 
-        var historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME);
+        var historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME, SCL_NS_URI);
         assertFalse(historyElement.isPresent());
 
         var result = processor.addHistoryItem(header.get(), username, message, version);
         assertNotNull(result);
 
-        historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME);
+        historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME, SCL_NS_URI);
         assertTrue(historyElement.isPresent());
-        var hItemElement = processor.getChildNodeByName(historyElement.get(), SCL_HITEM_ELEMENT_NAME);
+        var hItemElement = processor.getChildNodeByName(historyElement.get(), SCL_HITEM_ELEMENT_NAME, SCL_NS_URI);
         assertTrue(hItemElement.isPresent());
         assertEquals(version.toString(), hItemElement.get().getAttribute(SCL_VERSION_ATTR));
         assertTrue(hItemElement.get().hasAttribute(SCL_REVISION_ATTR));
@@ -154,16 +154,16 @@ class SclElementProcessorTest {
         var header = processor.getSclHeader(scl);
         assertTrue(header.isPresent());
 
-        var historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME);
+        var historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME, SCL_NS_URI);
         assertTrue(historyElement.isPresent());
 
         var result = processor.addHistoryItem(header.get(), "The Tester", "The Message", version);
         assertNotNull(result);
         assertEquals(version.toString(), result.getAttribute(SCL_VERSION_ATTR));
 
-        historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME);
+        historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME, SCL_NS_URI);
         assertTrue(historyElement.isPresent());
-        var hItemElements = processor.getChildNodesByName(historyElement.get(), SCL_HITEM_ELEMENT_NAME);
+        var hItemElements = processor.getChildNodesByName(historyElement.get(), SCL_HITEM_ELEMENT_NAME, SCL_NS_URI);
         assertEquals(2, hItemElements.size());
     }
 
