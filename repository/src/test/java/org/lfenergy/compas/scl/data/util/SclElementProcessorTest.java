@@ -12,10 +12,13 @@ import org.w3c.dom.Element;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_SCL_EXTENSION_TYPE;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_SCL_NAME_EXTENSION;
 
 class SclElementProcessorTest {
     private SclElementProcessor processor = new SclElementProcessor();
     private ElementConverter converter = new ElementConverter();
+
     @Test
     void getSclHeader_WhenCalledWithSclContainingAHeader_ThenHeaderReturned() {
         var scl = readSCL("scl_with_header.scd");

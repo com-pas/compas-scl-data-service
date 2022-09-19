@@ -14,13 +14,16 @@ import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.sql.DataSource;
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_SCL_EXTENSION_TYPE;
 
 public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepository {
     private static final String ID_FIELD = "id";
@@ -42,43 +45,45 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     public List<Item> list(SclFileType type) {
         var sql = """
-                select scl_file.id, scl_file.name, scl_file.major_version, scl_file.minor_version, scl_file.patch_version
-                  from scl_file
-                 where scl_file.type = ?
-                 and   (scl_file.id, scl_file.major_version, scl_file.minor_version, scl_file.patch_version) in (
-                        -- Last select the maximum patch version with the major/minor version per id.
-                        select id, major_version, minor_version, max(patch_version)
-                          from scl_file patch_scl
-                         where patch_scl.type = scl_file.type
-                         and   (id, major_version, minor_version) in (
-                               -- Next select the maximum minor version with the major version per id.
-                               select id, major_version, max(minor_version)
-                                 from scl_file minor_scl
-                                where minor_scl.type = scl_file.type
-                                and   (id, major_version) in (
-                                      -- First select the maximum major version per id.
-                                      select id, max(major_version)
-                                        from scl_file major_scl
-                                       where major_scl.type = scl_file.type
-                                       group by id
-                                )
-                                group by id, major_version
-                         )
-                         group by id, major_version, minor_version
-                 )
-                 order by scl_file.name, scl_file.major_version, scl_file.minor_version, scl_file.patch_version
+                select scl_file.id, scl_file.name,
+                       scl_file.major_version, scl_file.minor_version, scl_file.patch_version,
+                       (xpath('//compas:Labels/compas:Label/text()'
+                            , scl_data.compas_private
+                            , ARRAY[ARRAY['compas', 'https://www.lfenergy.org/compas/extension/v1']])) as labels
+                  from (select distinct on (scl_file.id) *
+                          from scl_file
+                         where scl_file.type = ?
+                         order by scl_file.id
+                                , scl_file.major_version desc
+                                , scl_file.minor_version desc
+                                , scl_file.patch_version desc
+                  ) scl_file
+                  left outer join (
+                    select id, major_version, minor_version, patch_version,
+                           unnest(
+                              xpath( '(/scl:SCL/scl:Private[@type="' || ? || '"])[1]'
+                                   , scl_data::xml
+                                   , ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']])) as compas_private
+                              from scl_file) scl_data
+                        on scl_data.id            = scl_file.id
+                       and scl_data.major_version = scl_file.major_version
+                       and scl_data.minor_version = scl_file.minor_version
+                       and scl_data.patch_version = scl_file.patch_version
+                  order by scl_file.name, scl_file.major_version, scl_file.minor_version, scl_file.patch_version
                 """;
 
         var items = new ArrayList<Item>();
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, type.name());
+            stmt.setString(2, COMPAS_SCL_EXTENSION_TYPE);
 
             try (var resultSet = stmt.executeQuery()) {
                 while (resultSet.next()) {
                     items.add(new Item(resultSet.getString(ID_FIELD),
                             resultSet.getString(NAME_FIELD),
-                            createVersion(resultSet)));
+                            createVersion(resultSet),
+                            createLabelList(resultSet.getArray("labels"))));
                 }
             }
         } catch (SQLException exp) {
@@ -304,5 +309,18 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 resultSet.getInt(MINOR_VERSION_FIELD),
                 resultSet.getInt(PATCH_VERSION_FIELD));
         return version.toString();
+    }
+
+    private List<String> createLabelList(Array sqlArray) throws SQLException {
+        var labelsList = new ArrayList<String>();
+        // Sadly no generics in JDBC so we need to check what the Array() method returns.
+        if (sqlArray.getArray() instanceof Object[] objectArray) {
+            Arrays.stream(objectArray)
+                    .forEach(arrayObject -> {
+                        // Just use toString() to return the value of the PostgreSQL Object.
+                        labelsList.add(arrayObject.toString());
+                    });
+        }
+        return labelsList;
     }
 }

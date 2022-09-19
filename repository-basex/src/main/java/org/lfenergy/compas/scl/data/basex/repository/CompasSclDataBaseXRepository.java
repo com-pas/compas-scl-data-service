@@ -26,16 +26,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERVICE_V1_NS_URI;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_NS_URI;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_COMMAND_ERROR_CODE;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_QUERY_ERROR_CODE;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_EXTENSION_NS_URI;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_SCL_EXTENSION_TYPE;
 
 /**
  * This implementation of the repository will store the SCL XML Files in BaseX, this is a XML Database.
  * For more information see https://basex.org/.
  * <p>
  * For every type of SCL a separate database is created in which the SCL XML Files are stored.
- * every entries is stored under &lt;ID&gt;/&lt;Major version&gt;/&lt;Minor version&gt;/&lt;Patch version&gt;/scl.xml.
+ * Every entry is stored under &lt;ID&gt;/&lt;Major version&gt;/&lt;Minor version&gt;/&lt;Patch version&gt;/scl.xml.
  * This combination is always unique and easy to use.
  */
 public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
@@ -48,8 +51,8 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
             declare variable $compasSclExtensionType     := '%s';
             declare variable $compasDataServiceNamespace := '%s';
             """.formatted(SCL_NS_URI, COMPAS_EXTENSION_NS_URI, COMPAS_SCL_EXTENSION_TYPE, SCL_DATA_SERVICE_V1_NS_URI);
-    // This find method always searches for the latest version.
-    // Retrieve all versions using db:list-details function.
+
+    // This find method always searches for the latest version. Retrieve all versions using db:list-details function.
     // Sort the result descending, this way the last version is the first.
     private static final String DECLARE_LATEST_VERSION_FUNC = """
             declare function local:latest-version($db as xs:string, $id as xs:string) as document-node()? {
@@ -63,6 +66,15 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                   return $resource
                 )[1]
                 return $doc
+            };
+            """;
+
+    // Retrieve the Labels as XML Label elements from the XML. The result can be returned by the List functions.
+    private static final String DECLARE_LABELS_FUNC = """
+            declare function local:createLabelsResponse($latestScl as document-node()) as xs:string* {
+              let $labels := $latestScl/scl:SCL/scl:Private[@type=$compasSclExtensionType]/compas:Labels/compas:Label
+              for $label in $labels
+                return ' <Label>' || $label || '</Label>'
             };
             """;
 
@@ -93,20 +105,23 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
         return executeQuery(type, """
                         %s
                         %s
+                        %s
                         declare variable $db := '%s';
                         for $resource in db:open($db)
                           let $id := $resource/scl:SCL/scl:Header/@id
                           group by $id
                           let $latestScl := local:latest-version($db, $id)
                           let $version := $latestScl/scl:SCL/scl:Header/@version
-                          let $name := $latestScl/scl:SCL/scl:Private[@type=$compasSclExtensionType]/compas:SclName
+                          let $name := ($latestScl/scl:SCL/scl:Private[@type=$compasSclExtensionType]/compas:SclName)[1]
+                          let $labels := fn:string-join(local:createLabelsResponse($latestScl))
                           order by fn:lower-case($name)
                           return '<Item xmlns="' || $compasDataServiceNamespace || '">'
-                              || '  <Id>'      || $id      || '</Id>'
-                              || '  <Name>'    || $name    || '</Name>'
-                              || '  <Version>' || $version || '</Version>'
+                              || ' <Id>'      || $id      || '</Id>'
+                              || ' <Name>'    || $name    || '</Name>'
+                              || ' <Version>' || $version || '</Version>'
+                              || $labels
                               || '</Item>'
-                        """.formatted(DECLARE_NS_AND_VARS, DECLARE_LATEST_VERSION_FUNC, type)
+                        """.formatted(DECLARE_NS_AND_VARS, DECLARE_LATEST_VERSION_FUNC, DECLARE_LABELS_FUNC, type)
                 ,
                 sclDataMarshaller::unmarshalItem);
     }
@@ -127,12 +142,12 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                            let $patchVersion := xs:int($parts[3])
                            order by $majorVersion, $minorVersion, $patchVersion
                            return '<HistoryItem xmlns="' || $compasDataServiceNamespace || '">'
-                               || '  <Id>'      || $id           || '</Id>'
-                               || '  <Name>'    || $name         || '</Name>'
-                               || '  <Version>' || $version      || '</Version>'
-                               || '  <Who>'     || $header/@who  || '</Who>'
-                               || '  <When>'    || $header/@when || '</When>'
-                               || '  <What>'    || $header/@what || '</What>'
+                               || ' <Id>'      || $id           || '</Id>'
+                               || ' <Name>'    || $name         || '</Name>'
+                               || ' <Version>' || $version      || '</Version>'
+                               || ' <Who>'     || $header/@who  || '</Who>'
+                               || ' <When>'    || $header/@when || '</When>'
+                               || ' <What>'    || $header/@what || '</What>'
                                || '</HistoryItem>'
                         """.formatted(DECLARE_NS_AND_VARS, type, id),
                 sclDataMarshaller::unmarshalHistoryItem);
@@ -194,9 +209,9 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
                                   let $version := $resource/scl:SCL/scl:Header/@version
                                   let $name := $resource/scl:SCL/scl:Private[@type=$compasSclExtensionType]/compas:SclName
                                   return '<SclMetaInfo xmlns="' || $compasDataServiceNamespace || '">'
-                                      || '  <Id>'      || $id      || '</Id>'
-                                      || '  <Name>'    || $name    || '</Name>'
-                                      || '  <Version>' || $version || '</Version>'
+                                      || ' <Id>'      || $id      || '</Id>'
+                                      || ' <Name>'    || $name    || '</Name>'
+                                      || ' <Version>' || $version || '</Version>'
                                       || '</SclMetaInfo>'
                                 )
                         """.formatted(DECLARE_NS_AND_VARS, DECLARE_LATEST_VERSION_FUNC, type, id),

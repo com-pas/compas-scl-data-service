@@ -5,6 +5,7 @@ package org.lfenergy.compas.scl.data.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,11 +21,13 @@ class ItemTest extends AbstractPojoTester {
         var id = UUID.randomUUID().toString();
         var name = "Name";
         var version = "1.0.0";
+        var labels = List.of("Label1");
 
-        var item = new Item(id, name, version);
+        var item = new Item(id, name, version, labels);
 
         assertEquals(id, item.getId());
         assertEquals(name, item.getName());
         assertEquals(version, item.getVersion());
+        assertEquals(labels, item.getLabels());
     }
 }

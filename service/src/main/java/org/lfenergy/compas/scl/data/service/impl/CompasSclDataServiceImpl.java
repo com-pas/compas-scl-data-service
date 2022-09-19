@@ -30,6 +30,8 @@ import static javax.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.DUPLICATE_SCL_NAME_ERROR_CODE;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_SCL_ELEMENT_FOUND_ERROR_CODE;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_SCL_FILE_TYPE_EXTENSION;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_SCL_NAME_EXTENSION;
 
 /**
  * Service class that will be using a Repository instance to retrieve, create, update, delete SCL XML Files.

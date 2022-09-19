@@ -20,6 +20,7 @@ import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
@@ -42,9 +43,10 @@ class CompasSclDataResourceAsReaderTest {
         var uuid = UUID.randomUUID();
         var name = "name";
         var version = "1.0.0";
+        var labels = List.of("Label1");
 
         when(compasSclDataService.list(type))
-                .thenReturn(Collections.singletonList(new Item(uuid.toString(), name, version)));
+                .thenReturn(Collections.singletonList(new Item(uuid.toString(), name, version, labels)));
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -58,6 +60,7 @@ class CompasSclDataResourceAsReaderTest {
         assertEquals(uuid.toString(), xmlPath.get("ListResponse.Item[0].Id"));
         assertEquals(name, xmlPath.get("ListResponse.Item[0].Name"));
         assertEquals(version, xmlPath.get("ListResponse.Item[0].Version"));
+        assertEquals(labels.get(0), xmlPath.get("ListResponse.Item[0].Label"));
         verify(compasSclDataService, times(1)).list(type);
     }
 

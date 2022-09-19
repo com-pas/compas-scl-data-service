@@ -31,6 +31,8 @@ import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_SCL_FILE_TYPE_EXTENSION;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_SCL_NAME_EXTENSION;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
