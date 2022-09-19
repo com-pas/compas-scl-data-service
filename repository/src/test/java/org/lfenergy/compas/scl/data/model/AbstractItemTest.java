@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AbstractItemTest extends AbstractPojoTester {
     @Override
     protected Class<?> getClassToBeTested() {
-        return SomeImplementation.class;
+        return AbstractItem.class;
     }
 
     @Test
@@ -21,19 +21,11 @@ class AbstractItemTest extends AbstractPojoTester {
         var name = "Name";
         var version = "1.0.0";
 
-        var item = new SomeImplementation(id, name, version);
+        var item = new AbstractItem(id, name, version) {
+        };
 
         assertEquals(id, item.getId());
         assertEquals(name, item.getName());
         assertEquals(version, item.getVersion());
-    }
-
-    private static class SomeImplementation extends AbstractItem {
-        public SomeImplementation() {
-        }
-
-        public SomeImplementation(String id, String name, String version) {
-            super(id, name, version);
-        }
     }
 }
