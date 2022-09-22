@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.*;
 
 /**
  * Support class to work with the SCL XML in a generic way as W3C Element/Node class.
@@ -67,7 +68,7 @@ public class SclElementProcessor {
      * @return The new created Private Element with the correct type.
      */
     public Element addCompasPrivate(Element scl) {
-        scl.setAttribute("xmlns:" + COMPAS_EXTENSION_NS_PREFIX, COMPAS_EXTENSION_NS_URI);
+        scl.setAttribute("xmlns:" + XML_DEFAULT_NS_PREFIX, COMPAS_EXTENSION_NS_URI);
 
         var tPrivate = scl.getOwnerDocument().createElementNS(SCL_NS_URI, SCL_PRIVATE_ELEMENT_NAME);
         tPrivate.setPrefix(SCL_NS_PREFIX);
@@ -89,7 +90,7 @@ public class SclElementProcessor {
      */
     public Element addCompasElement(Element compasPrivate, String localName, String value) {
         Element element = compasPrivate.getOwnerDocument().createElementNS(COMPAS_EXTENSION_NS_URI, localName);
-        element.setPrefix(COMPAS_EXTENSION_NS_PREFIX);
+        element.setPrefix(XML_DEFAULT_NS_PREFIX);
         element.setTextContent(value);
         compasPrivate.appendChild(element);
         return element;

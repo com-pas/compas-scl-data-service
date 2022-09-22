@@ -25,10 +25,4 @@ public class SclDataServiceConstants {
     public static final String SCL_WHO_ATTR = "who";
     public static final String SCL_WHEN_ATTR = "when";
     public static final String SCL_WHAT_ATTR = "what";
-
-    public static final String COMPAS_EXTENSION_NS_URI = "https://www.lfenergy.org/compas/extension/v1";
-    public static final String COMPAS_EXTENSION_NS_PREFIX = "compas";
-    public static final String COMPAS_SCL_EXTENSION_TYPE = "compas_scl";
-    public static final String COMPAS_SCL_NAME_EXTENSION = "SclName";
-    public static final String COMPAS_SCL_FILE_TYPE_EXTENSION = "SclFileType";
 }

@@ -13,7 +13,7 @@ import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERV
 
 @Schema(description = "Item found in the database with all basic information including version info about a SCL.")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class HistoryItem extends Item {
+public class HistoryItem extends AbstractItem {
     @Schema(description = "Who created this version of the SCL.",
             example = "John Doe")
     @XmlElement(name = "Who",
