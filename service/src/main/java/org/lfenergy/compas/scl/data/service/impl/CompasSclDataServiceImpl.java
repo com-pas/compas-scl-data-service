@@ -7,6 +7,7 @@ package org.lfenergy.compas.scl.data.service.impl;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
+import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.HistoryItem;
 import org.lfenergy.compas.scl.data.model.Item;
@@ -16,6 +17,7 @@ import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import javax.transaction.Transactional;
 import java.io.BufferedInputStream;
@@ -24,12 +26,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static javax.transaction.Transactional.TxType.REQUIRED;
 import static javax.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
-import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.DUPLICATE_SCL_NAME_ERROR_CODE;
-import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_SCL_ELEMENT_FOUND_ERROR_CODE;
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
+import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.*;
 
 /**
  * Service class that will be using a Repository instance to retrieve, create, update, delete SCL XML Files.
@@ -138,6 +141,9 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
         // Update or add the Compas Private Element to the SCL File.
         setSclCompasPrivateElement(scl, name, type);
 
+        // Validate the labels from the Private Element, if there are any.
+        validateLabels(scl);
+
         var newSclData = converter.convertToString(scl);
         repository.create(type, id, name, newSclData, version, who);
         return newSclData;
@@ -183,6 +189,9 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
         // Update or add the Compas Private Element to the SCL File.
         var newSclName = newFileName.orElse(currentSclMetaInfo.getName());
         setSclCompasPrivateElement(scl, newSclName, type);
+
+        // Validate the labels from the Private Element, if there are any.
+        validateLabels(scl);
 
         var newSclData = converter.convertToString(scl);
         repository.create(type, id, newSclName, newSclData, version, who);
@@ -240,7 +249,8 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
     private Optional<String> getFilenameFromXML(Element scl) {
         return sclElementProcessor.getCompasPrivate(scl)
                 .stream()
-                .map(compasPrivate -> sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_NAME_EXTENSION))
+                .map(compasPrivate -> sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_NAME_EXTENSION,
+                        COMPAS_EXTENSION_NS_URI))
                 .flatMap(Optional::stream)
                 .map(Element::getTextContent)
                 .findFirst();
@@ -257,7 +267,7 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
         var compasPrivate = sclElementProcessor.getCompasPrivate(scl)
                 .orElseGet(() -> sclElementProcessor.addCompasPrivate(scl));
 
-        sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_NAME_EXTENSION)
+        sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_NAME_EXTENSION, COMPAS_EXTENSION_NS_URI)
                 .ifPresentOrElse(
                         // Override the value of the element with the name passed.
                         element -> element.setTextContent(name),
@@ -265,10 +275,11 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
                 );
 
         // Always set the file type as private element.
-        sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION)
+        sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION, COMPAS_EXTENSION_NS_URI)
                 .ifPresentOrElse(
                         element -> element.setTextContent(fileType.toString()),
-                        () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION, fileType.toString())
+                        () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION,
+                                fileType.toString())
                 );
     }
 
@@ -287,5 +298,48 @@ public class CompasSclDataServiceImpl implements CompasSclDataService {
             fullmessage += ", " + comment;
         }
         sclElementProcessor.addHistoryItem(header, who, fullmessage, version);
+    }
+
+    /**
+     * Retrieve the Private Element from the SCL and validate if all Labels are correct, if any available.
+     *
+     * @param scl The SCL file to edit.
+     */
+    void validateLabels(Element scl) {
+        // Get all the Label Elements from the CoMPAS Private.
+        var labelElements = sclElementProcessor.getCompasPrivate(scl)
+                .map(compasPrivate -> sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_LABELS_EXTENSION,
+                        COMPAS_EXTENSION_NS_URI))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(labelsElement -> sclElementProcessor.getChildNodesByName(labelsElement, COMPAS_LABEL_EXTENSION,
+                        COMPAS_EXTENSION_NS_URI))
+                .stream().flatMap(List::stream)
+                .toList();
+        if (labelElements.size() > 20) {
+            throw new CompasSclDataServiceException(TOO_MANY_LABEL_ERROR_CODE,
+                    "Only 20 Labels are allowed per SCL File");
+        }
+
+        var invalidLabels = labelElements.stream()
+                .filter(labelElement -> !validateLabel(labelElement))
+                .map(Node::getTextContent)
+                .toList();
+        if (!invalidLabels.isEmpty()) {
+            throw new CompasSclDataServiceException(INVALID_LABEL_ERROR_CODE,
+                    "Invalid label(s) passed in the CoMPAS Private Element (%s)"
+                            .formatted(invalidLabels.stream().collect(Collectors.joining("','", "'", "'"))));
+        }
+    }
+
+    /**
+     * Check if the label meets the expected RegEx.
+     *
+     * @param labelElement The Element which contains the Label to be checked.
+     * @return true, if label meets RegEx, otherwise false.
+     */
+    boolean validateLabel(Element labelElement) {
+        String label = labelElement.getTextContent();
+        return label.matches("[A-Za-z][0-9A-Za-z_-]*");
     }
 }

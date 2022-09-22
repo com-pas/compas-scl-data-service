@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 
 @Schema(description = "Meta Info found in the database with all basic information about a SCL.")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class SclMetaInfo extends Item {
+public class SclMetaInfo extends AbstractItem {
     public SclMetaInfo() {
     }
 

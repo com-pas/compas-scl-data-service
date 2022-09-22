@@ -83,8 +83,7 @@ public class Version {
     public boolean equals(final Object obj) {
         if (obj == this) return true;
         if (obj == null) return false;
-        if (obj instanceof Version) {
-            final Version other = (Version) obj;
+        if (obj instanceof Version other) {
             return majorVersion == other.majorVersion
                     && minorVersion == other.minorVersion
                     && patchVersion == other.patchVersion;
