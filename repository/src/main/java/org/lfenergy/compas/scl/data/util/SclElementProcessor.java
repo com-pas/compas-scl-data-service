@@ -30,7 +30,7 @@ public class SclElementProcessor {
      * @return The Header Element if found or empty() if not.
      */
     public Optional<Element> getSclHeader(Element scl) {
-        return getChildNodesByName(scl, SCL_HEADER_ELEMENT_NAME).stream()
+        return getChildNodesByName(scl, SCL_HEADER_ELEMENT_NAME, SCL_NS_URI).stream()
                 .findFirst();
     }
 
@@ -55,7 +55,7 @@ public class SclElementProcessor {
      * @return The Private Element with the correct type if found or empty() if not.
      */
     public Optional<Element> getCompasPrivate(Element scl) {
-        return getChildNodesByName(scl, SCL_PRIVATE_ELEMENT_NAME).stream()
+        return getChildNodesByName(scl, SCL_PRIVATE_ELEMENT_NAME, SCL_NS_URI).stream()
                 .filter(element -> element.hasAttribute(SCL_PRIVATE_TYPE_ATTR))
                 .filter(element -> element.getAttribute(SCL_PRIVATE_TYPE_ATTR).equals(COMPAS_SCL_EXTENSION_TYPE))
                 .findFirst();
@@ -111,7 +111,7 @@ public class SclElementProcessor {
         var formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
         var document = header.getOwnerDocument();
 
-        var history = getChildNodesByName(header, SCL_HISTORY_ELEMENT_NAME).stream().findFirst()
+        var history = getChildNodesByName(header, SCL_HISTORY_ELEMENT_NAME, SCL_NS_URI).stream().findFirst()
                 .orElseGet(() -> {
                     Element newHistory = document.createElementNS(SCL_NS_URI, SCL_HISTORY_ELEMENT_NAME);
                     header.appendChild(newHistory);
@@ -148,8 +148,8 @@ public class SclElementProcessor {
      * @param localName The name of the Child Node.
      * @return The Child Node if found or empty() if not.
      */
-    public Optional<Element> getChildNodeByName(Element root, String localName) {
-        return getChildNodesByName(root, localName)
+    public Optional<Element> getChildNodeByName(Element root, String localName, String namespaceURI) {
+        return getChildNodesByName(root, localName, namespaceURI)
                 .stream()
                 .findFirst();
     }
@@ -161,13 +161,15 @@ public class SclElementProcessor {
      * @param localName The name of the Child Node.
      * @return The list of Child Nodes found.
      */
-    public List<Element> getChildNodesByName(Element root, String localName) {
+    public List<Element> getChildNodesByName(Element root, String localName, String namespaceURI) {
         var foundElements = new ArrayList<Element>();
         var childNodes = root.getChildNodes();
         if (childNodes.getLength() > 0) {
             for (int i = 0; i < childNodes.getLength(); i++) {
                 Node node = childNodes.item(i);
-                if (node instanceof Element element && localName.equals(element.getLocalName())) {
+                if (node instanceof Element element
+                        && localName.equals(element.getLocalName())
+                        && namespaceURI.equals(element.getNamespaceURI())) {
                     foundElements.add(element);
                 }
             }

@@ -146,9 +146,8 @@ public abstract class AbstractCompasSclDataRepositoryTest {
         var uuid = UUID.randomUUID();
 
         var repository = getRepository();
-        var exception = assertThrows(CompasNoDataFoundException.class, () -> {
-            repository.findByUUID(TYPE, uuid);
-        });
+        var exception = assertThrows(CompasNoDataFoundException.class,
+                () -> repository.findByUUID(TYPE, uuid));
         assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
     }
 
@@ -179,9 +178,8 @@ public abstract class AbstractCompasSclDataRepositoryTest {
         repository.create(TYPE, uuid, NAME_1, scl, version, WHO);
 
         var unknownVersion = new Version(1, 1, 1);
-        var exception = assertThrows(CompasNoDataFoundException.class, () -> {
-            repository.findByUUID(TYPE, uuid, unknownVersion);
-        });
+        var exception = assertThrows(CompasNoDataFoundException.class,
+                () -> repository.findByUUID(TYPE, uuid, unknownVersion));
         assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
     }
 
@@ -235,9 +233,8 @@ public abstract class AbstractCompasSclDataRepositoryTest {
         var uuid = UUID.randomUUID();
 
         var repository = getRepository();
-        var exception = assertThrows(CompasNoDataFoundException.class, () -> {
-            repository.findMetaInfoByUUID(TYPE, uuid);
-        });
+        var exception = assertThrows(CompasNoDataFoundException.class,
+                () -> repository.findMetaInfoByUUID(TYPE, uuid));
         assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
     }
 
@@ -304,9 +301,8 @@ public abstract class AbstractCompasSclDataRepositoryTest {
         assertEquals(getIdFromHeader(scl), getIdFromHeader(foundScl));
 
         repository.delete(TYPE, uuid, version);
-        var exception = assertThrows(CompasNoDataFoundException.class, () -> {
-            repository.findByUUID(TYPE, uuid);
-        });
+        var exception = assertThrows(CompasNoDataFoundException.class,
+                () -> repository.findByUUID(TYPE, uuid));
         assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
     }
 
@@ -331,9 +327,8 @@ public abstract class AbstractCompasSclDataRepositoryTest {
         assertEquals(getVersionFromHeader(scl), getVersionFromHeader(foundScl));
 
         repository.delete(TYPE, uuid);
-        var exception = assertThrows(CompasNoDataFoundException.class, () -> {
-            repository.findByUUID(TYPE, uuid);
-        });
+        var exception = assertThrows(CompasNoDataFoundException.class,
+                () -> repository.findByUUID(TYPE, uuid));
         assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
     }
 

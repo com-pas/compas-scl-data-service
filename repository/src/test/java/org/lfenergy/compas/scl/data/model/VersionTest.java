@@ -12,34 +12,20 @@ class VersionTest {
     void constructor_WhenCalledWithNullOrEmptyValue_ThenExceptionThrown() {
         var expectedMessage = "Version can't be null or empty";
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Version(null);
-        }, expectedMessage);
+        assertThrows(IllegalArgumentException.class, () -> new Version(null), expectedMessage);
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Version("");
-        }, expectedMessage);
+        assertThrows(IllegalArgumentException.class, () -> new Version(""), expectedMessage);
     }
 
     @Test
     void constructor_WhenCalledWithInvalidValues_ThenExceptionThrown() {
         var expectedMessage = "Version is in the wrong format. Must consist of 3 number separated by dot (1.3.5)";
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Version("AS.ER.AD");
-        }, expectedMessage);
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Version("JANSEN");
-        }, expectedMessage);
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Version("1.0");
-        }, expectedMessage);
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Version("1");
-        }, expectedMessage);
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Version("0.0.0");
-        }, expectedMessage);
+        assertThrows(IllegalArgumentException.class, () -> new Version("AS.ER.AD"), expectedMessage);
+        assertThrows(IllegalArgumentException.class, () -> new Version("JANSEN"), expectedMessage);
+        assertThrows(IllegalArgumentException.class, () -> new Version("1.0"), expectedMessage);
+        assertThrows(IllegalArgumentException.class, () -> new Version("1"), expectedMessage);
+        assertThrows(IllegalArgumentException.class, () -> new Version("0.0.0"), expectedMessage);
     }
 
     @Test
@@ -69,9 +55,7 @@ class VersionTest {
     void getNextVersion_WhenCalledWithNoChangeSetTypes_ThenExceptionThrown() {
         var currentVersion = new Version(1, 3, 5);
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            currentVersion.getNextVersion(null);
-        });
+        assertThrows(IllegalArgumentException.class, () -> currentVersion.getNextVersion(null));
     }
 
     @Test
