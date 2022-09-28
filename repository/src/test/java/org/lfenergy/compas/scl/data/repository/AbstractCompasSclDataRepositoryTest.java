@@ -294,7 +294,7 @@ public abstract class AbstractCompasSclDataRepositoryTest {
     void createAndDelete_WhenSclAddedAndDelete_ThenScLStoredAndRemoved() {
         var version = new Version(1, 0, 0);
         var uuid = UUID.randomUUID();
-        var scl = readStandardSCL(uuid, version, NAME_1);
+        var scl = readCompasSCL(uuid, version, NAME_1);
 
         var repository = getRepository();
         repository.create(TYPE, uuid, NAME_1, scl, version, WHO, LABELS);
@@ -312,7 +312,7 @@ public abstract class AbstractCompasSclDataRepositoryTest {
     void createAndDeleteAll_WhenSclAddedAndDelete_ThenScLStoredAndRemoved() {
         var version = new Version(1, 0, 0);
         var uuid = UUID.randomUUID();
-        var scl = readStandardSCL(uuid, version, NAME_1);
+        var scl = readCompasSCL(uuid, version, NAME_1);
 
         var repository = getRepository();
         repository.create(TYPE, uuid, NAME_1, scl, version, WHO, LABELS);
