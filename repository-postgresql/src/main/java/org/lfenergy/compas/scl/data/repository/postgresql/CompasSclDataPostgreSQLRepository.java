@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
 import java.sql.Array;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -253,10 +254,6 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 insert into scl_file(id, major_version, minor_version, patch_version, type, name, created_by, scl_data)
                      values (?, ?, ?, ?, ?, ?, ?, ?)
                 """;
-        var createLabelSQL = """
-                insert into scl_label(scl_id, major_version, minor_version, patch_version, label_value)
-                     values (?, ?, ?, ?, ?)
-                """;
 
         try (var connection = dataSource.getConnection();
              var sclStmt = connection.prepareStatement(createSclSQL)) {
@@ -271,29 +268,39 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             sclStmt.setString(8, scl);
             sclStmt.executeUpdate();
 
-            if (labels != null && !labels.isEmpty()) {
-                // Now add the extracted labels from the header to the SCL_LABEL table (in batch)
-                try (var labelsStmt = connection.prepareStatement(createLabelSQL)) {
-                    labels.stream().distinct().forEach(label -> {
-                        try {
-                            labelsStmt.setObject(1, id);
-                            labelsStmt.setInt(2, version.getMajorVersion());
-                            labelsStmt.setInt(3, version.getMinorVersion());
-                            labelsStmt.setInt(4, version.getPatchVersion());
-                            labelsStmt.setString(5, label);
-                            labelsStmt.addBatch();
-                            labelsStmt.clearParameters();
-                        } catch (SQLException exp) {
-                            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error adding Label to database!", exp);
-                        }
-                    });
-                    labelsStmt.executeBatch();
-                } catch (SQLException exp) {
-                    throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error adding Labels to database!", exp);
-                }
-            }
+            // Add the label to the database, if there are any.
+            createLabels(connection, id, version, labels);
         } catch (SQLException exp) {
             throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error adding SCL to database!", exp);
+        }
+    }
+
+    void createLabels(Connection connection, UUID id, Version version, List<String> labels) {
+        if (labels != null && !labels.isEmpty()) {
+            // Now add the extracted labels from the header to the SCL_LABEL table (in batch)
+            var createLabelSQL = """
+                    insert into scl_label(scl_id, major_version, minor_version, patch_version, label_value)
+                         values (?, ?, ?, ?, ?)
+                    """;
+            try (var labelsStmt = connection.prepareStatement(createLabelSQL)) {
+                labels.stream().distinct().forEach(label -> {
+                    try {
+                        labelsStmt.setObject(1, id);
+                        labelsStmt.setInt(2, version.getMajorVersion());
+                        labelsStmt.setInt(3, version.getMinorVersion());
+                        labelsStmt.setInt(4, version.getPatchVersion());
+                        labelsStmt.setString(5, label);
+                        labelsStmt.addBatch();
+                        labelsStmt.clearParameters();
+                    } catch (SQLException exp) {
+                        throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error adding Label to database!", exp);
+                    }
+                });
+                // Execute the insert commands in batch now.
+                labelsStmt.executeBatch();
+            } catch (SQLException exp) {
+                throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error adding Labels to database!", exp);
+            }
         }
     }
 
