@@ -78,7 +78,7 @@ public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
     // Retrieve the Labels as XML Label elements from the XML. The result can be returned by the List functions.
     private static final String DECLARE_LABELS_FUNC = """
             declare function local:createLabelsResponse($latestScl as document-node()) as xs:string* {
-              let $labels := $latestScl/scl:SCL/scl:Private[@type=$compasSclExtensionType]/compas:Labels/compas:Label
+              let $labels := distinct-values($latestScl/scl:SCL/scl:Private[@type=$compasSclExtensionType]/compas:Labels/compas:Label)
               for $label in $labels
                 return ' <Label>' || $label || '</Label>'
             };
