@@ -99,8 +99,49 @@ public class SclElementProcessor {
     }
 
     /**
+     * The method will remove all newer Hitem Element, including the version passed from the History Element.
+     * It will search for Hitem Element where the Revision Attribute is empty and the version has the
+     * pattern "Major version"."Minor version"."Patch version".
+     * <p>
+     * If the version is the same or newer the Hitem will be removed from the History Element.
+     *
+     * @param headerElement The Header Element containing the History Items.
+     * @param version       The version from which to remove.
+     */
+    public void cleanupHistoryItem(Element headerElement, Version version) {
+        var history = getChildNodesByName(headerElement, SCL_HISTORY_ELEMENT_NAME, SCL_NS_URI).stream().findFirst();
+        history.ifPresent(historyElement ->
+                getChildNodesByName(historyElement, SCL_HITEM_ELEMENT_NAME, SCL_NS_URI)
+                        .stream()
+                        .filter(hItemElement -> hItemElement.getAttribute("revision").isBlank())
+                        .forEach(hItemElement -> {
+                            if (shouldRemoveHItem(hItemElement, version)) {
+                                historyElement.removeChild(hItemElement);
+                            }
+                        })
+        );
+    }
+
+    /**
+     * Check if the version uses the pattern that matches the one used by CoMPAS and if this is the case
+     * compare the two versions and determine if the HItem version is smaller or the same as the new one
+     * being created.
+     *
+     * @param hItemElement The HItem Element to check the version attribute from.
+     * @param version      The new version that will be created.
+     * @return True if the HItem has a smaller or the same version and should be removed.
+     */
+    boolean shouldRemoveHItem(Element hItemElement, Version version) {
+        var hItemVersion = hItemElement.getAttribute("version");
+        if (hItemVersion.isBlank() || !hItemVersion.matches(Version.PATTERN)) {
+            return false;
+        }
+        return version.compareTo(new Version(hItemVersion)) <= 0;
+    }
+
+    /**
      * Add a Hitem to the History Element from the Header. If the Header doesn't contain a History Element
-     * this Element will also be created. The revision attribute will be empty, the when will be set to the
+     * this Element will also be created. The revision attribute will be empty, the "when" will be set to the
      * current date.
      *
      * @param header      The Header Element from SCL under which the History Element can be found/added.

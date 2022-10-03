@@ -127,7 +127,7 @@ class CompasSclDataServiceTest {
 
         assertNotNull(scl);
         assertCompasExtension(scl, name);
-        assertHistoryItem(scl, INITIAL_VERSION, comment);
+        assertHistoryItem(scl, 2, INITIAL_VERSION, comment);
         verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
         verify(compasSclDataRepository, times(1)).hasDuplicateSclName(SCL_TYPE, name);
     }
@@ -148,7 +148,7 @@ class CompasSclDataServiceTest {
 
         assertNotNull(scl);
         assertCompasExtension(scl, name);
-        assertHistoryItem(scl, INITIAL_VERSION, comment);
+        assertHistoryItem(scl, 2, INITIAL_VERSION, comment);
         verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
         verify(compasSclDataRepository, times(1)).hasDuplicateSclName(SCL_TYPE, name);
     }
@@ -201,7 +201,7 @@ class CompasSclDataServiceTest {
 
         assertNotNull(scl);
         assertCompasExtension(scl, previousName);
-        assertHistoryItem(scl, nextVersion, null);
+        assertHistoryItem(scl, 4, nextVersion, null);
         verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
         verify(compasSclDataRepository, times(1)).findMetaInfoByUUID(SCL_TYPE, uuid);
         verify(compasSclDataRepository, never()).hasDuplicateSclName(SCL_TYPE, previousName);
@@ -228,7 +228,7 @@ class CompasSclDataServiceTest {
 
         assertNotNull(scl);
         assertCompasExtension(scl, newName);
-        assertHistoryItem(scl, nextVersion, null);
+        assertHistoryItem(scl, 4, nextVersion, null);
         verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(newName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
         verify(compasSclDataRepository, times(1)).findMetaInfoByUUID(SCL_TYPE, uuid);
         verify(compasSclDataRepository, times(1)).hasDuplicateSclName(SCL_TYPE, newName);
@@ -275,7 +275,7 @@ class CompasSclDataServiceTest {
 
         assertNotNull(scl);
         assertCompasExtension(scl, previousName);
-        assertHistoryItem(scl, nextVersion, null);
+        assertHistoryItem(scl, 4, nextVersion, null);
         verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
         verify(compasSclDataRepository, times(1)).findMetaInfoByUUID(SCL_TYPE, uuid);
         verify(compasSclDataRepository, never()).hasDuplicateSclName(SCL_TYPE, previousName);
@@ -386,7 +386,7 @@ class CompasSclDataServiceTest {
         assertEquals(SCL_TYPE.toString(), typeElement.get().getTextContent());
     }
 
-    private void assertHistoryItem(String sclData, Version version, String comment) {
+    private void assertHistoryItem(String sclData, int expectedHItems, Version version, String comment) {
         var scl = converter.convertToElement(sclData, SCL_ELEMENT_NAME, SCL_NS_URI);
         var header = processor.getSclHeader(scl);
         assertTrue(header.isPresent());
@@ -395,7 +395,7 @@ class CompasSclDataServiceTest {
         assertTrue(history.isPresent());
 
         var items = processor.getChildNodesByName(history.get(), SCL_HITEM_ELEMENT_NAME, SCL_NS_URI);
-        assertFalse(items.isEmpty());
+        assertEquals(expectedHItems, items.size());
         // The last item should be the one added.
         var item = items.get(items.size() - 1);
         assertEquals(version.toString(), item.getAttribute(SCL_VERSION_ATTR));
