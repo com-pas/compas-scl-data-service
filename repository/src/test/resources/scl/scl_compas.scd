@@ -9,6 +9,8 @@
         <compas:Labels>
             <compas:Label>Label-1</compas:Label>
             <compas:Label>Label-2</compas:Label>
+            <compas:Label>Label-2</compas:Label>
+            <compas:Label>Label-2</compas:Label>
         </compas:Labels>
     </Private>
     <Header id="HeaderID" version="version" revision="Revision" toolID="toolID" nameStructure="IEDName">

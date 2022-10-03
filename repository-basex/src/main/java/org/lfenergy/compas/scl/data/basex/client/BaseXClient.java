@@ -49,7 +49,7 @@ public class BaseXClient implements Closeable {
      *
      * @param host     server name
      * @param port     server port
-     * @param username user name
+     * @param username username
      * @param password password
      * @throws IOException Exception
      */

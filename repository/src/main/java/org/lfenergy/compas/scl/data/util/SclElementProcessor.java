@@ -8,6 +8,7 @@ import org.lfenergy.compas.scl.data.model.Version;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import javax.enterprise.context.ApplicationScoped;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,6 +23,7 @@ import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstan
  * Support class to work with the SCL XML in a generic way as W3C Element/Node class.
  * This way multiple versions of the SCL XSD can easily be supported.
  */
+@ApplicationScoped
 public class SclElementProcessor {
     /**
      * Search for the SCL Header in the SCL Root Element and return that.
@@ -138,7 +140,7 @@ public class SclElementProcessor {
      */
     public Optional<String> getAttributeValue(Element element, String attributeName) {
         var value = element.getAttribute(attributeName);
-        return (value != null && !value.isBlank()) ? Optional.of(value) : Optional.empty();
+        return (!value.isBlank()) ? Optional.of(value) : Optional.empty();
     }
 
     /**
