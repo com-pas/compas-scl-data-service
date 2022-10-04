@@ -8,7 +8,6 @@ public class CompasSclDataServiceErrorCode {
         throw new UnsupportedOperationException("CompasSclDataRepositoryErrorCode class");
     }
 
-    public static final String UNKNOWN_CHANGE_SET_TYPE_ERROR_CODE = "SDS-0001";
     public static final String CREATION_ERROR_CODE = "SDS-0002";
     public static final String UNMARSHAL_ERROR_CODE = "SDS-0003";
     public static final String HEADER_NOT_FOUND_ERROR_CODE = "SDS-0004";

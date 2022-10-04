@@ -37,7 +37,7 @@ class CompasSclDataPostgreSQLRepositoryTest extends AbstractCompasSclDataReposit
         var expectedVersion = new Version(1, 0, 0);
         var uuid = UUID.randomUUID();
         var scl = readStandardSCL(uuid, expectedVersion, NAME_1);
-        getRepository().create(TYPE, uuid, NAME_1, scl, expectedVersion, WHO);
+        getRepository().create(TYPE, uuid, NAME_1, scl, expectedVersion, WHO, LABELS);
 
         assertTrue(getRepository().hasDuplicateSclName(TYPE, NAME_1));
     }

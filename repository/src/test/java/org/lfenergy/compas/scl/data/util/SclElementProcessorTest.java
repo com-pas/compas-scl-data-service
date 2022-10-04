@@ -9,6 +9,9 @@ import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.w3c.dom.Element;
 
+import java.util.List;
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.HEADER_NOT_FOUND_ERROR_CODE;
@@ -186,6 +189,73 @@ class SclElementProcessorTest {
         var result = processor.getAttributeValue(compasPrivate.get(), "unknown");
 
         assertFalse(result.isPresent());
+    }
+
+    @Test
+    void cleanupHistoryItem_WhenCalledWithVersion_ThenSameAndNewerVersionsAreRemoved() {
+        var scl = readSCL("scl_cleanup_history.scd");
+
+        assertEquals(7, getHItems(scl).size());
+        processor.cleanupHistoryItem(processor.getSclHeader(scl).orElseThrow(), new Version("1.0.2"));
+        assertEquals(5, getHItems(scl).size());
+    }
+
+    @Test
+    void shouldRemoveHItem_WhenCalledWithInvalidVersion_ThenFalseReturned() {
+        var scl = readSCL("scl_cleanup_history.scd");
+        var hItem = getHItem(scl, "Siemens");
+
+        assertFalse(processor.shouldRemoveHItem(hItem, new Version("1.0.2")));
+    }
+
+    @Test
+    void shouldRemoveHItem_WhenCalledWithEmptyVersion_ThenFalseReturned() {
+        var scl = readSCL("scl_cleanup_history.scd");
+        var hItem = getHItem(scl, "Empty");
+
+        assertFalse(processor.shouldRemoveHItem(hItem, new Version("1.0.2")));
+    }
+
+    @Test
+    void shouldRemoveHItem_WhenCalledWithOlderVersion_ThenFalseReturned() {
+        var scl = readSCL("scl_cleanup_history.scd");
+        var hItem = getHItem(scl, "Created");
+
+        assertFalse(processor.shouldRemoveHItem(hItem, new Version("1.0.2")));
+    }
+
+    @Test
+    void shouldRemoveHItem_WhenCalledWithSameVersion_ThenTrueReturned() {
+        var scl = readSCL("scl_cleanup_history.scd");
+        var hItem = getHItem(scl, "Updated 1");
+
+        assertTrue(processor.shouldRemoveHItem(hItem, new Version("1.0.2")));
+    }
+
+    @Test
+    void shouldRemoveHItem_WhenCalledWithNewerVersion_ThenTrueReturned() {
+        var scl = readSCL("scl_cleanup_history.scd");
+        var hItem = getHItem(scl, "Updated 2");
+
+        assertTrue(processor.shouldRemoveHItem(hItem, new Version("1.0.2")));
+    }
+
+    private List<Element> getHItems(Element scl) {
+        return processor.getSclHeader(scl)
+                .map(header -> processor.getChildNodeByName(header, SCL_HISTORY_ELEMENT_NAME, SCL_NS_URI))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(history -> processor.getChildNodesByName(history, SCL_HITEM_ELEMENT_NAME, SCL_NS_URI))
+                .stream()
+                .flatMap(List::stream)
+                .toList();
+    }
+
+    private Element getHItem(Element scl, String what) {
+        return getHItems(scl).stream()
+                .filter(element -> element.getAttribute("what").equals(what))
+                .findFirst()
+                .get();
     }
 
     private Element readSCL(String sclFilename) {

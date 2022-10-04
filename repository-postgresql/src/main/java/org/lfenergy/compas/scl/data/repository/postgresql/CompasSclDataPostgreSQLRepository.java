@@ -13,8 +13,12 @@ import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.sql.DataSource;
+import javax.transaction.Transactional;
 import java.sql.Array;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,9 +26,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static javax.transaction.Transactional.TxType.REQUIRED;
+import static javax.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
-import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.COMPAS_SCL_EXTENSION_TYPE;
 
+@ApplicationScoped
 public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepository {
     private static final String ID_FIELD = "id";
     private static final String MAJOR_VERSION_FIELD = "major_version";
@@ -38,18 +44,18 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     private final DataSource dataSource;
 
+    @Inject
     public CompasSclDataPostgreSQLRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
     @Override
+    @Transactional(SUPPORTS)
     public List<Item> list(SclFileType type) {
         var sql = """
                 select scl_file.id, scl_file.name,
                        scl_file.major_version, scl_file.minor_version, scl_file.patch_version,
-                       (xpath('//compas:Labels/compas:Label/text()'
-                            , scl_data.compas_private
-                            , ARRAY[ARRAY['compas', 'https://www.lfenergy.org/compas/extension/v1']])) as labels
+                       scl_labels.label_values as labels
                   from (select distinct on (scl_file.id) *
                           from scl_file
                          where scl_file.type = ?
@@ -59,16 +65,14 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                                 , scl_file.patch_version desc
                   ) scl_file
                   left outer join (
-                    select id, major_version, minor_version, patch_version,
-                           unnest(
-                              xpath( '(/scl:SCL/scl:Private[@type="' || ? || '"])[1]'
-                                   , scl_data::xml
-                                   , ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']])) as compas_private
-                              from scl_file) scl_data
-                        on scl_data.id            = scl_file.id
-                       and scl_data.major_version = scl_file.major_version
-                       and scl_data.minor_version = scl_file.minor_version
-                       and scl_data.patch_version = scl_file.patch_version
+                    select scl_label.scl_id, scl_label.major_version, scl_label.minor_version, scl_label.patch_version,
+                           array_agg(scl_label.label_value) AS label_values
+                              from scl_label
+                          group by scl_label.scl_id, scl_label.major_version, scl_label.minor_version, scl_label.patch_version) scl_labels
+                        on scl_labels.scl_id        = scl_file.id
+                       and scl_labels.major_version = scl_file.major_version
+                       and scl_labels.minor_version = scl_file.minor_version
+                       and scl_labels.patch_version = scl_file.patch_version
                   order by scl_file.name, scl_file.major_version, scl_file.minor_version, scl_file.patch_version
                 """;
 
@@ -76,7 +80,6 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, type.name());
-            stmt.setString(2, COMPAS_SCL_EXTENSION_TYPE);
 
             try (var resultSet = stmt.executeQuery()) {
                 while (resultSet.next()) {
@@ -93,6 +96,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
+    @Transactional(SUPPORTS)
     public List<HistoryItem> listVersionsByUUID(SclFileType type, UUID id) {
         var sql = """
                 select scl_file.id, scl_file.name
@@ -142,6 +146,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
+    @Transactional(SUPPORTS)
     public String findByUUID(SclFileType type, UUID id) {
         // Use the find meta info to retrieve info about the latest version.
         var metaInfo = findMetaInfoByUUID(type, id);
@@ -150,6 +155,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
+    @Transactional(SUPPORTS)
     public String findByUUID(SclFileType type, UUID id, Version version) {
         var sql = """
                 select scl_file.scl_data
@@ -182,6 +188,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
+    @Transactional(SUPPORTS)
     public boolean hasDuplicateSclName(SclFileType type, String name) {
         var sql = """
                 select distinct on (scl_file.id) *
@@ -210,6 +217,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
+    @Transactional(SUPPORTS)
     public SclMetaInfo findMetaInfoByUUID(SclFileType type, UUID id) {
         var sql = """
                 select scl_file.id, scl_file.name, scl_file.major_version, scl_file.minor_version, scl_file.patch_version
@@ -240,29 +248,64 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public void create(SclFileType type, UUID id, String name, String scl, Version version, String who) {
-        var sql = """
+    @Transactional(REQUIRED)
+    public void create(SclFileType type, UUID id, String name, String scl, Version version, String who, List<String> labels) {
+        var createSclSQL = """
                 insert into scl_file(id, major_version, minor_version, patch_version, type, name, created_by, scl_data)
                      values (?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         try (var connection = dataSource.getConnection();
-             var stmt = connection.prepareStatement(sql)) {
-            stmt.setObject(1, id);
-            stmt.setInt(2, version.getMajorVersion());
-            stmt.setInt(3, version.getMinorVersion());
-            stmt.setInt(4, version.getPatchVersion());
-            stmt.setString(5, type.name());
-            stmt.setString(6, name);
-            stmt.setString(7, who);
-            stmt.setString(8, scl);
-            stmt.executeUpdate();
+             var sclStmt = connection.prepareStatement(createSclSQL)) {
+            // First add the SCL XML File to the SCL_FILE Table.
+            sclStmt.setObject(1, id);
+            sclStmt.setInt(2, version.getMajorVersion());
+            sclStmt.setInt(3, version.getMinorVersion());
+            sclStmt.setInt(4, version.getPatchVersion());
+            sclStmt.setString(5, type.name());
+            sclStmt.setString(6, name);
+            sclStmt.setString(7, who);
+            sclStmt.setString(8, scl);
+            sclStmt.executeUpdate();
+
+            // Add the label to the database, if there are any.
+            createLabels(connection, id, version, labels);
         } catch (SQLException exp) {
-            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error inserting SCL to database!", exp);
+            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error adding SCL to database!", exp);
+        }
+    }
+
+    void createLabels(Connection connection, UUID id, Version version, List<String> labels) {
+        if (labels != null && !labels.isEmpty()) {
+            // Now add the extracted labels from the header to the SCL_LABEL table (in batch)
+            var createLabelSQL = """
+                    insert into scl_label(scl_id, major_version, minor_version, patch_version, label_value)
+                         values (?, ?, ?, ?, ?)
+                    """;
+            try (var labelsStmt = connection.prepareStatement(createLabelSQL)) {
+                labels.stream().distinct().forEach(label -> {
+                    try {
+                        labelsStmt.setObject(1, id);
+                        labelsStmt.setInt(2, version.getMajorVersion());
+                        labelsStmt.setInt(3, version.getMinorVersion());
+                        labelsStmt.setInt(4, version.getPatchVersion());
+                        labelsStmt.setString(5, label);
+                        labelsStmt.addBatch();
+                        labelsStmt.clearParameters();
+                    } catch (SQLException exp) {
+                        throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error adding Label to database!", exp);
+                    }
+                });
+                // Execute the insert commands in batch now.
+                labelsStmt.executeBatch();
+            } catch (SQLException exp) {
+                throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error adding Labels to database!", exp);
+            }
         }
     }
 
     @Override
+    @Transactional(REQUIRED)
     public void delete(SclFileType type, UUID id) {
         var sql = """
                 delete from scl_file
@@ -281,6 +324,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
+    @Transactional(REQUIRED)
     public void delete(SclFileType type, UUID id, Version version) {
         var sql = """
                 delete from scl_file
@@ -314,7 +358,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private List<String> createLabelList(Array sqlArray) throws SQLException {
         var labelsList = new ArrayList<String>();
         // Sadly no generics in JDBC so we need to check what the Array() method returns.
-        if (sqlArray.getArray() instanceof Object[] objectArray) {
+        if (sqlArray != null && sqlArray.getArray() instanceof Object[] objectArray) {
             Arrays.stream(objectArray)
                     .forEach(arrayObject ->
                             // Just use toString() to return the value of the PostgreSQL Object.

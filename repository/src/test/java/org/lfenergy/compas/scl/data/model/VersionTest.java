@@ -13,7 +13,6 @@ class VersionTest {
         var expectedMessage = "Version can't be null or empty";
 
         assertThrows(IllegalArgumentException.class, () -> new Version(null), expectedMessage);
-
         assertThrows(IllegalArgumentException.class, () -> new Version(""), expectedMessage);
     }
 
@@ -92,5 +91,26 @@ class VersionTest {
     @Test
     void toString_WhenCalled_ThenCorrectStringReturned() {
         assertEquals("1.5.8", new Version(1, 5, 8).toString());
+    }
+
+    @Test
+    void compareTo_WhenWhenMajorVersionAreDifferent_ThenCorrectResult() {
+        assertEquals(-1, new Version("1.0.0").compareTo(new Version("2.0.0")));
+        assertEquals(0, new Version("1.0.0").compareTo(new Version("1.0.0")));
+        assertEquals(1, new Version("2.0.0").compareTo(new Version("1.0.0")));
+    }
+
+    @Test
+    void compareTo_WhenWhenMinorVersionAreDifferent_ThenCorrectResult() {
+        assertEquals(-1, new Version("1.1.0").compareTo(new Version("1.2.0")));
+        assertEquals(0, new Version("1.1.0").compareTo(new Version("1.1.0")));
+        assertEquals(1, new Version("1.2.0").compareTo(new Version("1.1.0")));
+    }
+
+    @Test
+    void compareTo_WhenWhenPathVersionAreDifferent_ThenCorrectResult() {
+        assertEquals(-1, new Version("1.1.1").compareTo(new Version("1.1.2")));
+        assertEquals(0, new Version("1.1.1").compareTo(new Version("1.1.1")));
+        assertEquals(1, new Version("1.1.2").compareTo(new Version("1.1.1")));
     }
 }
