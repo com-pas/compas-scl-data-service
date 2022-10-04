@@ -3,8 +3,17 @@
 <!-- -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 
-<SCL xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4">
-    <Header id="f9283708-bf4f-412c-a1d6-f947b9ac3000" version="1.0.0" revision="Revision" toolID="toolID" nameStructure="IEDName"/>
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007"
+     revision="B" release="4">
+    <Header id="f9283708-bf4f-412c-a1d6-f947b9ac3000" version="1.0.0" revision="Revision" toolID="toolID"
+            nameStructure="IEDName">
+        <History>
+            <Hitem revision="" version="0.0.1" what="Init" when="2021-09-01T01:57:56+02:00" who="Mr Editor"/>
+            <Hitem revision="" version="1.0.0" what="Created" when="2021-09-01T01:57:56+02:00" who="Mr Editor"/>
+            <Hitem revision="" version="1.0.2" what="Updated 1" when="2021-09-01T01:57:56+02:00" who="Mr Editor"/>
+            <Hitem revision="" version="3.0.0" what="Updated 3" when="2021-09-01T01:57:56+02:00" who="Mr Editor"/>
+        </History>
+    </Header>
     <IED name="IED_NAME">
         <AccessPoint name="AP_NAME">
             <Server>
@@ -59,7 +68,8 @@
             <DA fc="ST" dchg="false" qchg="false" dupd="false" name="origin" bType="Struct" type="DA3"/>
         </DOType>
         <DOType cdc="WYE" id="DO4">
-            <DA fc="DC" dchg="false" qchg="false" dupd="false" name="configRev" bType="VisString255" valKind="RO" valImport="false"/>
+            <DA fc="DC" dchg="false" qchg="false" dupd="false" name="configRev" bType="VisString255" valKind="RO"
+                valImport="false"/>
         </DOType>
         <DAType id="DA1">
             <BDA name="operTm" bType="Timestamp"/>

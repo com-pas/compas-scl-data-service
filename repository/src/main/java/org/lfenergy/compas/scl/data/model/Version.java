@@ -4,14 +4,13 @@
 package org.lfenergy.compas.scl.data.model;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 
 import java.util.Objects;
 
-import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.UNKNOWN_CHANGE_SET_TYPE_ERROR_CODE;
-
 @Schema(description = "Presenting the version logic used in CoMPAS.")
-public class Version {
+public class Version implements Comparable<Version> {
+    public static final String PATTERN = "([1-9]\\d*)\\.(\\d+)\\.(\\d+)";
+
     @Schema(description = "The major version.", example = "2")
     private final int majorVersion;
     @Schema(description = "The minor version.", example = "1")
@@ -40,7 +39,7 @@ public class Version {
         if (version == null || version.isEmpty()) {
             throw new IllegalArgumentException("Version can't be null or empty");
         }
-        if (!version.matches("([1-9]\\d*)\\.(\\d+)\\.(\\d+)")) {
+        if (!version.matches(PATTERN)) {
             throw new IllegalArgumentException("Version is in the wrong format. Must consist of 3 number separated by dot (1.3.5)");
         }
     }
@@ -50,16 +49,11 @@ public class Version {
             throw new IllegalArgumentException("ChangeSetType can't be null or empty");
         }
 
-        switch (changeSetType) {
-            case MAJOR:
-                return new Version(majorVersion + 1, 0, 0);
-            case MINOR:
-                return new Version(majorVersion, minorVersion + 1, 0);
-            case PATCH:
-                return new Version(majorVersion, minorVersion, patchVersion + 1);
-            default:
-                throw new CompasSclDataServiceException(UNKNOWN_CHANGE_SET_TYPE_ERROR_CODE, "Unhandled ChangeSetType " + changeSetType);
-        }
+        return switch (changeSetType) {
+            case MAJOR -> new Version(majorVersion + 1, 0, 0);
+            case MINOR -> new Version(majorVersion, minorVersion + 1, 0);
+            case PATCH -> new Version(majorVersion, minorVersion, patchVersion + 1);
+        };
     }
 
     public int getMajorVersion() {
@@ -90,6 +84,17 @@ public class Version {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public int compareTo(Version otherVersion) {
+        if (this.majorVersion == otherVersion.getMajorVersion()) {
+            if (this.minorVersion == otherVersion.getMinorVersion()) {
+                return Integer.compare(this.patchVersion, otherVersion.getPatchVersion());
+            }
+            return Integer.compare(this.minorVersion, otherVersion.getMinorVersion());
+        }
+        return Integer.compare(this.majorVersion, otherVersion.getMajorVersion());
     }
 
     @Override

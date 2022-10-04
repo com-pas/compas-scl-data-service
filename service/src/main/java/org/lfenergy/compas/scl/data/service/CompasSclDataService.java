@@ -133,7 +133,8 @@ public class CompasSclDataService {
 
         // Update the Header of the SCL (or create if not exists.)
         var header = createOrUpdateHeader(scl, id, version);
-        createHistoryItem(header, "SCL created", who, comment, version);
+        sclElementProcessor.cleanupHistoryItem(header, version);
+        sclElementProcessor.addHistoryItem(header, who, createMessage("SCL created", comment), version);
 
         // Update or add the Compas Private Element to the SCL File.
         setSclCompasPrivateElement(scl, name, type);
@@ -149,7 +150,7 @@ public class CompasSclDataService {
     /**
      * Create a new version of a specific SCL XML File. The content will be the passed SCL XML File.
      * The UUID and new version (depending on the passed ChangeSetType) are set and
-     * the CoMPAS Private elements will also be copied, the SCL Name will only be copied if not available in the passed
+     * the CoMPAS Private elements will also be copied, the SCL Name will only be copied if it isn't available in the
      * SCL XML File.
      *
      * @param type          The type to update it for.
@@ -180,7 +181,8 @@ public class CompasSclDataService {
 
         // Update the Header of the SCL (or create if not exists.)
         var header = createOrUpdateHeader(scl, id, version);
-        createHistoryItem(header, "SCL updated", who, comment, version);
+        sclElementProcessor.cleanupHistoryItem(header, version);
+        sclElementProcessor.addHistoryItem(header, who, createMessage("SCL updated", comment), version);
 
         // Update or add the Compas Private Element to the SCL File.
         var newSclName = newFileName.orElse(currentSclMetaInfo.getName());
@@ -278,20 +280,18 @@ public class CompasSclDataService {
     }
 
     /**
-     * Add a Hitem to the current or added History Element from the Header.
+     * If a comment is added by the user, a standard message will be joined together with the comment from the user.
      *
-     * @param header  The header of SCL file to edit.
-     * @param message The message set on the Hitem.
-     * @param who     The user that made the change.
-     * @param comment If filled the comment that will be added to the message.
-     * @param version The version set on the Hitem.
+     * @param standardMessage The standard message.
+     * @param comment         The comment a user may have added.
+     * @return The full message to be added to the HItem.
      */
-    private void createHistoryItem(Element header, String message, String who, String comment, Version version) {
-        var fullmessage = message;
+    private String createMessage(String standardMessage, String comment) {
+        var message = standardMessage;
         if (comment != null && !comment.isBlank()) {
-            fullmessage += ", " + comment;
+            message += ", " + comment;
         }
-        sclElementProcessor.addHistoryItem(header, who, fullmessage, version);
+        return message;
     }
 
     /**
