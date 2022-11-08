@@ -50,7 +50,11 @@ SPDX-License-Identifier: Apache-2.0
         </dependency>
         <dependency>
             <groupId>org.lfenergy.compas.core</groupId>
-            <artifactId>jaxrs-commons</artifactId>
+            <artifactId>rest-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.lfenergy.compas.core</groupId>
+            <artifactId>websocket-commons</artifactId>
         </dependency>
 
         <dependency>
@@ -59,16 +63,17 @@ SPDX-License-Identifier: Apache-2.0
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-resteasy</artifactId>
+            <artifactId>quarkus-resteasy-reactive</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-resteasy-jaxb</artifactId>
+            <artifactId>quarkus-resteasy-reactive-jaxb</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-hibernate-validator</artifactId>
+            <artifactId>quarkus-websockets</artifactId>
         </dependency>
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-jwt</artifactId>
@@ -80,6 +85,11 @@ SPDX-License-Identifier: Apache-2.0
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-health</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-hibernate-validator</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>

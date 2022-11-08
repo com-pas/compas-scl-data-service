@@ -223,9 +223,10 @@ class CompasSclDataResourceAsReaderTest {
     }
 
     private String readSCL() throws IOException {
-        var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd");
-        assert inputStream != null;
+        try (var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd")) {
+            assert inputStream != null;
 
-        return new String(inputStream.readAllBytes());
+            return new String(inputStream.readAllBytes());
+        }
     }
 }

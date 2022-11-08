@@ -202,40 +202,39 @@ class SclElementProcessorTest {
 
     @Test
     void shouldRemoveHItem_WhenCalledWithInvalidVersion_ThenFalseReturned() {
-        var scl = readSCL("scl_cleanup_history.scd");
-        var hItem = getHItem(scl, "Siemens");
-
-        assertFalse(processor.shouldRemoveHItem(hItem, new Version("1.0.2")));
+        executeShouldRemoveHItemWhenCalledThenFalseReturned("Siemens");
     }
 
     @Test
     void shouldRemoveHItem_WhenCalledWithEmptyVersion_ThenFalseReturned() {
-        var scl = readSCL("scl_cleanup_history.scd");
-        var hItem = getHItem(scl, "Empty");
-
-        assertFalse(processor.shouldRemoveHItem(hItem, new Version("1.0.2")));
+        executeShouldRemoveHItemWhenCalledThenFalseReturned("Empty");
     }
 
     @Test
     void shouldRemoveHItem_WhenCalledWithOlderVersion_ThenFalseReturned() {
+        executeShouldRemoveHItemWhenCalledThenFalseReturned("Created");
+    }
+
+    private void executeShouldRemoveHItemWhenCalledThenFalseReturned(String what) {
         var scl = readSCL("scl_cleanup_history.scd");
-        var hItem = getHItem(scl, "Created");
+        var hItem = getHItem(scl, what);
 
         assertFalse(processor.shouldRemoveHItem(hItem, new Version("1.0.2")));
     }
 
     @Test
     void shouldRemoveHItem_WhenCalledWithSameVersion_ThenTrueReturned() {
-        var scl = readSCL("scl_cleanup_history.scd");
-        var hItem = getHItem(scl, "Updated 1");
-
-        assertTrue(processor.shouldRemoveHItem(hItem, new Version("1.0.2")));
+        executeShouldRemoveHItemWhenCalledThenTrueReturned("Updated 1");
     }
 
     @Test
     void shouldRemoveHItem_WhenCalledWithNewerVersion_ThenTrueReturned() {
+        executeShouldRemoveHItemWhenCalledThenTrueReturned("Updated 2");
+    }
+
+    private void executeShouldRemoveHItemWhenCalledThenTrueReturned(String what) {
         var scl = readSCL("scl_cleanup_history.scd");
-        var hItem = getHItem(scl, "Updated 2");
+        var hItem = getHItem(scl, what);
 
         assertTrue(processor.shouldRemoveHItem(hItem, new Version("1.0.2")));
     }
