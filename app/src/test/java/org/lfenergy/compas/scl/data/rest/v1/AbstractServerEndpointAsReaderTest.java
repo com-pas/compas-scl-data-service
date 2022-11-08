@@ -29,11 +29,11 @@ public abstract class AbstractServerEndpointAsReaderTest {
         var container = ContainerProvider.getWebSocketContainer();
         var exception = assertThrows(InterruptedIOException.class, () -> container.connectToServer(Client.class, uri));
 
-        assertEquals(exception.getSuppressed().length, 1);
-        assertEquals(exception.getSuppressed()[0].getClass(), ExecutionException.class);
-        assertEquals((exception.getSuppressed()[0]).getCause().getClass(), WebSocketClientHandshakeException.class);
+        assertEquals(1, exception.getSuppressed().length);
+        assertEquals(ExecutionException.class, exception.getSuppressed()[0].getClass());
+        assertEquals(WebSocketClientHandshakeException.class, (exception.getSuppressed()[0]).getCause().getClass());
         var wschExp = (WebSocketClientHandshakeException) (exception.getSuppressed()[0]).getCause();
-        assertEquals(wschExp.response().status(), HttpResponseStatus.FORBIDDEN);
+        assertEquals(HttpResponseStatus.FORBIDDEN, wschExp.response().status());
     }
 
     @ClientEndpoint()
