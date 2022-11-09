@@ -25,6 +25,17 @@ class GetRequestDecoderTest {
     }
 
     @Test
+    void willDecode_WhenCalledWithString_ThenTrueReturned() {
+        assertTrue(decoder.willDecode(""));
+        assertTrue(decoder.willDecode("Some text"));
+    }
+
+    @Test
+    void willDecode_WhenCalledWithNull_ThenFalseReturned() {
+        assertFalse(decoder.willDecode(null));
+    }
+
+    @Test
     void decode_WhenCalledWithCorrectRequestXML_ThenStringConvertedToObject() {
         var id = UUID.randomUUID();
         var message = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"

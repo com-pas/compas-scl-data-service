@@ -26,6 +26,17 @@ class GetVersionRequestDecoderTest {
     }
 
     @Test
+    void willDecode_WhenCalledWithString_ThenTrueReturned() {
+        assertTrue(decoder.willDecode(""));
+        assertTrue(decoder.willDecode("Some text"));
+    }
+
+    @Test
+    void willDecode_WhenCalledWithNull_ThenFalseReturned() {
+        assertFalse(decoder.willDecode(null));
+    }
+
+    @Test
     void decode_WhenCalledWithCorrectRequestXML_ThenStringConvertedToObject() {
         var id = UUID.randomUUID();
         var version = new Version("1.2.3");
