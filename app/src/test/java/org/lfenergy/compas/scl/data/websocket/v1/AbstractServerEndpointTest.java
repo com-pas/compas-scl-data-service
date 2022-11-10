@@ -24,7 +24,7 @@ public class AbstractServerEndpointTest {
     protected static final LinkedBlockingDeque<ErrorMessage> errorQueue = new LinkedBlockingDeque<>();
 
     void testWhenCalledWithInvalidTextThenExceptionThrown(URI uri) throws Exception {
-        try (Session session = ContainerProvider.getWebSocketContainer().connectToServer(CompasSclCreateServerEndpointAsEditorTest.ErrorClient.class, uri)) {
+        try (Session session = ContainerProvider.getWebSocketContainer().connectToServer(ErrorClient.class, uri)) {
             session.getAsyncRemote().sendText("Invalid Message");
 
             assertErrorResponse(WEBSOCKET_DECODER_ERROR_CODE);
