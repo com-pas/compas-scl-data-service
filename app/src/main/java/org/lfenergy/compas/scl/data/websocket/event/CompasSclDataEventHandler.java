@@ -10,9 +10,9 @@ import org.lfenergy.compas.scl.data.websocket.event.model.CreateEventRequest;
 import org.lfenergy.compas.scl.data.websocket.event.model.GetEventRequest;
 import org.lfenergy.compas.scl.data.websocket.event.model.GetVersionEventRequest;
 import org.lfenergy.compas.scl.data.websocket.event.model.UpdateEventRequest;
-import org.lfenergy.compas.scl.data.websocket.v1.model.CreateResponse;
-import org.lfenergy.compas.scl.data.websocket.v1.model.GetResponse;
-import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateResponse;
+import org.lfenergy.compas.scl.data.websocket.v1.model.CreateWsResponse;
+import org.lfenergy.compas.scl.data.websocket.v1.model.GetWsResponse;
+import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateWsResponse;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -31,8 +31,8 @@ public class CompasSclDataEventHandler {
 
     @ConsumeEvent(value = "create-ws", blocking = true)
     public void createWebsocketsEvent(CreateEventRequest request) {
-        new WebsocketHandler<CreateResponse>().execute(request.getSession(), () -> {
-            var response = new CreateResponse();
+        new WebsocketHandler<CreateWsResponse>().execute(request.getSession(), () -> {
+            var response = new CreateWsResponse();
             response.setSclData(compasSclDataService.create(request.getType(), request.getName(), request.getWho(),
                     request.getComment(), request.getSclData()));
             return response;
@@ -41,8 +41,8 @@ public class CompasSclDataEventHandler {
 
     @ConsumeEvent(value = "get-ws")
     public void getWebsocketsEvent(GetEventRequest request) {
-        new WebsocketHandler<GetResponse>().execute(request.getSession(), () -> {
-            var response = new GetResponse();
+        new WebsocketHandler<GetWsResponse>().execute(request.getSession(), () -> {
+            var response = new GetWsResponse();
             response.setSclData(compasSclDataService.findByUUID(request.getType(), request.getId()));
             return response;
         });
@@ -50,8 +50,8 @@ public class CompasSclDataEventHandler {
 
     @ConsumeEvent(value = "get-version-ws")
     public void getVersionWebsocketsEvent(GetVersionEventRequest request) {
-        new WebsocketHandler<GetResponse>().execute(request.getSession(), () -> {
-            var response = new GetResponse();
+        new WebsocketHandler<GetWsResponse>().execute(request.getSession(), () -> {
+            var response = new GetWsResponse();
             response.setSclData(compasSclDataService.findByUUID(request.getType(), request.getId(), request.getVersion()));
             return response;
         });
@@ -59,8 +59,8 @@ public class CompasSclDataEventHandler {
 
     @ConsumeEvent(value = "update-ws", blocking = true)
     public void updateWebsocketsEvent(UpdateEventRequest request) {
-        new WebsocketHandler<UpdateResponse>().execute(request.getSession(), () -> {
-            var response = new UpdateResponse();
+        new WebsocketHandler<UpdateWsResponse>().execute(request.getSession(), () -> {
+            var response = new UpdateWsResponse();
             response.setSclData(compasSclDataService.update(request.getType(), request.getId(), request.getChangeSetType(),
                     request.getWho(), request.getComment(), request.getSclData()));
             return response;

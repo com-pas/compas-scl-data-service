@@ -109,7 +109,7 @@ class CompasSclDataResourceAsReaderTest {
 
         var xmlPath = response.xmlPath()
                 .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
-        assertEquals(scl, xmlPath.get("GetResponse.SclData"));
+        assertEquals(scl, xmlPath.get("GetWsResponse.SclData"));
         verify(compasSclDataService, times(1)).findByUUID(type, uuid);
     }
 
@@ -134,7 +134,7 @@ class CompasSclDataResourceAsReaderTest {
 
         var xmlPath = response.xmlPath()
                 .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
-        assertEquals(scl, xmlPath.get("GetResponse.SclData"));
+        assertEquals(scl, xmlPath.get("GetWsResponse.SclData"));
         verify(compasSclDataService, times(1)).findByUUID(type, uuid, version);
     }
 

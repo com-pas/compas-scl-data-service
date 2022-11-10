@@ -8,10 +8,10 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
-import org.lfenergy.compas.scl.data.websocket.v1.decoder.GetResponseDecoder;
-import org.lfenergy.compas.scl.data.websocket.v1.encoder.GetRequestEncoder;
-import org.lfenergy.compas.scl.data.websocket.v1.model.GetRequest;
-import org.lfenergy.compas.scl.data.websocket.v1.model.GetResponse;
+import org.lfenergy.compas.scl.data.websocket.v1.decoder.GetWsResponseDecoder;
+import org.lfenergy.compas.scl.data.websocket.v1.encoder.GetWsRequestEncoder;
+import org.lfenergy.compas.scl.data.websocket.v1.model.GetWsRequest;
+import org.lfenergy.compas.scl.data.websocket.v1.model.GetWsResponse;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.websocket.ClientEndpoint;
@@ -20,7 +20,6 @@ import javax.websocket.OnMessage;
 import javax.websocket.Session;
 import java.net.URI;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -35,12 +34,12 @@ class CompasSclGetServerEndpointAsEditorTest extends AbstractServerEndpointAsEdi
 
     @Test
     void getSCL_WhenCalled_ThenExpectedResponseIsRetrieved() throws Exception {
-        var encoder = new GetRequestEncoder();
+        var encoder = new GetWsRequestEncoder();
         var sclFileTye = SclFileType.SCD;
         var id = UUID.randomUUID();
         var sclData = readSCL();
 
-        var request = new GetRequest();
+        var request = new GetWsRequest();
         request.setId(id);
 
         when(service.findByUUID(sclFileTye, id)).thenReturn(sclData);
@@ -58,10 +57,10 @@ class CompasSclGetServerEndpointAsEditorTest extends AbstractServerEndpointAsEdi
         testWhenCalledWithInvalidTextThenExceptionThrown(uri);
     }
 
-    @ClientEndpoint(decoders = GetResponseDecoder.class)
+    @ClientEndpoint(decoders = GetWsResponseDecoder.class)
     static class Client {
         @OnMessage
-        public void onMessage(GetResponse response) {
+        public void onMessage(GetWsResponse response) {
             sclDataQueue.add(response.getSclData());
         }
     }

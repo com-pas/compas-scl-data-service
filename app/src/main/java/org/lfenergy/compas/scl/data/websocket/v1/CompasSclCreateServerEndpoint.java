@@ -9,9 +9,9 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.lfenergy.compas.core.websocket.ErrorResponseEncoder;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.websocket.event.model.CreateEventRequest;
-import org.lfenergy.compas.scl.data.websocket.v1.decoder.CreateRequestDecoder;
-import org.lfenergy.compas.scl.data.websocket.v1.encoder.CreateResponseEncoder;
-import org.lfenergy.compas.scl.data.websocket.v1.model.CreateRequest;
+import org.lfenergy.compas.scl.data.websocket.v1.decoder.CreateWsRequestDecoder;
+import org.lfenergy.compas.scl.data.websocket.v1.encoder.CreateWsResponseEncoder;
+import org.lfenergy.compas.scl.data.websocket.v1.model.CreateWsRequest;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +28,8 @@ import static org.lfenergy.compas.scl.data.rest.Constants.TYPE_PATH_PARAM;
 @Authenticated
 @ApplicationScoped
 @ServerEndpoint(value = "/scl-ws/v1/{" + TYPE_PATH_PARAM + "}/create",
-        decoders = {CreateRequestDecoder.class},
-        encoders = {CreateResponseEncoder.class, ErrorResponseEncoder.class})
+        decoders = {CreateWsRequestDecoder.class},
+        encoders = {CreateWsResponseEncoder.class, ErrorResponseEncoder.class})
 public class CompasSclCreateServerEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclCreateServerEndpoint.class);
 
@@ -52,7 +52,7 @@ public class CompasSclCreateServerEndpoint {
     }
 
     @OnMessage
-    public void onCreateMessage(Session session, CreateRequest request, @PathParam(TYPE_PATH_PARAM) String type) {
+    public void onCreateMessage(Session session, CreateWsRequest request, @PathParam(TYPE_PATH_PARAM) String type) {
         LOGGER.info("Message (create) from session {} for type {}.", session.getId(), type);
 
         String who = jsonWebToken.getClaim(userInfoProperties.who());

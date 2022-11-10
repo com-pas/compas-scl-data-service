@@ -14,9 +14,9 @@ import org.lfenergy.compas.scl.data.websocket.event.model.CreateEventRequest;
 import org.lfenergy.compas.scl.data.websocket.event.model.GetEventRequest;
 import org.lfenergy.compas.scl.data.websocket.event.model.GetVersionEventRequest;
 import org.lfenergy.compas.scl.data.websocket.event.model.UpdateEventRequest;
-import org.lfenergy.compas.scl.data.websocket.v1.model.CreateResponse;
-import org.lfenergy.compas.scl.data.websocket.v1.model.GetResponse;
-import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateResponse;
+import org.lfenergy.compas.scl.data.websocket.v1.model.CreateWsResponse;
+import org.lfenergy.compas.scl.data.websocket.v1.model.GetWsResponse;
+import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateWsResponse;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -55,7 +55,7 @@ class CompasSclDataEventHandlerTest {
 
         eventHandler.createWebsocketsEvent(request);
 
-        var response = verifyResponse(session, CreateResponse.class);
+        var response = verifyResponse(session, CreateWsResponse.class);
         assertEquals(sclData, response.getSclData());
         verify(service, times(1)).create(type, name, who, comment, sclData);
     }
@@ -111,7 +111,7 @@ class CompasSclDataEventHandlerTest {
 
         eventHandler.getWebsocketsEvent(request);
 
-        var response = verifyResponse(session, GetResponse.class);
+        var response = verifyResponse(session, GetWsResponse.class);
         assertEquals(sclData, response.getSclData());
         verify(service, times(1)).findByUUID(type, id);
     }
@@ -162,7 +162,7 @@ class CompasSclDataEventHandlerTest {
 
         eventHandler.getVersionWebsocketsEvent(request);
 
-        var response = verifyResponse(session, GetResponse.class);
+        var response = verifyResponse(session, GetWsResponse.class);
         assertEquals(sclData, response.getSclData());
         verify(service, times(1)).findByUUID(type, id, version);
     }
@@ -217,7 +217,7 @@ class CompasSclDataEventHandlerTest {
 
         eventHandler.updateWebsocketsEvent(request);
 
-        var response = verifyResponse(session, UpdateResponse.class);
+        var response = verifyResponse(session, UpdateWsResponse.class);
         assertEquals(sclData, response.getSclData());
         verify(service, times(1)).update(type, id, cst, who, comment, sclData);
     }

@@ -9,10 +9,10 @@ import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
-import org.lfenergy.compas.scl.data.websocket.v1.decoder.UpdateResponseDecoder;
-import org.lfenergy.compas.scl.data.websocket.v1.encoder.UpdateRequestEncoder;
-import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateRequest;
-import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateResponse;
+import org.lfenergy.compas.scl.data.websocket.v1.decoder.UpdateWsResponseDecoder;
+import org.lfenergy.compas.scl.data.websocket.v1.encoder.UpdateWsRequestEncoder;
+import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateWsRequest;
+import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateWsResponse;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.websocket.ClientEndpoint;
@@ -34,14 +34,14 @@ class CompasSclUpdateServerEndpointAsEditorTest extends AbstractServerEndpointAs
 
     @Test
     void updateSCL_WhenCalled_ThenExpectedResponseIsRetrieved() throws Exception {
-        var encoder = new UpdateRequestEncoder();
+        var encoder = new UpdateWsRequestEncoder();
         var sclFileTye = SclFileType.SCD;
         var id = UUID.randomUUID();
         var cst = ChangeSetType.PATCH;
         var comment = "Some comment";
         var sclData = readSCL();
 
-        var request = new UpdateRequest();
+        var request = new UpdateWsRequest();
         request.setId(id);
         request.setChangeSetType(cst);
         request.setComment(comment);
@@ -63,10 +63,10 @@ class CompasSclUpdateServerEndpointAsEditorTest extends AbstractServerEndpointAs
         testWhenCalledWithInvalidTextThenExceptionThrown(uri);
     }
 
-    @ClientEndpoint(decoders = UpdateResponseDecoder.class)
+    @ClientEndpoint(decoders = UpdateWsResponseDecoder.class)
     static class Client {
         @OnMessage
-        public void onMessage(UpdateResponse response) {
+        public void onMessage(UpdateWsResponse response) {
             sclDataQueue.add(response.getSclData());
         }
     }

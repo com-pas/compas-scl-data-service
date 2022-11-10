@@ -117,7 +117,7 @@ class CompasSclDataResourceAsEditorTest {
 
         var xmlPath = response.xmlPath()
                 .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
-        assertEquals(scl, xmlPath.get("GetResponse.SclData"));
+        assertEquals(scl, xmlPath.get("GetWsResponse.SclData"));
         verify(compasSclDataService, times(1)).findByUUID(type, uuid);
     }
 
@@ -142,7 +142,7 @@ class CompasSclDataResourceAsEditorTest {
 
         var xmlPath = response.xmlPath()
                 .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
-        assertEquals(scl, xmlPath.get("GetResponse.SclData"));
+        assertEquals(scl, xmlPath.get("GetWsResponse.SclData"));
         verify(compasSclDataService, times(1)).findByUUID(type, uuid, version);
     }
 
@@ -170,7 +170,7 @@ class CompasSclDataResourceAsEditorTest {
                 .extract()
                 .response();
 
-        assertEquals(scl, response.xmlPath().getString("CreateResponse.SclData"));
+        assertEquals(scl, response.xmlPath().getString("CreateWsResponse.SclData"));
         verify(compasSclDataService, times(1)).create(type, name, USERNAME, comment, scl);
     }
 
@@ -227,7 +227,7 @@ class CompasSclDataResourceAsEditorTest {
                 .extract()
                 .response();
 
-        assertEquals(scl, response.xmlPath().getString("CreateResponse.SclData"));
+        assertEquals(scl, response.xmlPath().getString("CreateWsResponse.SclData"));
         verify(compasSclDataService, times(1)).update(type, uuid, changeSetType, USERNAME, comment, scl);
     }
 

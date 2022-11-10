@@ -8,10 +8,10 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
-import org.lfenergy.compas.scl.data.websocket.v1.decoder.CreateResponseDecoder;
-import org.lfenergy.compas.scl.data.websocket.v1.encoder.CreateRequestEncoder;
-import org.lfenergy.compas.scl.data.websocket.v1.model.CreateRequest;
-import org.lfenergy.compas.scl.data.websocket.v1.model.CreateResponse;
+import org.lfenergy.compas.scl.data.websocket.v1.decoder.CreateWsResponseDecoder;
+import org.lfenergy.compas.scl.data.websocket.v1.encoder.CreateWsRequestEncoder;
+import org.lfenergy.compas.scl.data.websocket.v1.model.CreateWsRequest;
+import org.lfenergy.compas.scl.data.websocket.v1.model.CreateWsResponse;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.websocket.ClientEndpoint;
@@ -32,13 +32,13 @@ class CompasSclCreateServerEndpointAsEditorTest extends AbstractServerEndpointAs
 
     @Test
     void createSCL_WhenCalled_ThenExpectedResponseIsRetrieved() throws Exception {
-        var encoder = new CreateRequestEncoder();
+        var encoder = new CreateWsRequestEncoder();
         var sclFileTye = SclFileType.SCD;
         var name = "Some name";
         var comment = "Some comment";
         var sclData = readSCL();
 
-        var request = new CreateRequest();
+        var request = new CreateWsRequest();
         request.setName(name);
         request.setComment(comment);
         request.setSclData(sclData);
@@ -59,10 +59,10 @@ class CompasSclCreateServerEndpointAsEditorTest extends AbstractServerEndpointAs
         testWhenCalledWithInvalidTextThenExceptionThrown(uri);
     }
 
-    @ClientEndpoint(decoders = CreateResponseDecoder.class)
+    @ClientEndpoint(decoders = CreateWsResponseDecoder.class)
     static class Client {
         @OnMessage
-        public void onMessage(CreateResponse response) {
+        public void onMessage(CreateWsResponse response) {
             sclDataQueue.add(response.getSclData());
         }
     }

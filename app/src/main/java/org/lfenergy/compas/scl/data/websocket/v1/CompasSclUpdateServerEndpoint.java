@@ -9,9 +9,9 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.lfenergy.compas.core.websocket.ErrorResponseEncoder;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.websocket.event.model.UpdateEventRequest;
-import org.lfenergy.compas.scl.data.websocket.v1.decoder.UpdateRequestDecoder;
-import org.lfenergy.compas.scl.data.websocket.v1.encoder.UpdateResponseEncoder;
-import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateRequest;
+import org.lfenergy.compas.scl.data.websocket.v1.decoder.UpdateWsRequestDecoder;
+import org.lfenergy.compas.scl.data.websocket.v1.encoder.UpdateWsResponseEncoder;
+import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateWsRequest;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +28,8 @@ import static org.lfenergy.compas.scl.data.rest.Constants.TYPE_PATH_PARAM;
 @Authenticated
 @ApplicationScoped
 @ServerEndpoint(value = "/scl-ws/v1/{" + TYPE_PATH_PARAM + "}/update",
-        decoders = {UpdateRequestDecoder.class},
-        encoders = {UpdateResponseEncoder.class, ErrorResponseEncoder.class})
+        decoders = {UpdateWsRequestDecoder.class},
+        encoders = {UpdateWsResponseEncoder.class, ErrorResponseEncoder.class})
 public class CompasSclUpdateServerEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclUpdateServerEndpoint.class);
 
@@ -52,7 +52,7 @@ public class CompasSclUpdateServerEndpoint {
     }
 
     @OnMessage
-    public void onUpdateMessage(Session session, UpdateRequest request,
+    public void onUpdateMessage(Session session, UpdateWsRequest request,
                                 @PathParam(TYPE_PATH_PARAM) String type) {
         LOGGER.info("Message (update) from session {} for type {}.", session.getId(), type);
 

@@ -9,10 +9,10 @@ import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
-import org.lfenergy.compas.scl.data.websocket.v1.decoder.GetResponseDecoder;
-import org.lfenergy.compas.scl.data.websocket.v1.encoder.GetVersionRequestEncoder;
-import org.lfenergy.compas.scl.data.websocket.v1.model.GetResponse;
-import org.lfenergy.compas.scl.data.websocket.v1.model.GetVersionRequest;
+import org.lfenergy.compas.scl.data.websocket.v1.decoder.GetWsResponseDecoder;
+import org.lfenergy.compas.scl.data.websocket.v1.encoder.GetVersionWsRequestEncoder;
+import org.lfenergy.compas.scl.data.websocket.v1.model.GetWsResponse;
+import org.lfenergy.compas.scl.data.websocket.v1.model.GetVersionWsRequest;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.websocket.ClientEndpoint;
@@ -34,13 +34,13 @@ class CompasSclGetVersionServerEndpointAsReaderTest extends AbstractServerEndpoi
 
     @Test
     void getVersionSCL_WhenCalled_ThenExpectedResponseIsRetrieved() throws Exception {
-        var encoder = new GetVersionRequestEncoder();
+        var encoder = new GetVersionWsRequestEncoder();
         var sclFileTye = SclFileType.SCD;
         var id = UUID.randomUUID();
         var version = new Version("1.2.3");
         var sclData = readSCL();
 
-        var request = new GetVersionRequest();
+        var request = new GetVersionWsRequest();
         request.setId(id);
         request.setVersion(version.toString());
 
@@ -59,10 +59,10 @@ class CompasSclGetVersionServerEndpointAsReaderTest extends AbstractServerEndpoi
         testWhenCalledWithInvalidTextThenExceptionThrown(uri);
     }
 
-    @ClientEndpoint(decoders = GetResponseDecoder.class)
+    @ClientEndpoint(decoders = GetWsResponseDecoder.class)
     static class Client {
         @OnMessage
-        public void onMessage(GetResponse response) {
+        public void onMessage(GetWsResponse response) {
             sclDataQueue.add(response.getSclData());
         }
     }

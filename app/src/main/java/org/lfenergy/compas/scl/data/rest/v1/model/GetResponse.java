@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERVICE_V1_NS_URI;
 
 @Schema(description = "Response from retrieving a SCL from the database containing the SCL Content.")
-@XmlRootElement(name = "GetResponse", namespace = SCL_DATA_SERVICE_V1_NS_URI)
+@XmlRootElement(name = "GetWsResponse", namespace = SCL_DATA_SERVICE_V1_NS_URI)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GetResponse {
     @Schema(description = "The XML Content of the retrieved SCL from the database. The content contains a XML according to the IEC 61850 standard.",
