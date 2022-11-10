@@ -18,7 +18,7 @@ import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERV
 
 @Schema(description = "Request to update an existing entry in the database containing the SCL Element content. " +
         "A new version is created and the old version is also kept.")
-@XmlRootElement(name = "UpdateWsRequest", namespace = SCL_DATA_SERVICE_V1_NS_URI)
+@XmlRootElement(name = "UpdateRequest", namespace = SCL_DATA_SERVICE_V1_NS_URI)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class UpdateRequest {
     @NotNull(message = "{org.lfenergy.compas.changeset.notnull.message}")

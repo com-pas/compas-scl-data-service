@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERVICE_V1_NS_URI;
 
 @Schema(description = "Request to create a new entry in the database containing the SCL Element content.")
-@XmlRootElement(name = "CreateWsRequest", namespace = SCL_DATA_SERVICE_V1_NS_URI)
+@XmlRootElement(name = "CreateRequest", namespace = SCL_DATA_SERVICE_V1_NS_URI)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CreateRequest {
     @FilenameValid
