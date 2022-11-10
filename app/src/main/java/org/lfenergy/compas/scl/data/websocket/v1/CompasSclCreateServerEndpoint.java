@@ -22,6 +22,7 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import static org.lfenergy.compas.core.websocket.WebsocketSupport.handleException;
 import static org.lfenergy.compas.scl.data.rest.Constants.TYPE_PATH_PARAM;
 
 @Authenticated
@@ -47,12 +48,12 @@ public class CompasSclCreateServerEndpoint {
 
     @OnOpen
     public void onOpen(Session session, @PathParam(TYPE_PATH_PARAM) String type) {
-        LOGGER.debug("Starting session {} for type {}.", session.getId(), type);
+        LOGGER.debug("Starting (create) session {} for type {}.", session.getId(), type);
     }
 
     @OnMessage
     public void onCreateMessage(Session session, CreateRequest request, @PathParam(TYPE_PATH_PARAM) String type) {
-        LOGGER.info("Message from session {} for type {}.", session.getId(), type);
+        LOGGER.info("Message (create) from session {} for type {}.", session.getId(), type);
 
         String who = jsonWebToken.getClaim(userInfoProperties.who());
         LOGGER.trace("Username used for Who {}", who);
@@ -63,11 +64,12 @@ public class CompasSclCreateServerEndpoint {
 
     @OnError
     public void onError(Session session, @PathParam(TYPE_PATH_PARAM) String type, Throwable throwable) {
-        LOGGER.warn("Error with session {} for type {}.", session.getId(), type, throwable);
+        LOGGER.warn("Error (create) with session {} for type {}.", session.getId(), type, throwable);
+        handleException(session, throwable);
     }
 
     @OnClose
     public void onClose(Session session, @PathParam(TYPE_PATH_PARAM) String type) {
-        LOGGER.debug("Closing session {} for type {}.", session.getId(), type);
+        LOGGER.debug("Closing (create) session {} for type {}.", session.getId(), type);
     }
 }

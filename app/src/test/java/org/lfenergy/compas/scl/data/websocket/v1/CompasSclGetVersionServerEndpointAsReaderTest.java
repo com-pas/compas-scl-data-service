@@ -7,12 +7,12 @@ import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
-import org.lfenergy.compas.scl.data.model.ChangeSetType;
+import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
-import org.lfenergy.compas.scl.data.websocket.v1.decoder.UpdateResponseDecoder;
-import org.lfenergy.compas.scl.data.websocket.v1.encoder.UpdateRequestEncoder;
-import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateRequest;
-import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateResponse;
+import org.lfenergy.compas.scl.data.websocket.v1.decoder.GetResponseDecoder;
+import org.lfenergy.compas.scl.data.websocket.v1.encoder.GetVersionRequestEncoder;
+import org.lfenergy.compas.scl.data.websocket.v1.model.GetResponse;
+import org.lfenergy.compas.scl.data.websocket.v1.model.GetVersionRequest;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.websocket.ClientEndpoint;
@@ -25,48 +25,44 @@ import java.util.UUID;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
-class CompasSclUpdateServerEndpointAsEditorTest extends AbstractServerEndpointAsEditorTest {
+class CompasSclGetVersionServerEndpointAsReaderTest extends AbstractServerEndpointAsReaderTest {
     @InjectMock
     private CompasSclDataService service;
 
-    @TestHTTPResource("/scl-ws/v1/SCD/update")
+    @TestHTTPResource("/scl-ws/v1/SCD/get-version")
     private URI uri;
 
     @Test
-    void updateSCL_WhenCalled_ThenExpectedResponseIsRetrieved() throws Exception {
-        var encoder = new UpdateRequestEncoder();
+    void getVersionSCL_WhenCalled_ThenExpectedResponseIsRetrieved() throws Exception {
+        var encoder = new GetVersionRequestEncoder();
         var sclFileTye = SclFileType.SCD;
         var id = UUID.randomUUID();
-        var cst = ChangeSetType.PATCH;
-        var comment = "Some comment";
+        var version = new Version("1.2.3");
         var sclData = readSCL();
 
-        var request = new UpdateRequest();
+        var request = new GetVersionRequest();
         request.setId(id);
-        request.setChangeSetType(cst);
-        request.setComment(comment);
-        request.setSclData(sclData);
+        request.setVersion(version.toString());
 
-        when(service.update(sclFileTye, id, cst, USERNAME, comment, sclData))
-                .thenReturn(sclData);
+        when(service.findByUUID(sclFileTye, id, version)).thenReturn(sclData);
 
         try (Session session = ContainerProvider.getWebSocketContainer().connectToServer(Client.class, uri)) {
             session.getAsyncRemote().sendText(encoder.encode(request));
 
             assertSclData(sclData);
-            verify(service, times(1)).update(sclFileTye, id, cst, USERNAME, comment, sclData);
+            verify(service, times(1)).findByUUID(sclFileTye, id, version);
         }
     }
 
     @Test
-    void createSCL_WhenCalledWithInvalidText_ThenExceptionThrown() throws Exception {
+    void getSCL_WhenCalledWithInvalidText_ThenExceptionThrown() throws Exception {
         testWhenCalledWithInvalidTextThenExceptionThrown(uri);
     }
 
-    @ClientEndpoint(decoders = UpdateResponseDecoder.class)
+    @ClientEndpoint(decoders = GetResponseDecoder.class)
     static class Client {
         @OnMessage
-        public void onMessage(UpdateResponse response) {
+        public void onMessage(GetResponse response) {
             sclDataQueue.add(response.getSclData());
         }
     }

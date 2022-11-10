@@ -21,6 +21,7 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import static org.lfenergy.compas.core.websocket.WebsocketSupport.handleException;
 import static org.lfenergy.compas.scl.data.rest.Constants.TYPE_PATH_PARAM;
 
 @Authenticated
@@ -56,6 +57,7 @@ public class CompasSclGetVersionServerEndpoint {
     @OnError
     public void onError(Session session, @PathParam(TYPE_PATH_PARAM) String type, Throwable throwable) {
         LOGGER.warn("Error with session {} for type {}.", session.getId(), type, throwable);
+        handleException(session, throwable);
     }
 
     @OnClose
