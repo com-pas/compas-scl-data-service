@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.lfenergy.compas.core.commons.exception.CompasErrorCode.WEBSOCKET_DECODER_ERROR_CODE;
 
-public class AbstractServerEndpointTest {
+public class AbstractServerEndpointTestSupport {
     protected static final LinkedBlockingDeque<String> sclDataQueue = new LinkedBlockingDeque<>();
     protected static final LinkedBlockingDeque<ErrorMessage> errorQueue = new LinkedBlockingDeque<>();
 

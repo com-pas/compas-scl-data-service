@@ -11,8 +11,8 @@ import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 import org.lfenergy.compas.scl.data.websocket.v1.decoder.GetWsResponseDecoder;
 import org.lfenergy.compas.scl.data.websocket.v1.encoder.GetVersionWsRequestEncoder;
-import org.lfenergy.compas.scl.data.websocket.v1.model.GetWsResponse;
 import org.lfenergy.compas.scl.data.websocket.v1.model.GetVersionWsRequest;
+import org.lfenergy.compas.scl.data.websocket.v1.model.GetWsResponse;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.websocket.ClientEndpoint;
@@ -25,7 +25,7 @@ import java.util.UUID;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
-class CompasSclGetVersionServerEndpointAsReaderTest extends AbstractServerEndpointAsReaderTest {
+class CompasSclGetVersionServerEndpointAsReaderTest extends AbstractServerEndpointAsReaderTestSupport {
     @InjectMock
     private CompasSclDataService service;
 

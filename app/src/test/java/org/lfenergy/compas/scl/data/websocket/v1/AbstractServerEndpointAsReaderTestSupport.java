@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.lfenergy.compas.scl.data.rest.Constants.READ_ROLE;
 
 @TestSecurity(user = "test-editor", roles = {"SCD_" + READ_ROLE})
-public abstract class AbstractServerEndpointAsReaderTest extends AbstractServerEndpointTest {
+public abstract class AbstractServerEndpointAsReaderTestSupport extends AbstractServerEndpointTestSupport {
     protected void testWhenForbiddenToExecute(URI uri) {
         var container = ContainerProvider.getWebSocketContainer();
         var exception = assertThrows(InterruptedIOException.class, () -> container.connectToServer(Client.class, uri));

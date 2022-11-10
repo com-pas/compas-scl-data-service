@@ -21,11 +21,10 @@ import javax.websocket.Session;
 import java.net.URI;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
-class CompasSclGetServerEndpointAsEditorTest extends AbstractServerEndpointAsEditorTest {
+class CompasSclGetServerEndpointAsEditorTest extends AbstractServerEndpointAsEditorTestSupport {
     @InjectMock
     private CompasSclDataService service;
 

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 
 @QuarkusTest
-class CompasSclCreateServerEndpointAsReaderTest extends AbstractServerEndpointAsReaderTest {
+class CompasSclCreateServerEndpointAsReaderTest extends AbstractServerEndpointAsReaderTestSupport {
     @TestHTTPResource("/scl-ws/v1/SCD/create")
     private URI uri;
 

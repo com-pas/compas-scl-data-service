@@ -23,7 +23,7 @@ import java.net.URI;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
-class CompasSclCreateServerEndpointAsEditorTest extends AbstractServerEndpointAsEditorTest {
+class CompasSclCreateServerEndpointAsEditorTest extends AbstractServerEndpointAsEditorTestSupport {
     @InjectMock
     private CompasSclDataService service;
 

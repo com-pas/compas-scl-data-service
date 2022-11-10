@@ -24,7 +24,7 @@ import java.util.UUID;
 import static org.mockito.Mockito.*;
 
 @QuarkusTest
-class CompasSclGetServerEndpointAsReaderTest extends AbstractServerEndpointAsReaderTest {
+class CompasSclGetServerEndpointAsReaderTest extends AbstractServerEndpointAsReaderTestSupport {
     @InjectMock
     private CompasSclDataService service;
 

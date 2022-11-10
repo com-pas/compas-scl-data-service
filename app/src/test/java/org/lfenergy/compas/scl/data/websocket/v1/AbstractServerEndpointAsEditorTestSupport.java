@@ -12,9 +12,9 @@ import static org.lfenergy.compas.scl.data.rest.Constants.*;
 @TestSecurity(user = "test-editor", roles = {"SCD_" + READ_ROLE, "SCD_" + CREATE_ROLE, "SCD_" + UPDATE_ROLE})
 @JwtSecurity(claims = {
         // Default the claim "name" is configured for Who, so we will set this claim for the test.
-        @Claim(key = "name", value = AbstractServerEndpointAsEditorTest.USERNAME)
+        @Claim(key = "name", value = AbstractServerEndpointAsEditorTestSupport.USERNAME)
 })
-public abstract class AbstractServerEndpointAsEditorTest extends AbstractServerEndpointTest {
+public abstract class AbstractServerEndpointAsEditorTestSupport extends AbstractServerEndpointTestSupport {
     public static final String USERNAME = "Test Editor";
 
 }
