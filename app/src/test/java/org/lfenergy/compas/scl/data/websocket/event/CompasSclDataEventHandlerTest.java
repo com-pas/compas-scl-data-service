@@ -31,7 +31,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.lfenergy.compas.core.commons.exception.CompasErrorCode.WEBSOCKET_GENERAL_ERROR_CODE;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.DUPLICATE_SCL_NAME_ERROR_CODE;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CompasSclDataEventHandlerTest {
@@ -57,7 +58,7 @@ class CompasSclDataEventHandlerTest {
 
         var response = verifyResponse(session, CreateWsResponse.class);
         assertEquals(sclData, response.getSclData());
-        verify(service, times(1)).create(type, name, who, comment, sclData);
+        verify(service).create(type, name, who, comment, sclData);
     }
 
     @Test
@@ -77,7 +78,7 @@ class CompasSclDataEventHandlerTest {
         eventHandler.createWebsocketsEvent(request);
 
         verifyErrorResponse(session, DUPLICATE_SCL_NAME_ERROR_CODE, errorMessage);
-        verify(service, times(1)).create(type, name, who, comment, sclData);
+        verify(service).create(type, name, who, comment, sclData);
     }
 
     @Test
@@ -96,7 +97,7 @@ class CompasSclDataEventHandlerTest {
         eventHandler.createWebsocketsEvent(request);
 
         verifyErrorResponse(session, WEBSOCKET_GENERAL_ERROR_CODE, errorMessage);
-        verify(service, times(1)).create(type, name, who, comment, sclData);
+        verify(service).create(type, name, who, comment, sclData);
     }
 
     @Test
@@ -113,7 +114,7 @@ class CompasSclDataEventHandlerTest {
 
         var response = verifyResponse(session, GetWsResponse.class);
         assertEquals(sclData, response.getSclData());
-        verify(service, times(1)).findByUUID(type, id);
+        verify(service).findByUUID(type, id);
     }
 
     @Test
@@ -130,7 +131,7 @@ class CompasSclDataEventHandlerTest {
         eventHandler.getWebsocketsEvent(request);
 
         verifyErrorResponse(session, DUPLICATE_SCL_NAME_ERROR_CODE, errorMessage);
-        verify(service, times(1)).findByUUID(type, id);
+        verify(service).findByUUID(type, id);
     }
 
     @Test
@@ -146,7 +147,7 @@ class CompasSclDataEventHandlerTest {
         eventHandler.getWebsocketsEvent(request);
 
         verifyErrorResponse(session, WEBSOCKET_GENERAL_ERROR_CODE, errorMessage);
-        verify(service, times(1)).findByUUID(type, id);
+        verify(service).findByUUID(type, id);
     }
 
     @Test
@@ -164,7 +165,7 @@ class CompasSclDataEventHandlerTest {
 
         var response = verifyResponse(session, GetWsResponse.class);
         assertEquals(sclData, response.getSclData());
-        verify(service, times(1)).findByUUID(type, id, version);
+        verify(service).findByUUID(type, id, version);
     }
 
     @Test
@@ -182,7 +183,7 @@ class CompasSclDataEventHandlerTest {
         eventHandler.getVersionWebsocketsEvent(request);
 
         verifyErrorResponse(session, DUPLICATE_SCL_NAME_ERROR_CODE, errorMessage);
-        verify(service, times(1)).findByUUID(type, id, version);
+        verify(service).findByUUID(type, id, version);
     }
 
     @Test
@@ -199,7 +200,7 @@ class CompasSclDataEventHandlerTest {
         eventHandler.getVersionWebsocketsEvent(request);
 
         verifyErrorResponse(session, WEBSOCKET_GENERAL_ERROR_CODE, errorMessage);
-        verify(service, times(1)).findByUUID(type, id, version);
+        verify(service).findByUUID(type, id, version);
     }
 
     @Test
@@ -219,7 +220,7 @@ class CompasSclDataEventHandlerTest {
 
         var response = verifyResponse(session, UpdateWsResponse.class);
         assertEquals(sclData, response.getSclData());
-        verify(service, times(1)).update(type, id, cst, who, comment, sclData);
+        verify(service).update(type, id, cst, who, comment, sclData);
     }
 
     @Test
@@ -240,7 +241,7 @@ class CompasSclDataEventHandlerTest {
         eventHandler.updateWebsocketsEvent(request);
 
         verifyErrorResponse(session, DUPLICATE_SCL_NAME_ERROR_CODE, errorMessage);
-        verify(service, times(1)).update(type, id, cst, who, comment, sclData);
+        verify(service).update(type, id, cst, who, comment, sclData);
     }
 
     @Test
@@ -260,7 +261,7 @@ class CompasSclDataEventHandlerTest {
         eventHandler.updateWebsocketsEvent(request);
 
         verifyErrorResponse(session, WEBSOCKET_GENERAL_ERROR_CODE, errorMessage);
-        verify(service, times(1)).update(type, id, cst, who, comment, sclData);
+        verify(service).update(type, id, cst, who, comment, sclData);
     }
 
     private Session mockSession() {
@@ -271,16 +272,16 @@ class CompasSclDataEventHandlerTest {
     }
 
     private <T> T verifyResponse(Session session, Class<T> responseClass) {
-        verify(session, times(1)).getAsyncRemote();
+        verify(session).getAsyncRemote();
         ArgumentCaptor<T> captor = ArgumentCaptor.forClass(responseClass);
-        verify(session.getAsyncRemote(), times(1)).sendObject(captor.capture());
+        verify(session.getAsyncRemote()).sendObject(captor.capture());
         return captor.getValue();
     }
 
     private void verifyErrorResponse(Session session, String errorCode, String errorMessage) {
-        verify(session, times(1)).getAsyncRemote();
+        verify(session).getAsyncRemote();
         ArgumentCaptor<ErrorResponse> captor = ArgumentCaptor.forClass(ErrorResponse.class);
-        verify(session.getAsyncRemote(), times(1)).sendObject(captor.capture());
+        verify(session.getAsyncRemote()).sendObject(captor.capture());
         var response = captor.getValue();
         assertEquals(1, response.getErrorMessages().size());
         var message = response.getErrorMessages().get(0);

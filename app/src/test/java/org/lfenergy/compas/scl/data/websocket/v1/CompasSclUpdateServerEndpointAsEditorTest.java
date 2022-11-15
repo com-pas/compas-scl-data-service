@@ -22,7 +22,8 @@ import javax.websocket.Session;
 import java.net.URI;
 import java.util.UUID;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class CompasSclUpdateServerEndpointAsEditorTest extends AbstractServerEndpointAsEditorTestSupport {
@@ -54,7 +55,7 @@ class CompasSclUpdateServerEndpointAsEditorTest extends AbstractServerEndpointAs
             session.getAsyncRemote().sendText(encoder.encode(request));
 
             assertSclData(sclData);
-            verify(service, times(1)).update(sclFileTye, id, cst, USERNAME, comment, sclData);
+            verify(service).update(sclFileTye, id, cst, USERNAME, comment, sclData);
         }
     }
 

@@ -20,7 +20,8 @@ import javax.websocket.OnMessage;
 import javax.websocket.Session;
 import java.net.URI;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class CompasSclCreateServerEndpointAsEditorTest extends AbstractServerEndpointAsEditorTestSupport {
@@ -50,7 +51,7 @@ class CompasSclCreateServerEndpointAsEditorTest extends AbstractServerEndpointAs
             session.getAsyncRemote().sendText(encoder.encode(request));
 
             assertSclData(sclData);
-            verify(service, times(1)).create(sclFileTye, name, USERNAME, comment, sclData);
+            verify(service).create(sclFileTye, name, USERNAME, comment, sclData);
         }
     }
 
