@@ -7,6 +7,7 @@ package org.lfenergy.compas.scl.data.rest.v1.model;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -32,6 +33,7 @@ public class UpdateRequest {
 
     @Schema(description = "The XML Content of the SCL added as CDATA. The content should contain a XML according to the IEC 61850 standard.",
             example = "<![CDATA[<SCL xmlns=\"http://www.iec.ch/61850/2003/SCL\">....</SCL>]]")
+    @NotBlank
     @XmlElement(name = "SclData", namespace = SCL_DATA_SERVICE_V1_NS_URI)
     private String sclData;
 

@@ -4,6 +4,7 @@
 package org.lfenergy.compas.scl.data.rest.v1;
 
 import io.quarkus.security.Authenticated;
+import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.rest.v1.model.Type;
@@ -40,10 +41,10 @@ public class CompasCommonResource {
     @GET
     @Path("/type/list")
     @Produces(MediaType.APPLICATION_XML)
-    public TypeListResponse list(@HeaderParam("Authorization") String authHeader) {
+    public Uni<TypeListResponse> list(@HeaderParam("Authorization") String authHeader) {
         LOGGER.trace("Authorization Header '{}'", authHeader);
 
-        // Retrieve the roles the logged in user has.
+        // Retrieve the roles the logged-in user has.
         var roles = jsonWebToken.getGroups();
 
         var response = new TypeListResponse();
@@ -54,19 +55,19 @@ public class CompasCommonResource {
                         .map(sclFileType -> new Type(sclFileType.name(), sclFileType.getDescription()))
                         .sorted(Comparator.comparing(Type::getDescription))
                         .toList());
-        return response;
+        return Uni.createFrom().item(response);
     }
 
     @GET
     @Path("/userinfo")
     @Produces(MediaType.APPLICATION_XML)
-    public UserInfoResponse getUserInfo(@HeaderParam("Authorization") String authHeader) {
+    public Uni<UserInfoResponse> getUserInfo(@HeaderParam("Authorization") String authHeader) {
         LOGGER.trace("Authorization Header '{}'", authHeader);
 
         var response = new UserInfoResponse();
         response.setName(jsonWebToken.getClaim(userInfoProperties.name()));
         response.setSessionWarning(userInfoProperties.sessionWarning());
         response.setSessionExpires(userInfoProperties.sessionExpires());
-        return response;
+        return Uni.createFrom().item(response);
     }
 }

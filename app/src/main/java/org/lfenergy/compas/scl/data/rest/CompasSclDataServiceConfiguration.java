@@ -14,8 +14,8 @@ import javax.enterprise.inject.Produces;
  * Create Beans from other dependencies that are used in the application.
  */
 @RegisterForReflection(targets = {
-        org.lfenergy.compas.core.jaxrs.model.ErrorResponse.class,
-        org.lfenergy.compas.core.jaxrs.model.ErrorMessage.class
+        org.lfenergy.compas.core.commons.model.ErrorResponse.class,
+        org.lfenergy.compas.core.commons.model.ErrorMessage.class
 })
 public class CompasSclDataServiceConfiguration {
     @Produces

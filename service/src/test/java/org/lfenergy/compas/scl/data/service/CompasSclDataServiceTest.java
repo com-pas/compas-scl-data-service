@@ -60,7 +60,7 @@ class CompasSclDataServiceTest {
         var result = compasSclDataService.list(SCL_TYPE);
 
         assertNotNull(result);
-        verify(compasSclDataRepository, times(1)).list(SCL_TYPE);
+        verify(compasSclDataRepository).list(SCL_TYPE);
     }
 
     @Test
@@ -74,7 +74,7 @@ class CompasSclDataServiceTest {
         assertNotNull(result);
         assertEquals(expectedResult.size(), result.size());
         assertEquals(expectedResult.get(0), result.get(0));
-        verify(compasSclDataRepository, times(1)).listVersionsByUUID(SCL_TYPE, uuid);
+        verify(compasSclDataRepository).listVersionsByUUID(SCL_TYPE, uuid);
     }
 
     @Test
@@ -86,7 +86,7 @@ class CompasSclDataServiceTest {
             compasSclDataService.listVersionsByUUID(SCL_TYPE, uuid);
         });
         assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
-        verify(compasSclDataRepository, times(1)).listVersionsByUUID(SCL_TYPE, uuid);
+        verify(compasSclDataRepository).listVersionsByUUID(SCL_TYPE, uuid);
     }
 
     @Test
@@ -97,7 +97,7 @@ class CompasSclDataServiceTest {
         var result = compasSclDataService.findByUUID(SCL_TYPE, uuid);
 
         assertNotNull(result);
-        verify(compasSclDataRepository, times(1)).findByUUID(SCL_TYPE, uuid);
+        verify(compasSclDataRepository).findByUUID(SCL_TYPE, uuid);
     }
 
     @Test
@@ -109,7 +109,7 @@ class CompasSclDataServiceTest {
         var result = compasSclDataService.findByUUID(SCL_TYPE, uuid, version);
 
         assertNotNull(result);
-        verify(compasSclDataRepository, times(1)).findByUUID(SCL_TYPE, uuid, version);
+        verify(compasSclDataRepository).findByUUID(SCL_TYPE, uuid, version);
     }
 
     @Test
@@ -128,8 +128,8 @@ class CompasSclDataServiceTest {
         assertNotNull(scl);
         assertCompasExtension(scl, name);
         assertHistoryItem(scl, 2, INITIAL_VERSION, comment);
-        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
-        verify(compasSclDataRepository, times(1)).hasDuplicateSclName(SCL_TYPE, name);
+        verify(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
+        verify(compasSclDataRepository).hasDuplicateSclName(SCL_TYPE, name);
     }
 
     @Test
@@ -149,8 +149,8 @@ class CompasSclDataServiceTest {
         assertNotNull(scl);
         assertCompasExtension(scl, name);
         assertHistoryItem(scl, 2, INITIAL_VERSION, comment);
-        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
-        verify(compasSclDataRepository, times(1)).hasDuplicateSclName(SCL_TYPE, name);
+        verify(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
+        verify(compasSclDataRepository).hasDuplicateSclName(SCL_TYPE, name);
     }
 
     @Test
@@ -166,7 +166,7 @@ class CompasSclDataServiceTest {
             compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
         });
         assertEquals(DUPLICATE_SCL_NAME_ERROR_CODE, exception.getErrorCode());
-        verify(compasSclDataRepository, times(1)).hasDuplicateSclName(SCL_TYPE, name);
+        verify(compasSclDataRepository).hasDuplicateSclName(SCL_TYPE, name);
     }
 
     @Test
@@ -202,8 +202,8 @@ class CompasSclDataServiceTest {
         assertNotNull(scl);
         assertCompasExtension(scl, previousName);
         assertHistoryItem(scl, 4, nextVersion, null);
-        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
-        verify(compasSclDataRepository, times(1)).findMetaInfoByUUID(SCL_TYPE, uuid);
+        verify(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
+        verify(compasSclDataRepository).findMetaInfoByUUID(SCL_TYPE, uuid);
         verify(compasSclDataRepository, never()).hasDuplicateSclName(SCL_TYPE, previousName);
     }
 
@@ -229,9 +229,9 @@ class CompasSclDataServiceTest {
         assertNotNull(scl);
         assertCompasExtension(scl, newName);
         assertHistoryItem(scl, 4, nextVersion, null);
-        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(newName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
-        verify(compasSclDataRepository, times(1)).findMetaInfoByUUID(SCL_TYPE, uuid);
-        verify(compasSclDataRepository, times(1)).hasDuplicateSclName(SCL_TYPE, newName);
+        verify(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(newName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
+        verify(compasSclDataRepository).findMetaInfoByUUID(SCL_TYPE, uuid);
+        verify(compasSclDataRepository).hasDuplicateSclName(SCL_TYPE, newName);
     }
 
     @Test
@@ -252,8 +252,8 @@ class CompasSclDataServiceTest {
             compasSclDataService.update(SCL_TYPE, uuid, changeSet, who, null, scl);
         });
         assertEquals(DUPLICATE_SCL_NAME_ERROR_CODE, exception.getErrorCode());
-        verify(compasSclDataRepository, times(1)).findMetaInfoByUUID(SCL_TYPE, uuid);
-        verify(compasSclDataRepository, times(1)).hasDuplicateSclName(SCL_TYPE, newName);
+        verify(compasSclDataRepository).findMetaInfoByUUID(SCL_TYPE, uuid);
+        verify(compasSclDataRepository).hasDuplicateSclName(SCL_TYPE, newName);
     }
 
     @Test
@@ -276,8 +276,8 @@ class CompasSclDataServiceTest {
         assertNotNull(scl);
         assertCompasExtension(scl, previousName);
         assertHistoryItem(scl, 4, nextVersion, null);
-        verify(compasSclDataRepository, times(1)).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
-        verify(compasSclDataRepository, times(1)).findMetaInfoByUUID(SCL_TYPE, uuid);
+        verify(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
+        verify(compasSclDataRepository).findMetaInfoByUUID(SCL_TYPE, uuid);
         verify(compasSclDataRepository, never()).hasDuplicateSclName(SCL_TYPE, previousName);
     }
 
@@ -303,7 +303,7 @@ class CompasSclDataServiceTest {
 
         compasSclDataService.delete(SCL_TYPE, uuid);
 
-        verify(compasSclDataRepository, times(1)).delete(SCL_TYPE, uuid);
+        verify(compasSclDataRepository).delete(SCL_TYPE, uuid);
     }
 
     @Test
@@ -315,7 +315,7 @@ class CompasSclDataServiceTest {
 
         compasSclDataService.delete(SCL_TYPE, uuid, version);
 
-        verify(compasSclDataRepository, times(1)).delete(SCL_TYPE, uuid, version);
+        verify(compasSclDataRepository).delete(SCL_TYPE, uuid, version);
     }
 
     @Test
