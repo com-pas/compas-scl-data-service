@@ -69,7 +69,7 @@ class CompasSclDataResourceAsEditorTest {
         assertEquals(name, xmlPath.get("ListResponse.Item[0].Name"));
         assertEquals(version, xmlPath.get("ListResponse.Item[0].Version"));
         assertEquals(labels.get(0), xmlPath.get("ListResponse.Item[0].Label"));
-        verify(compasSclDataService, times(1)).list(type);
+        verify(compasSclDataService).list(type);
     }
 
     @Test
@@ -95,7 +95,7 @@ class CompasSclDataResourceAsEditorTest {
         assertEquals(uuid.toString(), xmlPath.get("VersionsResponse.HistoryItem[0].Id"));
         assertEquals(name, xmlPath.get("VersionsResponse.HistoryItem[0].Name"));
         assertEquals(version, xmlPath.get("VersionsResponse.HistoryItem[0].Version"));
-        verify(compasSclDataService, times(1)).listVersionsByUUID(type, uuid);
+        verify(compasSclDataService).listVersionsByUUID(type, uuid);
     }
 
     @Test
@@ -117,8 +117,8 @@ class CompasSclDataResourceAsEditorTest {
 
         var xmlPath = response.xmlPath()
                 .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
-        assertEquals(scl, xmlPath.get("GetResponse.SclData"));
-        verify(compasSclDataService, times(1)).findByUUID(type, uuid);
+        assertEquals(scl, xmlPath.get("GetWsResponse.SclData"));
+        verify(compasSclDataService).findByUUID(type, uuid);
     }
 
     @Test
@@ -142,8 +142,8 @@ class CompasSclDataResourceAsEditorTest {
 
         var xmlPath = response.xmlPath()
                 .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
-        assertEquals(scl, xmlPath.get("GetResponse.SclData"));
-        verify(compasSclDataService, times(1)).findByUUID(type, uuid, version);
+        assertEquals(scl, xmlPath.get("GetWsResponse.SclData"));
+        verify(compasSclDataService).findByUUID(type, uuid, version);
     }
 
     @Test
@@ -170,8 +170,8 @@ class CompasSclDataResourceAsEditorTest {
                 .extract()
                 .response();
 
-        assertEquals(scl, response.xmlPath().getString("CreateResponse.SclData"));
-        verify(compasSclDataService, times(1)).create(type, name, USERNAME, comment, scl);
+        assertEquals(scl, response.xmlPath().getString("CreateWsResponse.SclData"));
+        verify(compasSclDataService).create(type, name, USERNAME, comment, scl);
     }
 
     @Test
@@ -227,8 +227,8 @@ class CompasSclDataResourceAsEditorTest {
                 .extract()
                 .response();
 
-        assertEquals(scl, response.xmlPath().getString("CreateResponse.SclData"));
-        verify(compasSclDataService, times(1)).update(type, uuid, changeSetType, USERNAME, comment, scl);
+        assertEquals(scl, response.xmlPath().getString("CreateWsResponse.SclData"));
+        verify(compasSclDataService).update(type, uuid, changeSetType, USERNAME, comment, scl);
     }
 
     @Test
@@ -245,7 +245,7 @@ class CompasSclDataResourceAsEditorTest {
                 .then()
                 .statusCode(204);
 
-        verify(compasSclDataService, times(1)).delete(type, uuid);
+        verify(compasSclDataService).delete(type, uuid);
     }
 
     @Test
@@ -264,13 +264,14 @@ class CompasSclDataResourceAsEditorTest {
                 .then()
                 .statusCode(204);
 
-        verify(compasSclDataService, times(1)).delete(type, uuid, version);
+        verify(compasSclDataService).delete(type, uuid, version);
     }
 
     private String readSCL() throws IOException {
-        var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd");
-        assert inputStream != null;
+        try (var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd")) {
+            assert inputStream != null;
 
-        return new String(inputStream.readAllBytes());
+            return new String(inputStream.readAllBytes());
+        }
     }
 }
