@@ -6,14 +6,14 @@ package org.lfenergy.compas.scl.data.rest.v1;
 import io.quarkus.security.Authenticated;
 import io.smallrye.common.annotation.Blocking;
 import io.smallrye.mutiny.Uni;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.rest.v1.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -28,7 +28,7 @@ import static org.lfenergy.compas.scl.data.rest.Constants.*;
 @RequestScoped
 @Path("/scl/v1/{" + TYPE_PATH_PARAM + "}")
 public class CompasSclDataResource {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataResource.class);
+    private static final Logger LOGGER = LogManager.getLogger(CompasSclDataResource.class);
 
     private final CompasSclDataService compasSclDataService;
 

@@ -5,14 +5,14 @@ package org.lfenergy.compas.scl.data.rest.v1;
 
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.rest.v1.model.Type;
 import org.lfenergy.compas.scl.data.rest.v1.model.TypeListResponse;
 import org.lfenergy.compas.scl.data.rest.v1.model.UserInfoResponse;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -30,7 +30,7 @@ import static org.lfenergy.compas.scl.data.rest.Constants.READ_ROLE;
 @RequestScoped
 @Path("/common/v1/")
 public class CompasCommonResource {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompasCommonResource.class);
+    private static final Logger LOGGER = LogManager.getLogger(CompasCommonResource.class);
 
     @Inject
     JsonWebToken jsonWebToken;

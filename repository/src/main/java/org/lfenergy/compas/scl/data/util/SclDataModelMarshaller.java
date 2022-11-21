@@ -3,12 +3,12 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.HistoryItem;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.SclMetaInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -20,7 +20,7 @@ import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCo
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.UNMARSHAL_ERROR_CODE;
 
 public class SclDataModelMarshaller {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SclDataModelMarshaller.class);
+    private static final Logger LOGGER = LogManager.getLogger(SclDataModelMarshaller.class);
 
     private final Unmarshaller jaxbUnmarshaller;
 
