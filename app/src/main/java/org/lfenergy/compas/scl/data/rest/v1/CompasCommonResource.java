@@ -17,7 +17,6 @@ import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -41,8 +40,8 @@ public class CompasCommonResource {
     @GET
     @Path("/type/list")
     @Produces(MediaType.APPLICATION_XML)
-    public Uni<TypeListResponse> list(@HeaderParam("Authorization") String authHeader) {
-        LOGGER.trace("Authorization Header '{}'", authHeader);
+    public Uni<TypeListResponse> list() {
+        LOGGER.info("Retrieving list of the types of SCL Files");
 
         // Retrieve the roles the logged-in user has.
         var roles = jsonWebToken.getGroups();
@@ -61,9 +60,8 @@ public class CompasCommonResource {
     @GET
     @Path("/userinfo")
     @Produces(MediaType.APPLICATION_XML)
-    public Uni<UserInfoResponse> getUserInfo(@HeaderParam("Authorization") String authHeader) {
-        LOGGER.trace("Authorization Header '{}'", authHeader);
-
+    public Uni<UserInfoResponse> getUserInfo() {
+        LOGGER.info("Retrieving user information about {}", jsonWebToken.getName());
         var response = new UserInfoResponse();
         response.setName(jsonWebToken.getClaim(userInfoProperties.name()));
         response.setSessionWarning(userInfoProperties.sessionWarning());
