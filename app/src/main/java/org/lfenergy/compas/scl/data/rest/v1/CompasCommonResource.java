@@ -5,19 +5,18 @@ package org.lfenergy.compas.scl.data.rest.v1;
 
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.rest.v1.model.Type;
 import org.lfenergy.compas.scl.data.rest.v1.model.TypeListResponse;
 import org.lfenergy.compas.scl.data.rest.v1.model.UserInfoResponse;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -30,7 +29,7 @@ import static org.lfenergy.compas.scl.data.rest.Constants.READ_ROLE;
 @RequestScoped
 @Path("/common/v1/")
 public class CompasCommonResource {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompasCommonResource.class);
+    private static final Logger LOGGER = LogManager.getLogger(CompasCommonResource.class);
 
     @Inject
     JsonWebToken jsonWebToken;
@@ -41,8 +40,8 @@ public class CompasCommonResource {
     @GET
     @Path("/type/list")
     @Produces(MediaType.APPLICATION_XML)
-    public Uni<TypeListResponse> list(@HeaderParam("Authorization") String authHeader) {
-        LOGGER.trace("Authorization Header '{}'", authHeader);
+    public Uni<TypeListResponse> list() {
+        LOGGER.info("Retrieving list of the types of SCL Files");
 
         // Retrieve the roles the logged-in user has.
         var roles = jsonWebToken.getGroups();
@@ -61,9 +60,8 @@ public class CompasCommonResource {
     @GET
     @Path("/userinfo")
     @Produces(MediaType.APPLICATION_XML)
-    public Uni<UserInfoResponse> getUserInfo(@HeaderParam("Authorization") String authHeader) {
-        LOGGER.trace("Authorization Header '{}'", authHeader);
-
+    public Uni<UserInfoResponse> getUserInfo() {
+        LOGGER.info("Retrieving user information about {}", jsonWebToken.getName());
         var response = new UserInfoResponse();
         response.setName(jsonWebToken.getClaim(userInfoProperties.name()));
         response.setSessionWarning(userInfoProperties.sessionWarning());
