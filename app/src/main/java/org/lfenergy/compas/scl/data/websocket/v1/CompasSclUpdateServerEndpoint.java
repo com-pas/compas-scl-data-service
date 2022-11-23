@@ -18,6 +18,7 @@ import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
@@ -52,7 +53,8 @@ public class CompasSclUpdateServerEndpoint {
     }
 
     @OnMessage
-    public void onUpdateMessage(Session session, UpdateWsRequest request,
+    public void onUpdateMessage(Session session,
+                                @Valid UpdateWsRequest request,
                                 @PathParam(TYPE_PATH_PARAM) String type) {
         LOGGER.info("Message (update) from session {} for type {}.", session.getId(), type);
 
