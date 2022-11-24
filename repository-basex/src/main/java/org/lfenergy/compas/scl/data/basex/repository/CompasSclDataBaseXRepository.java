@@ -4,6 +4,8 @@
 package org.lfenergy.compas.scl.data.basex.repository;
 
 import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lfenergy.compas.scl.data.basex.client.BaseXClient;
 import org.lfenergy.compas.scl.data.basex.client.BaseXClientFactory;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
@@ -15,8 +17,6 @@ import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclDataModelMarshaller;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -48,7 +48,7 @@ import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstan
  */
 @ApplicationScoped
 public class CompasSclDataBaseXRepository implements CompasSclDataRepository {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataBaseXRepository.class);
+    private static final Logger LOGGER = LogManager.getLogger(CompasSclDataBaseXRepository.class);
 
     private static final String DECLARE_NS_AND_VARS = """
             declare namespace scl    = "%s";

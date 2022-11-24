@@ -5,17 +5,18 @@ package org.lfenergy.compas.scl.data.websocket.v1;
 
 import io.quarkus.security.Authenticated;
 import io.vertx.mutiny.core.eventbus.EventBus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lfenergy.compas.core.websocket.ErrorResponseEncoder;
 import org.lfenergy.compas.scl.data.websocket.event.model.GetEventRequest;
 import org.lfenergy.compas.scl.data.websocket.v1.decoder.GetWsRequestDecoder;
 import org.lfenergy.compas.scl.data.websocket.v1.encoder.GetWsResponseEncoder;
 import org.lfenergy.compas.scl.data.websocket.v1.model.GetWsRequest;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
@@ -29,7 +30,7 @@ import static org.lfenergy.compas.scl.data.rest.Constants.TYPE_PATH_PARAM;
         decoders = {GetWsRequestDecoder.class},
         encoders = {GetWsResponseEncoder.class, ErrorResponseEncoder.class})
 public class CompasSclGetServerEndpoint {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclGetServerEndpoint.class);
+    private static final Logger LOGGER = LogManager.getLogger(CompasSclGetServerEndpoint.class);
 
     private final EventBus eventBus;
 
@@ -45,7 +46,7 @@ public class CompasSclGetServerEndpoint {
 
     @OnMessage
     public void onGetMessage(Session session,
-                             GetWsRequest request,
+                             @Valid GetWsRequest request,
                              @PathParam(TYPE_PATH_PARAM) String type) {
         LOGGER.info("Message (get) from session {} for type {}.", session.getId(), type);
 

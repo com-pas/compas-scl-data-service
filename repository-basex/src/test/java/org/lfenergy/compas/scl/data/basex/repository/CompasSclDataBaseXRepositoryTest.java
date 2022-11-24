@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.basex.repository;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,8 +16,6 @@ import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclDataModelMarshaller;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,7 +25,7 @@ import static org.lfenergy.compas.scl.data.basex.client.BaseXServerUtil.createCl
 
 @ExtendWith({MockitoExtension.class, BaseXServerJUnitExtension.class})
 class CompasSclDataBaseXRepositoryTest extends AbstractCompasSclDataRepositoryTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompasSclDataBaseXRepositoryTest.class);
+    private static final Logger LOGGER = LogManager.getLogger(CompasSclDataBaseXRepositoryTest.class);
 
     private static BaseXClientFactory factory;
     private CompasSclDataBaseXRepository repository;
