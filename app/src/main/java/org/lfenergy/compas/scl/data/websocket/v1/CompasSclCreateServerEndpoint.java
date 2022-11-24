@@ -18,6 +18,7 @@ import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
@@ -52,7 +53,9 @@ public class CompasSclCreateServerEndpoint {
     }
 
     @OnMessage
-    public void onCreateMessage(Session session, CreateWsRequest request, @PathParam(TYPE_PATH_PARAM) String type) {
+    public void onCreateMessage(Session session,
+                                @Valid CreateWsRequest request,
+                                @PathParam(TYPE_PATH_PARAM) String type) {
         LOGGER.info("Message (create) from session {} for type {}.", session.getId(), type);
 
         String who = jsonWebToken.getClaim(userInfoProperties.who());

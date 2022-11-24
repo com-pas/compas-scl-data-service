@@ -17,6 +17,7 @@ import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
@@ -46,7 +47,7 @@ public class CompasSclGetVersionServerEndpoint {
 
     @OnMessage
     public void onGetVersionMessage(Session session,
-                                    GetVersionWsRequest request,
+                                    @Valid GetVersionWsRequest request,
                                     @PathParam(TYPE_PATH_PARAM) String type) {
         LOGGER.info("Message from session {} for type {}.", session.getId(), type);
 
