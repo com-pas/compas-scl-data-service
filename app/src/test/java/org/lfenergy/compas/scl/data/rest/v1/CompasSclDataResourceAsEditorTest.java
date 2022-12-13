@@ -16,6 +16,7 @@ import org.lfenergy.compas.scl.data.model.HistoryItem;
 import org.lfenergy.compas.scl.data.model.Item;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.v1.model.CreateRequest;
+import org.lfenergy.compas.scl.data.rest.v1.model.DuplicateNameCheckRequest;
 import org.lfenergy.compas.scl.data.rest.v1.model.UpdateRequest;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
@@ -27,7 +28,7 @@ import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.path.xml.config.XmlPathConfig.xmlPathConfig;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_NS_URI;
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
 import static org.mockito.Mockito.*;
@@ -265,6 +266,54 @@ class CompasSclDataResourceAsEditorTest {
                 .statusCode(204);
 
         verify(compasSclDataService).delete(type, uuid, version);
+    }
+
+    @Test
+    void checkNameForDuplication_WhenCalled_WithDuplicateName_ThenServiceCalled() {
+        var type = SclFileType.SCD;
+        var name = "STATION-0012312";
+
+        when(compasSclDataService.hasDuplicateSclName(type, name)).thenReturn(true);
+
+        var request = new DuplicateNameCheckRequest();
+        request.setName(name);
+
+        var response = given()
+                .pathParam(TYPE_PATH_PARAM, type)
+                .contentType(ContentType.XML)
+                .body(request)
+                .when().post("/checkname")
+                .then()
+                .statusCode(200)
+                .extract()
+                .response();
+
+        verify(compasSclDataService).hasDuplicateSclName(type, name);
+        assertTrue(response.xmlPath().getBoolean("DuplicateNameCheckResponse.Duplicate"));
+    }
+
+    @Test
+    void checkNameForDuplication_WhenCalled_WithUniqueName_ThenServiceCalled() {
+        var type = SclFileType.SCD;
+        var name = "STATION-0012312";
+
+        when(compasSclDataService.hasDuplicateSclName(type, name)).thenReturn(false);
+
+        var request = new DuplicateNameCheckRequest();
+        request.setName(name);
+
+        var response = given()
+                .pathParam(TYPE_PATH_PARAM, type)
+                .contentType(ContentType.XML)
+                .body(request)
+                .when().post("/checkname")
+                .then()
+                .statusCode(200)
+                .extract()
+                .response();
+
+        verify(compasSclDataService).hasDuplicateSclName(type, name);
+        assertFalse(response.xmlPath().getBoolean("DuplicateNameCheckResponse.Duplicate"));
     }
 
     private String readSCL() throws IOException {

@@ -122,7 +122,7 @@ public class CompasSclDataService {
             throw new CompasException(NO_SCL_ELEMENT_FOUND_ERROR_CODE, "No valid SCL found in the passed SCL Data.");
         }
 
-        if (repository.hasDuplicateSclName(type, name)) {
+        if (hasDuplicateSclName(type, name)) {
             throw new CompasException(DUPLICATE_SCL_NAME_ERROR_CODE, "Given name of SCL File already used.");
         }
 
@@ -145,6 +145,10 @@ public class CompasSclDataService {
         var newSclData = converter.convertToString(scl);
         repository.create(type, id, name, newSclData, version, who, labels);
         return newSclData;
+    }
+
+    public boolean hasDuplicateSclName(SclFileType type, String name){
+        return repository.hasDuplicateSclName(type, name);
     }
 
     /**

@@ -29,9 +29,6 @@ class CompasSclDataPostgreSQLRepositoryTest extends AbstractCompasSclDataReposit
         repository = new CompasSclDataPostgreSQLRepository(PostgreSQLServerJUnitExtension.getDataSource());
     }
 
-    /*
-     * TODO: Method beneath needs to be moved to AbstractCompasSclDataRepositoryTest
-     * when hasDuplicateSclName has been implemented by CompasSclDataBaseXRepository. */
     @Test
     void hasDuplicateSclName_WhenUsingSclNameThatHasBeenUsedYet_ThenDuplicateIsFound() {
         var expectedVersion = new Version(1, 0, 0);
