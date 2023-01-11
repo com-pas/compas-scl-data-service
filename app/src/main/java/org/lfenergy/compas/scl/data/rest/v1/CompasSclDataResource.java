@@ -143,4 +143,17 @@ public class CompasSclDataResource {
         compasSclDataService.delete(type, id, version);
         return Uni.createFrom().nullItem();
     }
+
+    @POST
+    @Path("/checkname")
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
+    public Uni<DuplicateNameCheckResponse> checkDuplicateName(@PathParam(TYPE_PATH_PARAM) SclFileType type,
+                                                  @Valid DuplicateNameCheckRequest request) {
+        LOGGER.info("Checking for duplicate SCL File name.");
+
+        var response = new DuplicateNameCheckResponse();
+        response.setDuplicate(compasSclDataService.hasDuplicateSclName(type, request.getName()));
+        return Uni.createFrom().item(response);
+    }
 }
