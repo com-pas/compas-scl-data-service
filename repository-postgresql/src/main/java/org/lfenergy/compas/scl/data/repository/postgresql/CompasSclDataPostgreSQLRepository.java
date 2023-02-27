@@ -191,7 +191,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Transactional(SUPPORTS)
     public boolean hasDuplicateSclName(SclFileType type, String name) {
         var sql = """
-                select distinct on (scl_file.id) *
+                select distinct on (scl_file.id) scl_file.name
                   from scl_file
                  where scl_file.type = ?
                  order by scl_file.id
