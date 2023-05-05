@@ -7,8 +7,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakeException;
 import io.quarkus.test.security.TestSecurity;
 
-import javax.websocket.ClientEndpoint;
-import javax.websocket.ContainerProvider;
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.ContainerProvider;
 import java.io.InterruptedIOException;
 import java.net.URI;
 import java.util.concurrent.ExecutionException;

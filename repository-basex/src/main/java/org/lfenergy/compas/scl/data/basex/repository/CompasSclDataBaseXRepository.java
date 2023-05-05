@@ -18,9 +18,9 @@ import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclDataModelMarshaller;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
@@ -29,8 +29,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static javax.transaction.Transactional.TxType.REQUIRED;
-import static javax.transaction.Transactional.TxType.SUPPORTS;
+import static jakarta.transaction.Transactional.TxType.REQUIRED;
+import static jakarta.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERVICE_V1_NS_URI;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_NS_URI;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.BASEX_COMMAND_ERROR_CODE;

@@ -14,8 +14,8 @@ import org.lfenergy.compas.scl.data.websocket.v1.model.CreateWsResponse;
 import org.lfenergy.compas.scl.data.websocket.v1.model.GetWsResponse;
 import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateWsResponse;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Event Handler used to execute the validation asynchronized.

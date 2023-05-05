@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.mockito.Mockito;
 
-import javax.websocket.Session;
+import jakarta.websocket.Session;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
