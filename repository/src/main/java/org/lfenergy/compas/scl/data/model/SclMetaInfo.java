@@ -5,8 +5,8 @@ package org.lfenergy.compas.scl.data.model;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
 
 @Schema(description = "Meta Info found in the database with all basic information about a SCL.")
 @XmlAccessorType(XmlAccessType.FIELD)

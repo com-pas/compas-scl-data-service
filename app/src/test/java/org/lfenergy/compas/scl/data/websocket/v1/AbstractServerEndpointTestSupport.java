@@ -7,10 +7,10 @@ import org.lfenergy.compas.core.commons.model.ErrorMessage;
 import org.lfenergy.compas.core.commons.model.ErrorResponse;
 import org.lfenergy.compas.core.websocket.ErrorResponseDecoder;
 
-import javax.websocket.ClientEndpoint;
-import javax.websocket.ContainerProvider;
-import javax.websocket.OnMessage;
-import javax.websocket.Session;
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.Session;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.LinkedBlockingDeque;
