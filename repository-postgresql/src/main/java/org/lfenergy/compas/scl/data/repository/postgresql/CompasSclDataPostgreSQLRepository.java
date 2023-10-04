@@ -13,10 +13,10 @@ import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import javax.sql.DataSource;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -26,8 +26,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static javax.transaction.Transactional.TxType.REQUIRED;
-import static javax.transaction.Transactional.TxType.SUPPORTS;
+import static jakarta.transaction.Transactional.TxType.REQUIRED;
+import static jakarta.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
 
 @ApplicationScoped
