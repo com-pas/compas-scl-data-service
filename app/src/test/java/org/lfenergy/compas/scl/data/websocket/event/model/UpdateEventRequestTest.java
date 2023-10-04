@@ -12,7 +12,7 @@ import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.mockito.Mockito;
 
-import javax.websocket.Session;
+import jakarta.websocket.Session;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

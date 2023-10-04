@@ -23,10 +23,9 @@ SPDX-License-Identifier: Apache-2.0
         <surefire-plugin.version>3.1.0</surefire-plugin.version>
         <sonarqube-plugin.version>3.2.0</sonarqube-plugin.version>
 
-        <compas.core.version>0.12.0</compas.core.version>
-        <quarkus.platform.version>2.16.6.Final</quarkus.platform.version>
+        <compas.core.version>0.16.0</compas.core.version>
+        <quarkus.platform.version>3.0.4.Final</quarkus.platform.version>
 
-        <jaxb-impl.version>2.3.8</jaxb-impl.version>
         <microprofile-openapi-api.version>3.1</microprofile-openapi-api.version>
         <log4j2.version>2.20.0</log4j2.version>
         <openpojo.version>0.9.1</openpojo.version>
@@ -59,8 +58,8 @@ SPDX-License-Identifier: Apache-2.0
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>io.quarkus</groupId>
-                <artifactId>quarkus-universe-bom</artifactId>
+                <groupId>io.quarkus.platform</groupId>
+                <artifactId>quarkus-bom</artifactId>
                 <version>${quarkus.platform.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -106,12 +105,6 @@ SPDX-License-Identifier: Apache-2.0
                 <groupId>org.lfenergy.compas.core</groupId>
                 <artifactId>websocket-commons</artifactId>
                 <version>${compas.core.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-impl</artifactId>
-                <version>${jaxb-impl.version}</version>
             </dependency>
 
             <dependency>
