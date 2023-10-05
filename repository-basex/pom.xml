@@ -37,9 +37,10 @@ SPDX-License-Identifier: Apache-2.0
             <artifactId>microprofile-config-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
             <scope>provided</scope>
+            <version>4.0.2</version>
         </dependency>
 
         <dependency>

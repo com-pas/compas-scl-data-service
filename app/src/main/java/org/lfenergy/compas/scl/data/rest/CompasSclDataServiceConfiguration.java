@@ -7,8 +7,8 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.scl.data.util.SclDataModelMarshaller;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
 
 /**
  * Create Beans from other dependencies that are used in the application.
