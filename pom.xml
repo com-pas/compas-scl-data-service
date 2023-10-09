@@ -33,7 +33,6 @@ SPDX-License-Identifier: Apache-2.0
 
     <modules>
         <module>repository</module>
-        <module>repository-basex</module>
         <module>repository-postgresql</module>
         <module>service</module>
         <module>app</module>
@@ -73,11 +72,6 @@ SPDX-License-Identifier: Apache-2.0
             <dependency>
                 <groupId>org.lfenergy.compas.scl.data</groupId>
                 <artifactId>repository</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.lfenergy.compas.scl.data</groupId>
-                <artifactId>repository-basex</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

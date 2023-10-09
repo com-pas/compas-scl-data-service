@@ -18,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL;
 
 /**
- * JUnit extension to start a BaseX Server. This server should only be started and stopped once for all
+ * JUnit extension to start a Postgresql Server. This server should only be started and stopped once for all
  * JUnit Tests.
  */
 public class PostgreSQLServerJUnitExtension implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
