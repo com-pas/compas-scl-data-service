@@ -6,7 +6,7 @@ package org.lfenergy.compas.scl.data.websocket.event.model;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
-import javax.websocket.Session;
+import jakarta.websocket.Session;
 import java.util.UUID;
 
 public class UpdateEventRequest {

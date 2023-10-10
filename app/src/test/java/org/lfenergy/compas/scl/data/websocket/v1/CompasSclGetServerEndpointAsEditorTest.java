@@ -14,10 +14,10 @@ import org.lfenergy.compas.scl.data.websocket.v1.model.GetWsRequest;
 import org.lfenergy.compas.scl.data.websocket.v1.model.GetWsResponse;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
-import javax.websocket.ClientEndpoint;
-import javax.websocket.ContainerProvider;
-import javax.websocket.OnMessage;
-import javax.websocket.Session;
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.Session;
 import java.net.URI;
 import java.util.UUID;
 
