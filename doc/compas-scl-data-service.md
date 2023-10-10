@@ -55,15 +55,6 @@ The Service class contains some logic regarding versions and private elements.
 - delete: Remove (all versions) of the SCL from the storage. Or if the version is passed that specific version of the
   SCL.
 
-### BaseX
-
-There a some BaseX specific choices made in storing the SCL.
-
-- For every type of SCL a separate database is created. This is quite easy done in BaseX.
-  ![Databases](images/CoMPAS-SclDataService-Databases.png)
-- In these databases the SCL will be stored as "\<uuid\>/\<major-version\>/\<minor-version\>/\<patch-version\>/scl.xml".
-  This way it will be easy to store the different version and find the latest version.
-
 ### PostgreSQL
 
 There a some PostgreSQL choices made in storing the SCL.

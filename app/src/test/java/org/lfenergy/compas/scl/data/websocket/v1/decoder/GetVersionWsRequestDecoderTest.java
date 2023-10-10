@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl.data.model.Version;
 
-import javax.xml.bind.UnmarshalException;
+import jakarta.xml.bind.UnmarshalException;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;

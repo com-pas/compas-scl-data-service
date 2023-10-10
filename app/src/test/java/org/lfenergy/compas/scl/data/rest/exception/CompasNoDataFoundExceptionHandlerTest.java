@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.core.commons.model.ErrorResponse;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
