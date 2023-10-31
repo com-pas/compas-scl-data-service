@@ -8,7 +8,7 @@ import org.lfenergy.compas.scl.data.model.Version;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;

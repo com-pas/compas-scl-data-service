@@ -32,9 +32,10 @@ SPDX-License-Identifier: Apache-2.0
             <artifactId>jakarta.xml.bind-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
             <scope>provided</scope>
+            <version>4.0.4</version>
         </dependency>
 
         <dependency>
