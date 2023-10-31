@@ -22,7 +22,7 @@ public class Item extends AbstractItem implements IItem {
             example = "[Label-1, Label-2]")
     @XmlElement(name = "Label",
             namespace = SCL_DATA_SERVICE_V1_NS_URI)
-    private List<String> labels;
+    private List<String> labels = new ArrayList<>();
 
     public Item() { }
 
