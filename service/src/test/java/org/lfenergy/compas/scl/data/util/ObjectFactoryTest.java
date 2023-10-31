@@ -1,9 +1,13 @@
 // SPDX-FileCopyrightText: 2021 Alliander N.V.
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.model;
+package org.lfenergy.compas.scl.data.util;
 
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl.data.xml.HistoryItem;
+import org.lfenergy.compas.scl.data.xml.Item;
+import org.lfenergy.compas.scl.data.xml.ObjectFactory;
+import org.lfenergy.compas.scl.data.xml.SclMetaInfo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

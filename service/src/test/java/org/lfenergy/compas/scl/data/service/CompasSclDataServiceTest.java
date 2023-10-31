@@ -14,8 +14,9 @@ import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.data.model.HistoryItem;
-import org.lfenergy.compas.scl.data.model.SclMetaInfo;
+import org.lfenergy.compas.scl.data.model.IHistoryItem;
+import org.lfenergy.compas.scl.data.xml.HistoryItem;
+import org.lfenergy.compas.scl.data.xml.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
@@ -66,14 +67,18 @@ class CompasSclDataServiceTest {
     @Test
     void listVersionsByUUID_WhenCalledAndRepositoryReturnItemList_ThenListIsReturned() {
         var uuid = UUID.randomUUID();
-        var expectedResult = List.of(new HistoryItem());
+        var id = UUID.randomUUID().toString();
+
+        var historyItem = mock(IHistoryItem.class);
+        when(historyItem.getId()).thenReturn(id);
+        List<IHistoryItem> expectedResult = List.of(historyItem);
         when(compasSclDataRepository.listVersionsByUUID(SCL_TYPE, uuid)).thenReturn(expectedResult);
 
         var result = compasSclDataService.listVersionsByUUID(SCL_TYPE, uuid);
 
         assertNotNull(result);
         assertEquals(expectedResult.size(), result.size());
-        assertEquals(expectedResult.get(0), result.get(0));
+        assertEquals(historyItem.getId(), result.get(0).getId());
         verify(compasSclDataRepository).listVersionsByUUID(SCL_TYPE, uuid);
     }
 

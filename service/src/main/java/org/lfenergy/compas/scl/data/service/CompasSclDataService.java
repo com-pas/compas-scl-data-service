@@ -8,8 +8,8 @@ import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.data.model.HistoryItem;
-import org.lfenergy.compas.scl.data.model.Item;
+import org.lfenergy.compas.scl.data.xml.HistoryItem;
+import org.lfenergy.compas.scl.data.xml.Item;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
@@ -60,7 +60,10 @@ public class CompasSclDataService {
      */
     @Transactional(SUPPORTS)
     public List<Item> list(SclFileType type) {
-        return repository.list(type);
+        return repository.list(type)
+                .stream()
+                .map(e -> new Item(e.getId(), e.getName(), e.getVersion(), e.getLabels()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -77,7 +80,10 @@ public class CompasSclDataService {
             var message = String.format("No versions found for type '%s' with ID '%s'", type, id);
             throw new CompasNoDataFoundException(message);
         }
-        return items;
+        return items
+            .stream()
+            .map(e -> new HistoryItem(e.getId(), e.getName(), e.getVersion(), e.getWho(), e.getWhen(), e.getWhat()))
+            .collect(Collectors.toList());
     }
 
     /**

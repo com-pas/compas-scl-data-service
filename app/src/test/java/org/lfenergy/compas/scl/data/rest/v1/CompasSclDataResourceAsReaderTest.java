@@ -5,13 +5,12 @@ package org.lfenergy.compas.scl.data.rest.v1;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.data.model.HistoryItem;
-import org.lfenergy.compas.scl.data.model.Item;
+import org.lfenergy.compas.scl.data.xml.HistoryItem;
+import org.lfenergy.compas.scl.data.xml.Item;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.v1.model.CreateRequest;
 import org.lfenergy.compas.scl.data.rest.v1.model.UpdateRequest;
@@ -29,11 +28,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_NS_URI;
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
 import static org.mockito.Mockito.*;
+import io.quarkus.test.InjectMock;
 
 @QuarkusTest
 @TestHTTPEndpoint(CompasSclDataResource.class)
 @TestSecurity(user = "test-reader", roles = {"SCD_" + READ_ROLE})
 class CompasSclDataResourceAsReaderTest {
+
     @InjectMock
     private CompasSclDataService compasSclDataService;
 

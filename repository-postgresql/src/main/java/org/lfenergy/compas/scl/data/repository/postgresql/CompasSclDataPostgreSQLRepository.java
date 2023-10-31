@@ -6,10 +6,7 @@ package org.lfenergy.compas.scl.data.repository.postgresql;
 
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
-import org.lfenergy.compas.scl.data.model.HistoryItem;
-import org.lfenergy.compas.scl.data.model.Item;
-import org.lfenergy.compas.scl.data.model.SclMetaInfo;
-import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
@@ -51,7 +48,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(SUPPORTS)
-    public List<Item> list(SclFileType type) {
+    public List<IItem> list(SclFileType type) {
         var sql = """
                 select scl_file.id, scl_file.name,
                        scl_file.major_version, scl_file.minor_version, scl_file.patch_version,
@@ -76,7 +73,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                   order by scl_file.name, scl_file.major_version, scl_file.minor_version, scl_file.patch_version
                 """;
 
-        var items = new ArrayList<Item>();
+        List<IItem> items = new ArrayList<>();
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, type.name());
@@ -97,7 +94,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(SUPPORTS)
-    public List<HistoryItem> listVersionsByUUID(SclFileType type, UUID id) {
+    public List<IHistoryItem> listVersionsByUUID(SclFileType type, UUID id) {
         var sql = """
                 select scl_file.id, scl_file.name
                      , scl_file.major_version, scl_file.minor_version, scl_file.patch_version
@@ -123,7 +120,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                         , scl_file.patch_version
                 """;
 
-        var items = new ArrayList<HistoryItem>();
+        List<IHistoryItem> items = new ArrayList<>();
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, id);
@@ -218,7 +215,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(SUPPORTS)
-    public SclMetaInfo findMetaInfoByUUID(SclFileType type, UUID id) {
+    public IAbstractItem findMetaInfoByUUID(SclFileType type, UUID id) {
         var sql = """
                 select scl_file.id, scl_file.name, scl_file.major_version, scl_file.minor_version, scl_file.patch_version
                   from scl_file
