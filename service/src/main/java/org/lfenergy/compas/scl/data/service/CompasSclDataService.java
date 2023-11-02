@@ -63,7 +63,7 @@ public class CompasSclDataService {
         return repository.list(type)
                 .stream()
                 .map(e -> new Item(e.getId(), e.getName(), e.getVersion(), e.getLabels()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -83,7 +83,7 @@ public class CompasSclDataService {
         return items
             .stream()
             .map(e -> new HistoryItem(e.getId(), e.getName(), e.getVersion(), e.getWho(), e.getWhen(), e.getWhat()))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /**
@@ -203,6 +203,7 @@ public class CompasSclDataService {
 
         var newSclData = converter.convertToString(scl);
         repository.create(type, id, newSclName, newSclData, version, who, labels);
+
         return newSclData;
     }
 
@@ -243,6 +244,7 @@ public class CompasSclDataService {
                 .orElseGet(() -> sclElementProcessor.addSclHeader(scl));
         header.setAttribute(SCL_ID_ATTR, id.toString());
         header.setAttribute(SCL_VERSION_ATTR, version.toString());
+
         return header;
     }
 
@@ -274,19 +276,19 @@ public class CompasSclDataService {
                 .orElseGet(() -> sclElementProcessor.addCompasPrivate(scl));
 
         sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_NAME_EXTENSION, COMPAS_EXTENSION_NS_URI)
-                .ifPresentOrElse(
-                        // Override the value of the element with the name passed.
-                        element -> element.setTextContent(name),
-                        () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, name)
-                );
+            .ifPresentOrElse(
+                // Override the value of the element with the name passed.
+                element -> element.setTextContent(name),
+                () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, name)
+            );
 
         // Always set the file type as private element.
         sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION, COMPAS_EXTENSION_NS_URI)
-                .ifPresentOrElse(
-                        element -> element.setTextContent(fileType.toString()),
-                        () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION,
-                                fileType.toString())
-                );
+            .ifPresentOrElse(
+                element -> element.setTextContent(fileType.toString()),
+                () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION,
+                    fileType.toString())
+            );
     }
 
     /**
@@ -337,8 +339,8 @@ public class CompasSclDataService {
         }
 
         return labelElements.stream()
-                .map(Element::getTextContent)
-                .toList();
+            .map(Element::getTextContent)
+            .toList();
     }
 
     /**
