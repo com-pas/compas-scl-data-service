@@ -33,10 +33,6 @@ SPDX-License-Identifier: Apache-2.0
         </dependency>
         <dependency>
             <groupId>org.lfenergy.compas.scl.data</groupId>
-            <artifactId>repository-basex</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.lfenergy.compas.scl.data</groupId>
             <artifactId>repository-postgresql</artifactId>
         </dependency>
 
@@ -171,28 +167,8 @@ SPDX-License-Identifier: Apache-2.0
                             <goal>generate-code-tests</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>build-basex</id>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                        <configuration>
-                            <properties>
-                                <quarkus.profile>prod-basex</quarkus.profile>
-                                <quarkus.package.output-directory>basex-quarkus-app</quarkus.package.output-directory>
-                                <quarkus.docker.dockerfile-jvm-path>src/main/docker/Dockerfile-basex.jvm
-                                </quarkus.docker.dockerfile-jvm-path>
-                                <quarkus.docker.dockerfile-native-path>src/main/docker/Dockerfile-basex.native
-                                </quarkus.docker.dockerfile-native-path>
-                                <quarkus.container-image.tag>${project.version}-basex</quarkus.container-image.tag>
-                                <quarkus.container-image.additional-tags>latest-basex
-                                </quarkus.container-image.additional-tags>
-                            </properties>
-                        </configuration>
-                    </execution>
                     <!-- Put this build execution as last, because we will use this image to do a basic native check (NativeHealthCheckIT).
                          This information is written in "target\quarkus-artifact.properties" and used by the integration tests (failsafe).
-                         Sadly there is only 1 file create, so this build overwrites the one from basex.
                       -->
                     <execution>
                         <id>build-postgresql</id>
@@ -285,23 +261,6 @@ SPDX-License-Identifier: Apache-2.0
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <version>${surefire-plugin.version}</version>
                         <executions>
-                            <execution>
-                                <id>integration-test-basex</id>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                                <configuration>
-                                    <systemPropertyVariables>
-                                        <native.image.path>
-                                            ${project.build.directory}/basex-quarkus-app/${project.build.finalName}-runner
-                                        </native.image.path>
-                                        <java.util.logging.manager>org.jboss.logmanager.LogManager
-                                        </java.util.logging.manager>
-                                        <maven.home>${maven.home}</maven.home>
-                                    </systemPropertyVariables>
-                                </configuration>
-                            </execution>
                         </executions>
                     </plugin>
                 </plugins>
