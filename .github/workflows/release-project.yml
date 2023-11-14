@@ -20,6 +20,8 @@ jobs:
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
+        with:
+          detached: true
       
       - name: Cache Docker Register
         uses: actions/cache@v3
