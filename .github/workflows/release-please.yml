@@ -22,7 +22,7 @@ jobs:
         id: release
         with:
           release-type: node
-          package-name: compas-cim-mapping
+          package-name: compas-scl-data-service
   # The logic below handles the docker hub publication:
   push_to_registry:
     needs: release_please
