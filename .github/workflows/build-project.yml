@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Cache Docker Register
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ hashFiles('**/Dockerfile') }}
@@ -33,14 +33,14 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
           cache: 'maven'
 
       - name: Create custom Maven Settings.xml
-        uses: whelk-io/maven-settings-xml-action@v21
+        uses: whelk-io/maven-settings-xml-action@v22
         with:
           output_file: custom_maven_settings.xml
           servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'

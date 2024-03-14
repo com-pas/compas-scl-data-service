@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
             <scope>provided</scope>
-            <version>4.0.4</version>
+            <version>4.0.5</version>
         </dependency>
 
         <dependency>
@@ -70,11 +70,6 @@ SPDX-License-Identifier: Apache-2.0
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.openpojo</groupId>
-            <artifactId>openpojo</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

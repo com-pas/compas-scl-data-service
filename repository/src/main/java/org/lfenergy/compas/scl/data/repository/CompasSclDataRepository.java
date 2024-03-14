@@ -3,10 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.repository;
 
-import org.lfenergy.compas.scl.data.model.HistoryItem;
-import org.lfenergy.compas.scl.data.model.Item;
-import org.lfenergy.compas.scl.data.model.SclMetaInfo;
-import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import java.util.List;
@@ -23,7 +20,7 @@ public interface CompasSclDataRepository {
      * @param type The type of SCL to search for.
      * @return The list of entries found for the passed type.
      */
-    List<Item> list(SclFileType type);
+    List<IItem> list(SclFileType type);
 
     /**
      * List all versions for a specific SCL Entry for a type of SCL.
@@ -32,7 +29,7 @@ public interface CompasSclDataRepository {
      * @param id   The ID of the SCL to search for.
      * @return The list of versions found for that specific sCl Entry.
      */
-    List<HistoryItem> listVersionsByUUID(SclFileType type, UUID id);
+    List<IHistoryItem> listVersionsByUUID(SclFileType type, UUID id);
 
     /**
      * Return the latest version of a specific SCL Entry.
@@ -50,7 +47,7 @@ public interface CompasSclDataRepository {
      * @param id   The ID of the SCL to search for.
      * @return The Meta Info of SCL Entry that is search for.
      */
-    SclMetaInfo findMetaInfoByUUID(SclFileType type, UUID id);
+    IAbstractItem findMetaInfoByUUID(SclFileType type, UUID id);
 
     /**
      * Return the specific version of a specific SCL Entry.

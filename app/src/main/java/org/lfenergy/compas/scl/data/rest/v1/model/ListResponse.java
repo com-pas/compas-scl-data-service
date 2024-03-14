@@ -4,7 +4,7 @@
 package org.lfenergy.compas.scl.data.rest.v1.model;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.lfenergy.compas.scl.data.model.Item;
+import org.lfenergy.compas.scl.data.xml.Item;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;

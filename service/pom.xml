@@ -22,7 +22,16 @@ SPDX-License-Identifier: Apache-2.0
             <groupId>org.lfenergy.compas.scl.data</groupId>
             <artifactId>repository</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <scope>provƒided</scope>
+            <version>4.0.5</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.lfenergy.compas.core</groupId>
             <artifactId>scl-extension</artifactId>
@@ -52,6 +61,11 @@ SPDX-License-Identifier: Apache-2.0
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.openpojo</groupId>
+            <artifactId>openpojo</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

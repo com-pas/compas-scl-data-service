@@ -8,8 +8,8 @@ import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.data.model.HistoryItem;
-import org.lfenergy.compas.scl.data.model.Item;
+import org.lfenergy.compas.scl.data.xml.HistoryItem;
+import org.lfenergy.compas.scl.data.xml.Item;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
@@ -60,7 +60,10 @@ public class CompasSclDataService {
      */
     @Transactional(SUPPORTS)
     public List<Item> list(SclFileType type) {
-        return repository.list(type);
+        return repository.list(type)
+                .stream()
+                .map(e -> new Item(e.getId(), e.getName(), e.getVersion(), e.getLabels()))
+                .toList();
     }
 
     /**
@@ -77,7 +80,10 @@ public class CompasSclDataService {
             var message = String.format("No versions found for type '%s' with ID '%s'", type, id);
             throw new CompasNoDataFoundException(message);
         }
-        return items;
+        return items
+            .stream()
+            .map(e -> new HistoryItem(e.getId(), e.getName(), e.getVersion(), e.getWho(), e.getWhen(), e.getWhat()))
+            .toList();
     }
 
     /**
@@ -197,6 +203,7 @@ public class CompasSclDataService {
 
         var newSclData = converter.convertToString(scl);
         repository.create(type, id, newSclName, newSclData, version, who, labels);
+
         return newSclData;
     }
 
@@ -237,6 +244,7 @@ public class CompasSclDataService {
                 .orElseGet(() -> sclElementProcessor.addSclHeader(scl));
         header.setAttribute(SCL_ID_ATTR, id.toString());
         header.setAttribute(SCL_VERSION_ATTR, version.toString());
+
         return header;
     }
 
@@ -268,19 +276,19 @@ public class CompasSclDataService {
                 .orElseGet(() -> sclElementProcessor.addCompasPrivate(scl));
 
         sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_NAME_EXTENSION, COMPAS_EXTENSION_NS_URI)
-                .ifPresentOrElse(
-                        // Override the value of the element with the name passed.
-                        element -> element.setTextContent(name),
-                        () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, name)
-                );
+            .ifPresentOrElse(
+                // Override the value of the element with the name passed.
+                element -> element.setTextContent(name),
+                () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, name)
+            );
 
         // Always set the file type as private element.
         sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION, COMPAS_EXTENSION_NS_URI)
-                .ifPresentOrElse(
-                        element -> element.setTextContent(fileType.toString()),
-                        () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION,
-                                fileType.toString())
-                );
+            .ifPresentOrElse(
+                element -> element.setTextContent(fileType.toString()),
+                () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION,
+                    fileType.toString())
+            );
     }
 
     /**
@@ -331,8 +339,8 @@ public class CompasSclDataService {
         }
 
         return labelElements.stream()
-                .map(Element::getTextContent)
-                .toList();
+            .map(Element::getTextContent)
+            .toList();
     }
 
     /**

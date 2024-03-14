@@ -6,13 +6,14 @@ package org.lfenergy.compas.scl.data.util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
-import org.lfenergy.compas.scl.data.model.HistoryItem;
-import org.lfenergy.compas.scl.data.model.Item;
-import org.lfenergy.compas.scl.data.model.SclMetaInfo;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
+import org.lfenergy.compas.scl.data.xml.HistoryItem;
+import org.lfenergy.compas.scl.data.xml.Item;
+import org.lfenergy.compas.scl.data.xml.SclMetaInfo;
+
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 
@@ -26,7 +27,7 @@ public class SclDataModelMarshaller {
 
     public SclDataModelMarshaller() {
         try {
-            var jaxbContext = JAXBContext.newInstance("org.lfenergy.compas.scl.data.model");
+            var jaxbContext = JAXBContext.newInstance("org.lfenergy.compas.scl.data.xml");
             jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         } catch (JAXBException exp) {
             LOGGER.error("Construction problem: {}", exp.getLocalizedMessage(), exp);
