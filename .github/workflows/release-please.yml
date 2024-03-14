@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         if: ${{ steps.release.outputs.release_created }}
         uses: actions/checkout@v4
-
+      
       - name: Cache Docker Register
         if: ${{ steps.release.outputs.release_created }}
         uses: actions/cache@v4
@@ -70,6 +70,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Deploy with Maven to GitHub Packages and Docker Hub
         if: ${{ steps.release.outputs.release_created }}
-        run: ./mvnw -B -s custom_maven_settings.xml -Pnative-image,release clean deploy
+        run: ./mvnw -B -s custom_maven_settings.xml -Pjvm-image,release clean deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
