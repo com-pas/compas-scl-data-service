@@ -19,8 +19,6 @@ jobs:
       - uses: google-github-actions/release-please-action@v4
         id: release
         with:
-          release-type: maven
-          package-name: compas-scl-data-service
           target-branch: main
       - name: Checkout
         if: ${{ steps.release.outputs.release_created }}
