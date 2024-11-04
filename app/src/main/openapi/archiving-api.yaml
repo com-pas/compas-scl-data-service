@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: CoMPAS SCL Data Service History API
+  title: CoMPAS SCL Data Archiving API
   version: 1.0.0
 
 servers:
@@ -454,6 +454,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponseDto'
+  /api/archive/resources/search:
+    post:
+      tags:
+        - archiving
+      summary: Search for archived resources
+      security:
+        - open-id-connect: [ read ]
+      operationId: searchArchivedResources
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchivedResourcesSearch'
+      responses:
+        '200':
+          description: Successfully generated location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchivedResources'
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '403':
+          description: Authorization failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '404':
+          description: Unable to find location or resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+
 
 components:
   securitySchemes:
@@ -509,9 +554,12 @@ components:
       required:
         - uuid
         - name
+        - author
         - contentType
         - version
         - fields
+        - modifiedAt
+        - archivedAt
       properties:
         uuid:
           type: string
@@ -519,12 +567,33 @@ components:
         name:
           type: string
           description: "Resource name"
+        note:
+          type: string
+          description: "Versioning note"
+        author:
+          type: string
+          description: "Modifying author"
+        aprover:
+          type: string
+          description: "Name of the aprover"
+        type:
+          type: string
+          description: "Content type"
         contentType:
+          type: string
+          description: "Content type"
+        voltage:
           type: string
           description: "Content type"
         version:
           type: string
           description: "Version"
+        modifiedAt:
+          type: string
+          format: date-time
+        archivedAt:
+          type: string
+          format: date-time
         fields:
           type: array
           items:
@@ -541,6 +610,47 @@ components:
         value:
           type: string
           description: "Tag value"
+    ArchivedResourcesSearch:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: "If uuid is set no other filter must be set"
+        location:
+          type: string
+          description: "Exact match of a location"
+        name:
+          type: string
+          description: "Partially match allowed"
+        aprover:
+          type: string
+          description: "Fulltext match which can be retrieved via extra endpoint"
+        contentType:
+          type: string
+          description: "Fulltext match set to one of the supported scl types: SSD, IID, ICD, SCD, CID, SED, ISD, STD, etc."
+        type:
+          type: string
+          description: "Type of the documented entity eg. Schütz, Leittechnik, etc"
+        voltage:
+          type: string
+          description: "Voltage of the documented entity eg. 110, 220, 380"
+        from:
+          type: string
+          format: date-time
+          description: "Starting date from where resources have been archived. Use ISO 8601 format (e.g., 2024-10-22T14:48:00Z)."
+        to:
+          type: string
+          format: date-time
+          description: "Ending date from where resources have been archived. Use ISO 8601 format (e.g., 2024-10-22T14:48:00Z)."
+    ArchivedResources:
+      type: object
+      required:
+        - resources
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArchivedResource'
     ErrorResponseDto:
       required:
         - timestamp
