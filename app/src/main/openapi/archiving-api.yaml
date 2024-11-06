@@ -549,6 +549,10 @@ components:
         description:
           type: string
           description: "Location description"
+        assignedResources:
+          type: integer
+          format: int32
+          description: "Number of resources assigned to this location"
     ArchivedResource:
       type: object
       required:
@@ -564,6 +568,9 @@ components:
         uuid:
           type: string
           description: "Unique resource identifier"
+        location:
+          type: string
+          description: "Location of the resource, might be empty"
         name:
           type: string
           description: "Resource name"
