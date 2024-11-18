@@ -30,6 +30,9 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private static final String MINOR_VERSION_FIELD = "minor_version";
     private static final String PATCH_VERSION_FIELD = "patch_version";
     private static final String NAME_FIELD = "name";
+    private static final String LOCATIONMETAITEM_KEY_FIELD = "key";
+    private static final String LOCATIONMETAITEM_DESCRIPTION_FIELD = "description";
+    private static final String LOCATIONMETAITEM_RESOURCE_ID_FIELD = "resource_id";
     private static final String SCL_DATA_FIELD = "scl_data";
     private static final String HITEM_WHO_FIELD = "hitem_who";
     private static final String HITEM_WHEN_FIELD = "hitem_when";
@@ -606,6 +609,143 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         return executeHistoryQuery(sql, Collections.singletonList(id));
     }
 
+    @Override
+    @Transactional(REQUIRED)
+    public ILocationMetaItem createLocation(UUID id, String key, String name, String description) {
+        String sql = """
+            INSERT INTO location (id, key, name, description, resource_id)
+            VALUES      (?, ?, ?, ?, null);
+            """;
+
+        try (var connection = dataSource.getConnection();
+             var sclStmt = connection.prepareStatement(sql)) {
+            sclStmt.setObject(1, id);
+            sclStmt.setString(2, key);
+            sclStmt.setString(3, name);
+            sclStmt.setString(4, description == null ? "" : description);
+            sclStmt.executeUpdate();
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error adding Location to database!", exp);
+        }
+
+        return findLocationByUUID(id);
+    }
+
+    @Override
+    @Transactional(SUPPORTS)
+    public List<ILocationMetaItem> listLocations(int page, int pageSize) {
+        String sql = """
+            SELECT   *
+            FROM     location
+            ORDER BY name
+            OFFSET   ?
+            LIMIT    ?;
+            """;
+        int offset = 0;
+        if (page > 1) {
+            offset = (page - 1) * pageSize;
+        }
+        return executeLocationQuery(sql, List.of(offset, pageSize));
+    }
+
+    @Override
+    @Transactional(SUPPORTS)
+    public ILocationMetaItem findLocationByUUID(UUID locationId) {
+        String sql = """
+            SELECT *
+            FROM   location
+            WHERE  id = ?
+            ORDER BY name;
+            """;
+        List<ILocationMetaItem> retrievedLocation = executeLocationQuery(sql, Collections.singletonList(locationId));
+        if (retrievedLocation.isEmpty()) {
+            throw new CompasNoDataFoundException(String.format("Unable to find Location with id %s.", locationId));
+        }
+        return retrievedLocation.get(0);
+    }
+
+    @Override
+    @Transactional(REQUIRED)
+    public void deleteLocation(UUID locationId) {
+        String sql = """
+            DELETE FROM location
+            WHERE       id = ?;
+            """;
+        try (var connection = dataSource.getConnection();
+             var sclStmt = connection.prepareStatement(sql)) {
+            sclStmt.setObject(1, locationId);
+            sclStmt.executeUpdate();
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_DELETE_ERROR_CODE, "Error removing Location from database", exp);
+        }
+    }
+
+    @Override
+    @Transactional(REQUIRED)
+    public ILocationMetaItem updateLocation(UUID locationId, String key, String name, String description) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("""
+            UPDATE location
+            SET    key = ?, name = ?
+            """);
+        if (description != null && !description.isBlank()) {
+            sqlBuilder.append(", description = ?");
+            sqlBuilder.append("\n");
+        }
+        sqlBuilder.append("WHERE id = ?;");
+        try (var connection = dataSource.getConnection();
+             var sclStmt = connection.prepareStatement(sqlBuilder.toString())) {
+            sclStmt.setString(1, key);
+            sclStmt.setString(2, name);
+            if (description == null || description.isBlank()) {
+                sclStmt.setObject(3, locationId);
+            } else {
+                sclStmt.setString(3, description);
+                sclStmt.setObject(4, locationId);
+            }
+            sclStmt.executeUpdate();
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error updating Location in database!", exp);
+        }
+        return findLocationByUUID(locationId);
+    }
+
+    @Override
+    @Transactional(REQUIRED)
+    public void assignResourceToLocation(UUID locationId, UUID resourceId) {
+        String sql = """
+            UPDATE location
+            SET    resource_id = ?
+            WHERE  id = ?;
+            """;
+        try (var connection = dataSource.getConnection();
+             var sclStmt = connection.prepareStatement(sql)) {
+            sclStmt.setObject(1, resourceId);
+            sclStmt.setObject(2, locationId);
+            sclStmt.executeUpdate();
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error assigning SCL Resource to Location in database!", exp);
+        }
+    }
+
+    @Override
+    @Transactional(REQUIRED)
+    public void unassignResourceFromLocation(UUID locationId, UUID resourceId) {
+        String sql = """
+            UPDATE location
+            SET    resource_id = NULL
+            WHERE  id = ? AND resource_id = ?;
+            """;
+        try (var connection = dataSource.getConnection();
+             var sclStmt = connection.prepareStatement(sql)) {
+            sclStmt.setObject(1, locationId);
+            sclStmt.setObject(2, resourceId);
+            sclStmt.executeUpdate();
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error unassigning SCL Resource from Location in database!", exp);
+        }
+    }
+
     private List<IHistoryMetaItem> executeHistoryQuery(String sql, List<Object> parameters) {
         List<IHistoryMetaItem> items = new ArrayList<>();
         try (
@@ -648,5 +788,35 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         return sqlTimestamp != null
                 ? sqlTimestamp.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime()
                 : null;
+    }
+
+    private List<ILocationMetaItem> executeLocationQuery(String sql, List<Object> parameters) {
+        List<ILocationMetaItem> items = new ArrayList<>();
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                while (resultSet.next()) {
+                    items.add(mapResultSetToLocationMetaItem(resultSet));
+                }
+            }
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE, "Error listing Location entries from database!", exp);
+        }
+        return items;
+    }
+
+    private LocationMetaItem mapResultSetToLocationMetaItem(ResultSet resultSet) throws SQLException {
+        UUID resourceId = resultSet.getObject(LOCATIONMETAITEM_RESOURCE_ID_FIELD, UUID.class);
+        int resourceCount = resourceId == null ? 0 : 1;
+        return new LocationMetaItem(
+            resultSet.getString(ID_FIELD),
+            resultSet.getString(LOCATIONMETAITEM_KEY_FIELD),
+            resultSet.getString(NAME_FIELD),
+            resultSet.getString(LOCATIONMETAITEM_DESCRIPTION_FIELD),
+            resourceCount
+        );
     }
 }

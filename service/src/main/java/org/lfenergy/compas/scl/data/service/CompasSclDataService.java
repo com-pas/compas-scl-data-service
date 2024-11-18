@@ -10,9 +10,7 @@ import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
-import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.data.model.IHistoryMetaItem;
-import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
 import org.lfenergy.compas.scl.data.xml.HistoryItem;
@@ -466,5 +464,87 @@ public class CompasSclDataService {
     @Transactional(SUPPORTS)
     public List<IHistoryMetaItem> listHistoryVersionsByUUID(UUID id) {
         return repository.listHistoryVersionsByUUID(id);
+    }
+
+    /**
+     * Find the Location with the specified uuid
+     *
+     * @param id uuid of the Location
+     * @return The Location entry with the matching id
+     */
+    @Transactional(SUPPORTS)
+    public ILocationMetaItem findLocationByUUID(UUID id) {
+        return repository.findLocationByUUID(id);
+    }
+
+    /**
+     * List all Locations
+     *
+     * @param page The current page number to be displayed
+     * @param pageSize The amount of entries per page
+     * @return All Location entries in a paginated list
+     */
+    @Transactional(SUPPORTS)
+    public List<ILocationMetaItem> listLocations(int page, int pageSize) {
+        return repository.listLocations(page, pageSize);
+    }
+
+    /**
+     * Create a Location entry according to the supplied parameters
+     *
+     * @param key The key value of the Location entry
+     * @param name The name value of the Location entry
+     * @param description The description value of the Location entry
+     * @return The created Location entry
+     */
+    @Transactional(REQUIRED)
+    public ILocationMetaItem createLocation(String key, String name, String description) {
+        return repository.createLocation(UUID.randomUUID(), key, name, description);
+    }
+
+    /**
+     * Delete the Location entry with the supplied id
+     *
+     * @param id The id of the Location entry to be deleted
+     */
+    @Transactional(REQUIRED)
+    public void deleteLocation(UUID id) {
+        repository.deleteLocation(id);
+    }
+
+    /**
+     * Update a Location entry with the supplied parameter value
+     *
+     * @param id The id of the Location to be updated
+     * @param key The updated key of the Location entry
+     * @param name The updated name of the Location entry
+     * @param description The updated description of the Location entry
+     * @return The updated Location entry
+     */
+    @Transactional(REQUIRED)
+    public ILocationMetaItem updateLocation(UUID id, String key, String name, String description) {
+        return repository.updateLocation(id, key, name, description);
+    }
+
+    /**
+     * Assigns a Resource id to a Location entry
+     *
+     * @param locationId The id of the Location entry
+     * @param resourceId The id of the Resource
+     */
+    @Transactional(REQUIRED)
+    public void assignResourceToLocation(UUID locationId, UUID resourceId) {
+        repository.assignResourceToLocation(locationId, resourceId);
+    }
+
+    /**
+     * Unassigns a Resource id from a Location entry
+     *
+     * @param locationId The id of the Location entry
+     * @param resourceId The id of the Resource entry
+     */
+    @Transactional(REQUIRED)
+    public void unassignResourceFromLocation(UUID locationId, UUID resourceId) {
+        repository.unassignResourceFromLocation(locationId, resourceId);
     }
 }

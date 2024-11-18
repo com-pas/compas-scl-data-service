@@ -159,4 +159,65 @@ public interface CompasSclDataRepository {
     List<IHistoryMetaItem> listHistoryVersionsByUUID(UUID id);
 
     void createHistoryVersion(UUID id, String name, Version version, SclFileType type, String author, String comment, OffsetDateTime changedAt, Boolean archived, Boolean available);
+
+    /**
+     * Create a new Location
+     *
+     * @param id          The uuid of the Location
+     * @param key         The key of the Location
+     * @param name        The name of the Location
+     * @param description The description of the Location
+     * @return The created Location
+     */
+    ILocationMetaItem createLocation(UUID id, String key, String name, String description);
+
+    /**
+     * List Location entries
+     *
+     * @param page     The page number of the result
+     * @param pageSize The amount of Location entries on the page
+     * @return The specified page with the specified number of Location entries
+     */
+    List<ILocationMetaItem> listLocations(int page, int pageSize);
+
+    /**
+     * Return the specific Location entry
+     *
+     * @param locationId The uuid of the Location
+     * @return The Meta Info of the searched Location
+     */
+    ILocationMetaItem findLocationByUUID(UUID locationId);
+
+    /**
+     * Delete the specified Location entry
+     *
+     * @param locationId The uuid of the Location
+     */
+    void deleteLocation(UUID locationId);
+
+    /**
+     * Updates an existing location
+     *
+     * @param locationId  The uuid of the existing Location
+     * @param key         The key of the updated Location
+     * @param name        The name of the updated Location
+     * @param description The description of the updated Location
+     */
+    ILocationMetaItem updateLocation(UUID locationId, String key, String name, String description);
+
+    /**
+     * Assigns a resource to the specified location, if a resource is already assigned to a location, the previous assignment is removed
+     *
+     * @param locationId The uuid of the Location
+     * @param resourceId The uuid of the Resource
+     */
+    void assignResourceToLocation(UUID locationId, UUID resourceId);
+
+    /**
+     * Removes the resource assignment from the specified location
+     *
+     * @param locationId The uuid of the Location
+     * @param resourceId The uuid of the Resource
+     */
+    void unassignResourceFromLocation(UUID locationId, UUID resourceId);
 }

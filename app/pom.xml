@@ -223,29 +223,29 @@ SPDX-License-Identifier: Apache-2.0
                             </configOptions>
                         </configuration>
                     </execution>
-                    <!--                    <execution> note: disabled until archiving API Spec is finished-->
-                    <!--                        <id>generate-archiving-api</id>-->
-                    <!--                        <goals>-->
-                    <!--                            <goal>generate</goal>-->
-                    <!--                        </goals>-->
-                    <!--                        <configuration>-->
-                    <!--                            <inputSpec>${project.basedir}/src/main/openapi/archiving-api.yaml</inputSpec>-->
-                    <!--                            <generatorName>jaxrs-spec</generatorName>-->
-                    <!--                            <output>${project.build.directory}/generated-sources/openapi</output>-->
-                    <!--                            <library>quarkus</library>-->
-                    <!--                            <apiPackage>org.lfenergy.compas.scl.data.rest.api.locations</apiPackage>-->
-                    <!--                            <modelPackage>org.lfenergy.compas.scl.data.rest.api.locations.model</modelPackage>-->
-                    <!--                            <generateSupportingFiles>false</generateSupportingFiles>-->
-                    <!--                            <configOptions>-->
-                    <!--                                <useTags>true</useTags>-->
-                    <!--                                <interfaceOnly>true</interfaceOnly>-->
-                    <!--                                <dateLibrary>java8</dateLibrary>-->
-                    <!--                                <supportAsync>true</supportAsync>-->
-                    <!--                                <useMutiny>true</useMutiny>-->
-                    <!--                                <useJakartaEe>true</useJakartaEe>-->
-                    <!--                            </configOptions>-->
-                    <!--                        </configuration>-->
-                    <!--                    </execution>-->
+<!--                    <execution> note: disabled because bug in maven codegen doesn't allow custom properties-->
+<!--                        <id>generate-archiving-api</id>-->
+<!--                        <goals>-->
+<!--                            <goal>generate</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <inputSpec>${project.basedir}/src/main/openapi/archiving-api.yaml</inputSpec>-->
+<!--                            <generatorName>jaxrs-spec</generatorName>-->
+<!--                            <output>${project.build.directory}/generated-sources/openapi</output>-->
+<!--                            <library>quarkus</library>-->
+<!--                            <apiPackage>org.lfenergy.compas.scl.data.rest.api.locations</apiPackage>-->
+<!--                            <modelPackage>org.lfenergy.compas.scl.data.rest.api.locations.model</modelPackage>-->
+<!--                            <generateSupportingFiles>false</generateSupportingFiles>-->
+<!--                            <configOptions>-->
+<!--                                <useTags>true</useTags>-->
+<!--                                <interfaceOnly>true</interfaceOnly>-->
+<!--                                <dateLibrary>java8</dateLibrary>-->
+<!--                                <supportAsync>true</supportAsync>-->
+<!--                                <useMutiny>true</useMutiny>-->
+<!--                                <useJakartaEe>true</useJakartaEe>-->
+<!--                            </configOptions>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
                 </executions>
             </plugin>
 

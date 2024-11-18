@@ -16,6 +16,7 @@ public class CompasSclDataServiceErrorCode {
     public static final String DUPLICATE_SCL_NAME_ERROR_CODE = "SDS-0007";
     public static final String INVALID_LABEL_ERROR_CODE = "SDS-0008";
     public static final String TOO_MANY_LABEL_ERROR_CODE = "SDS-0009";
+    public static final String LOCATION_DELETION_NOT_ALLOWED_ERROR_CODE = "SDS-0009";
 
     public static final String POSTGRES_SELECT_ERROR_CODE = "SDS-2000";
     public static final String POSTGRES_INSERT_ERROR_CODE = "SDS-2001";
