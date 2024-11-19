@@ -6,6 +6,7 @@ package org.lfenergy.compas.scl.data.repository;
 import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
+import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -220,4 +221,13 @@ public interface CompasSclDataRepository {
      * @param resourceId The uuid of the Resource
      */
     void unassignResourceFromLocation(UUID locationId, UUID resourceId);
+
+    IArchivedResourceMetaItem archiveResource(UUID id, String version, String xAuthor, String xApprover, String contentType, String xFilename, File body);
+
+    IArchivedResourceMetaItem archiveSclResource(UUID id, String version);
+
+    IArchivedResourcesMetaItem searchArchivedResource(UUID id);
+
+    IArchivedResourcesMetaItem searchArchivedResource(String location, String name, String approver, String contentType, String type, String voltage, OffsetDateTime from, OffsetDateTime to);
+
 }

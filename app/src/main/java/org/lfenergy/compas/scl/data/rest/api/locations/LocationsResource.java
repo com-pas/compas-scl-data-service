@@ -1,21 +1,17 @@
 package org.lfenergy.compas.scl.data.rest.api.locations;
 
-import io.smallrye.common.annotation.Blocking;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ILocationMetaItem;
 import org.lfenergy.compas.scl.data.rest.api.locations.model.Location;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 
 import java.util.List;
 import java.util.UUID;
-
-import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.LOCATION_DELETION_NOT_ALLOWED_ERROR_CODE;
 
 @RequestScoped
 public class LocationsResource implements LocationsApi {
@@ -49,11 +45,6 @@ public class LocationsResource implements LocationsApi {
 
     @Override
     public Uni<Void> deleteLocation(UUID locationId) {
-        int assignedResourceCount = compasSclDataService.findLocationByUUID(locationId).getAssignedResources();
-        if (assignedResourceCount > 0) {
-            return Uni.createFrom().failure(new CompasSclDataServiceException(LOCATION_DELETION_NOT_ALLOWED_ERROR_CODE,
-                String.format("Deletion of Location %s not allowed, unassign resources before deletion", locationId)));
-        }
         compasSclDataService.deleteLocation(locationId);
         return Uni.createFrom().nullItem();
     }

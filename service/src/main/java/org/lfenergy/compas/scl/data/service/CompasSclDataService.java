@@ -21,13 +21,11 @@ import org.w3c.dom.Node;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static jakarta.transaction.Transactional.TxType.REQUIRED;
@@ -509,6 +507,11 @@ public class CompasSclDataService {
      */
     @Transactional(REQUIRED)
     public void deleteLocation(UUID id) {
+        int assignedResourceCount = repository.findLocationByUUID(id).getAssignedResources();
+        if (assignedResourceCount > 0) {
+            throw new CompasSclDataServiceException(LOCATION_DELETION_NOT_ALLOWED_ERROR_CODE,
+                String.format("Deletion of Location %s not allowed, unassign resources before deletion", id));
+        }
         repository.deleteLocation(id);
     }
 
@@ -534,7 +537,10 @@ public class CompasSclDataService {
      */
     @Transactional(REQUIRED)
     public void assignResourceToLocation(UUID locationId, UUID resourceId) {
-        repository.assignResourceToLocation(locationId, resourceId);
+        ILocationMetaItem item = repository.findLocationByUUID(locationId);
+        if (item != null) {
+            repository.assignResourceToLocation(locationId, resourceId);
+        }
     }
 
     /**
@@ -545,6 +551,44 @@ public class CompasSclDataService {
      */
     @Transactional(REQUIRED)
     public void unassignResourceFromLocation(UUID locationId, UUID resourceId) {
-        repository.unassignResourceFromLocation(locationId, resourceId);
+        ILocationMetaItem item = repository.findLocationByUUID(locationId);
+        if (item != null) {
+            repository.unassignResourceFromLocation(locationId, resourceId);
+        }
+    }
+
+    @Transactional(REQUIRED)
+    public IArchivedResourceMetaItem archiveResource(UUID id, String version, String xAuthor, String xApprover, String contentType, String xFilename, File body) {
+        return repository.archiveResource(id, version, xAuthor, xApprover, contentType, xFilename, body);
+    }
+
+    @Transactional(REQUIRED)
+    public IArchivedResourceMetaItem archiveSclResource(UUID id, String version) {
+        return repository.archiveSclResource(id, version);
+    }
+
+    @Transactional(SUPPORTS)
+    public IArchivedResourcesMetaItem searchArchivedResources(UUID uuid) {
+        return repository.searchArchivedResource(uuid);
+    }
+
+    @Transactional(SUPPORTS)
+    public IArchivedResourcesMetaItem searchArchivedResources(String location, String name, String approver, String contentType, String type, String voltage, OffsetDateTime from, OffsetDateTime to) {
+        return repository.searchArchivedResource(location, name, approver, getSclFileType(contentType), type, voltage, from, to);
+    }
+
+    private String getSclFileType(String contentType) {
+        if (contentType != null && !contentType.isBlank()) {
+            boolean isInvalidSclType = Arrays.stream(SclFileType.values())
+                .noneMatch(sclFileType ->
+                    sclFileType.name().equalsIgnoreCase(contentType)
+                );
+            if (isInvalidSclType) {
+                throw new CompasSclDataServiceException(INVALID_SCL_CONTENT_TYPE_ERROR_CODE,
+                    "Content type " + contentType + " is no valid SCL file type");
+            }
+            return SclFileType.valueOf(contentType.toUpperCase()).name();
+        }
+        return contentType;
     }
 }

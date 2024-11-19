@@ -223,7 +223,7 @@ SPDX-License-Identifier: Apache-2.0
                             </configOptions>
                         </configuration>
                     </execution>
-<!--                    <execution> note: disabled because bug in maven codegen doesn't allow custom properties-->
+<!--                    <execution> &lt;!&ndash; note: disabled because bug in maven codegen doesn't allow custom properties&ndash;&gt;-->
 <!--                        <id>generate-archiving-api</id>-->
 <!--                        <goals>-->
 <!--                            <goal>generate</goal>-->

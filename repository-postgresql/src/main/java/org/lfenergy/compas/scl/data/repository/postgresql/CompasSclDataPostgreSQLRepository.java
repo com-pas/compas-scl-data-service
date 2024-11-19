@@ -14,6 +14,7 @@ import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.sql.DataSource;
+import java.io.File;
 import java.sql.*;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -44,6 +45,15 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private static final String HISTORYMETAITEM_AVAILABLE_FIELD = "available";
     private static final String HISTORYMETAITEM_ARCHIVED_FIELD = "archived";
     private static final String HISTORYMETAITEM_IS_DELETED_FIELD = "is_deleted";
+    private static final String ARCHIVEMETAITEM_LOCATION_FIELD = "location";
+    private static final String ARCHIVEMETAITEM_NOTE_FIELD = "note";
+    private static final String ARCHIVEMETAITEM_AUTHOR_FIELD = "author";
+    private static final String ARCHIVEMETAITEM_APPROVER_FIELD = "approver";
+    private static final String ARCHIVEMETAITEM_TYPE_FIELD = "type";
+    private static final String ARCHIVEMETAITEM_CONTENT_TYPE_FIELD = "content_type";
+    private static final String ARCHIVEMETAITEM_VOLTAGE_FIELD = "voltage";
+    private static final String ARCHIVEMETAITEM_MODIFIED_AT_FIELD = "modified_at";
+    private static final String ARCHIVEMETAITEM_ARCHIVED_AT_FIELD = "archived_at";
 
     private final DataSource dataSource;
 
@@ -746,6 +756,78 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         }
     }
 
+    @Override
+    public IArchivedResourceMetaItem archiveResource(UUID id, String version, String xAuthor, String xApprover, String contentType, String xFilename, File body) {
+        return null;
+    }
+
+    @Override
+    public IArchivedResourceMetaItem archiveSclResource(UUID id, String version) {
+        return null;
+    }
+
+    @Override
+    public IArchivedResourcesMetaItem searchArchivedResource(UUID id) {
+        String archivedResourcesSql = """
+            SELECT ar.*, ARRAY_AGG (rt.id || ';' || rt.key || ';' || rt.value) AS tags
+            FROM archived_resource ar LEFT OUTER JOIN resource_tag rt
+                                   ON ar.id=rt.archived_resource_id
+            WHERE ar.id = ?
+            GROUP BY ar.id, ar.name, ar.major_version, ar.minor_version, ar.patch_version, ar.location, ar.note, ar.approver, ar.type, ar.content_type, ar.voltage, ar.modified_at, ar.archived_at;
+            """;
+        List<IArchivedResourceMetaItem> result = executeArchivedResourceQuery(archivedResourcesSql, Collections.singletonList(id));
+        return new ArchivedResourcesMetaItem(result);
+    }
+
+    @Override
+    public IArchivedResourcesMetaItem searchArchivedResource(String location, String name, String approver, String contentType, String type, String voltage, OffsetDateTime from, OffsetDateTime to) {
+        List<Object> parameters = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        sb.append("""
+            SELECT ar.*, ARRAY_AGG (rt.id || ';' || rt.key || ';' || rt.value) AS tags
+            FROM archived_resource ar LEFT OUTER JOIN resource_tag rt
+                                   ON ar.id=rt.archived_resource_id
+            WHERE 1=1
+            """);
+
+        if (location != null && !location.isBlank()) {
+            parameters.add(location);
+            sb.append(" AND ar.location = ?");
+        }
+        if (name != null && !name.isBlank()) {
+            parameters.add("%"+name+"%");
+            sb.append(" AND ar.name ILIKE ?");
+        }
+        if (approver != null && !approver.isBlank()) {
+            parameters.add(approver);
+            sb.append(" AND ar.approver = ?");
+        }
+        if (contentType != null && !contentType.isBlank()) {
+            parameters.add(contentType);
+            sb.append(" AND ar.content_type = ?");
+        }
+        if (type != null && !type.isBlank()) {
+            parameters.add(type);
+            sb.append(" AND ar.type = ?");
+        }
+        if (voltage != null && !voltage.isBlank()) {
+            parameters.add(voltage);
+            sb.append(" AND ar.voltage = ?");
+        }
+        if (from != null) {
+            parameters.add(from);
+            sb.append(" AND ar.archived_at >= ?");
+        }
+        if (to != null) {
+            parameters.add(to);
+            sb.append(" AND ar.archived_at <= ?");
+        }
+        sb.append(System.lineSeparator());
+        sb.append("GROUP BY ar.id, ar.name, ar.major_version, ar.minor_version, ar.patch_version, ar.location, ar.note, ar.approver, ar.type, ar.content_type, ar.voltage, ar.modified_at, ar.archived_at;");
+        return new ArchivedResourcesMetaItem(executeArchivedResourceQuery(sb.toString(), parameters));
+    }
+
+
     private List<IHistoryMetaItem> executeHistoryQuery(String sql, List<Object> parameters) {
         List<IHistoryMetaItem> items = new ArrayList<>();
         try (
@@ -817,6 +899,64 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             resultSet.getString(NAME_FIELD),
             resultSet.getString(LOCATIONMETAITEM_DESCRIPTION_FIELD),
             resourceCount
+        );
+    }
+
+    private List<IArchivedResourceMetaItem> executeArchivedResourceQuery(String sql, List<Object> parameters) {
+        List<IArchivedResourceMetaItem> items = new ArrayList<>();
+        try (
+            Connection connection = dataSource.getConnection();
+            PreparedStatement stmt = connection.prepareStatement(sql)) {
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                while (resultSet.next()) {
+                    List<IResourceTagItem> resourceTags = getResourceTagItems(resultSet);
+                    items.add(mapResultSetToArchivedResourceMetaItem(resultSet, resourceTags));
+                }
+            }
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(
+                POSTGRES_SELECT_ERROR_CODE,
+                "Error listing Archived Resource entries from database!", exp
+            );
+        }
+        return items;
+    }
+
+    private List<IResourceTagItem> getResourceTagItems(ResultSet resultSet) throws SQLException {
+        Array tags = resultSet.getArray("tags");
+        List<IResourceTagItem> resourceTags = new ArrayList<>();
+        if (tags != null) {
+            Arrays.stream((String[]) tags.getArray())
+                .filter(Objects::nonNull)
+                .map(entry ->
+                    new ResourceTagItem(
+                        entry.split(";")[0],
+                        entry.split(";")[1],
+                        entry.split(";")[2]
+                    )
+                ).forEach(resourceTags::add);
+        }
+        return resourceTags;
+    }
+
+    private ArchivedResourceMetaItem mapResultSetToArchivedResourceMetaItem(ResultSet resultSet, List<IResourceTagItem> resourceTags) throws SQLException {
+        return new ArchivedResourceMetaItem(
+            resultSet.getString(ID_FIELD),
+            resultSet.getString(NAME_FIELD),
+            createVersion(resultSet),
+            resultSet.getString(ARCHIVEMETAITEM_LOCATION_FIELD),
+            resultSet.getString(ARCHIVEMETAITEM_NOTE_FIELD),
+            resultSet.getString(ARCHIVEMETAITEM_AUTHOR_FIELD),
+            resultSet.getString(ARCHIVEMETAITEM_APPROVER_FIELD),
+            resultSet.getString(ARCHIVEMETAITEM_TYPE_FIELD),
+            resultSet.getString(ARCHIVEMETAITEM_CONTENT_TYPE_FIELD),
+            resultSet.getString(ARCHIVEMETAITEM_VOLTAGE_FIELD),
+            convertToOffsetDateTime(resultSet.getTimestamp(ARCHIVEMETAITEM_MODIFIED_AT_FIELD)),
+            convertToOffsetDateTime(resultSet.getTimestamp(ARCHIVEMETAITEM_ARCHIVED_AT_FIELD)),
+            resourceTags
         );
     }
 }
