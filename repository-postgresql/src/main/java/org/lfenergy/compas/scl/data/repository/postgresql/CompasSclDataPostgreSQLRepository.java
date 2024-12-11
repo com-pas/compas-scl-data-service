@@ -56,6 +56,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                   from (select distinct on (scl_file.id) *
                           from scl_file
                          where scl_file.type = ?
+                         AND scl_file.is_deleted = false
                          order by scl_file.id
                                 , scl_file.major_version desc
                                 , scl_file.minor_version desc
@@ -115,6 +116,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                        and scl_data.patch_version = scl_file.patch_version
                  where scl_file.id   = ?
                  and   scl_file.type = ?
+                 and   scl_file.is_deleted = false
                  order by scl_file.major_version
                         , scl_file.minor_version
                         , scl_file.patch_version
@@ -162,6 +164,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                  and   scl_file.major_version = ?
                  and   scl_file.minor_version = ?
                  and   scl_file.patch_version = ?
+                 and   scl_file.is_deleted = false
                 """;
 
         try (var connection = dataSource.getConnection();
@@ -191,6 +194,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 select distinct on (scl_file.id) scl_file.name
                   from scl_file
                  where scl_file.type = ?
+                 and scl_file.is_deleted = false
                  order by scl_file.id
                         , scl_file.major_version desc
                         , scl_file.minor_version desc
@@ -221,6 +225,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                   from scl_file
                  where scl_file.id   = ?
                  and   scl_file.type = ?
+                 and   scl_file.is_deleted = false
                  order by scl_file.major_version desc, scl_file.minor_version desc, scl_file.patch_version desc
                 """;
 
@@ -305,7 +310,8 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Transactional(REQUIRED)
     public void delete(SclFileType type, UUID id) {
         var sql = """
-                delete from scl_file
+                UPDATE scl_file
+                 SET scl_file.is_deleted = false
                  where scl_file.id   = ?
                  and   scl_file.type = ?
                 """;
@@ -324,7 +330,8 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Transactional(REQUIRED)
     public void delete(SclFileType type, UUID id, Version version) {
         var sql = """
-                delete from scl_file
+                UPDATE scl_file
+                 SET scl_file.is_deleted = false
                  where scl_file.id   = ?
                  and   scl_file.type = ?
                  and   scl_file.major_version = ?
