@@ -23,7 +23,7 @@ public class ArchivedResources   {
     return this;
   }
 
-  
+
   @JsonProperty("resources")
   @NotNull @Valid public List<@Valid ArchivedResource> getResources() {
     return resources;
@@ -72,7 +72,7 @@ public class ArchivedResources   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ArchivedResources {\n");
-    
+
     sb.append("    resources: ").append(toIndentedString(resources)).append("\n");
     sb.append("}");
     return sb.toString();

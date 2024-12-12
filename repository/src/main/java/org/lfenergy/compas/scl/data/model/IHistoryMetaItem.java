@@ -13,6 +13,8 @@ public interface IHistoryMetaItem extends IAbstractItem {
 
     String getComment();
 
+    String getLocation();
+
     OffsetDateTime getChangedAt();
 
     boolean isArchived();

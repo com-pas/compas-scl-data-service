@@ -22,7 +22,7 @@ public class ResourceTag   {
     return this;
   }
 
-  
+
   @JsonProperty("key")
   @NotNull public String getKey() {
     return key;
@@ -41,7 +41,7 @@ public class ResourceTag   {
     return this;
   }
 
-  
+
   @JsonProperty("value")
   @NotNull public String getValue() {
     return value;
@@ -75,7 +75,7 @@ public class ResourceTag   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ResourceTag {\n");
-    
+
     sb.append("    key: ").append(toIndentedString(key)).append("\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");
     sb.append("}");

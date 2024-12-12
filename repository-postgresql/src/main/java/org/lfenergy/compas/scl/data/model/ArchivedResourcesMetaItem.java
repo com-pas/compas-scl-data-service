@@ -4,14 +4,14 @@ import java.util.List;
 
 public class ArchivedResourcesMetaItem implements IArchivedResourcesMetaItem {
 
-    List<IArchivedResourceMetaItem> archivedResources;
+    List<IAbstractArchivedResourceMetaItem> archivedResources;
 
-    public ArchivedResourcesMetaItem(List<IArchivedResourceMetaItem> archivedResources) {
+    public ArchivedResourcesMetaItem(List<IAbstractArchivedResourceMetaItem> archivedResources) {
         this.archivedResources = archivedResources;
     }
 
     @Override
-    public List<IArchivedResourceMetaItem> getResources() {
+    public List<IAbstractArchivedResourceMetaItem> getResources() {
         return archivedResources;
     }
 }

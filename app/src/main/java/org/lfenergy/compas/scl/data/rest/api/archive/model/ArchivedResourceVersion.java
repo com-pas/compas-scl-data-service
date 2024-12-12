@@ -12,9 +12,9 @@ import java.util.Objects;
 
 
 
-@JsonTypeName("ArchivedResource")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-11-18T15:39:21.464141400+01:00[Europe/Vienna]", comments = "Generator version: 7.8.0")
-public class ArchivedResource   {
+@JsonTypeName("ArchivedResourceVersion")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-12-06T09:13:22.882514600+01:00[Europe/Vienna]", comments = "Generator version: 7.8.0")
+public class ArchivedResourceVersion   {
   private String uuid;
   private String location;
   private String name;
@@ -28,11 +28,13 @@ public class ArchivedResource   {
   private OffsetDateTime modifiedAt;
   private OffsetDateTime archivedAt;
   private @Valid List<@Valid ResourceTag> fields = new ArrayList<>();
+  private String comment;
+  private Boolean archived = false;
 
   /**
    * Unique resource identifier
    **/
-  public ArchivedResource uuid(String uuid) {
+  public ArchivedResourceVersion uuid(String uuid) {
     this.uuid = uuid;
     return this;
   }
@@ -51,7 +53,7 @@ public class ArchivedResource   {
   /**
    * Location of the resource, might be empty
    **/
-  public ArchivedResource location(String location) {
+  public ArchivedResourceVersion location(String location) {
     this.location = location;
     return this;
   }
@@ -70,7 +72,7 @@ public class ArchivedResource   {
   /**
    * Resource name
    **/
-  public ArchivedResource name(String name) {
+  public ArchivedResourceVersion name(String name) {
     this.name = name;
     return this;
   }
@@ -89,7 +91,7 @@ public class ArchivedResource   {
   /**
    * Versioning note
    **/
-  public ArchivedResource note(String note) {
+  public ArchivedResourceVersion note(String note) {
     this.note = note;
     return this;
   }
@@ -108,7 +110,7 @@ public class ArchivedResource   {
   /**
    * Modifying author
    **/
-  public ArchivedResource author(String author) {
+  public ArchivedResourceVersion author(String author) {
     this.author = author;
     return this;
   }
@@ -127,7 +129,7 @@ public class ArchivedResource   {
   /**
    * Name of the approver
    **/
-  public ArchivedResource approver(String approver) {
+  public ArchivedResourceVersion approver(String approver) {
     this.approver = approver;
     return this;
   }
@@ -146,7 +148,7 @@ public class ArchivedResource   {
   /**
    * Content type
    **/
-  public ArchivedResource type(String type) {
+  public ArchivedResourceVersion type(String type) {
     this.type = type;
     return this;
   }
@@ -165,7 +167,7 @@ public class ArchivedResource   {
   /**
    * Content type
    **/
-  public ArchivedResource contentType(String contentType) {
+  public ArchivedResourceVersion contentType(String contentType) {
     this.contentType = contentType;
     return this;
   }
@@ -184,7 +186,7 @@ public class ArchivedResource   {
   /**
    * Content type
    **/
-  public ArchivedResource voltage(String voltage) {
+  public ArchivedResourceVersion voltage(String voltage) {
     this.voltage = voltage;
     return this;
   }
@@ -203,7 +205,7 @@ public class ArchivedResource   {
   /**
    * Version
    **/
-  public ArchivedResource version(String version) {
+  public ArchivedResourceVersion version(String version) {
     this.version = version;
     return this;
   }
@@ -221,7 +223,7 @@ public class ArchivedResource   {
 
   /**
    **/
-  public ArchivedResource modifiedAt(OffsetDateTime modifiedAt) {
+  public ArchivedResourceVersion modifiedAt(OffsetDateTime modifiedAt) {
     this.modifiedAt = modifiedAt;
     return this;
   }
@@ -239,7 +241,7 @@ public class ArchivedResource   {
 
   /**
    **/
-  public ArchivedResource archivedAt(OffsetDateTime archivedAt) {
+  public ArchivedResourceVersion archivedAt(OffsetDateTime archivedAt) {
     this.archivedAt = archivedAt;
     return this;
   }
@@ -257,7 +259,7 @@ public class ArchivedResource   {
 
   /**
    **/
-  public ArchivedResource fields(List<@Valid ResourceTag> fields) {
+  public ArchivedResourceVersion fields(List<@Valid ResourceTag> fields) {
     this.fields = fields;
     return this;
   }
@@ -273,7 +275,7 @@ public class ArchivedResource   {
     this.fields = fields;
   }
 
-  public ArchivedResource addFieldsItem(ResourceTag fieldsItem) {
+  public ArchivedResourceVersion addFieldsItem(ResourceTag fieldsItem) {
     if (this.fields == null) {
       this.fields = new ArrayList<>();
     }
@@ -282,13 +284,51 @@ public class ArchivedResource   {
     return this;
   }
 
-  public ArchivedResource removeFieldsItem(ResourceTag fieldsItem) {
+  public ArchivedResourceVersion removeFieldsItem(ResourceTag fieldsItem) {
     if (fieldsItem != null && this.fields != null) {
       this.fields.remove(fieldsItem);
     }
 
     return this;
   }
+  /**
+   * Comment given when uploading the data resource
+   **/
+  public ArchivedResourceVersion comment(String comment) {
+    this.comment = comment;
+    return this;
+  }
+
+
+  @JsonProperty("comment")
+  public String getComment() {
+    return comment;
+  }
+
+  @JsonProperty("comment")
+  public void setComment(String comment) {
+    this.comment = comment;
+  }
+
+  /**
+   * Defines if given data resource is archived
+   **/
+  public ArchivedResourceVersion archived(Boolean archived) {
+    this.archived = archived;
+    return this;
+  }
+
+
+  @JsonProperty("archived")
+  @NotNull public Boolean getArchived() {
+    return archived;
+  }
+
+  @JsonProperty("archived")
+  public void setArchived(Boolean archived) {
+    this.archived = archived;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -298,31 +338,33 @@ public class ArchivedResource   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ArchivedResource archivedResource = (ArchivedResource) o;
-    return Objects.equals(this.uuid, archivedResource.uuid) &&
-        Objects.equals(this.location, archivedResource.location) &&
-        Objects.equals(this.name, archivedResource.name) &&
-        Objects.equals(this.note, archivedResource.note) &&
-        Objects.equals(this.author, archivedResource.author) &&
-        Objects.equals(this.approver, archivedResource.approver) &&
-        Objects.equals(this.type, archivedResource.type) &&
-        Objects.equals(this.contentType, archivedResource.contentType) &&
-        Objects.equals(this.voltage, archivedResource.voltage) &&
-        Objects.equals(this.version, archivedResource.version) &&
-        Objects.equals(this.modifiedAt, archivedResource.modifiedAt) &&
-        Objects.equals(this.archivedAt, archivedResource.archivedAt) &&
-        Objects.equals(this.fields, archivedResource.fields);
+    ArchivedResourceVersion archivedResourceVersion = (ArchivedResourceVersion) o;
+    return Objects.equals(this.uuid, archivedResourceVersion.uuid) &&
+        Objects.equals(this.location, archivedResourceVersion.location) &&
+        Objects.equals(this.name, archivedResourceVersion.name) &&
+        Objects.equals(this.note, archivedResourceVersion.note) &&
+        Objects.equals(this.author, archivedResourceVersion.author) &&
+        Objects.equals(this.approver, archivedResourceVersion.approver) &&
+        Objects.equals(this.type, archivedResourceVersion.type) &&
+        Objects.equals(this.contentType, archivedResourceVersion.contentType) &&
+        Objects.equals(this.voltage, archivedResourceVersion.voltage) &&
+        Objects.equals(this.version, archivedResourceVersion.version) &&
+        Objects.equals(this.modifiedAt, archivedResourceVersion.modifiedAt) &&
+        Objects.equals(this.archivedAt, archivedResourceVersion.archivedAt) &&
+        Objects.equals(this.fields, archivedResourceVersion.fields) &&
+        Objects.equals(this.comment, archivedResourceVersion.comment) &&
+        Objects.equals(this.archived, archivedResourceVersion.archived);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, location, name, note, author, approver, type, contentType, voltage, version, modifiedAt, archivedAt, fields);
+    return Objects.hash(uuid, location, name, note, author, approver, type, contentType, voltage, version, modifiedAt, archivedAt, fields, comment, archived);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ArchivedResource {\n");
+    sb.append("class ArchivedResourceVersion {\n");
 
     sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    location: ").append(toIndentedString(location)).append("\n");
@@ -337,6 +379,8 @@ public class ArchivedResource   {
     sb.append("    modifiedAt: ").append(toIndentedString(modifiedAt)).append("\n");
     sb.append("    archivedAt: ").append(toIndentedString(archivedAt)).append("\n");
     sb.append("    fields: ").append(toIndentedString(fields)).append("\n");
+    sb.append("    comment: ").append(toIndentedString(comment)).append("\n");
+    sb.append("    archived: ").append(toIndentedString(archived)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -19,9 +19,7 @@ import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
@@ -44,6 +42,7 @@ public class CompasSclDataService {
     private final CompasSclDataRepository repository;
     private final ElementConverter converter;
     private final SclElementProcessor sclElementProcessor;
+    private final String DEFAULT_PATH = System.getProperty("user.dir") + File.separator + "locations";
 
     @Inject
     public CompasSclDataService(CompasSclDataRepository repository, ElementConverter converter,
@@ -496,8 +495,12 @@ public class CompasSclDataService {
      * @return The created Location entry
      */
     @Transactional(REQUIRED)
-    public ILocationMetaItem createLocation(String key, String name, String description) {
-        return repository.createLocation(UUID.randomUUID(), key, name, description);
+    public ILocationMetaItem createLocation(String key, String name, String description, String author) {
+        ILocationMetaItem createdLocation = repository.createLocation(UUID.randomUUID(), key, name, description);
+        repository.addLocationTags(createdLocation, author);
+        File newLocationDirectory = new File(DEFAULT_PATH + File.separator + createdLocation.getName());
+        newLocationDirectory.mkdirs();
+        return createdLocation;
     }
 
     /**
@@ -507,12 +510,17 @@ public class CompasSclDataService {
      */
     @Transactional(REQUIRED)
     public void deleteLocation(UUID id) {
-        int assignedResourceCount = repository.findLocationByUUID(id).getAssignedResources();
+        ILocationMetaItem locationToDelete = repository.findLocationByUUID(id);
+        int assignedResourceCount = locationToDelete.getAssignedResources();
         if (assignedResourceCount > 0) {
             throw new CompasSclDataServiceException(LOCATION_DELETION_NOT_ALLOWED_ERROR_CODE,
                 String.format("Deletion of Location %s not allowed, unassign resources before deletion", id));
         }
+
+        repository.deleteLocationTags(locationToDelete);
         repository.deleteLocation(id);
+        File directory = new File(DEFAULT_PATH + File.separator + locationToDelete.getName());
+        directory.delete();
     }
 
     /**
@@ -530,7 +538,7 @@ public class CompasSclDataService {
     }
 
     /**
-     * Assigns a Resource id to a Location entry
+     * Assign a Resource id to a Location entry
      *
      * @param locationId The id of the Location entry
      * @param resourceId The id of the Resource
@@ -544,7 +552,7 @@ public class CompasSclDataService {
     }
 
     /**
-     * Unassigns a Resource id from a Location entry
+     * Unassign a Resource from a Location entry
      *
      * @param locationId The id of the Location entry
      * @param resourceId The id of the Resource entry
@@ -553,25 +561,103 @@ public class CompasSclDataService {
     public void unassignResourceFromLocation(UUID locationId, UUID resourceId) {
         ILocationMetaItem item = repository.findLocationByUUID(locationId);
         if (item != null) {
+            //ToDo cgutmann: ask what should happen with resources in filesystem - should they be deleted?
             repository.unassignResourceFromLocation(locationId, resourceId);
         }
     }
 
+    /**
+     * Archive a resource and links it to the corresponding scl_file
+     *
+     * @param id The id of the scl_file
+     * @param version The version of the scl_file
+     * @param author The author of the resource
+     * @param approver The approver of the resource
+     * @param contentType The content type of the resource
+     * @param filename The filename of the resource
+     * @param body The content of the resource
+     * @return The created archived resource item
+     */
     @Transactional(REQUIRED)
-    public IArchivedResourceMetaItem archiveResource(UUID id, String version, String xAuthor, String xApprover, String contentType, String xFilename, File body) {
-        return repository.archiveResource(id, version, xAuthor, xApprover, contentType, xFilename, body);
+    public IAbstractArchivedResourceMetaItem archiveResource(UUID id, String version, String author, String approver, String contentType, String filename, File body) {
+        IAbstractArchivedResourceMetaItem archivedResource = repository.archiveResource(id, new Version(version), author, approver, contentType, filename);
+        if (body != null) {
+            String absolutePath = DEFAULT_PATH + File.separator + archivedResource.getLocation() + File.separator + archivedResource.getId();
+            File locationDir = new File(absolutePath);
+            locationDir.mkdirs();
+            File f = new File(absolutePath + File.separator + filename);
+            try (FileOutputStream fos = new FileOutputStream(f)) {
+                try (FileInputStream fis = new FileInputStream(body)) {
+                    fos.write(fis.readAllBytes());
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return archivedResource;
     }
 
+    /**
+     * Archive an existing scl resource
+     *
+     * @param id The id of the resource to be archived
+     * @param version The version of the resource to be archived
+     * @param approver The approver of the archiving action
+     * @return The archived resource item
+     */
     @Transactional(REQUIRED)
-    public IArchivedResourceMetaItem archiveSclResource(UUID id, String version) {
-        return repository.archiveSclResource(id, version);
+    public IAbstractArchivedResourceMetaItem archiveSclResource(UUID id, Version version, String approver) {
+        IAbstractArchivedResourceMetaItem archivedResource = repository.archiveSclResource(id, version, approver);
+        String data = repository.findByUUID(id, version);
+        if (data != null) {
+            String absolutePath = DEFAULT_PATH + File.separator + archivedResource.getLocation() + File.separator + archivedResource.getId();
+            File locationDir = new File(absolutePath);
+            locationDir.mkdirs();
+            File f = new File(locationDir + File.separator + archivedResource.getName() + "." + archivedResource.getContentType().toLowerCase());
+            try (FileWriter fw = new FileWriter(f)) {
+                fw.write(data);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return archivedResource;
     }
 
+    /**
+     * Retrieve all archived resource history versions according to an archived resource id
+     *
+     * @param uuid The id of the archived resource
+     * @return All archived versions of the given id
+     */
+    @Transactional(SUPPORTS)
+    public IArchivedResourcesHistoryMetaItem getArchivedResourceHistory(UUID uuid) {
+        return repository.searchArchivedResourceHistory(uuid);
+    }
+
+    /**
+     * Retrieve all entries according to an archived resource id
+     *
+     * @param uuid The id of the archived resource
+     * @return All archived entries of the given id
+     */
     @Transactional(SUPPORTS)
     public IArchivedResourcesMetaItem searchArchivedResources(UUID uuid) {
         return repository.searchArchivedResource(uuid);
     }
 
+    /**
+     * Retrieve all archived entries according to the search parameters
+     *
+     * @param location The location of the archived resource
+     * @param name The name of the archived resource
+     * @param approver The approver of the archived resource
+     * @param contentType The content type of the resource
+     * @param type The type of the resource
+     * @param voltage The voltage of the resource
+     * @param from The start timestamp of archiving (including)
+     * @param to The end timestamp of archiving (including)
+     * @return All archived entries matching the search criteria
+     */
     @Transactional(SUPPORTS)
     public IArchivedResourcesMetaItem searchArchivedResources(String location, String name, String approver, String contentType, String type, String voltage, OffsetDateTime from, OffsetDateTime to) {
         return repository.searchArchivedResource(location, name, approver, getSclFileType(contentType), type, voltage, from, to);

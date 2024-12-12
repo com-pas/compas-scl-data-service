@@ -4,12 +4,11 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import org.lfenergy.compas.scl.data.model.IArchivedResourceMetaItem;
-import org.lfenergy.compas.scl.data.model.IArchivedResourcesMetaItem;
-import org.lfenergy.compas.scl.data.rest.api.archive.model.ArchivedResource;
-import org.lfenergy.compas.scl.data.rest.api.archive.model.ArchivedResources;
-import org.lfenergy.compas.scl.data.rest.api.archive.model.ArchivedResourcesSearch;
-import org.lfenergy.compas.scl.data.rest.api.archive.model.ResourceTag;
+import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.lfenergy.compas.scl.data.model.*;
+import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
+import org.lfenergy.compas.scl.data.rest.api.archive.model.*;
+import org.lfenergy.compas.scl.data.rest.api.archive.model.ArchivedResourceVersion;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 
 import java.io.File;
@@ -20,10 +19,14 @@ import java.util.UUID;
 public class ArchiveResource implements ArchivingApi {
 
     private final CompasSclDataService compasSclDataService;
+    private final JsonWebToken jsonWebToken;
+    private final UserInfoProperties userInfoProperties;
 
     @Inject
-    public ArchiveResource(CompasSclDataService compasSclDataService) {
+    public ArchiveResource(CompasSclDataService compasSclDataService, JsonWebToken jsonWebToken, UserInfoProperties userInfoProperties) {
         this.compasSclDataService = compasSclDataService;
+        this.jsonWebToken = jsonWebToken;
+        this.userInfoProperties = userInfoProperties;
     }
 
     @Override
@@ -37,11 +40,21 @@ public class ArchiveResource implements ArchivingApi {
 
     @Override
     public Uni<ArchivedResource> archiveSclResource(UUID id, String version) {
+        String approver = jsonWebToken.getClaim(userInfoProperties.name());
         return Uni.createFrom()
-            .item(() -> compasSclDataService.archiveSclResource(id, version))
+            .item(() -> compasSclDataService.archiveSclResource(id, new Version(version), approver))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()
             .transform(this::mapToArchivedResource);
+    }
+
+    @Override
+    public Uni<ArchivedResourcesHistory> retrieveArchivedResourceHistory(UUID id) {
+        return Uni.createFrom()
+            .item(() -> compasSclDataService.getArchivedResourceHistory(id))
+            .runSubscriptionOn(Infrastructure.getDefaultExecutor())
+            .onItem()
+            .transform(this::mapToArchivedResourcesHistory);
     }
 
     @Override
@@ -58,7 +71,6 @@ public class ArchiveResource implements ArchivingApi {
         if (uuid != null && !uuid.isBlank()) {
             return compasSclDataService.searchArchivedResources(UUID.fromString(uuid));
         }
-
         String location = archivedResourcesSearch.getLocation();
         String name = archivedResourcesSearch.getName();
         String approver = archivedResourcesSearch.getApprover();
@@ -70,7 +82,7 @@ public class ArchiveResource implements ArchivingApi {
         return compasSclDataService.searchArchivedResources(location, name, approver, contentType, type, voltage, from, to);
     }
 
-    private ArchivedResource mapToArchivedResource(IArchivedResourceMetaItem archivedResource) {
+    private ArchivedResource mapToArchivedResource(IAbstractArchivedResourceMetaItem archivedResource) {
         return new ArchivedResource()
             .uuid(archivedResource.getId())
             .location(archivedResource.getLocation())
@@ -99,5 +111,42 @@ public class ArchiveResource implements ArchivingApi {
                     .map(this::mapToArchivedResource)
                     .toList()
             );
+    }
+
+    private ArchivedResourcesHistory mapToArchivedResourcesHistory(IArchivedResourcesHistoryMetaItem archivedResourcesHistoryMetaItem) {
+        return new ArchivedResourcesHistory()
+            .versions(
+                archivedResourcesHistoryMetaItem.getVersions()
+                    .stream()
+                    .map(this::mapToArchivedResourceVersion)
+                    .toList()
+            );
+    }
+
+    private ArchivedResourceVersion mapToArchivedResourceVersion(IArchivedResourceVersion resourceVersion) {
+        return new ArchivedResourceVersion()
+            .uuid(resourceVersion.getId())
+            .location(resourceVersion.getLocation())
+            .name(resourceVersion.getName())
+            .note(resourceVersion.getNote())
+            .author(resourceVersion.getAuthor())
+            .approver(resourceVersion.getApprover())
+            .type(resourceVersion.getType())
+            .contentType(resourceVersion.getContentType())
+            .voltage(resourceVersion.getVoltage())
+            .version(resourceVersion.getVersion())
+            .modifiedAt(resourceVersion.getModifiedAt())
+            .archivedAt(resourceVersion.getArchivedAt())
+            .fields(resourceVersion.getFields()
+                .stream()
+                .map(field ->
+                    new ResourceTag()
+                        .key(field.getKey())
+                        .value(field.getValue())
+                )
+                .toList()
+            )
+            .comment(resourceVersion.getComment())
+            .archived(resourceVersion.isArchived());
     }
 }

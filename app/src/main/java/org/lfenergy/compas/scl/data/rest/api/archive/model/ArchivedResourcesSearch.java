@@ -29,7 +29,7 @@ public class ArchivedResourcesSearch   {
     return this;
   }
 
-  
+
   @JsonProperty("uuid")
   public String getUuid() {
     return uuid;
@@ -48,7 +48,7 @@ public class ArchivedResourcesSearch   {
     return this;
   }
 
-  
+
   @JsonProperty("location")
   public String getLocation() {
     return location;
@@ -67,7 +67,7 @@ public class ArchivedResourcesSearch   {
     return this;
   }
 
-  
+
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -86,7 +86,7 @@ public class ArchivedResourcesSearch   {
     return this;
   }
 
-  
+
   @JsonProperty("approver")
   public String getApprover() {
     return approver;
@@ -105,7 +105,7 @@ public class ArchivedResourcesSearch   {
     return this;
   }
 
-  
+
   @JsonProperty("contentType")
   public String getContentType() {
     return contentType;
@@ -124,7 +124,7 @@ public class ArchivedResourcesSearch   {
     return this;
   }
 
-  
+
   @JsonProperty("type")
   public String getType() {
     return type;
@@ -143,7 +143,7 @@ public class ArchivedResourcesSearch   {
     return this;
   }
 
-  
+
   @JsonProperty("voltage")
   public String getVoltage() {
     return voltage;
@@ -162,7 +162,7 @@ public class ArchivedResourcesSearch   {
     return this;
   }
 
-  
+
   @JsonProperty("from")
   public OffsetDateTime getFrom() {
     return from;
@@ -181,7 +181,7 @@ public class ArchivedResourcesSearch   {
     return this;
   }
 
-  
+
   @JsonProperty("to")
   public OffsetDateTime getTo() {
     return to;
@@ -222,7 +222,7 @@ public class ArchivedResourcesSearch   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ArchivedResourcesSearch {\n");
-    
+
     sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    location: ").append(toIndentedString(location)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");

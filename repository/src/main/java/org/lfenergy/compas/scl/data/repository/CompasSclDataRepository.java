@@ -172,6 +172,10 @@ public interface CompasSclDataRepository {
      */
     ILocationMetaItem createLocation(UUID id, String key, String name, String description);
 
+    void addLocationTags(ILocationMetaItem location, String author);
+
+    void deleteLocationTags(ILocationMetaItem location);
+
     /**
      * List Location entries
      *
@@ -222,12 +226,14 @@ public interface CompasSclDataRepository {
      */
     void unassignResourceFromLocation(UUID locationId, UUID resourceId);
 
-    IArchivedResourceMetaItem archiveResource(UUID id, String version, String xAuthor, String xApprover, String contentType, String xFilename, File body);
+    IAbstractArchivedResourceMetaItem archiveResource(UUID id, Version version, String author, String approver, String contentType, String filename);
 
-    IArchivedResourceMetaItem archiveSclResource(UUID id, String version);
+    IAbstractArchivedResourceMetaItem archiveSclResource(UUID id, Version version, String approver);
 
     IArchivedResourcesMetaItem searchArchivedResource(UUID id);
 
     IArchivedResourcesMetaItem searchArchivedResource(String location, String name, String approver, String contentType, String type, String voltage, OffsetDateTime from, OffsetDateTime to);
+
+    IArchivedResourcesHistoryMetaItem searchArchivedResourceHistory(UUID uuid);
 
 }
