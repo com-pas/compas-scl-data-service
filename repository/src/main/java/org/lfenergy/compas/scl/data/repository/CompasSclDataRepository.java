@@ -6,6 +6,7 @@ package org.lfenergy.compas.scl.data.repository;
 import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,6 +49,15 @@ public interface CompasSclDataRepository {
      * @return The Meta Info of SCL Entry that is search for.
      */
     IAbstractItem findMetaInfoByUUID(SclFileType type, UUID id);
+
+    /**
+     * Return the specific version of a specific SCL Entry.
+     *
+     * @param id      The ID of the SCL to search for.
+     * @param version The version of the ScL to search for.
+     * @return The SCL XML File Content that is search for.
+     */
+    String findByUUID(UUID id, Version version);
 
     /**
      * Return the specific version of a specific SCL Entry.
@@ -101,4 +111,26 @@ public interface CompasSclDataRepository {
      * @param version The version of that SCL File to delete.
      */
     void delete(SclFileType type, UUID id, Version version, boolean softDelete);
+
+    /**
+     * List the latest version of all SCL History Entries.
+     *
+     * @return The list of entries found.
+     */
+    List<IHistoryMetaItem> listHistory();
+
+    /**
+     * List the latest version of all SCL History Entries.
+     *
+     * @return The list of entries found.
+     */
+    List<IHistoryMetaItem> listHistory(SclFileType type, String name, String author, OffsetDateTime from, OffsetDateTime to);
+
+    /**
+     * List all history versions for a specific SCL Entry.
+     *
+     * @param id The ID of the SCL to search for.
+     * @return The list of versions found for that specific sCl Entry.
+     */
+    List<IHistoryMetaItem> listHistoryVersionsByUUID(UUID id);
 }

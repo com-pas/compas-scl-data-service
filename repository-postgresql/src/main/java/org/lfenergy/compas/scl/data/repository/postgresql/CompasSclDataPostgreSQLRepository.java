@@ -14,14 +14,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import javax.sql.DataSource;
 import jakarta.transaction.Transactional;
-import java.sql.Array;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+
+import java.sql.*;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.*;
 
 import static jakarta.transaction.Transactional.TxType.REQUIRED;
 import static jakarta.transaction.Transactional.TxType.SUPPORTS;
@@ -38,6 +35,12 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private static final String HITEM_WHO_FIELD = "hitem_who";
     private static final String HITEM_WHEN_FIELD = "hitem_when";
     private static final String HITEM_WHAT_FIELD = "hitem_what";
+
+    private static final String HISTORYMETAITEM_TYPE_FIELD = "type";
+    private static final String HISTORYMETAITEM_AUTHOR_FIELD = "author";
+    private static final String HISTORYMETAITEM_COMMENT_FIELD = "comment";
+    private static final String HISTORYMETAITEM_CHANGEDAT_FIELD = "changedAt";
+    private static final String HISTORYMETAITEM_IS_DELETED_FIELD = "is_deleted";
 
     private final DataSource dataSource;
 
@@ -373,6 +376,116 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         }
     }
 
+    @Override
+    @Transactional(SUPPORTS)
+    public String findByUUID(UUID id, Version version) {
+        var sql = """
+                select scl_file.scl_data
+                  from scl_file
+                 where scl_file.id   = ?
+                 and   scl_file.major_version = ?
+                 and   scl_file.minor_version = ?
+                 and   scl_file.patch_version = ?
+                """;
+
+        try (var connection = dataSource.getConnection();
+             var stmt = connection.prepareStatement(sql)) {
+            stmt.setObject(1, id);
+            stmt.setInt(2, version.getMajorVersion());
+            stmt.setInt(3, version.getMinorVersion());
+            stmt.setInt(4, version.getPatchVersion());
+
+            try (var resultSet = stmt.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString(SCL_DATA_FIELD);
+                }
+                var message = String.format("No record found with ID '%s' and version '%s'", id, version);
+                throw new CompasNoDataFoundException(message);
+            }
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE, "Error select scl data from database!", exp);
+        }
+    }
+
+    @Override
+    @Transactional(SUPPORTS)
+    public List<IHistoryMetaItem> listHistory() {
+        var sql = """
+            select *
+                from scl_file
+            order by
+                scl_file.id ASC,
+                scl_file.major_version DESC,
+                scl_file.minor_version DESC,
+                scl_file.patch_version DESC
+        """;
+        return executeHistoryQuery(sql, Collections.emptyList());
+    }
+
+    @Override
+    @Transactional(SUPPORTS)
+    public List<IHistoryMetaItem> listHistory(SclFileType type, String name, String author, OffsetDateTime from, OffsetDateTime to) {
+        StringBuilder sqlBuilder = new StringBuilder("""
+            select *
+              from scl_file
+            where 1=1
+            """);
+
+        List<Object> parameters = new ArrayList<>();
+
+        if (type != null) {
+            sqlBuilder.append(" AND scl_file.type = ?");
+            parameters.add(type.toString());
+        }
+
+        if (name != null) {
+            sqlBuilder.append(" AND scl_file.name ILIKE ?");
+            parameters.add("%" + name + "%");
+        }
+
+        if (author != null) {
+            sqlBuilder.append(" AND scl_file.author = ?");
+            parameters.add(author);
+        }
+
+        if (from != null) {
+            sqlBuilder.append(" AND scl_file.changedAt >= ?");
+            parameters.add(from);
+        }
+
+        if (to != null) {
+            sqlBuilder.append(" AND scl_file.changedAt <= ?");
+            parameters.add(to);
+        }
+
+        sqlBuilder.append(System.lineSeparator());
+        sqlBuilder.append("""
+            ORDER BY
+                scl_file.id ASC,
+                scl_file.major_version DESC,
+                scl_file.minor_version DESC,
+                scl_file.patch_version DESC
+            """);
+
+        return executeHistoryQuery(sqlBuilder.toString(), parameters);
+    }
+
+    @Override
+    @Transactional(SUPPORTS)
+    public List<IHistoryMetaItem> listHistoryVersionsByUUID(UUID id) {
+        var sql = """
+                select *
+                  from scl_file
+                where scl_file.id   = ?
+                order by
+                  scl_file.major_version,
+                  scl_file.minor_version,
+                  scl_file.patch_version
+                """;
+
+        return executeHistoryQuery(sql, Collections.singletonList(id));
+    }
+
     private String createVersion(ResultSet resultSet) throws SQLException {
         var version = new Version(resultSet.getInt(MAJOR_VERSION_FIELD),
                 resultSet.getInt(MINOR_VERSION_FIELD),
@@ -391,5 +504,44 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                     );
         }
         return labelsList;
+    }
+
+    private List<IHistoryMetaItem> executeHistoryQuery(String sql, List<Object> parameters) {
+        List<IHistoryMetaItem> items = new ArrayList<>();
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql);
+        ) {
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                while (resultSet.next()) {
+                    items.add(mapResultSetToHistoryMetaItem(resultSet));
+                }
+            }
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE, "Error listing scl entries from database!", exp);
+        }
+        return items;
+    }
+
+    private HistoryMetaItem mapResultSetToHistoryMetaItem(ResultSet resultSet) throws SQLException {
+        return new HistoryMetaItem(
+                resultSet.getString(ID_FIELD),
+                resultSet.getString(NAME_FIELD),
+                createVersion(resultSet),
+                resultSet.getString(HISTORYMETAITEM_TYPE_FIELD),
+                resultSet.getString(HISTORYMETAITEM_AUTHOR_FIELD),
+                resultSet.getString(HISTORYMETAITEM_COMMENT_FIELD),
+                convertToOffsetDateTime(resultSet.getTimestamp(HISTORYMETAITEM_CHANGEDAT_FIELD)),
+                resultSet.getBoolean(HISTORYMETAITEM_IS_DELETED_FIELD)
+        );
+    }
+
+    private static OffsetDateTime convertToOffsetDateTime(Timestamp sqlTimestamp) {
+        return sqlTimestamp != null
+                ? sqlTimestamp.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime()
+                : null;
     }
 }
