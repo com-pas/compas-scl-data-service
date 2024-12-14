@@ -91,7 +91,7 @@ public interface CompasSclDataRepository {
      * @param type The type of SCL where to find the SCL File
      * @param id   The ID of the SCL File to delete.
      */
-    void delete(SclFileType type, UUID id);
+    void delete(SclFileType type, UUID id, boolean softDelete);
 
     /**
      * Delete passed versions for a specific SCL File using its ID.
@@ -100,5 +100,5 @@ public interface CompasSclDataRepository {
      * @param id      The ID of the SCL File to delete.
      * @param version The version of that SCL File to delete.
      */
-    void delete(SclFileType type, UUID id, Version version);
+    void delete(SclFileType type, UUID id, Version version, boolean softDelete);
 }

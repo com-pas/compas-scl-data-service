@@ -49,6 +49,10 @@ SPDX-License-Identifier: Apache-2.0
             <artifactId>log4j-core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.microprofile.config</groupId>
+            <artifactId>microprofile-config-api</artifactId>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>

@@ -48,10 +48,11 @@ class CompasSclDataServiceTest {
 
     private final ElementConverter converter = new ElementConverter();
     private final SclElementProcessor processor = new SclElementProcessor();
+    private final FeatureFlagsConfiguration featureFlagsConfiguration = new FeatureFlagsConfiguration();
 
     @BeforeEach
     void beforeEach() {
-        compasSclDataService = new CompasSclDataService(compasSclDataRepository, converter, processor);
+        compasSclDataService = new CompasSclDataService(compasSclDataRepository, converter, processor, featureFlagsConfiguration);
     }
 
     @Test
@@ -304,11 +305,12 @@ class CompasSclDataServiceTest {
     void delete_WhenCalledWithoutVersion_ThenRepositoryIsCalled() {
         var uuid = UUID.randomUUID();
 
-        doNothing().when(compasSclDataRepository).delete(SCL_TYPE, uuid);
+        doNothing().when(compasSclDataRepository).delete(SCL_TYPE, uuid, Boolean.FALSE);
 
+        featureFlagsConfiguration.softDeleteEnabled = Boolean.FALSE;
         compasSclDataService.delete(SCL_TYPE, uuid);
 
-        verify(compasSclDataRepository).delete(SCL_TYPE, uuid);
+        verify(compasSclDataRepository).delete(SCL_TYPE, uuid, Boolean.FALSE);
     }
 
     @Test
@@ -316,11 +318,37 @@ class CompasSclDataServiceTest {
         var uuid = UUID.randomUUID();
         var version = new Version(1, 0, 0);
 
-        doNothing().when(compasSclDataRepository).delete(SCL_TYPE, uuid, version);
+        doNothing().when(compasSclDataRepository).delete(SCL_TYPE, uuid, version, Boolean.FALSE);
 
+        featureFlagsConfiguration.softDeleteEnabled = Boolean.FALSE;
         compasSclDataService.delete(SCL_TYPE, uuid, version);
 
-        verify(compasSclDataRepository).delete(SCL_TYPE, uuid, version);
+        verify(compasSclDataRepository).delete(SCL_TYPE, uuid, version, Boolean.FALSE);
+    }
+
+    @Test
+    void deleteWithSoftDelete_WhenCalledWithoutVersion_ThenRepositoryIsCalled() {
+        var uuid = UUID.randomUUID();
+
+        doNothing().when(compasSclDataRepository).delete(SCL_TYPE, uuid, Boolean.TRUE);
+
+        featureFlagsConfiguration.softDeleteEnabled = Boolean.TRUE;
+        compasSclDataService.delete(SCL_TYPE, uuid);
+
+        verify(compasSclDataRepository).delete(SCL_TYPE, uuid, Boolean.TRUE);
+    }
+
+    @Test
+    void deleteWithSoftDelete_WhenCalledWithVersion_ThenRepositoryIsCalled() {
+        var uuid = UUID.randomUUID();
+        var version = new Version(1, 0, 0);
+
+        doNothing().when(compasSclDataRepository).delete(SCL_TYPE, uuid, version, Boolean.TRUE);
+
+        featureFlagsConfiguration.softDeleteEnabled = Boolean.TRUE;
+        compasSclDataService.delete(SCL_TYPE, uuid, version);
+
+        verify(compasSclDataRepository).delete(SCL_TYPE, uuid, version, Boolean.TRUE);
     }
 
     @Test

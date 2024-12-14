@@ -308,13 +308,22 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(REQUIRED)
-    public void delete(SclFileType type, UUID id) {
-        var sql = """
+    public void delete(SclFileType type, UUID id, boolean softDelete) {
+        String sql;
+        if (softDelete) {
+            sql = """
                 UPDATE scl_file
-                 SET scl_file.is_deleted = false
+                 SET scl_file.is_deleted = true
                  where scl_file.id   = ?
                  and   scl_file.type = ?
                 """;
+        } else {
+            sql = """
+                delete from scl_file
+                 where scl_file.id   = ?
+                 and   scl_file.type = ?
+                """;
+        }
 
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
@@ -328,16 +337,28 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(REQUIRED)
-    public void delete(SclFileType type, UUID id, Version version) {
-        var sql = """
+    public void delete(SclFileType type, UUID id, Version version, boolean softDelete) {
+        String sql;
+        if (softDelete) {
+            sql = """
                 UPDATE scl_file
-                 SET scl_file.is_deleted = false
+                 SET scl_file.is_deleted = true
                  where scl_file.id   = ?
                  and   scl_file.type = ?
                  and   scl_file.major_version = ?
                  and   scl_file.minor_version = ?
                  and   scl_file.patch_version = ?
                 """;
+        } else {
+            sql = """
+                delete from scl_file
+                 where scl_file.id   = ?
+                 and   scl_file.type = ?
+                 and   scl_file.major_version = ?
+                 and   scl_file.minor_version = ?
+                 and   scl_file.patch_version = ?
+                """;
+        }
 
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
