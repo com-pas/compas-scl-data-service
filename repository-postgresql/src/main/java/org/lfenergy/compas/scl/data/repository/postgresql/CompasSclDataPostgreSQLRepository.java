@@ -631,40 +631,45 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Transactional(SUPPORTS)
     public List<IHistoryMetaItem> listHistoryVersionsByUUID(UUID id) {
         String sql = """
-                SELECT sf.id
-                , sf.major_version
-                , sf.minor_version
-                , sf.patch_version
-                , sf.type
-                , sf.name
-                , sf.creation_date as changedAt
-                , sf.created_by as author
-                , sf.id IN (SELECT ar.scl_file_id FROM archived_resource ar) as archived
-                , true as available
-                , sf.is_deleted
-                , l.name as location
-                , (XPATH('/scl:Hitem/@what', scl_data.header, ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1]::varchar as comment
-                FROM scl_file sf
-                   INNER JOIN (
-                      SELECT id, major_version, minor_version, patch_version,
-                              UNNEST(
-                                 XPATH( '(/scl:SCL/scl:Header//scl:Hitem[(not(@revision) or @revision="") and @version="' || major_version || '.' || minor_version || '.' || patch_version || '"])[1]'
-                                      , scl_data::xml
-                                      , ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']])) as header
-                      FROM scl_file) scl_data
-                       ON scl_data.id                 = sf.id
-                           AND scl_data.major_version = sf.major_version
-                           AND scl_data.minor_version = sf.minor_version
-                           AND scl_data.patch_version = sf.patch_version
-                   LEFT JOIN location l
-                      ON sf.location_id = l.id
-                WHERE sf.id = ?
-                ORDER BY
-                    sf.name,
-                    sf.major_version,
-                    sf.minor_version,
-                    sf.patch_version
-                """;
+            SELECT sf.id
+                 , sf.major_version
+                 , sf.minor_version
+                 , sf.patch_version
+                 , sf.type
+                 , sf.name
+                 , sf.creation_date as changedAt
+                 , sf.created_by as author
+                 , sf.id IN (SELECT ar.scl_file_id
+                             FROM   archived_resource ar
+                             WHERE  ar.scl_file_id            = sf.id
+                               AND  ar.scl_file_major_version = sf.major_version
+                               AND  ar.scl_file_minor_version = sf.minor_version
+                               AND  ar.scl_file_patch_version = sf.patch_version) as archived
+                 , true as available
+                 , sf.is_deleted
+                 , l.name as location
+                 , (XPATH('/scl:Hitem/@what', scl_data.header, ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1]::varchar as comment
+            FROM scl_file sf
+                     INNER JOIN (
+                SELECT id, major_version, minor_version, patch_version,
+                       UNNEST(
+                               XPATH( '(/scl:SCL/scl:Header//scl:Hitem[(not(@revision) or @revision="") and @version="' || major_version || '.' || minor_version || '.' || patch_version || '"])[1]'
+                                   , scl_data::xml
+                                   , ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']])) as header
+                FROM scl_file) scl_data
+                                ON scl_data.id                 = sf.id
+                                    AND scl_data.major_version = sf.major_version
+                                    AND scl_data.minor_version = sf.minor_version
+                                    AND scl_data.patch_version = sf.patch_version
+                     LEFT JOIN location l
+                               ON sf.location_id = l.id
+            WHERE sf.id = ?
+            ORDER BY
+                sf.name,
+                sf.major_version,
+                sf.minor_version,
+                sf.patch_version;
+            """;
         return executeHistoryQuery(sql, Collections.singletonList(id));
     }
 
