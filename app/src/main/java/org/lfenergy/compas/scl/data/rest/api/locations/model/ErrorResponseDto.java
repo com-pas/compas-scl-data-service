@@ -24,7 +24,7 @@ public class ErrorResponseDto   {
     return this;
   }
 
-  
+
   @JsonProperty("timestamp")
   @NotNull public OffsetDateTime getTimestamp() {
     return timestamp;
@@ -42,7 +42,7 @@ public class ErrorResponseDto   {
     return this;
   }
 
-  
+
   @JsonProperty("code")
   @NotNull public String getCode() {
     return code;
@@ -60,7 +60,7 @@ public class ErrorResponseDto   {
     return this;
   }
 
-  
+
   @JsonProperty("message")
   @NotNull public String getMessage() {
     return message;
@@ -95,7 +95,7 @@ public class ErrorResponseDto   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ErrorResponseDto {\n");
-    
+
     sb.append("    timestamp: ").append(toIndentedString(timestamp)).append("\n");
     sb.append("    code: ").append(toIndentedString(code)).append("\n");
     sb.append("    message: ").append(toIndentedString(message)).append("\n");

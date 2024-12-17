@@ -6,6 +6,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ILocationMetaItem;
@@ -30,6 +31,8 @@ class LocationsResourceTest {
 
     @InjectMock
     private CompasSclDataService compasSclDataService;
+    @InjectMock
+    private JsonWebToken jwt;
 
     @Test
     void createLocation_WhenCalled_ThenReturnsCreatedLocation() {
@@ -44,7 +47,8 @@ class LocationsResourceTest {
         location.setDescription(description);
         ILocationMetaItem testData = new LocationResourceTestDataBuilder().setId(uuid.toString()).build();
 
-        when(compasSclDataService.createLocation(key, name, description)).thenReturn(testData);
+        when(jwt.getClaim("name")).thenReturn("test user");
+        when(compasSclDataService.createLocation(key, name, description, "test user")).thenReturn(testData);
         Response response = given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(location)

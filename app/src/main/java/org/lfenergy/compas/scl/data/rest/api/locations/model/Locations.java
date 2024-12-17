@@ -25,7 +25,7 @@ public class Locations   {
     return this;
   }
 
-  
+
   @JsonProperty("locations")
   @NotNull @Valid public List<@Valid Location> getLocations() {
     return locations;
@@ -59,7 +59,7 @@ public class Locations   {
     return this;
   }
 
-  
+
   @JsonProperty("pagination")
   @Valid public Pagination getPagination() {
     return pagination;
@@ -93,7 +93,7 @@ public class Locations   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class Locations {\n");
-    
+
     sb.append("    locations: ").append(toIndentedString(locations)).append("\n");
     sb.append("    pagination: ").append(toIndentedString(pagination)).append("\n");
     sb.append("}");

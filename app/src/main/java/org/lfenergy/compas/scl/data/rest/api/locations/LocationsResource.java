@@ -6,7 +6,9 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.lfenergy.compas.scl.data.model.ILocationMetaItem;
+import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.rest.api.locations.model.Location;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 
@@ -18,10 +20,14 @@ public class LocationsResource implements LocationsApi {
     private static final Logger LOGGER = LogManager.getLogger(LocationsResource.class);
 
     private final CompasSclDataService compasSclDataService;
+    private final JsonWebToken jsonWebToken;
+    private final UserInfoProperties userInfoProperties;
 
     @Inject
-    public LocationsResource(CompasSclDataService compasSclDataService) {
+    public LocationsResource(CompasSclDataService compasSclDataService, JsonWebToken jsonWebToken, UserInfoProperties userInfoProperties) {
         this.compasSclDataService = compasSclDataService;
+        this.jsonWebToken = jsonWebToken;
+        this.userInfoProperties = userInfoProperties;
     }
 
     @Override
@@ -36,7 +42,8 @@ public class LocationsResource implements LocationsApi {
             .item(() -> compasSclDataService.createLocation(
                 location.getKey(),
                 location.getName(),
-                location.getDescription()
+                location.getDescription(),
+                jsonWebToken.getClaim(userInfoProperties.name())
             ))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()

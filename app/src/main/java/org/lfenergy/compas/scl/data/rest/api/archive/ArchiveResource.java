@@ -4,20 +4,24 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
-import org.lfenergy.compas.scl.data.rest.api.archive.model.*;
 import org.lfenergy.compas.scl.data.rest.api.archive.model.ArchivedResourceVersion;
+import org.lfenergy.compas.scl.data.rest.api.archive.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 
 import java.io.File;
+import java.rmi.UnexpectedException;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @RequestScoped
 public class ArchiveResource implements ArchivingApi {
 
+    private static final Logger LOGGER = LogManager.getLogger(ArchiveResource.class);
     private final CompasSclDataService compasSclDataService;
     private final JsonWebToken jsonWebToken;
     private final UserInfoProperties userInfoProperties;
@@ -35,7 +39,13 @@ public class ArchiveResource implements ArchivingApi {
             .item(() -> compasSclDataService.archiveResource(id, version, xAuthor, xApprover, contentType, xFilename, body))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()
-            .transform(this::mapToArchivedResource);
+            .transform(this::mapToArchivedResource)
+            .onFailure().transform(e -> {
+                LOGGER.error("Failed to archive resource {} for scl resource {} and version {}", xFilename, id, version, e);
+                return new UnexpectedException(
+                    String.format("Error while archiving data resource %s for scl resource %s and version %s", xFilename, id, version),
+                    (Exception) e);
+            });
     }
 
     @Override
@@ -45,7 +55,13 @@ public class ArchiveResource implements ArchivingApi {
             .item(() -> compasSclDataService.archiveSclResource(id, new Version(version), approver))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()
-            .transform(this::mapToArchivedResource);
+            .transform(this::mapToArchivedResource)
+            .onFailure().transform(e -> {
+                LOGGER.error("Failed to archive SCL resource {} with version {}", id, version, e);
+                return new UnexpectedException(
+                    String.format("Error while archiving data resource %s with version %s", id, version),
+                    (Exception) e);
+            });
     }
 
     @Override
@@ -54,7 +70,11 @@ public class ArchiveResource implements ArchivingApi {
             .item(() -> compasSclDataService.getArchivedResourceHistory(id))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()
-            .transform(this::mapToArchivedResourcesHistory);
+            .transform(this::mapToArchivedResourcesHistory)
+            .onFailure().transform(e -> {
+                LOGGER.error("Failed to retrieve archived resource history for {}", id, e);
+                return new UnexpectedException(String.format("Error while retrieving data resource history for %s", id), (Exception) e);
+            });
     }
 
     @Override
@@ -63,7 +83,11 @@ public class ArchiveResource implements ArchivingApi {
             .item(() -> getArchivedResourcesMetaItem(archivedResourcesSearch))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()
-            .transform(this::mapToArchivedResources);
+            .transform(this::mapToArchivedResources)
+            .onFailure().transform(e -> {
+                LOGGER.error("Failed to find archived resources", e);
+                return new UnexpectedException("Error while finding archived data resources", (Exception) e);
+            });
     }
 
     private IArchivedResourcesMetaItem getArchivedResourcesMetaItem(ArchivedResourcesSearch archivedResourcesSearch) {

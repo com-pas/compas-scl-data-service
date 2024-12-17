@@ -73,7 +73,8 @@ public class HistoryResource implements HistoryApi {
                 .changedAt(e.getChangedAt())
                 .version(e.getVersion())
                 .available(e.isAvailable())
-                .deleted(e.isDeleted());
+                .deleted(e.isDeleted())
+                .location(e.getLocation());
     }
 
     @Override
@@ -96,8 +97,8 @@ public class HistoryResource implements HistoryApi {
                 .available(e.isAvailable())
                 .deleted(e.isDeleted())
                 .comment(e.getComment())
-                .archived(e.isArchived());
-
+                .archived(e.isArchived())
+                .location(e.getLocation());
     }
 
     @Override

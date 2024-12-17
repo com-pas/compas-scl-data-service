@@ -6,7 +6,6 @@ package org.lfenergy.compas.scl.data.repository;
 import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
-import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -159,8 +158,6 @@ public interface CompasSclDataRepository {
      */
     List<IHistoryMetaItem> listHistoryVersionsByUUID(UUID id);
 
-    void createHistoryVersion(UUID id, String name, Version version, SclFileType type, String author, String comment, OffsetDateTime changedAt, Boolean archived, Boolean available);
-
     /**
      * Create a new Location
      *
@@ -201,17 +198,18 @@ public interface CompasSclDataRepository {
     void deleteLocation(UUID locationId);
 
     /**
-     * Updates an existing location
+     * Update an existing location
      *
      * @param locationId  The uuid of the existing Location
      * @param key         The key of the updated Location
      * @param name        The name of the updated Location
      * @param description The description of the updated Location
+     * @return The Meta Info of the updated Location
      */
     ILocationMetaItem updateLocation(UUID locationId, String key, String name, String description);
 
     /**
-     * Assigns a resource to the specified location, if a resource is already assigned to a location, the previous assignment is removed
+     * Assign a resource to the specified location, if a resource is already assigned to a location, the previous assignment is removed
      *
      * @param locationId The uuid of the Location
      * @param resourceId The uuid of the Resource
@@ -219,21 +217,65 @@ public interface CompasSclDataRepository {
     void assignResourceToLocation(UUID locationId, UUID resourceId);
 
     /**
-     * Removes the resource assignment from the specified location
+     * Remove the resource assignment from the specified location
      *
      * @param locationId The uuid of the Location
      * @param resourceId The uuid of the Resource
      */
     void unassignResourceFromLocation(UUID locationId, UUID resourceId);
 
+    /**
+     * Archive a resource and link it to the corresponding scl_file entry
+     *
+     * @param id The id of the scl_file
+     * @param version The version of the scl_file
+     * @param author The author of the resource
+     * @param approver The approver of the resource
+     * @param contentType The content type of the resource
+     * @param filename The filename of the resource
+     * @return The created archived resource item
+     */
     IAbstractArchivedResourceMetaItem archiveResource(UUID id, Version version, String author, String approver, String contentType, String filename);
 
+    /**
+     * Archive an existing scl resource
+     *
+     * @param id The id of the resource to be archived
+     * @param version The version of the resource to be archived
+     * @param approver The approver of the archiving action
+     * @return The archived resource item
+     */
     IAbstractArchivedResourceMetaItem archiveSclResource(UUID id, Version version, String approver);
 
+    /**
+     * Retrieve all entries according to an archived resource id
+     *
+     * @param id The id of the archived resource
+     * @return All archived entries of the given id
+     */
     IArchivedResourcesMetaItem searchArchivedResource(UUID id);
 
+    /**
+     * Retrieve all archived entries according to the search parameters
+     *
+     * @param location The location of the archived resource
+     * @param name The name of the archived resource
+     * @param approver The approver of the archived resource
+     * @param contentType The content type of the resource
+     * @param type The type of the resource
+     * @param voltage The voltage of the resource
+     * @param from The start timestamp of archiving (including)
+     * @param to The end timestamp of archiving (including)
+     * @return All archived entries matching the search criteria
+     */
     IArchivedResourcesMetaItem searchArchivedResource(String location, String name, String approver, String contentType, String type, String voltage, OffsetDateTime from, OffsetDateTime to);
 
+    /**
+     * Retrieve all archived resource history versions according to an archived resource id
+     *
+     * @param uuid The id of the archived resource
+     * @return All archived versions of the given id
+     */
     IArchivedResourcesHistoryMetaItem searchArchivedResourceHistory(UUID uuid);
 
 }

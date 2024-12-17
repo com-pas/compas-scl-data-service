@@ -182,7 +182,7 @@ public class CompasSclDataService {
         repository.create(type, id, name, newSclData, version, who, labels);
 
         if (isHistoryEnabled) {
-            repository.createHistoryVersion(id, name, version, type, who, what, OffsetDateTime.parse(when), false, true);
+            //ToDo cgutmann: check what has to be done here when history table is not available anymore
         }
 
         return newSclData;
@@ -260,7 +260,7 @@ public class CompasSclDataService {
         repository.create(type, id, newSclName, newSclData, version, who, labels);
 
         if (isHistoryEnabled) {
-            repository.createHistoryVersion(id, newSclName, version, type, who, what, OffsetDateTime.parse(when), false, true);
+            //ToDo cgutmann: check what needs to be done when history table is not available anymore
         }
 
         return newSclData;
@@ -567,7 +567,7 @@ public class CompasSclDataService {
     }
 
     /**
-     * Archive a resource and links it to the corresponding scl_file
+     * Archive a resource and link it to the corresponding scl_file entry
      *
      * @param id The id of the scl_file
      * @param version The version of the scl_file

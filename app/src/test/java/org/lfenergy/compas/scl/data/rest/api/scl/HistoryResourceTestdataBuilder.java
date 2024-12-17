@@ -15,6 +15,7 @@ public class HistoryResourceTestdataBuilder {
     private String type = "SSD";
     private String author = "Test";
     private String comment = "Created";
+    private String location = "some location";
     private OffsetDateTime changedAt = OffsetDateTime.now();
     private boolean archived = false;
     private boolean available = false;
@@ -72,6 +73,6 @@ public class HistoryResourceTestdataBuilder {
 
     // Build method to create a new HistoryMetaItem object
     public IHistoryMetaItem build() {
-        return new HistoryMetaItem(id, name, version, type, author, comment, changedAt, archived, available, deleted);
+        return new HistoryMetaItem(id, name, version, type, author, comment, location, changedAt, archived, available, deleted);
     }
 }

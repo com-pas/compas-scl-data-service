@@ -7,6 +7,8 @@ package org.lfenergy.compas.scl.data.repository.postgresql;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.*;
@@ -14,11 +16,12 @@ import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.sql.DataSource;
-import java.io.File;
 import java.sql.*;
+import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static jakarta.transaction.Transactional.TxType.REQUIRED;
 import static jakarta.transaction.Transactional.TxType.SUPPORTS;
@@ -34,7 +37,6 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private static final String KEY_FIELD = "key";
     private static final String VALUE_FIELD = "value";
     private static final String LOCATIONMETAITEM_DESCRIPTION_FIELD = "description";
-    private static final String LOCATIONMETAITEM_RESOURCE_ID_FIELD = "resource_id";
     private static final String SCL_DATA_FIELD = "scl_data";
     private static final String HITEM_WHO_FIELD = "hitem_who";
     private static final String HITEM_WHEN_FIELD = "hitem_when";
@@ -47,7 +49,6 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private static final String HISTORYMETAITEM_ARCHIVED_FIELD = "archived";
     private static final String HISTORYMETAITEM_IS_DELETED_FIELD = "is_deleted";
     private static final String ARCHIVEMETAITEM_LOCATION_FIELD = "location";
-    private static final String ARCHIVEMETAITEM_NOTE_FIELD = "note";
     private static final String ARCHIVEMETAITEM_AUTHOR_FIELD = "author";
     private static final String ARCHIVEMETAITEM_APPROVER_FIELD = "approver";
     private static final String ARCHIVEMETAITEM_TYPE_FIELD = "type";
@@ -462,77 +463,91 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    @Transactional(REQUIRED)
-    public void createHistoryVersion(UUID id, String name, Version version, SclFileType type, String author, String comment, OffsetDateTime changedAt, Boolean archived, Boolean available) {
-        var sql = """
-                INSERT INTO scl_history(id, name, major_version, minor_version, patch_version, type, author, comment, changedAt, archived, available)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-                """;
-
-        try (var connection = dataSource.getConnection();
-             var sclStmt = connection.prepareStatement(sql)) {
-            sclStmt.setObject(1, id);
-            sclStmt.setString(2, name);
-            sclStmt.setInt(3, version.getMajorVersion());
-            sclStmt.setInt(4, version.getMinorVersion());
-            sclStmt.setInt(5, version.getPatchVersion());
-            sclStmt.setString(6, type.toString());
-            sclStmt.setString(7, author);
-            sclStmt.setString(8, comment);
-            sclStmt.setObject(9, changedAt);
-            sclStmt.setBoolean(10, archived);
-            sclStmt.setBoolean(11, available);
-            sclStmt.executeUpdate();
-        } catch (SQLException exp) {
-            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error adding SCL History to database!", exp);
-        }
-    }
-
-    @Override
     @Transactional(SUPPORTS)
     public List<IHistoryMetaItem> listHistory() {
-        var sql = """
-                SELECT *
-                FROM (
-                    SELECT DISTINCT ON (scl_history.id) scl_history.*, scl_file.is_deleted
-                    FROM scl_history
-                    JOIN scl_file ON scl_history.id = scl_file.id
-                        AND scl_history.major_version = scl_file.major_version
-                        AND scl_history.minor_version = scl_file.minor_version
-                        AND scl_history.patch_version = scl_file.patch_version
-                    ORDER BY
-                        scl_history.id,
-                        scl_history.major_version DESC,
-                        scl_history.minor_version DESC,
-                        scl_history.patch_version DESC
-                ) subquery
-                ORDER BY subquery.name
-                """;
+        String sql = """
+            SELECT subquery.id
+                 , subquery.major_version
+                 , subquery.minor_version
+                 , subquery.patch_version
+                 , subquery.type
+                 , subquery.name
+                 , subquery.creation_date                                                         as changedAt
+                 , subquery.created_by                                                            as author
+                 , subquery.id IN (SELECT ar.scl_file_id FROM archived_resource ar)               as archived
+                 , true                                                                           as available
+                 , subquery.is_deleted
+                 , l.name                                                                         as location
+                 , (XPATH('/scl:Hitem/@what', subquery.header,
+                          ARRAY [ARRAY ['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1]::varchar as comment
+            FROM (SELECT DISTINCT ON (scl_file.id) scl_file.*,
+                                       UNNEST(
+                                           XPATH(
+                                               '(/scl:SCL/scl:Header//scl:Hitem[(not(@revision) or @revision="") and @version="' ||
+                                               sf.major_version || '.' || sf.minor_version || '.' ||
+                                               sf.patch_version || '"])[1]'
+                                               , sf.scl_data::xml
+                                               , ARRAY [ARRAY ['scl', 'http://www.iec.ch/61850/2003/SCL']]))
+                                           as header
+                  FROM scl_file
+                           JOIN scl_file sf
+                                ON scl_file.id = sf.id
+                                    AND scl_file.major_version = sf.major_version
+                                    AND scl_file.minor_version = sf.minor_version
+                                    AND scl_file.patch_version = sf.patch_version
+                  ORDER BY scl_file.id,
+                           scl_file.major_version DESC,
+                           scl_file.minor_version DESC,
+                           scl_file.patch_version DESC) subquery
+                     LEFT JOIN location l
+                               ON location_id = l.id
+            ORDER BY subquery.name;
+            """;
         return executeHistoryQuery(sql, Collections.emptyList());
     }
 
     @Override
     @Transactional(SUPPORTS)
     public List<IHistoryMetaItem> listHistory(UUID id) {
-        var sql = """
-                SELECT *
-                FROM (
-                    SELECT DISTINCT ON (scl_history.id) scl_history.*, scl_file.is_deleted
-                    FROM scl_history
-                    JOIN scl_file
-                        ON  scl_history.id            = scl_file.id
-                        AND scl_history.major_version = scl_file.major_version
-                        AND scl_history.minor_version = scl_file.minor_version
-                        AND scl_history.patch_version = scl_file.patch_version
-                    WHERE scl_history.id  = ?
-                    ORDER BY
-                        scl_history.id,
-                        scl_history.major_version DESC,
-                        scl_history.minor_version DESC,
-                        scl_history.patch_version DESC
-                ) subquery
-                ORDER BY subquery.name
-                """;
+        String sql = """
+            SELECT subquery.id
+                 , subquery.major_version
+                 , subquery.minor_version
+                 , subquery.patch_version
+                 , subquery.type
+                 , subquery.name
+                 , subquery.creation_date                                                         as changedAt
+                 , subquery.created_by                                                            as author
+                 , subquery.id IN (SELECT ar.scl_file_id FROM archived_resource ar)               as archived
+                 , true                                                                           as available
+                 , subquery.is_deleted
+                 , l.name                                                                         as location
+                 , (XPATH('/scl:Hitem/@what', subquery.header,
+                          ARRAY [ARRAY ['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1]::varchar as comment
+            FROM (SELECT DISTINCT ON (scl_file.id) scl_file.*,
+                                       UNNEST(
+                                           XPATH(
+                                               '(/scl:SCL/scl:Header//scl:Hitem[(not(@revision) or @revision="") and @version="' ||
+                                               sf.major_version || '.' || sf.minor_version || '.' ||
+                                               sf.patch_version || '"])[1]'
+                                               , sf.scl_data::xml
+                                               , ARRAY [ARRAY ['scl', 'http://www.iec.ch/61850/2003/SCL']]))
+                                           as header
+                  FROM scl_file
+                           JOIN scl_file sf
+                                ON scl_file.id = sf.id
+                                    AND scl_file.major_version = sf.major_version
+                                    AND scl_file.minor_version = sf.minor_version
+                                    AND scl_file.patch_version = sf.patch_version
+                  WHERE sf.id = ?
+                  ORDER BY scl_file.id,
+                           scl_file.major_version DESC,
+                           scl_file.minor_version DESC,
+                           scl_file.patch_version DESC) subquery
+                     LEFT JOIN location l
+                               ON location_id = l.id
+            ORDER BY subquery.name;
+            """;
         return executeHistoryQuery(sql, Collections.singletonList(id));
     }
 
@@ -540,24 +555,43 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Transactional(SUPPORTS)
     public List<IHistoryMetaItem> listHistory(SclFileType type, String name, String author, OffsetDateTime from, OffsetDateTime to) {
         StringBuilder sqlBuilder = new StringBuilder("""
-                SELECT *
-                FROM (
-                    SELECT DISTINCT ON (scl_history.id) scl_history.*, scl_file.is_deleted
-                    FROM scl_history
-                    JOIN scl_file
-                        ON  scl_history.id            = scl_file.id
-                        AND scl_history.major_version = scl_file.major_version
-                        AND scl_history.minor_version = scl_file.minor_version
-                        AND scl_history.patch_version = scl_file.patch_version
-                    ORDER BY
-                        scl_history.id,
-                        scl_history.major_version DESC,
-                        scl_history.minor_version DESC,
-                        scl_history.patch_version DESC
-                ) subquery
-                ORDER BY subquery.name
-                WHERE 1=1
-                """);
+            SELECT subquery.id
+                 , subquery.major_version
+                 , subquery.minor_version
+                 , subquery.patch_version
+                 , subquery.type
+                 , subquery.name
+                 , subquery.creation_date                                                         as changedAt
+                 , subquery.created_by                                                            as author
+                 , subquery.id IN (SELECT ar.scl_file_id FROM archived_resource ar)               as archived
+                 , true                                                                           as available
+                 , subquery.is_deleted
+                 , l.name                                                                         as location
+                 , (XPATH('/scl:Hitem/@what', subquery.header,
+                          ARRAY [ARRAY ['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1]::varchar as comment
+            FROM (SELECT DISTINCT ON (scl_file.id) scl_file.*,
+                                       UNNEST(
+                                           XPATH(
+                                               '(/scl:SCL/scl:Header//scl:Hitem[(not(@revision) or @revision="") and @version="' ||
+                                               sf.major_version || '.' || sf.minor_version || '.' ||
+                                               sf.patch_version || '"])[1]'
+                                               , sf.scl_data::xml
+                                               , ARRAY [ARRAY ['scl', 'http://www.iec.ch/61850/2003/SCL']]))
+                                           as header
+                  FROM scl_file
+                           JOIN scl_file sf
+                                ON scl_file.id = sf.id
+                                    AND scl_file.major_version = sf.major_version
+                                    AND scl_file.minor_version = sf.minor_version
+                                    AND scl_file.patch_version = sf.patch_version
+                  ORDER BY scl_file.id,
+                           scl_file.major_version DESC,
+                           scl_file.minor_version DESC,
+                           scl_file.patch_version DESC) subquery
+                     LEFT JOIN location l
+                               ON location_id = l.id
+            WHERE 1=1
+            """);
 
         List<Object> parameters = new ArrayList<>();
 
@@ -572,28 +606,22 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         }
 
         if (author != null) {
-            sqlBuilder.append(" AND subquery.author = ?");
+            sqlBuilder.append(" AND subquery.created_by = ?");
             parameters.add(author);
         }
 
         if (from != null) {
-            sqlBuilder.append(" AND subquery.changedAt >= ?");
+            sqlBuilder.append(" AND subquery.creation_date >= ?");
             parameters.add(from);
         }
 
         if (to != null) {
-            sqlBuilder.append(" AND subquery.changedAt <= ?");
+            sqlBuilder.append(" AND subquery.creation_date <= ?");
             parameters.add(to);
         }
 
         sqlBuilder.append(System.lineSeparator());
-        sqlBuilder.append("""
-                ORDER BY
-                    scl_history.name,
-                    scl_history.major_version,
-                    scl_history.minor_version,
-                    scl_history.patch_version
-                """);
+        sqlBuilder.append("ORDER BY subquery.name;");
 
         return executeHistoryQuery(sqlBuilder.toString(), parameters);
     }
@@ -602,20 +630,40 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     @Transactional(SUPPORTS)
     public List<IHistoryMetaItem> listHistoryVersionsByUUID(UUID id) {
-        var sql = """
-                SELECT scl_history.*, scl_file.is_deleted
-                FROM scl_history
-                JOIN scl_file
-                    ON  scl_history.id            = scl_file.id
-                    AND scl_history.major_version = scl_file.major_version
-                    AND scl_history.minor_version = scl_file.minor_version
-                    AND scl_history.patch_version = scl_file.patch_version
-                WHERE scl_history.id = ?
+        String sql = """
+                SELECT sf.id
+                , sf.major_version
+                , sf.minor_version
+                , sf.patch_version
+                , sf.type
+                , sf.name
+                , sf.creation_date as changedAt
+                , sf.created_by as author
+                , sf.id IN (SELECT ar.scl_file_id FROM archived_resource ar) as archived
+                , true as available
+                , sf.is_deleted
+                , l.name as location
+                , (XPATH('/scl:Hitem/@what', scl_data.header, ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1]::varchar as comment
+                FROM scl_file sf
+                   INNER JOIN (
+                      SELECT id, major_version, minor_version, patch_version,
+                              UNNEST(
+                                 XPATH( '(/scl:SCL/scl:Header//scl:Hitem[(not(@revision) or @revision="") and @version="' || major_version || '.' || minor_version || '.' || patch_version || '"])[1]'
+                                      , scl_data::xml
+                                      , ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']])) as header
+                      FROM scl_file) scl_data
+                       ON scl_data.id                 = sf.id
+                           AND scl_data.major_version = sf.major_version
+                           AND scl_data.minor_version = sf.minor_version
+                           AND scl_data.patch_version = sf.patch_version
+                   LEFT JOIN location l
+                      ON sf.location_id = l.id
+                WHERE sf.id = ?
                 ORDER BY
-                    scl_history.name,
-                    scl_history.major_version,
-                    scl_history.minor_version,
-                    scl_history.patch_version
+                    sf.name,
+                    sf.major_version,
+                    sf.minor_version,
+                    sf.patch_version
                 """;
         return executeHistoryQuery(sql, Collections.singletonList(id));
     }
@@ -624,8 +672,8 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Transactional(REQUIRED)
     public ILocationMetaItem createLocation(UUID id, String key, String name, String description) {
         String sql = """
-            INSERT INTO location (id, key, name, description, resource_id)
-            VALUES      (?, ?, ?, ?, null);
+            INSERT INTO location (id, key, name, description)
+            VALUES      (?, ?, ?, ?);
             """;
 
         try (var connection = dataSource.getConnection();
@@ -633,7 +681,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             sclStmt.setObject(1, id);
             sclStmt.setString(2, key);
             sclStmt.setString(3, name);
-            sclStmt.setString(4, description == null ? "" : description);
+            sclStmt.setString(4, description);
             sclStmt.executeUpdate();
         } catch (SQLException exp) {
             throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error adding Location to database!", exp);
@@ -1413,7 +1461,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             sb.append(" AND (rr.filename ILIKE ? OR sf.name ILIKE ?)");
         }
         if (approver != null && !approver.isBlank()) {
-            parameters.add(approver); //ToDo cgutmann add xpath subselect
+            parameters.add(approver);
             parameters.add(approver);
             sb.append(" AND (rr.approver = ? OR xml_data.hitem_who::varchar = ?)");
         }
@@ -1427,9 +1475,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             sb.append(" AND (rr.type = ? OR sf.type = ?)");
         }
         if (voltage != null && !voltage.isBlank()) {
-            parameters.add(voltage);
-            //ToDo cgutmann: add subquery for voltage from scl data
-            sb.append(" AND sf.voltage = ?");
+//            ToDo cgutmann: find out how to retrieve voltage
         }
         if (from != null) {
             parameters.add(from);
@@ -1539,7 +1585,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             resultSet.getString(NAME_FIELD),
             version.toString(),
             resultSet.getString(ARCHIVEMETAITEM_LOCATION_FIELD),
-            resultSet.getString(HISTORYMETAITEM_COMMENT_FIELD), //ToDo cgutmann: find out where to get comnment value
+            resultSet.getString(HISTORYMETAITEM_COMMENT_FIELD),
             resultSet.getString(ARCHIVEMETAITEM_AUTHOR_FIELD),
             resultSet.getString(ARCHIVEMETAITEM_APPROVER_FIELD),
             resultSet.getString(ARCHIVEMETAITEM_TYPE_FIELD),
@@ -1659,6 +1705,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 resultSet.getString(HISTORYMETAITEM_TYPE_FIELD),
                 resultSet.getString(HISTORYMETAITEM_AUTHOR_FIELD),
                 resultSet.getString(HISTORYMETAITEM_COMMENT_FIELD),
+                resultSet.getString(ARCHIVEMETAITEM_LOCATION_FIELD),
                 convertToOffsetDateTime(resultSet.getTimestamp(HISTORYMETAITEM_CHANGEDAT_FIELD)),
                 resultSet.getBoolean(HISTORYMETAITEM_ARCHIVED_FIELD),
                 resultSet.getBoolean(HISTORYMETAITEM_AVAILABLE_FIELD),
@@ -1668,7 +1715,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     private OffsetDateTime convertToOffsetDateTime(Timestamp sqlTimestamp) {
         return sqlTimestamp != null
-                ? sqlTimestamp.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime()
+                ? sqlTimestamp.toInstant().atOffset(ZoneOffset.UTC)
                 : null;
     }
 

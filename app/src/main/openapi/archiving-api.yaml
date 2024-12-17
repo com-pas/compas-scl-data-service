@@ -512,7 +512,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponseDto'
-
+  /api/archive/resources/{id}/versions:
+    get:
+      tags:
+        - archiving
+      description: Search for all versions for a given resource uuid
+      operationId: retrieveArchivedResourceHistory
+      parameters:
+        - name: id
+          in: path
+          description: Unique data resource identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Succefully retrieved data resource versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchivedResourcesHistory'
+        '400':
+          description: One of the specified Parameters is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '404':
+          description: Unable to finde data resource with given unique identifier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
 
 components:
   securitySchemes:
@@ -567,6 +611,29 @@ components:
           type: integer
           format: int32
           description: "Number of resources assigned to this location"
+    ArchivedResourcesHistory:
+      type: object
+      required:
+        - versions
+      properties:
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArchivedResourceVersion'
+    ArchivedResourceVersion:
+      allOf:
+        - $ref: '#/components/schemas/ArchivedResource'
+        - type: object
+          required:
+            - archived
+          properties:
+            comment:
+              type: string
+              description: "Comment given when uploading the data resource"
+            archived:
+              type: boolean
+              description: "Defines if given data resource is archived"
+              default: false
     ArchivedResource:
       type: object
       required:

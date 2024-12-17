@@ -21,7 +21,7 @@ public class Pagination   {
     return this;
   }
 
-  
+
   @JsonProperty("page")
   @NotNull public Integer getPage() {
     return page;
@@ -39,7 +39,7 @@ public class Pagination   {
     return this;
   }
 
-  
+
   @JsonProperty("pageSize")
   @NotNull public Integer getPageSize() {
     return pageSize;
@@ -73,7 +73,7 @@ public class Pagination   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class Pagination {\n");
-    
+
     sb.append("    page: ").append(toIndentedString(page)).append("\n");
     sb.append("    pageSize: ").append(toIndentedString(pageSize)).append("\n");
     sb.append("}");

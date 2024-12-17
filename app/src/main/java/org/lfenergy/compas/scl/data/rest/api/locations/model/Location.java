@@ -25,7 +25,7 @@ public class Location   {
     return this;
   }
 
-  
+
   @JsonProperty("uuid")
   public String getUuid() {
     return uuid;
@@ -44,7 +44,7 @@ public class Location   {
     return this;
   }
 
-  
+
   @JsonProperty("key")
   @NotNull public String getKey() {
     return key;
@@ -63,7 +63,7 @@ public class Location   {
     return this;
   }
 
-  
+
   @JsonProperty("name")
   @NotNull public String getName() {
     return name;
@@ -82,7 +82,7 @@ public class Location   {
     return this;
   }
 
-  
+
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -101,7 +101,7 @@ public class Location   {
     return this;
   }
 
-  
+
   @JsonProperty("assignedResources")
   public Integer getAssignedResources() {
     return assignedResources;
@@ -138,7 +138,7 @@ public class Location   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class Location {\n");
-    
+
     sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    key: ").append(toIndentedString(key)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");

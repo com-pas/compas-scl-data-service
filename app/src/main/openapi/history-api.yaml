@@ -168,6 +168,9 @@ components:
         name:
           type: string
           description: "Partially match allowed"
+        location:
+          type: string
+          description: "The location associated with the resource"
         author:
           type: string
           description: "Fulltext match which can be retrieved via extra endpoint"
@@ -228,6 +231,9 @@ components:
           type: boolean
           description: "Defines if a resource is marked as deleted"
           default: false
+        location:
+          type: string
+          description: "The location associated with the resource"
     DataResourceHistory:
       type: object
       required:
