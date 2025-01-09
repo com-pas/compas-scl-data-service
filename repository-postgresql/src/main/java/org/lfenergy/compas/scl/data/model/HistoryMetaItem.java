@@ -13,7 +13,7 @@ public class HistoryMetaItem extends AbstractItem implements IHistoryMetaItem {
     private final boolean deleted;
 
     public HistoryMetaItem(String id, String name, String version, String type, String author, String comment, String location,OffsetDateTime changedAt, boolean archived, boolean available, boolean deleted) {
-        super(id, name, version);
+        super(id, name, version, null);
         this.type = type;
         this.author = author;
         this.comment = comment;

@@ -259,6 +259,10 @@ public class CompasSclDataService {
         var newSclData = converter.convertToString(scl);
         repository.create(type, id, newSclName, newSclData, version, who, labels);
 
+        if (currentSclMetaInfo.getLocationId() != null) {
+            assignResourceToLocation(UUID.fromString(currentSclMetaInfo.getLocationId()), id);
+        }
+
         if (isHistoryEnabled) {
             //ToDo cgutmann: check what needs to be done when history table is not available anymore
         }

@@ -10,7 +10,7 @@ public class Item extends AbstractItem implements IItem {
     private final List<String> labels;
 
     public Item(final String id, final String name, final String version, final List<String> labels) {
-        super(id, name, version);
+        super(id, name, version, null);
         this.labels = labels;
     }
 

@@ -8,10 +8,12 @@ public abstract class AbstractItem implements IAbstractItem {
     private final String id;
     private final String name;
     private final String version;
-    protected AbstractItem(final String id, final String name, final String version) {
+    private final String locationId;
+    protected AbstractItem(final String id, final String name, final String version, final String locationId) {
         this.id = id;
         this.name = name;
         this.version = version;
+        this.locationId = locationId;
     }
 
     public String getId() {
@@ -24,6 +26,10 @@ public abstract class AbstractItem implements IAbstractItem {
 
     public String getVersion() {
         return version;
+    }
+
+    public String getLocationId() {
+        return locationId;
     }
 
 }

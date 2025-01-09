@@ -18,8 +18,8 @@ public class ArchivedResourceVersion extends AbstractItem implements IArchivedRe
     String comment;
     boolean archived;
 
-    public ArchivedResourceVersion(String id, String name, String version, String location, String note, String author, String approver, String type, String contentType, String voltage, List<IResourceTagItem> fields, OffsetDateTime modifiedAt, OffsetDateTime archivedAt, String comment,boolean archived) {
-        super(id, name, version);
+    public ArchivedResourceVersion(String id, String name, String version, String location, String note, String author, String approver, String type, String contentType, String voltage, List<IResourceTagItem> fields, OffsetDateTime modifiedAt, OffsetDateTime archivedAt, String comment, boolean archived) {
+        super(id, name, version, null);
         this.location = location;
         this.note = note;
         this.author = author;

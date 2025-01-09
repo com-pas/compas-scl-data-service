@@ -7,8 +7,6 @@ package org.lfenergy.compas.scl.data.repository.postgresql;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.*;
@@ -268,7 +266,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Transactional(SUPPORTS)
     public IAbstractItem findMetaInfoByUUID(SclFileType type, UUID id) {
         var sql = """
-                select scl_file.id, scl_file.name, scl_file.major_version, scl_file.minor_version, scl_file.patch_version
+                select scl_file.id, scl_file.name, scl_file.major_version, scl_file.minor_version, scl_file.patch_version, scl_file.location_id
                   from scl_file
                  where scl_file.id   = ?
                  and   scl_file.type = ?
@@ -286,7 +284,8 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 if (resultSet.next()) {
                     return new SclMetaInfo(resultSet.getString(ID_FIELD),
                             resultSet.getString(NAME_FIELD),
-                            createVersion(resultSet));
+                            createVersion(resultSet),
+                            resultSet.getString("location_id"));
                 }
                 var message = String.format("No meta info found for type '%s' with ID '%s'", type, id);
                 throw new CompasNoDataFoundException(message);
@@ -484,17 +483,12 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                                        UNNEST(
                                            XPATH(
                                                '(/scl:SCL/scl:Header//scl:Hitem[(not(@revision) or @revision="") and @version="' ||
-                                               sf.major_version || '.' || sf.minor_version || '.' ||
-                                               sf.patch_version || '"])[1]'
-                                               , sf.scl_data::xml
+                                               scl_file.major_version || '.' || scl_file.minor_version || '.' ||
+                                               scl_file.patch_version || '"])[1]'
+                                               , scl_file.scl_data::xml
                                                , ARRAY [ARRAY ['scl', 'http://www.iec.ch/61850/2003/SCL']]))
                                            as header
                   FROM scl_file
-                           JOIN scl_file sf
-                                ON scl_file.id = sf.id
-                                    AND scl_file.major_version = sf.major_version
-                                    AND scl_file.minor_version = sf.minor_version
-                                    AND scl_file.patch_version = sf.patch_version
                   ORDER BY scl_file.id,
                            scl_file.major_version DESC,
                            scl_file.minor_version DESC,
@@ -528,18 +522,13 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                                        UNNEST(
                                            XPATH(
                                                '(/scl:SCL/scl:Header//scl:Hitem[(not(@revision) or @revision="") and @version="' ||
-                                               sf.major_version || '.' || sf.minor_version || '.' ||
-                                               sf.patch_version || '"])[1]'
-                                               , sf.scl_data::xml
+                                               scl_file.major_version || '.' || scl_file.minor_version || '.' ||
+                                               scl_file.patch_version || '"])[1]'
+                                               , scl_file.scl_data::xml
                                                , ARRAY [ARRAY ['scl', 'http://www.iec.ch/61850/2003/SCL']]))
                                            as header
                   FROM scl_file
-                           JOIN scl_file sf
-                                ON scl_file.id = sf.id
-                                    AND scl_file.major_version = sf.major_version
-                                    AND scl_file.minor_version = sf.minor_version
-                                    AND scl_file.patch_version = sf.patch_version
-                  WHERE sf.id = ?
+                  WHERE scl_file.id = ?
                   ORDER BY scl_file.id,
                            scl_file.major_version DESC,
                            scl_file.minor_version DESC,
@@ -573,17 +562,12 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                                        UNNEST(
                                            XPATH(
                                                '(/scl:SCL/scl:Header//scl:Hitem[(not(@revision) or @revision="") and @version="' ||
-                                               sf.major_version || '.' || sf.minor_version || '.' ||
-                                               sf.patch_version || '"])[1]'
-                                               , sf.scl_data::xml
+                                               scl_file.major_version || '.' || scl_file.minor_version || '.' ||
+                                               scl_file.patch_version || '"])[1]'
+                                               , scl_file.scl_data::xml
                                                , ARRAY [ARRAY ['scl', 'http://www.iec.ch/61850/2003/SCL']]))
                                            as header
                   FROM scl_file
-                           JOIN scl_file sf
-                                ON scl_file.id = sf.id
-                                    AND scl_file.major_version = sf.major_version
-                                    AND scl_file.minor_version = sf.minor_version
-                                    AND scl_file.patch_version = sf.patch_version
                   ORDER BY scl_file.id,
                            scl_file.major_version DESC,
                            scl_file.minor_version DESC,
@@ -1547,7 +1531,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                                ON ar.referenced_resource_id = rr.id
                      LEFT JOIN location l
                                ON sf.location_id = l.id OR rr.location_id = l.id
-            WHERE ? in (sf.id, rr.id)
+            WHERE ar.id = ?
             GROUP BY ar.id, sf.name, rr.filename, sf.created_by, rr.author, l.name, rr.content_type, rr.approver, sf.type, rr.type, sf.creation_date, ar.archived_at, sf.scl_data, xml_data.hitem_who::varchar, xml_data.hitem_what::varchar;
             """;
 
@@ -1608,7 +1592,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         List<IHistoryMetaItem> items = new ArrayList<>();
         try (
                 Connection connection = dataSource.getConnection();
-                PreparedStatement stmt = connection.prepareStatement(sql);
+                PreparedStatement stmt = connection.prepareStatement(sql)
         ) {
             for (int i = 0; i < parameters.size(); i++) {
                 stmt.setObject(i + 1, parameters.get(i));
