@@ -19,7 +19,9 @@ import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
@@ -42,14 +44,15 @@ public class CompasSclDataService {
     private final CompasSclDataRepository repository;
     private final ElementConverter converter;
     private final SclElementProcessor sclElementProcessor;
-    private final String DEFAULT_PATH = System.getProperty("user.dir") + File.separator + "locations";
+    private final ICompasSclDataArchivingService archivingService;
 
     @Inject
     public CompasSclDataService(CompasSclDataRepository repository, ElementConverter converter,
-                                SclElementProcessor sclElementProcessor) {
+                                SclElementProcessor sclElementProcessor, ICompasSclDataArchivingService archivingService) {
         this.repository = repository;
         this.converter = converter;
         this.sclElementProcessor = sclElementProcessor;
+        this.archivingService = archivingService;
     }
 
     /**
@@ -500,10 +503,9 @@ public class CompasSclDataService {
      */
     @Transactional(REQUIRED)
     public ILocationMetaItem createLocation(String key, String name, String description, String author) {
-        ILocationMetaItem createdLocation = repository.createLocation(UUID.randomUUID(), key, name, description);
+        ILocationMetaItem createdLocation = repository.createLocation(key, name, description);
         repository.addLocationTags(createdLocation, author);
-        File newLocationDirectory = new File(DEFAULT_PATH + File.separator + createdLocation.getName());
-        newLocationDirectory.mkdirs();
+        archivingService.createLocation(createdLocation);
         return createdLocation;
     }
 
@@ -523,8 +525,7 @@ public class CompasSclDataService {
 
         repository.deleteLocationTags(locationToDelete);
         repository.deleteLocation(id);
-        File directory = new File(DEFAULT_PATH + File.separator + locationToDelete.getName());
-        directory.delete();
+        archivingService.deleteLocation(locationToDelete);
     }
 
     /**
@@ -542,17 +543,45 @@ public class CompasSclDataService {
     }
 
     /**
-     * Assign a Resource id to a Location entry
+     * Assign a Resource id to a Location entry and move archived content from previous assigned Location
      *
      * @param locationId The id of the Location entry
      * @param resourceId The id of the Resource
      */
     @Transactional(REQUIRED)
     public void assignResourceToLocation(UUID locationId, UUID resourceId) {
-        ILocationMetaItem item = repository.findLocationByUUID(locationId);
-        if (item != null) {
+        ILocationMetaItem locationItem = repository.findLocationByUUID(locationId);
+        if (locationItem != null) {
+            List<IHistoryMetaItem> historyMetaItems = repository.listHistory(resourceId);
+            ILocationMetaItem previousLocation = null;
+            if (!historyMetaItems.isEmpty()) {
+                IAbstractItem sclMetaInfo = repository.findMetaInfoByUUID(SclFileType.valueOf(historyMetaItems.get(0).getType()), resourceId);
+                if (sclMetaInfo.getLocationId() != null) {
+                    previousLocation = repository.findLocationByUUID(UUID.fromString(sclMetaInfo.getLocationId()));
+                }
+            }
             repository.assignResourceToLocation(locationId, resourceId);
+            if (previousLocation != null) {
+                moveArchivedItemsToNewLocation(resourceId, locationItem, previousLocation);
+            }
         }
+    }
+
+    private void moveArchivedItemsToNewLocation(UUID resourceId, ILocationMetaItem location, ILocationMetaItem previousLocation) {
+        List<String> archivedResourceIdsToMove = getResourceIdsFromAssignedArchivedResources(resourceId, location);
+        archivingService.moveArchivedResourcesToLocation(previousLocation, location, archivedResourceIdsToMove);
+    }
+
+    private List<String> getResourceIdsFromAssignedArchivedResources(UUID resourceId, ILocationMetaItem location) {
+        return repository.searchArchivedResource(location.getName(), null, null, null, null, null, null, null)
+            .getResources()
+            .stream()
+            .filter(ar ->
+                ar.getFields()
+                    .stream()
+                    .anyMatch(f ->
+                        f.getKey().equals("SOURCE_RESOURCE_ID") && f.getValue().equals(resourceId.toString())))
+            .map(IAbstractItem::getId).toList();
     }
 
     /**
@@ -563,9 +592,10 @@ public class CompasSclDataService {
      */
     @Transactional(REQUIRED)
     public void unassignResourceFromLocation(UUID locationId, UUID resourceId) {
-        ILocationMetaItem item = repository.findLocationByUUID(locationId);
-        if (item != null) {
-            //ToDo cgutmann: ask what should happen with resources in filesystem - should they be deleted?
+        ILocationMetaItem locationItem = repository.findLocationByUUID(locationId);
+        if (locationItem != null) {
+            List<String> resourceIdsToBeUnassigned = getResourceIdsFromAssignedArchivedResources(resourceId, locationItem);
+            archivingService.deleteSclDataFromLocation(locationItem, resourceIdsToBeUnassigned);
             repository.unassignResourceFromLocation(locationId, resourceId);
         }
     }
@@ -586,17 +616,7 @@ public class CompasSclDataService {
     public IAbstractArchivedResourceMetaItem archiveResource(UUID id, String version, String author, String approver, String contentType, String filename, File body) {
         IAbstractArchivedResourceMetaItem archivedResource = repository.archiveResource(id, new Version(version), author, approver, contentType, filename);
         if (body != null) {
-            String absolutePath = DEFAULT_PATH + File.separator + archivedResource.getLocation() + File.separator + archivedResource.getId();
-            File locationDir = new File(absolutePath);
-            locationDir.mkdirs();
-            File f = new File(absolutePath + File.separator + filename);
-            try (FileOutputStream fos = new FileOutputStream(f)) {
-                try (FileInputStream fis = new FileInputStream(body)) {
-                    fos.write(fis.readAllBytes());
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            archivingService.archiveSclData(filename, body, archivedResource);
         }
         return archivedResource;
     }
@@ -614,15 +634,7 @@ public class CompasSclDataService {
         IAbstractArchivedResourceMetaItem archivedResource = repository.archiveSclResource(id, version, approver);
         String data = repository.findByUUID(id, version);
         if (data != null) {
-            String absolutePath = DEFAULT_PATH + File.separator + archivedResource.getLocation() + File.separator + archivedResource.getId();
-            File locationDir = new File(absolutePath);
-            locationDir.mkdirs();
-            File f = new File(locationDir + File.separator + archivedResource.getName() + "." + archivedResource.getContentType().toLowerCase());
-            try (FileWriter fw = new FileWriter(f)) {
-                fw.write(data);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            archivingService.archiveSclData(archivedResource, data);
         }
         return archivedResource;
     }

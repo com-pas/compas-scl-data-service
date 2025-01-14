@@ -659,12 +659,13 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(REQUIRED)
-    public ILocationMetaItem createLocation(UUID id, String key, String name, String description) {
+    public ILocationMetaItem createLocation(String key, String name, String description) {
         String sql = """
             INSERT INTO location (id, key, name, description)
             VALUES      (?, ?, ?, ?);
             """;
 
+        UUID id = UUID.randomUUID();
         try (var connection = dataSource.getConnection();
              var sclStmt = connection.prepareStatement(sql)) {
             sclStmt.setObject(1, id);

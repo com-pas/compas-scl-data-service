@@ -4,8 +4,8 @@
 
 create table location (
     id uuid not null,
-    key varchar(255) not null,
-    name varchar(255) not null,
+    key varchar(255) unique not null,
+    name varchar(255) unique not null,
     description varchar(255),
     primary key (id)
 );

@@ -66,6 +66,11 @@ SPDX-License-Identifier: Apache-2.0
             <artifactId>openpojo</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.lfenergy.compas.scl.data</groupId>
+            <artifactId>repository-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -161,13 +161,12 @@ public interface CompasSclDataRepository {
     /**
      * Create a new Location
      *
-     * @param id          The uuid of the Location
      * @param key         The key of the Location
      * @param name        The name of the Location
      * @param description The description of the Location
      * @return The created Location
      */
-    ILocationMetaItem createLocation(UUID id, String key, String name, String description);
+    ILocationMetaItem createLocation(String key, String name, String description);
 
     void addLocationTags(ILocationMetaItem location, String author);
 
