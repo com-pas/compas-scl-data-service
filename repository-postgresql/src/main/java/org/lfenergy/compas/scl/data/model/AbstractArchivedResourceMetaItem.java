@@ -9,17 +9,17 @@ public abstract class AbstractArchivedResourceMetaItem implements IAbstractArchi
     private final String approver;
     private final String type;
     private final String contentType;
-    private final String location;
+    private final String locationId;
     private final List<IResourceTagItem> fields;
     private final OffsetDateTime modifiedAt;
     private final OffsetDateTime archivedAt;
 
-    public AbstractArchivedResourceMetaItem(String author, String approver, String type, String contentType, String location, List<IResourceTagItem> fields, OffsetDateTime modifiedAt, OffsetDateTime archivedAt) {
+    public AbstractArchivedResourceMetaItem(String author, String approver, String type, String contentType, String locationId, List<IResourceTagItem> fields, OffsetDateTime modifiedAt, OffsetDateTime archivedAt) {
         this.author = author;
         this.approver = approver;
         this.type = type;
         this.contentType = contentType;
-        this.location = location;
+        this.locationId = locationId;
         this.fields = fields;
         this.modifiedAt = modifiedAt;
         this.archivedAt = archivedAt;
@@ -41,8 +41,9 @@ public abstract class AbstractArchivedResourceMetaItem implements IAbstractArchi
         return contentType;
     }
 
-    public String getLocation() {
-        return location;
+    @Override
+    public String getLocationId() {
+        return locationId;
     }
 
     public List<IResourceTagItem> getFields() {

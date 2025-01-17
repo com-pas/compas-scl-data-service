@@ -13,8 +13,6 @@ public interface IAbstractArchivedResourceMetaItem extends IAbstractItem {
 
     String getContentType();
 
-    String getLocation();
-
     default String getNote() {
         return null;
     }

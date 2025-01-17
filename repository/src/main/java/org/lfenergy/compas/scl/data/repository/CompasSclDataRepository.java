@@ -168,8 +168,28 @@ public interface CompasSclDataRepository {
      */
     ILocationMetaItem createLocation(String key, String name, String description);
 
+    /**
+     * Create tags that identify a Location object
+     *
+     * @param location The Location object that receives the tags
+     * @param author The name of the author who created the Location
+     */
     void addLocationTags(ILocationMetaItem location, String author);
 
+    /**
+     * Return whether either the key or the name are already used in a location
+     *
+     * @param key The key of the Location used for checking duplicates.
+     * @param name The name of the Location used for checking duplicates.
+     * @return True if the key or the name is already used by another Location, otherwise false.
+     */
+    boolean hasDuplicateLocationValues(String key, String name);
+
+    /**
+     * Delete tags that identify a Location
+     *
+     * @param location The Location object to be deleted
+     */
     void deleteLocationTags(ILocationMetaItem location);
 
     /**

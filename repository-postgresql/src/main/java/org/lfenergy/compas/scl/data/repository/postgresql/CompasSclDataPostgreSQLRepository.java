@@ -19,7 +19,6 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static jakarta.transaction.Transactional.TxType.REQUIRED;
 import static jakarta.transaction.Transactional.TxType.SUPPORTS;
@@ -476,7 +475,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                  , subquery.id IN (SELECT ar.scl_file_id FROM archived_resource ar)               as archived
                  , true                                                                           as available
                  , subquery.is_deleted
-                 , l.name                                                                         as location
+                 , l.id                                                                           as location
                  , (XPATH('/scl:Hitem/@what', subquery.header,
                           ARRAY [ARRAY ['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1]::varchar as comment
             FROM (SELECT DISTINCT ON (scl_file.id) scl_file.*,
@@ -515,7 +514,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                  , subquery.id IN (SELECT ar.scl_file_id FROM archived_resource ar)               as archived
                  , true                                                                           as available
                  , subquery.is_deleted
-                 , l.name                                                                         as location
+                 , l.id                                                                           as location
                  , (XPATH('/scl:Hitem/@what', subquery.header,
                           ARRAY [ARRAY ['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1]::varchar as comment
             FROM (SELECT DISTINCT ON (scl_file.id) scl_file.*,
@@ -555,7 +554,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                  , subquery.id IN (SELECT ar.scl_file_id FROM archived_resource ar)               as archived
                  , true                                                                           as available
                  , subquery.is_deleted
-                 , l.name                                                                         as location
+                 , l.id                                                                           as location
                  , (XPATH('/scl:Hitem/@what', subquery.header,
                           ARRAY [ARRAY ['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1]::varchar as comment
             FROM (SELECT DISTINCT ON (scl_file.id) scl_file.*,
@@ -631,7 +630,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                                AND  ar.scl_file_patch_version = sf.patch_version) as archived
                  , true as available
                  , sf.is_deleted
-                 , l.name as location
+                 , l.id as location
                  , (XPATH('/scl:Hitem/@what', scl_data.header, ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1]::varchar as comment
             FROM scl_file sf
                      INNER JOIN (
@@ -678,6 +677,29 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         }
 
         return findLocationByUUID(id);
+    }
+
+    @Transactional(SUPPORTS)
+    @Override
+    public boolean hasDuplicateLocationValues(String key, String name) {
+        String query = """
+            SELECT ? IN (SELECT key from location) as duplicate_key,
+                   ? IN (SELECT name from location) as duplicate_name;
+            """;
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement sclStmt = connection.prepareStatement(query)) {
+            sclStmt.setString(1, key);
+            sclStmt.setString(2, name);
+            try (ResultSet resultSet = sclStmt.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getBoolean("duplicate_key") ||
+                        resultSet.getBoolean("duplicate_name");
+                }
+                return false;
+            }
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE, "Error retrieving location values!", exp);
+        }
     }
 
     @Override
@@ -744,7 +766,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Transactional(SUPPORTS)
     public List<ILocationMetaItem> listLocations(int page, int pageSize) {
         String sql = """
-            SELECT   *, (SELECT COUNT(sf.id) FROM scl_file sf WHERE sf.location_id = l.id) as assigned_resources
+            SELECT   *, (SELECT COUNT(DISTINCT(sf.id)) FROM scl_file sf WHERE sf.location_id = l.id) as assigned_resources
             FROM     location l
             ORDER BY name
             OFFSET   ?
@@ -761,14 +783,14 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Transactional(SUPPORTS)
     public ILocationMetaItem findLocationByUUID(UUID locationId) {
         String sql = """
-            SELECT   *, (SELECT COUNT(sf.id) FROM scl_file sf WHERE sf.location_id = ?) as assigned_resources
+            SELECT   *, (SELECT COUNT(DISTINCT(sf.id)) FROM scl_file sf WHERE sf.location_id = ?) as assigned_resources
             FROM     location l
             WHERE    id = ?
             ORDER BY l.name;
             """;
         List<ILocationMetaItem> retrievedLocation = executeLocationQuery(sql, List.of(locationId, locationId));
         if (retrievedLocation.isEmpty()) {
-            throw new CompasNoDataFoundException(String.format("Unable to find Location with id %s.", locationId));
+            throw new CompasNoDataFoundException(String.format("Unable to find Location with id '%s'.", locationId));
         }
         return retrievedLocation.get(0);
     }
@@ -849,9 +871,6 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         } catch (SQLException exp) {
             throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error assigning Referenced Resource to Location in database!", exp);
         }
-        String locationKey = findLocationByUUID(locationId).getName();
-        updateLocationKeyMappingForSclResource(resourceId, locationKey);
-        updateLocationKeyMappingForReferencedResource(resourceId, locationKey);
     }
 
     @Override
@@ -883,8 +902,6 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         } catch (SQLException exp) {
             throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error unassigning Referenced Resource from Location in database!", exp);
         }
-        updateLocationKeyMappingForSclResource(resourceId, null);
-        updateLocationKeyMappingForReferencedResource(resourceId, null);
     }
 
     private void updateTagMappingForLocation(UUID locationId, List<IResourceTagItem> resourceTags) {
@@ -912,107 +929,35 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         }
     }
 
-    private void updateLocationKeyMappingForSclResource(UUID resourceId, String locationKey) {
-        ResourceTagItem locationTag = getResourceTag("LOCATION", locationKey);
-        if (locationTag == null) {
-            createResourceTag("LOCATION", locationKey);
-            locationTag = getResourceTag("LOCATION", locationKey);
-        }
-        for (IAbstractArchivedResourceMetaItem resource : searchArchivedResourceBySclFile(resourceId)) {
-            updateLocationResourceTag(locationTag, resource);
-        }
-    }
-
-    private void updateLocationKeyMappingForReferencedResource(UUID resourceId, String locationKey) {
-        ResourceTagItem locationTag = getResourceTag("LOCATION", locationKey);
-        if (locationTag == null) {
-            createResourceTag("LOCATION", locationKey);
-            locationTag = getResourceTag("LOCATION", locationKey);
-        }
-        for (IAbstractArchivedResourceMetaItem resource : searchArchivedReferencedResources(resourceId)) {
-            updateLocationResourceTag(locationTag, resource);
-        }
-    }
-
-    private void updateLocationResourceTag(ResourceTagItem locationTag, IAbstractArchivedResourceMetaItem resource) {
-        List<String> locationFieldIds = resource.getFields()
-            .stream()
-            .filter(field ->
-                field.getKey().equals("LOCATION")
-            )
-            .map(IResourceTagItem::getId)
-            .toList();
-        if (!locationFieldIds.isEmpty()) {
-            removeLocationTagsFromResource(resource.getId(), locationFieldIds);
-        }
-        updateArchivedResourceToResourceTagMappingTable(
-            UUID.fromString(resource.getId()),
-            List.of(locationTag)
-        );
-    }
-
-    private void removeLocationTagsFromResource(String resourceId, List<String> locationFieldIds) {
-        String sql = String.format("""
-            DELETE FROM archived_resource_resource_tag
-            WHERE archived_resource_id = ? AND resource_tag_id IN (%s);
-            """, locationFieldIds.stream()
-            .map(fieldIds -> "?")
-            .collect(Collectors.joining(",")));
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement deleteStatement = connection.prepareStatement(sql)) {
-            deleteStatement.setObject(1, UUID.fromString(resourceId));
-            for (int i = 1; i <= locationFieldIds.size(); i++) {
-                deleteStatement.setObject(i + 1, UUID.fromString(locationFieldIds.get(i - 1)));
-            }
-            deleteStatement.executeUpdate();
-        } catch (SQLException exp) {
-            throw new CompasSclDataServiceException(POSTGRES_DELETE_ERROR_CODE, "Error deleting archived resource to resource tag mapping entries in database!", exp);
-        }
-    }
-
     @Override
     public IAbstractArchivedResourceMetaItem archiveResource(UUID id, Version version, String author, String approver, String contentType, String filename) {
         ArchivedSclResourceMetaItem sclResourceMetaItem = getSclFileAsArchivedSclResourceMetaItem(id, version, approver);
-        String location = sclResourceMetaItem.getLocation();
-
-        String locationIdQuery = """
-            SELECT l.*, (SELECT COUNT(DISTINCT(sf.id)) FROM scl_file sf WHERE sf.location_id = l.id) as assigned_resources
-            FROM   scl_file sf INNER JOIN location l ON sf.location_id = l.id
-            WHERE  sf.id = ?
-            AND sf.major_version = ?
-            AND sf.minor_version = ?
-            AND sf.patch_version = ?;
-            """;
-
-        List<ILocationMetaItem> locationItems = executeLocationQuery(locationIdQuery, List.of(id, version.getMajorVersion(), version.getMinorVersion(), version.getPatchVersion()));
-
+        String locationId = sclResourceMetaItem.getLocationId();
         UUID assignedResourceId = UUID.randomUUID();
 
-        if (!locationItems.isEmpty() && locationItems.get(0).getId() != null) {
-            String locationId = locationItems.get(0).getId();
-            String sql = """
+        String sql = """
             INSERT INTO referenced_resource (id, content_type, filename, author, approver, location_id, scl_file_id, scl_file_major_version, scl_file_minor_version, scl_file_patch_version)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """;
-            try (Connection connection = dataSource.getConnection();
-                 PreparedStatement stmt = connection.prepareStatement(sql)) {
-                stmt.setObject(1, assignedResourceId);
-                stmt.setObject(2, contentType);
-                stmt.setObject(3, filename);
-                stmt.setObject(4, author);
-                stmt.setObject(5, approver);
-                stmt.setObject(6, UUID.fromString(locationId));
-                stmt.setObject(7, id);
-                stmt.setObject(8, version.getMajorVersion());
-                stmt.setObject(9, version.getMinorVersion());
-                stmt.setObject(10, version.getPatchVersion());
-                stmt.executeUpdate();
-            } catch (SQLException exp) {
-                throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error inserting Referenced Resources!", exp);
-            }
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setObject(1, assignedResourceId);
+            stmt.setObject(2, contentType);
+            stmt.setObject(3, filename);
+            stmt.setObject(4, author);
+            stmt.setObject(5, approver);
+            stmt.setObject(6, UUID.fromString(locationId));
+            stmt.setObject(7, id);
+            stmt.setObject(8, version.getMajorVersion());
+            stmt.setObject(9, version.getMinorVersion());
+            stmt.setObject(10, version.getPatchVersion());
+            stmt.executeUpdate();
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error inserting Referenced Resources!", exp);
         }
 
-        List<IResourceTagItem> resourceTags = generateFields(location, id.toString(), author, approver);
+        String locationName = findLocationByUUID(UUID.fromString(locationId)).getName();
+        List<IResourceTagItem> resourceTags = generateFields(locationName, id.toString(), author, approver);
         ArchivedReferencedResourceMetaItem archivedResourcesMetaItem = new ArchivedReferencedResourceMetaItem(
             assignedResourceId.toString(),
             filename,
@@ -1021,7 +966,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             approver,
             null,
             contentType,
-            location,
+            locationId,
             resourceTags,
             null,
             convertToOffsetDateTime(Timestamp.from(Instant.now())),
@@ -1041,7 +986,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             archivedResourcesMetaItem.getApprover(),
             archivedResourcesMetaItem.getType(),
             archivedResourcesMetaItem.getContentType(),
-            archivedResourcesMetaItem.getLocation(),
+            archivedResourcesMetaItem.getLocationId(),
             archivedResourcesMetaItem.getFields(),
             archivedResourcesMetaItem.getModifiedAt(),
             archivedResourcesMetaItem.getArchivedAt(),
@@ -1053,10 +998,6 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     public IAbstractArchivedResourceMetaItem archiveSclResource(UUID id, Version version, String approver) {
         ArchivedSclResourceMetaItem convertedArchivedResourceMetaItem = getSclFileAsArchivedSclResourceMetaItem(id, version, approver);
         if (convertedArchivedResourceMetaItem != null) {
-            if (convertedArchivedResourceMetaItem.getLocation() == null) {
-                throw new CompasSclDataServiceException(NO_LOCATION_ASSIGNED_TO_SCL_DATA_ERROR_CODE,
-                    String.format("Unable to archive scl_file %s with version %s, no location assigned!", id, version));
-            }
             UUID archivedResourceId = UUID.randomUUID();
             insertIntoArchivedResourceTable(archivedResourceId, convertedArchivedResourceMetaItem, version);
             updateArchivedResourceToResourceTagMappingTable(
@@ -1071,7 +1012,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
               convertedArchivedResourceMetaItem.getApprover(),
               convertedArchivedResourceMetaItem.getType(),
               convertedArchivedResourceMetaItem.getContentType(),
-              convertedArchivedResourceMetaItem.getLocation(),
+              convertedArchivedResourceMetaItem.getLocationId(),
               convertedArchivedResourceMetaItem.getFields(),
               convertedArchivedResourceMetaItem.getModifiedAt(),
               convertedArchivedResourceMetaItem.getArchivedAt(),
@@ -1085,7 +1026,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private ArchivedSclResourceMetaItem getSclFileAsArchivedSclResourceMetaItem(UUID id, Version version, String approver) {
         String sql = """
             SELECT scl_file.*,
-                   l.name as location,
+                   l.id AS location,
                    (xpath('/scl:Hitem/@who', scl_data.header, ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1] hitem_who,
                    (xpath('/scl:Hitem/@what', scl_data.header, ARRAY[ARRAY['scl', 'http://www.iec.ch/61850/2003/SCL']]))[1] hitem_what
             FROM   scl_file
@@ -1182,8 +1123,9 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     private List<IResourceTagItem> generateFieldsFromResultSet(ResultSet resultSet, String examiner) throws SQLException {
+        String locationName = findLocationByUUID(UUID.fromString(resultSet.getString(ARCHIVEMETAITEM_LOCATION_FIELD))).getName();
         return generateFields(
-            resultSet.getString(ARCHIVEMETAITEM_LOCATION_FIELD),
+            locationName,
             resultSet.getString(ID_FIELD),
             resultSet.getString("created_by"),
             examiner
@@ -1280,91 +1222,21 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         }
     }
 
-    private List<IAbstractArchivedResourceMetaItem> searchArchivedReferencedResources(UUID archivedResourceUuid) {
-            String archivedResourcesSql = """
-            SELECT ar.*,
-                   COALESCE(sf.name, rr.filename)                                         as name,
-                   COALESCE(sf.created_by, rr.author)                                     as author,
-                   rr.approver                                                            as approver,
-                   rr.content_type                                                        as content_type,
-                   COALESCE(sf.type, rr.type)                                             as type,
-                   sf.creation_date                                                       as modified_at,
-                   ar.archived_at                                                         as archived_at,
-                   null                                                                   as comment,
-                   null                                                                   as voltage,
-                   ARRAY_AGG(rt.id || ';' || rt.key || ';' || COALESCE(rt.value, 'null')) AS tags,
-                   l.name                                                                 as location
-            FROM archived_resource ar
-                     INNER JOIN archived_resource_resource_tag arrt
-                                ON ar.id = arrt.archived_resource_id
-                     INNER JOIN resource_tag rt
-                                ON arrt.resource_tag_id = rt.id
-                     LEFT JOIN scl_file sf
-                               ON sf.id = ar.scl_file_id
-                                   AND sf.major_version = ar.scl_file_major_version
-                                   AND sf.minor_version = ar.scl_file_minor_version
-                                   AND sf.patch_version = ar.scl_file_patch_version
-                     LEFT JOIN referenced_resource rr
-                               ON ar.referenced_resource_id = rr.id
-                     LEFT JOIN location l
-                               ON sf.location_id = l.id OR rr.location_id = l.id
-            WHERE rr.scl_file_id = ?
-            GROUP BY ar.id, sf.name, rr.filename, sf.created_by, rr.author, l.name, rr.content_type, rr.approver, sf.type, rr.type, sf.creation_date, ar.archived_at;
-            """;
-
-        return executeArchivedResourceQuery(archivedResourcesSql, Collections.singletonList(archivedResourceUuid));
-    }
-
-    private List<IAbstractArchivedResourceMetaItem> searchArchivedResourceBySclFile(UUID archivedResourceUuid) {
-        String archivedResourcesSql = """
-            SELECT ar.*,
-                   COALESCE(sf.name, rr.filename)                                         as name,
-                   COALESCE(sf.created_by, rr.author)                                     as author,
-                   rr.approver                                                            as approver,
-                   rr.content_type                                                        as content_type,
-                   COALESCE(sf.type, rr.type)                                             as type,
-                   sf.creation_date                                                       as modified_at,
-                   ar.archived_at                                                         as archived_at,
-                   null                                                                   as comment,
-                   null                                                                   as voltage,
-                   ARRAY_AGG(rt.id || ';' || rt.key || ';' || COALESCE(rt.value, 'null')) AS tags,
-                   l.name                                                                 as location
-            FROM archived_resource ar
-                     INNER JOIN archived_resource_resource_tag arrt
-                                ON ar.id = arrt.archived_resource_id
-                     INNER JOIN resource_tag rt
-                                ON arrt.resource_tag_id = rt.id
-                     LEFT JOIN scl_file sf
-                               ON sf.id = ar.scl_file_id
-                                   AND sf.major_version = ar.scl_file_major_version
-                                   AND sf.minor_version = ar.scl_file_minor_version
-                                   AND sf.patch_version = ar.scl_file_patch_version
-                     LEFT JOIN referenced_resource rr
-                               ON ar.referenced_resource_id = rr.id
-                     LEFT JOIN location l
-                               ON sf.location_id = l.id OR rr.location_id = l.id
-            WHERE sf.id = ?
-            GROUP BY ar.id, sf.name, rr.filename, sf.created_by, rr.author, l.name, rr.content_type, rr.approver, sf.type, rr.type, sf.creation_date, ar.archived_at;
-            """;
-
-        return executeArchivedResourceQuery(archivedResourcesSql, Collections.singletonList(archivedResourceUuid));
-    }
-
     @Override
     public IArchivedResourcesMetaItem searchArchivedResource(UUID id) {
         String archivedResourcesSql = """
             SELECT ar.*,
-                   COALESCE(sf.name, rr.filename)                                         as name,
-                   COALESCE(sf.created_by, rr.author)                                     as author,
-                   rr.approver                                                            as approver,
-                   rr.content_type                                                        as content_type,
-                   COALESCE(sf.type, rr.type)                                             as type,
-                   sf.creation_date                                                       as modified_at,
-                   ar.archived_at                                                         as archived_at,
-                   null                                                                   as comment,
-                   null                                                                   as voltage,
+                   COALESCE(sf.name, rr.filename)                                         AS name,
+                   COALESCE(sf.created_by, rr.author)                                     AS author,
+                   rr.approver                                                            AS approver,
+                   rr.content_type                                                        AS content_type,
+                   COALESCE(sf.type, rr.type)                                             AS type,
+                   sf.creation_date                                                       AS modified_at,
+                   ar.archived_at                                                         AS archived_at,
+                   null                                                                   AS comment,
+                   null                                                                   AS voltage,
                    ARRAY_AGG(rt.id || ';' || rt.key || ';' || COALESCE(rt.value, 'null')) AS tags,
-                   l.name                                                                 as location
+                   l.id                                                                   AS location
             FROM archived_resource ar
                      INNER JOIN archived_resource_resource_tag arrt
                                 ON ar.id = arrt.archived_resource_id
@@ -1380,7 +1252,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                      LEFT JOIN location l
                                ON sf.location_id = l.id OR rr.location_id = l.id
             WHERE ar.id = ?
-            GROUP BY ar.id, sf.name, rr.filename, sf.created_by, rr.author, l.name, rr.content_type, rr.approver, sf.type, rr.type, sf.creation_date, ar.archived_at;
+            GROUP BY ar.id, sf.name, rr.filename, sf.created_by, rr.author, l.id, rr.content_type, rr.approver, sf.type, rr.type, sf.creation_date, ar.archived_at;
             """;
         return new ArchivedResourcesMetaItem(executeArchivedResourceQuery(archivedResourcesSql, Collections.singletonList(id)));
     }
@@ -1401,7 +1273,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                    null                                                                   AS comment,
                    null                                                                   AS voltage,
                    ARRAY_AGG(rt.id || ';' || rt.key || ';' || COALESCE(rt.value, 'null')) AS tags,
-                   l.name                                                                 AS location
+                   l.id                                                                   AS location
             FROM archived_resource ar
                      LEFT JOIN scl_file sf
                          ON sf.id = ar.scl_file_id
@@ -1476,7 +1348,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             sb.append(" AND ar.archived_at <= ?");
         }
         sb.append(System.lineSeparator());
-        sb.append("GROUP BY ar.id, sf.name, rr.filename, sf.created_by, rr.author, l.name, rr.content_type, rr.approver, sf.type, rr.type, sf.creation_date, ar.archived_at, sf.scl_data, xml_data.hitem_who::varchar;");
+        sb.append("GROUP BY ar.id, sf.name, rr.filename, sf.created_by, rr.author, l.id, rr.content_type, rr.approver, sf.type, rr.type, sf.creation_date, ar.archived_at, sf.scl_data, xml_data.hitem_who::varchar;");
         return new ArchivedResourcesMetaItem(executeArchivedResourceQuery(sb.toString(), parameters));
     }
 
@@ -1494,7 +1366,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                    xml_data.hitem_what::varchar                                           AS comment,
                    null                                                                   AS voltage,
                    ARRAY_AGG(rt.id || ';' || rt.key || ';' || COALESCE(rt.value, 'null')) AS tags,
-                   l.name                                                                 AS location,
+                   l.id                                                                   AS location,
                    ar.scl_file_id IS NOT NULL OR ar.referenced_resource_id IS NOT NULL    AS is_archived
             FROM archived_resource ar
                      LEFT JOIN scl_file sf
@@ -1533,7 +1405,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                      LEFT JOIN location l
                                ON sf.location_id = l.id OR rr.location_id = l.id
             WHERE ar.id = ?
-            GROUP BY ar.id, sf.name, rr.filename, sf.created_by, rr.author, l.name, rr.content_type, rr.approver, sf.type, rr.type, sf.creation_date, ar.archived_at, sf.scl_data, xml_data.hitem_who::varchar, xml_data.hitem_what::varchar;
+            GROUP BY ar.id, sf.name, rr.filename, sf.created_by, rr.author, l.id, rr.content_type, rr.approver, sf.type, rr.type, sf.creation_date, ar.archived_at, sf.scl_data, xml_data.hitem_who::varchar, xml_data.hitem_what::varchar;
             """;
 
         List<IArchivedResourceVersion> versions = new ArrayList<>();
@@ -1550,7 +1422,9 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         } catch (SQLException exp) {
             throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE, "Error retrieving Archived Resource History entries from database!", exp);
         }
-
+        if (versions.isEmpty()) {
+            throw new CompasNoDataFoundException(String.format("Unable to find resource with id '%s'.", uuid));
+        }
         return new ArchivedResourcesHistoryMetaItem(versions);
     }
 
@@ -1658,7 +1532,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         } catch (SQLException exp) {
             throw new CompasSclDataServiceException(
                 POSTGRES_SELECT_ERROR_CODE,
-                "Error listing scl entries from database!", exp
+                "Error listing location resource_tag mapping entries from database!", exp
             );
         }
     }
@@ -1682,7 +1556,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         } catch (SQLException exp) {
             throw new CompasSclDataServiceException(
                 POSTGRES_SELECT_ERROR_CODE,
-                "Error listing scl entries from database!", exp
+                "Error listing archived_resource resource_tag mapping entries from database!", exp
             );
         }
     }

@@ -14,7 +14,6 @@ import org.lfenergy.compas.scl.data.rest.api.archive.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 
 import java.io.File;
-import java.rmi.UnexpectedException;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -35,59 +34,43 @@ public class ArchiveResource implements ArchivingApi {
 
     @Override
     public Uni<ArchivedResource> archiveResource(UUID id, String version, String xAuthor, String xApprover, String contentType, String xFilename, File body) {
+        LOGGER.info("Archiving resource '{}' for scl resource with id '{}' and version '{}'", xFilename, id, version);
         return Uni.createFrom()
             .item(() -> compasSclDataService.archiveResource(id, version, xAuthor, xApprover, contentType, xFilename, body))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()
-            .transform(this::mapToArchivedResource)
-            .onFailure().transform(e -> {
-                LOGGER.error("Failed to archive resource {} for scl resource {} and version {}", xFilename, id, version, e);
-                return new UnexpectedException(
-                    String.format("Error while archiving data resource %s for scl resource %s and version %s", xFilename, id, version),
-                    (Exception) e);
-            });
+            .transform(this::mapToArchivedResource);
     }
 
     @Override
     public Uni<ArchivedResource> archiveSclResource(UUID id, String version) {
+        LOGGER.info("Archiving scl resource with id '{}' and version '{}'", id, version);
         String approver = jsonWebToken.getClaim(userInfoProperties.name());
         return Uni.createFrom()
             .item(() -> compasSclDataService.archiveSclResource(id, new Version(version), approver))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()
-            .transform(this::mapToArchivedResource)
-            .onFailure().transform(e -> {
-                LOGGER.error("Failed to archive SCL resource {} with version {}", id, version, e);
-                return new UnexpectedException(
-                    String.format("Error while archiving data resource %s with version %s", id, version),
-                    (Exception) e);
-            });
+            .transform(this::mapToArchivedResource);
     }
 
     @Override
     public Uni<ArchivedResourcesHistory> retrieveArchivedResourceHistory(UUID id) {
+        LOGGER.info("Retrieving archived resource history for id '{}'", id);
         return Uni.createFrom()
             .item(() -> compasSclDataService.getArchivedResourceHistory(id))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()
-            .transform(this::mapToArchivedResourcesHistory)
-            .onFailure().transform(e -> {
-                LOGGER.error("Failed to retrieve archived resource history for {}", id, e);
-                return new UnexpectedException(String.format("Error while retrieving data resource history for %s", id), (Exception) e);
-            });
+            .transform(this::mapToArchivedResourcesHistory);
     }
 
     @Override
     public Uni<ArchivedResources> searchArchivedResources(ArchivedResourcesSearch archivedResourcesSearch) {
+        LOGGER.info("Retrieving archived resources with filter: {}", archivedResourcesSearch);
         return Uni.createFrom()
             .item(() -> getArchivedResourcesMetaItem(archivedResourcesSearch))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()
-            .transform(this::mapToArchivedResources)
-            .onFailure().transform(e -> {
-                LOGGER.error("Failed to find archived resources", e);
-                return new UnexpectedException("Error while finding archived data resources", (Exception) e);
-            });
+            .transform(this::mapToArchivedResources);
     }
 
     private IArchivedResourcesMetaItem getArchivedResourcesMetaItem(ArchivedResourcesSearch archivedResourcesSearch) {
@@ -109,7 +92,7 @@ public class ArchiveResource implements ArchivingApi {
     private ArchivedResource mapToArchivedResource(IAbstractArchivedResourceMetaItem archivedResource) {
         return new ArchivedResource()
             .uuid(archivedResource.getId())
-            .location(archivedResource.getLocation())
+            .location(archivedResource.getLocationId())
             .name(archivedResource.getName())
             .note(archivedResource.getNote())
             .author(archivedResource.getAuthor())

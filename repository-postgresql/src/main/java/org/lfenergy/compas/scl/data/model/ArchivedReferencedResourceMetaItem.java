@@ -10,8 +10,8 @@ public class ArchivedReferencedResourceMetaItem extends AbstractArchivedResource
     String version;
     String comment;
 
-    public ArchivedReferencedResourceMetaItem(String id, String name, String version, String author, String approver, String type, String contentType, String location, List<IResourceTagItem> fields, OffsetDateTime modifiedAt, OffsetDateTime archivedAt, String comment) {
-        super(author, approver, type, contentType, location, fields, modifiedAt, archivedAt);
+    public ArchivedReferencedResourceMetaItem(String id, String name, String version, String author, String approver, String type, String contentType, String locationId, List<IResourceTagItem> fields, OffsetDateTime modifiedAt, OffsetDateTime archivedAt, String comment) {
+        super(author, approver, type, contentType, locationId, fields, modifiedAt, archivedAt);
         this.id = id;
         this.name = name;
         this.version = version;

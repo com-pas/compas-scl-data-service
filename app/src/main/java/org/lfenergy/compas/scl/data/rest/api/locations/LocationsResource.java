@@ -13,6 +13,7 @@ import org.lfenergy.compas.scl.data.rest.api.locations.model.Location;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @RequestScoped
@@ -32,12 +33,14 @@ public class LocationsResource implements LocationsApi {
 
     @Override
     public Uni<Void> assignResourceToLocation(UUID locationId, UUID uuid) {
+        LOGGER.info("Assigning resource '{}' to location '{}'", uuid, locationId);
         compasSclDataService.assignResourceToLocation(locationId, uuid);
         return Uni.createFrom().nullItem();
     }
 
     @Override
     public Uni<Location> createLocation(Location location) {
+        LOGGER.info("Creating location '{}'", location.getName());
         return Uni.createFrom()
             .item(() -> compasSclDataService.createLocation(
                 location.getKey(),
@@ -52,13 +55,14 @@ public class LocationsResource implements LocationsApi {
 
     @Override
     public Uni<Void> deleteLocation(UUID locationId) {
+        LOGGER.info("Deleting location with ID '{}'", locationId);
         compasSclDataService.deleteLocation(locationId);
         return Uni.createFrom().nullItem();
     }
 
     @Override
     public Uni<Location> getLocation(UUID locationId) {
-        LOGGER.info("Retrieving location for ID: {}", locationId);
+        LOGGER.info("Retrieving location for ID '{}'", locationId);
         return Uni.createFrom()
             .item(() -> compasSclDataService.findLocationByUUID(locationId))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
@@ -68,12 +72,8 @@ public class LocationsResource implements LocationsApi {
 
     @Override
     public Uni<List<Location>> getLocations(Integer page, Integer pageSize) {
-        int pageLocation;
-        if (page != null && page > 1) {
-            pageLocation = page;
-        } else {
-            pageLocation = 0;
-        }
+        int pageLocation = Objects.requireNonNullElse(page, 0);
+        LOGGER.info("Retrieving locations for page '{}' and pageSize '{}'", pageLocation, pageSize);
         return Uni.createFrom()
             .item(() -> compasSclDataService.listLocations(pageLocation, pageSize))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
@@ -83,12 +83,14 @@ public class LocationsResource implements LocationsApi {
 
     @Override
     public Uni<Void> unassignResourceFromLocation(UUID locationId, UUID uuid) {
+        LOGGER.info("Unassigning resource '{}' from location '{}'", uuid, locationId);
         compasSclDataService.unassignResourceFromLocation(locationId, uuid);
         return Uni.createFrom().nullItem();
     }
 
     @Override
     public Uni<Location> updateLocation(UUID locationId, Location location) {
+        LOGGER.info("Updating resource '{}'", locationId);
         return Uni.createFrom().
             item(() -> compasSclDataService.updateLocation(locationId, location.getKey(), location.getName(), location.getDescription()))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())

@@ -184,10 +184,6 @@ public class CompasSclDataService {
         var newSclData = converter.convertToString(scl);
         repository.create(type, id, name, newSclData, version, who, labels);
 
-        if (isHistoryEnabled) {
-            //ToDo cgutmann: check what has to be done here when history table is not available anymore
-        }
-
         return newSclData;
     }
 
@@ -264,10 +260,6 @@ public class CompasSclDataService {
 
         if (currentSclMetaInfo.getLocationId() != null) {
             assignResourceToLocation(UUID.fromString(currentSclMetaInfo.getLocationId()), id);
-        }
-
-        if (isHistoryEnabled) {
-            //ToDo cgutmann: check what needs to be done when history table is not available anymore
         }
 
         return newSclData;
@@ -503,6 +495,9 @@ public class CompasSclDataService {
      */
     @Transactional(REQUIRED)
     public ILocationMetaItem createLocation(String key, String name, String description, String author) {
+        if (repository.hasDuplicateLocationValues(key, name)) {
+            throw new CompasSclDataServiceException(CREATION_ERROR_CODE, "Duplicate location key or name provided!");
+        }
         ILocationMetaItem createdLocation = repository.createLocation(key, name, description);
         repository.addLocationTags(createdLocation, author);
         archivingService.createLocation(createdLocation);
@@ -520,12 +515,11 @@ public class CompasSclDataService {
         int assignedResourceCount = locationToDelete.getAssignedResources();
         if (assignedResourceCount > 0) {
             throw new CompasSclDataServiceException(LOCATION_DELETION_NOT_ALLOWED_ERROR_CODE,
-                String.format("Deletion of Location %s not allowed, unassign resources before deletion", id));
+                String.format("Deletion of Location '%s' not allowed, unassign resources before deletion", id));
         }
 
         repository.deleteLocationTags(locationToDelete);
         repository.deleteLocation(id);
-        archivingService.deleteLocation(locationToDelete);
     }
 
     /**
@@ -551,37 +545,12 @@ public class CompasSclDataService {
     @Transactional(REQUIRED)
     public void assignResourceToLocation(UUID locationId, UUID resourceId) {
         ILocationMetaItem locationItem = repository.findLocationByUUID(locationId);
-        if (locationItem != null) {
-            List<IHistoryMetaItem> historyMetaItems = repository.listHistory(resourceId);
-            ILocationMetaItem previousLocation = null;
-            if (!historyMetaItems.isEmpty()) {
-                IAbstractItem sclMetaInfo = repository.findMetaInfoByUUID(SclFileType.valueOf(historyMetaItems.get(0).getType()), resourceId);
-                if (sclMetaInfo.getLocationId() != null) {
-                    previousLocation = repository.findLocationByUUID(UUID.fromString(sclMetaInfo.getLocationId()));
-                }
-            }
-            repository.assignResourceToLocation(locationId, resourceId);
-            if (previousLocation != null) {
-                moveArchivedItemsToNewLocation(resourceId, locationItem, previousLocation);
-            }
+        if (repository.listHistory(resourceId).isEmpty()) {
+            throw new CompasNoDataFoundException(String.format("Unable to find resource with id '%s'.", resourceId));
         }
-    }
-
-    private void moveArchivedItemsToNewLocation(UUID resourceId, ILocationMetaItem location, ILocationMetaItem previousLocation) {
-        List<String> archivedResourceIdsToMove = getResourceIdsFromAssignedArchivedResources(resourceId, location);
-        archivingService.moveArchivedResourcesToLocation(previousLocation, location, archivedResourceIdsToMove);
-    }
-
-    private List<String> getResourceIdsFromAssignedArchivedResources(UUID resourceId, ILocationMetaItem location) {
-        return repository.searchArchivedResource(location.getName(), null, null, null, null, null, null, null)
-            .getResources()
-            .stream()
-            .filter(ar ->
-                ar.getFields()
-                    .stream()
-                    .anyMatch(f ->
-                        f.getKey().equals("SOURCE_RESOURCE_ID") && f.getValue().equals(resourceId.toString())))
-            .map(IAbstractItem::getId).toList();
+        if (locationItem != null) {
+            repository.assignResourceToLocation(locationId, resourceId);
+        }
     }
 
     /**
@@ -593,13 +562,13 @@ public class CompasSclDataService {
     @Transactional(REQUIRED)
     public void unassignResourceFromLocation(UUID locationId, UUID resourceId) {
         ILocationMetaItem locationItem = repository.findLocationByUUID(locationId);
+        if (repository.listHistory(resourceId).isEmpty()) {
+            throw new CompasNoDataFoundException(String.format("Unable to find resource with id '%s'.", resourceId));
+        }
         if (locationItem != null) {
-            List<String> resourceIdsToBeUnassigned = getResourceIdsFromAssignedArchivedResources(resourceId, locationItem);
-            archivingService.deleteSclDataFromLocation(locationItem, resourceIdsToBeUnassigned);
             repository.unassignResourceFromLocation(locationId, resourceId);
         }
     }
-
     /**
      * Archive a resource and link it to the corresponding scl_file entry
      *
@@ -614,9 +583,17 @@ public class CompasSclDataService {
      */
     @Transactional(REQUIRED)
     public IAbstractArchivedResourceMetaItem archiveResource(UUID id, String version, String author, String approver, String contentType, String filename, File body) {
+        List<IHistoryMetaItem> historyItem = repository.listHistoryVersionsByUUID(id);
+        if (!historyItem.isEmpty() && historyItem.get(0).getLocation() == null) {
+            throw new CompasSclDataServiceException(NO_LOCATION_ASSIGNED_TO_SCL_DATA_ERROR_CODE,
+                String.format("Unable to archive file '%s' for scl resource '%s' with version %s, no location assigned!", filename, id, version));
+        } else if (historyItem.isEmpty() || historyItem.stream().noneMatch(hi -> hi.getVersion().equals(version))) {
+            throw new CompasNoDataFoundException(
+                String.format("Unable to archive file '%s' for scl resource '%s' with version %s, unable to find scl resource '%s' with version %s!", filename, id, version, id, version));
+        }
         IAbstractArchivedResourceMetaItem archivedResource = repository.archiveResource(id, new Version(version), author, approver, contentType, filename);
         if (body != null) {
-            archivingService.archiveSclData(filename, body, archivedResource);
+            archivingService.archiveSclData(repository.findLocationByUUID(UUID.fromString(archivedResource.getLocationId())).getName(), filename, id, body, archivedResource);
         }
         return archivedResource;
     }
@@ -631,10 +608,15 @@ public class CompasSclDataService {
      */
     @Transactional(REQUIRED)
     public IAbstractArchivedResourceMetaItem archiveSclResource(UUID id, Version version, String approver) {
+        List<IHistoryMetaItem> historyItem = repository.listHistory(id);
+        if (!historyItem.isEmpty() && historyItem.get(0).getLocation() == null) {
+            throw new CompasSclDataServiceException(NO_LOCATION_ASSIGNED_TO_SCL_DATA_ERROR_CODE,
+                String.format("Unable to archive scl file '%s' with version %s, no location assigned!", id, version));
+        }
         IAbstractArchivedResourceMetaItem archivedResource = repository.archiveSclResource(id, version, approver);
         String data = repository.findByUUID(id, version);
         if (data != null) {
-            archivingService.archiveSclData(archivedResource, data);
+            archivingService.archiveSclData(id, archivedResource, repository.findLocationByUUID(UUID.fromString(archivedResource.getLocationId())).getName(), data);
         }
         return archivedResource;
     }
