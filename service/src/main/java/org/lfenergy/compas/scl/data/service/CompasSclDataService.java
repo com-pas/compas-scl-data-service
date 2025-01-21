@@ -593,7 +593,7 @@ public class CompasSclDataService {
         }
         IAbstractArchivedResourceMetaItem archivedResource = repository.archiveResource(id, new Version(version), author, approver, contentType, filename);
         if (body != null) {
-            archivingService.archiveSclData(repository.findLocationByUUID(UUID.fromString(archivedResource.getLocationId())).getName(), filename, id, body, archivedResource);
+            archivingService.archiveData(repository.findLocationByUUID(UUID.fromString(archivedResource.getLocationId())).getName(), filename, id, body, archivedResource);
         }
         return archivedResource;
     }

@@ -10,7 +10,7 @@ public interface ICompasSclDataArchivingService {
 
     void createLocation(ILocationMetaItem location);
 
-    void archiveSclData(String locationName, String filename, UUID uuid, File body, IAbstractArchivedResourceMetaItem archivedResource);
+    void archiveData(String locationName, String filename, UUID uuid, File body, IAbstractArchivedResourceMetaItem archivedResource);
 
     void archiveSclData(UUID uuid, IAbstractArchivedResourceMetaItem archivedResource, String locationName, String data);
 }

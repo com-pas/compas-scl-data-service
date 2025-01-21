@@ -19,7 +19,7 @@ public class CompasSclDataArchivingServiceImpl implements ICompasSclDataArchivin
     }
 
     @Override
-    public void archiveSclData(String locationName, String filename, UUID resourceId, File body, IAbstractArchivedResourceMetaItem archivedResource) {
+    public void archiveData(String locationName, String filename, UUID resourceId, File body, IAbstractArchivedResourceMetaItem archivedResource) {
         String absolutePath = generateSclDataLocation(resourceId, archivedResource, locationName) + File.separator + "referenced_resources";
         File locationDir = new File(absolutePath);
         locationDir.mkdirs();

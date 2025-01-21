@@ -736,7 +736,7 @@ class CompasSclDataServiceTest {
             compasSclDataService.archiveResource(resourceId, version, author, approver, contentType, filename, file);
 
             verify(compasSclDataRepository, times(1)).archiveResource(resourceId, new Version(version), author, approver, contentType, filename);
-            verify(compasSclDataArchivingService, times(1)).archiveSclData(any(), any(), any(), any(), any());
+            verify(compasSclDataArchivingService, times(1)).archiveData(any(), any(), any(), any(), any());
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
