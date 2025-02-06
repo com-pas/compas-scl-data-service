@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.5](https://github.com/com-pas/compas-scl-data-service/compare/v0.15.4...v0.15.5) (2025-02-06)
+
+
+### Bug Fixes
+
+* Add write permissions for packages ([c49c4bf](https://github.com/com-pas/compas-scl-data-service/commit/c49c4bf2245dae274409f11f4ac30165e0b6c186))
+
+
 ## [0.15.4](https://github.com/com-pas/compas-scl-data-service/compare/v0.15.3...v0.15.4) (2025-02-06)
 
 
