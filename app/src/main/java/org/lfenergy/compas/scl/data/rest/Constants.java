@@ -16,4 +16,3 @@ public final class Constants {
     public static final String UPDATE_ROLE = "UPDATE";
     public static final String DELETE_ROLE = "DELETE";
 }
-
