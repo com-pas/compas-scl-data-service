@@ -8,10 +8,6 @@
 * Add write permissions for packages ([c49c4bf](https://github.com/com-pas/compas-scl-data-service/commit/c49c4bf2245dae274409f11f4ac30165e0b6c186))
 
 
-### Miscellaneous Chores
-
-* release 0.15.5 ([175eb05](https://github.com/com-pas/compas-scl-data-service/commit/175eb053b03d978a4c374e7dde094cb901c8b469))
-
 ## [0.15.4](https://github.com/com-pas/compas-scl-data-service/compare/v0.15.3...v0.15.4) (2025-02-06)
 
 
