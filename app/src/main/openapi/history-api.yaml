@@ -1,0 +1,261 @@
+openapi: 3.0.3
+info:
+  title: CoMPAS SCL Data Service History API
+  version: 1.0.0
+
+servers:
+  - url: https://demo.compas.energy
+    description: DSOM Versatel Production URL
+
+tags:
+  - name: history
+    description: Endpoints managing history of scl files
+
+security:
+  - open-id-connect:
+      - read
+
+paths:
+  /history/scl/search:
+    post:
+      tags:
+        - history
+      description: Trigger search enabled by the search filter
+      summary: Trigger search enabled by the search filter
+      operationId: searchForResources
+      requestBody:
+        description: Search filter
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataResourceSearch'
+      responses:
+        '200':
+          description: Successfully retrieved data resources meta data for given search query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataResourcesResult'
+        '400':
+          description: One of the specified Parameters is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+  /history/scl/{id}/versions:
+    get:
+      tags:
+        - history
+      description: Trigger search enabled by the search filter
+      summary: Trigger search enabled by the search filter
+      operationId: retrieveDataResourceHistory
+      parameters:
+        - name: id
+          in: path
+          description: Unique data resource identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Succefully retrieved data resource versions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataResourceHistory'
+        '400':
+          description: One of the specified Parameters is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '404':
+          description: Unable to finde data resource with given unique identifier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+  /history/scl/{id}/version/{version}:
+    get:
+      tags:
+        - history
+      description: Retrieve data resource for a specific version
+      summary: Retrieve data resource for a specific version
+      operationId: retrieveDataResourceByVersion
+      parameters:
+        - name: id
+          in: path
+          description: Unique data resource identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: version
+          in: path
+          description: Combined with unique identifier this combination defines a specific document
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Succefully retrieved data resource
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '404':
+          description: One of the specified Parameters is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+
+components:
+  securitySchemes:
+    open-id-connect: # <--- Arbitrary name for the security scheme. Used to refer to it from elsewhere.
+      type: openIdConnect
+      openIdConnectUrl: https://example.com/.well-known/openid-configuration
+
+  schemas:
+    DataResourceSearch:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: "If uuid is set no other filter must be set"
+        type:
+          type: string
+          description: "Fulltext match set to one of the supported scl types: SSD, IID, ICD, SCD, CID, SED, ISD, STD, etc."
+        name:
+          type: string
+          description: "Partially match allowed"
+        author:
+          type: string
+          description: "Fulltext match which can be retrieved via extra endpoint"
+        from:
+          type: string
+          format: date-time
+          description: "Starting date and time for filtering results. Use ISO 8601 format (e.g., 2024-10-22T14:48:00Z)."
+        to:
+          type: string
+          format: date-time
+          description: "Ending date and time for filtering results. Use ISO 8601 format (e.g., 2024-10-22T14:48:00Z)."
+    DataResourcesResult:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataResource'
+    DataResource:
+      type: object
+      required:
+        - uuid
+        - name
+        - author
+        - type
+        - changedAt
+        - version
+        - deleted
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: "Unique identifier"
+        name:
+          type: string
+          description: "Name of the resource"
+        author:
+          type: string
+          description: "Name of the author last changed the document"
+        type:
+          type: string
+          description: "One of the supported types: SSD, IID, ICD, SCD, CID, SED, ISD, STD, etc."
+        changedAt:
+          type: string
+          format: date-time
+          description: "Point in time of last modification/upload"
+        version:
+          type: string
+          description: "Generated version by the scl-data-service"
+        deleted:
+          type: boolean
+          description: "Defines if a resource is marked as deleted"
+          default: false
+    DataResourceHistory:
+      type: object
+      required:
+        - versions
+      properties:
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataResourceVersion'
+    DataResourceVersion:
+      allOf:
+        - $ref: '#/components/schemas/DataResource'
+        - type: object
+          required:
+            - archived
+          properties:
+            comment:
+              type: string
+              description: "Comment given when uploading the data resource"
+    ErrorResponseDto:
+      required:
+        - timestamp
+        - code
+        - message
+      type: object
+      properties:
+        timestamp:
+          type: string
+          description: 2017-07-21T17:32:28Z.
+          format: 'date-time'
+        code:
+          type: string
+          example: TASK_NOT_FOUND
+        message:
+          type: string
+          example: Es wurde kein Task mit der id 'IdontExist' gefunden.

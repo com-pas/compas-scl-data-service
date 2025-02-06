@@ -43,13 +43,15 @@ public class CompasSclDataService {
     private final CompasSclDataRepository repository;
     private final ElementConverter converter;
     private final SclElementProcessor sclElementProcessor;
+    private final FeatureFlagsConfiguration featureFlagsConfiguration;
 
     @Inject
     public CompasSclDataService(CompasSclDataRepository repository, ElementConverter converter,
-                                SclElementProcessor sclElementProcessor) {
+                                SclElementProcessor sclElementProcessor, FeatureFlagsConfiguration featureFlagsConfiguration) {
         this.repository = repository;
         this.converter = converter;
         this.sclElementProcessor = sclElementProcessor;
+        this.featureFlagsConfiguration = featureFlagsConfiguration;
     }
 
     /**
@@ -215,7 +217,7 @@ public class CompasSclDataService {
      */
     @Transactional(REQUIRED)
     public void delete(SclFileType type, UUID id) {
-        repository.delete(type, id);
+        repository.delete(type, id, featureFlagsConfiguration.isSoftDeleteEnabled());
     }
 
     /**
@@ -227,7 +229,7 @@ public class CompasSclDataService {
      */
     @Transactional(REQUIRED)
     public void delete(SclFileType type, UUID id, Version version) {
-        repository.delete(type, id, version);
+        repository.delete(type, id, version, featureFlagsConfiguration.isSoftDeleteEnabled());
     }
 
     /**
