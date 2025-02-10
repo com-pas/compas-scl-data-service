@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.6](https://github.com/com-pas/compas-scl-data-service/compare/v0.15.5...v0.15.6) (2025-02-10)
+
+
+### Bug Fixes
+
+* Remove custom set version steps ([60cc386](https://github.com/com-pas/compas-scl-data-service/commit/60cc386be4a0fe47dfc00e35c210338fe941c74f))
+
 ## [0.15.5](https://github.com/com-pas/compas-scl-data-service/compare/v0.15.4...v0.15.5) (2025-02-06)
 
 
