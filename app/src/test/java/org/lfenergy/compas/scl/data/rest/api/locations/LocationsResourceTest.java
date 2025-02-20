@@ -48,7 +48,7 @@ class LocationsResourceTest {
         ILocationMetaItem testData = new LocationResourceTestDataBuilder().setId(uuid.toString()).build();
 
         when(jwt.getClaim("name")).thenReturn("test user");
-        when(compasSclDataService.createLocation(key, name, description, "test user")).thenReturn(testData);
+        when(compasSclDataService.createLocation(key, name, description)).thenReturn(testData);
         Response response = given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(location)

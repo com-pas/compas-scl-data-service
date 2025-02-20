@@ -172,9 +172,8 @@ public interface CompasSclDataRepository {
      * Create tags that identify a Location object
      *
      * @param location The Location object that receives the tags
-     * @param author The name of the author who created the Location
      */
-    void addLocationTags(ILocationMetaItem location, String author);
+    void addLocationTags(ILocationMetaItem location);
 
     /**
      * Return whether either the key or the name are already used in a location

@@ -710,21 +710,16 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     @Override
-    public void addLocationTags(ILocationMetaItem location, String author) {
+    public void addLocationTags(ILocationMetaItem location) {
         String locationName = location.getName();
         ResourceTagItem locationNameTag = getResourceTag("LOCATION", locationName);
-        ResourceTagItem locationAuthorTag = getResourceTag("AUTHOR", author);
 
         if (locationNameTag == null) {
             createResourceTag("LOCATION", locationName);
             locationNameTag = getResourceTag("LOCATION", locationName);
         }
-        if (locationAuthorTag == null) {
-            createResourceTag("AUTHOR", author);
-            locationAuthorTag = getResourceTag("AUTHOR", author);
-        }
         UUID locationUuid = UUID.fromString(location.getId());
-        updateTagMappingForLocation(locationUuid, List.of(locationNameTag, locationAuthorTag));
+        updateTagMappingForLocation(locationUuid, List.of(Objects.requireNonNull(locationNameTag)));
     }
 
     @Override
@@ -945,7 +940,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         insertRelatedResourceEntry(id, version, author, approver, contentType, filename, assignedResourceId, locationId);
 
         String locationName = findLocationByUUID(UUID.fromString(locationId)).getName();
-        List<IResourceTagItem> resourceTags = generateFields(locationName, id.toString(), author, approver);
+        List<IResourceTagItem> resourceTags = generateFields(locationName, id.toString(), author, approver, filename, version.toString());
         ArchivedReferencedResourceMetaItem archivedResourcesMetaItem = new ArchivedReferencedResourceMetaItem(
             assignedResourceId.toString(),
             filename,
@@ -1100,13 +1095,15 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         );
     }
 
-    private List<IResourceTagItem> generateFields(String location, String sourceResourceId, String author, String examiner) {
+    private List<IResourceTagItem> generateFields(String location, String sourceResourceId, String author, String examiner, String name, String version) {
         List<IResourceTagItem> fieldList = new ArrayList<>();
 
         ResourceTagItem locationTag = getResourceTag("LOCATION", location);
         ResourceTagItem resourceIdTag = getResourceTag("SOURCE_RESOURCE_ID", sourceResourceId);
         ResourceTagItem authorTag = getResourceTag("AUTHOR", author);
         ResourceTagItem examinerTag = getResourceTag("EXAMINER", examiner);
+        ResourceTagItem nameTag = getResourceTag("NAME", name);
+        ResourceTagItem versionTag = getResourceTag("VERSION", version);
 
         if (locationTag == null && location != null) {
             createResourceTag("LOCATION", location);
@@ -1124,11 +1121,21 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             createResourceTag("EXAMINER", examiner);
             examinerTag = getResourceTag("EXAMINER", examiner);
         }
+        if (nameTag == null && name != null) {
+            createResourceTag("NAME", name);
+            nameTag = getResourceTag("NAME", name);
+        }
+        if (versionTag == null && version != null) {
+            createResourceTag("VERSION", version);
+            versionTag = getResourceTag("VERSION", version);
+        }
 
         fieldList.add(locationTag);
         fieldList.add(resourceIdTag);
         fieldList.add(authorTag);
         fieldList.add(examinerTag);
+        fieldList.add(nameTag);
+        fieldList.add(versionTag);
 
         return fieldList.stream().filter(Objects::nonNull).toList();
     }
@@ -1139,7 +1146,9 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             locationName,
             resultSet.getString(ID_FIELD),
             resultSet.getString("created_by"),
-            examiner
+            examiner,
+            resultSet.getString(NAME_FIELD),
+            createVersion(resultSet)
         );
     }
 

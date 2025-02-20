@@ -524,7 +524,7 @@ public class CompasSclDataService {
      * @return The created Location entry
      */
     @Transactional(REQUIRED)
-    public ILocationMetaItem createLocation(String key, String name, String description, String author) {
+    public ILocationMetaItem createLocation(String key, String name, String description) {
         if (repository.hasDuplicateLocationValues(key, name)) {
             String errorMessage = String.format("Unable to create location, duplicate location key '%s' or name '%s' provided!", key, name);
             LOGGER.warn(errorMessage);
@@ -532,7 +532,7 @@ public class CompasSclDataService {
                 errorMessage);
         }
         ILocationMetaItem createdLocation = repository.createLocation(key, name, description);
-        repository.addLocationTags(createdLocation, author);
+        repository.addLocationTags(createdLocation);
         archivingService.createLocation(createdLocation);
         return createdLocation;
     }

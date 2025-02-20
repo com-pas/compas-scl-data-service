@@ -45,8 +45,7 @@ public class LocationsResource implements LocationsApi {
             .item(() -> compasSclDataService.createLocation(
                 location.getKey(),
                 location.getName(),
-                location.getDescription(),
-                jsonWebToken.getClaim(userInfoProperties.name())
+                location.getDescription()
             ))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()

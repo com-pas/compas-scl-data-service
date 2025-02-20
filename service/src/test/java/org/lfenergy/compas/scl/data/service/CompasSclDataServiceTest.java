@@ -546,7 +546,7 @@ class CompasSclDataServiceTest {
         ILocationMetaItem expectedLocation = new LocationMetaItem(UUID.randomUUID().toString(), "locationKey", "locationName", null, 0);
         when(compasSclDataRepository.createLocation("locationKey", "locationName", null)).thenReturn(expectedLocation);
         when(compasSclDataRepository.hasDuplicateLocationValues("locationKey", "locationName")).thenReturn(false);
-        ILocationMetaItem actualLocation = compasSclDataService.createLocation("locationKey", "locationName", null, "testUser");
+        ILocationMetaItem actualLocation = compasSclDataService.createLocation("locationKey", "locationName", null);
 
         verify(compasSclDataRepository, times(1)).createLocation(any(), any(), any());
         verify(compasSclDataArchivingServiceImpl, times(1)).createLocation(any());
