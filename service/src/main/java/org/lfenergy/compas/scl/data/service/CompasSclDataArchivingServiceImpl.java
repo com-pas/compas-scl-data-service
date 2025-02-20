@@ -1,25 +1,36 @@
 package org.lfenergy.compas.scl.data.service;
 
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.lfenergy.compas.scl.data.dto.ResourceMetaData;
+import org.lfenergy.compas.scl.data.dto.ResourceTag;
+import org.lfenergy.compas.scl.data.dto.TypeEnum;
 import org.lfenergy.compas.scl.data.model.IAbstractArchivedResourceMetaItem;
 import org.lfenergy.compas.scl.data.model.ILocationMetaItem;
 
 import java.io.*;
+import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
 public class CompasSclDataArchivingServiceImpl implements ICompasSclDataArchivingService {
 
-    private final String DEFAULT_PATH = System.getProperty("user.dir") + File.separator + "locations";
+    private static final Logger LOGGER = LogManager.getLogger(CompasSclDataArchivingServiceImpl.class);
+    @ConfigProperty(name = "scl-data-service.archiving.filesystem.location", defaultValue = "/work/locations")
+    String locationPath;
 
     @Override
     public void createLocation(ILocationMetaItem location) {
-        File newLocationDirectory = new File(DEFAULT_PATH + File.separator + location.getName());
+        LOGGER.info("locationPath: {}", locationPath);
+        File newLocationDirectory = new File(locationPath + File.separator + location.getName());
         newLocationDirectory.mkdirs();
     }
 
     @Override
-    public void archiveData(String locationName, String filename, UUID resourceId, File body, IAbstractArchivedResourceMetaItem archivedResource) {
+    public Uni<ResourceMetaData> archiveData(String locationName, String filename, UUID resourceId, File body, IAbstractArchivedResourceMetaItem archivedResource) {
         String absolutePath = generateSclDataLocation(resourceId, archivedResource, locationName) + File.separator + "referenced_resources";
         File locationDir = new File(absolutePath);
         locationDir.mkdirs();
@@ -29,24 +40,28 @@ public class CompasSclDataArchivingServiceImpl implements ICompasSclDataArchivin
                 fos.write(fis.readAllBytes());
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return Uni.createFrom().failure(new RuntimeException(e));
         }
+        List<ResourceTag> archivedResourceTag = archivedResource.getFields().stream().map(field -> new ResourceTag(field.getKey(), field.getValue())).toList();
+        return Uni.createFrom().item(new ResourceMetaData(TypeEnum.RESOURCE, resourceId, locationName, archivedResourceTag));
     }
 
     @Override
-    public void archiveSclData(UUID resourceId, IAbstractArchivedResourceMetaItem archivedResource, String locationName, String data) {
+    public Uni<ResourceMetaData> archiveSclData(UUID resourceId, IAbstractArchivedResourceMetaItem archivedResource, String locationName, String data) {
         String absolutePath = generateSclDataLocation(resourceId, archivedResource, locationName);
         File locationDir = new File(absolutePath);
         locationDir.mkdirs();
-        File f = new File(locationDir + File.separator + archivedResource.getName() + "." + archivedResource.getContentType().toLowerCase());
+        File f = new File(locationDir + File.separator + archivedResource.getName() + "." + archivedResource.getType().toLowerCase());
         try (FileWriter fw = new FileWriter(f)) {
             fw.write(data);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        List<ResourceTag> archivedResourceTag = archivedResource.getFields().stream().map(field -> new ResourceTag(field.getKey(), field.getValue())).toList();
+        return Uni.createFrom().item(new ResourceMetaData(TypeEnum.RESOURCE, resourceId, locationName, archivedResourceTag));
     }
 
     private String generateSclDataLocation(UUID resourceId, IAbstractArchivedResourceMetaItem archivedResource, String locationName) {
-        return DEFAULT_PATH + File.separator + locationName + File.separator + resourceId + File.separator + archivedResource.getVersion();
+        return locationPath + File.separator + locationName + File.separator + resourceId + File.separator + archivedResource.getVersion();
     }
 }

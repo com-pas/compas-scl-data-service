@@ -19,6 +19,7 @@ public class CompasSclDataServiceErrorCode {
     public static final String LOCATION_DELETION_NOT_ALLOWED_ERROR_CODE = "SDS-0010";
     public static final String INVALID_SCL_CONTENT_TYPE_ERROR_CODE = "SDS-0011";
     public static final String NO_LOCATION_ASSIGNED_TO_SCL_DATA_ERROR_CODE = "SDS-0012";
+    public static final String RESOURCE_ALREADY_ARCHIVED = "SDS-0013";
 
     public static final String POSTGRES_SELECT_ERROR_CODE = "SDS-2000";
     public static final String POSTGRES_INSERT_ERROR_CODE = "SDS-2001";

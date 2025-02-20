@@ -6,7 +6,10 @@ package org.lfenergy.compas.scl.data.repository.postgresql;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.TransactionManager;
 import jakarta.transaction.Transactional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.*;
@@ -54,7 +57,12 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private static final String ARCHIVEMETAITEM_MODIFIED_AT_FIELD = "modified_at";
     private static final String ARCHIVEMETAITEM_ARCHIVED_AT_FIELD = "archived_at";
 
+    private static final Logger LOGGER = LogManager.getLogger(CompasSclDataPostgreSQLRepository.class);
+
     private final DataSource dataSource;
+
+    @Inject
+    TransactionManager tm;
 
     @Inject
     public CompasSclDataPostgreSQLRepository(DataSource dataSource) {
@@ -93,7 +101,6 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, type.name());
-
             try (var resultSet = stmt.executeQuery()) {
                 while (resultSet.next()) {
                     items.add(new Item(resultSet.getString(ID_FIELD),
@@ -935,26 +942,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         String locationId = sclResourceMetaItem.getLocationId();
         UUID assignedResourceId = UUID.randomUUID();
 
-        String sql = """
-            INSERT INTO referenced_resource (id, content_type, filename, author, approver, location_id, scl_file_id, scl_file_major_version, scl_file_minor_version, scl_file_patch_version)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-            """;
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setObject(1, assignedResourceId);
-            stmt.setObject(2, contentType);
-            stmt.setObject(3, filename);
-            stmt.setObject(4, author);
-            stmt.setObject(5, approver);
-            stmt.setObject(6, UUID.fromString(locationId));
-            stmt.setObject(7, id);
-            stmt.setObject(8, version.getMajorVersion());
-            stmt.setObject(9, version.getMinorVersion());
-            stmt.setObject(10, version.getPatchVersion());
-            stmt.executeUpdate();
-        } catch (SQLException exp) {
-            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error inserting Referenced Resources!", exp);
-        }
+        insertRelatedResourceEntry(id, version, author, approver, contentType, filename, assignedResourceId, locationId);
 
         String locationName = findLocationByUUID(UUID.fromString(locationId)).getName();
         List<IResourceTagItem> resourceTags = generateFields(locationName, id.toString(), author, approver);
@@ -992,6 +980,29 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             archivedResourcesMetaItem.getArchivedAt(),
             archivedResourcesMetaItem.getComment()
         );
+    }
+
+    private void insertRelatedResourceEntry(UUID id, Version version, String author, String approver, String contentType, String filename, UUID assignedResourceId, String locationId) {
+        String sql = """
+            INSERT INTO referenced_resource (id, content_type, filename, author, approver, location_id, scl_file_id, scl_file_major_version, scl_file_minor_version, scl_file_patch_version)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """;
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setObject(1, assignedResourceId);
+            stmt.setObject(2, contentType);
+            stmt.setObject(3, filename);
+            stmt.setObject(4, author);
+            stmt.setObject(5, approver);
+            stmt.setObject(6, UUID.fromString(locationId));
+            stmt.setObject(7, id);
+            stmt.setObject(8, version.getMajorVersion());
+            stmt.setObject(9, version.getMinorVersion());
+            stmt.setObject(10, version.getPatchVersion());
+            stmt.executeUpdate();
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error inserting Referenced Resources!", exp);
+        }
     }
 
     @Override
@@ -1078,8 +1089,8 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             createVersion(resultSet),
             resultSet.getString("created_by"),
             approver,
-            null,
             resultSet.getString("type"),
+            null,
             resultSet.getString("location"),
             fieldList,
             convertToOffsetDateTime(Timestamp.from(Instant.now())),
@@ -1097,19 +1108,19 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         ResourceTagItem authorTag = getResourceTag("AUTHOR", author);
         ResourceTagItem examinerTag = getResourceTag("EXAMINER", examiner);
 
-        if (locationTag == null) {
+        if (locationTag == null && location != null) {
             createResourceTag("LOCATION", location);
             locationTag = getResourceTag("LOCATION", location);
         }
-        if (resourceIdTag == null) {
+        if (resourceIdTag == null && sourceResourceId != null) {
             createResourceTag("SOURCE_RESOURCE_ID", sourceResourceId);
             resourceIdTag = getResourceTag("SOURCE_RESOURCE_ID", sourceResourceId);
         }
-        if (authorTag == null) {
+        if (authorTag == null && author != null) {
             createResourceTag("AUTHOR", author);
             authorTag = getResourceTag("AUTHOR", author);
         }
-        if (examinerTag == null) {
+        if (examinerTag == null && examiner != null) {
             createResourceTag("EXAMINER", examiner);
             examinerTag = getResourceTag("EXAMINER", examiner);
         }
@@ -1119,7 +1130,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         fieldList.add(authorTag);
         fieldList.add(examinerTag);
 
-        return fieldList;
+        return fieldList.stream().filter(Objects::nonNull).toList();
     }
 
     private List<IResourceTagItem> generateFieldsFromResultSet(ResultSet resultSet, String examiner) throws SQLException {
@@ -1188,21 +1199,20 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     private void insertIntoArchivedResourceTable(UUID archivedResourceId, AbstractArchivedResourceMetaItem archivedResource, Version version) {
-        String insertSclResourceIntoArchiveSql = """
-        INSERT INTO archived_resource(id, archived_at, scl_file_id, scl_file_major_version, scl_file_minor_version, scl_file_patch_version)
-        VALUES (?, ?, ?, ?, ?, ?);
-        """;
+        if (archivedResource instanceof ArchivedSclResourceMetaItem) {
+            String insertSclResourceIntoArchiveSql = """
+                INSERT INTO archived_resource(id, archived_at, scl_file_id, scl_file_major_version, scl_file_minor_version, scl_file_patch_version)
+                VALUES (?, ?, ?, ?, ?, ?);
+                """;
+            executeArchivedResourceInsertStatement(archivedResourceId, archivedResource, version, insertSclResourceIntoArchiveSql);
+            return;
+        }
 
         String insertReferencedResourceIntoArchiveSql = """
-        INSERT INTO archived_resource(id, archived_at, referenced_resource_id, referenced_resource_major_version, referenced_resource_minor_version, referenced_resource_patch_version)
-        VALUES (?, ?, ?, ?, ?, ?);
-        """;
-
-        if (archivedResource instanceof ArchivedSclResourceMetaItem) {
-            executeArchivedResourceInsertStatement(archivedResourceId, archivedResource, version, insertSclResourceIntoArchiveSql);
-        } else {
-            executeArchivedResourceInsertStatement(archivedResourceId, archivedResource, version, insertReferencedResourceIntoArchiveSql);
-        }
+            INSERT INTO archived_resource(id, archived_at, referenced_resource_id, referenced_resource_major_version, referenced_resource_minor_version, referenced_resource_patch_version)
+            VALUES (?, ?, ?, ?, ?, ?);
+            """;
+        executeArchivedResourceInsertStatement(archivedResourceId, archivedResource, version, insertReferencedResourceIntoArchiveSql);
     }
 
     private void executeArchivedResourceInsertStatement(UUID archivedResourceId, AbstractArchivedResourceMetaItem archivedResource, Version version, String query) {

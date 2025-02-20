@@ -5,6 +5,7 @@ import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.response.Response;
+import io.smallrye.mutiny.Uni;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class ArchiveResourceTest {
         String version = "1.0.0";
         IAbstractArchivedResourceMetaItem testData = new ArchivedSclResourceTestDataBuilder().setId(uuid.toString()).build();
         when(jwt.getClaim("name")).thenReturn("");
-        when(compasSclDataService.archiveSclResource(uuid, new Version(version), "")).thenReturn(testData);
+        when(compasSclDataService.archiveSclResource(uuid, new Version(version), "")).thenReturn(Uni.createFrom().item(testData));
         Response response = given()
             .contentType(MediaType.APPLICATION_JSON)
             .when().post("/scl/" + uuid + "/versions/" + version)
@@ -64,7 +65,7 @@ class ArchiveResourceTest {
         String version = "1.0.0";
         IAbstractArchivedResourceMetaItem testData = new ArchivedReferencedResourceTestDataBuilder().setId(uuid.toString()).build();
         File f = Paths.get("src","test","resources","scl", "icd_import_ied_test.scd").toFile();
-        when(compasSclDataService.archiveResource(eq(uuid), eq(version), eq(null), eq(null), eq("application/json"), eq(null), any(File.class))).thenReturn(testData);
+        when(compasSclDataService.archiveResource(eq(uuid), eq(version), eq(null), eq(null), eq("application/json"), eq(null), any(File.class))).thenReturn(Uni.createFrom().item(testData));
         Response response = given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(f)

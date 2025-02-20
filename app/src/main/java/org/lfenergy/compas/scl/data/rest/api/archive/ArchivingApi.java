@@ -1,5 +1,6 @@
 package org.lfenergy.compas.scl.data.rest.api.archive;
 
+import io.smallrye.common.annotation.Blocking;
 import io.smallrye.mutiny.Uni;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -18,11 +19,13 @@ public interface ArchivingApi {
 
     @POST
     @Path("/referenced-resource/{id}/versions/{version}")
+    @Blocking
     @Produces({ "application/json" })
     Uni<ArchivedResource> archiveResource(@PathParam("id") UUID id, @PathParam("version") String version, @HeaderParam("X-author")   String xAuthor, @HeaderParam("X-approver")   String xApprover, @HeaderParam("Content-Type")   String contentType, @HeaderParam("X-filename")   String xFilename, @Valid File body);
 
     @POST
     @Path("/scl/{id}/versions/{version}")
+    @Blocking
     @Produces({ "application/json" })
     Uni<ArchivedResource> archiveSclResource(@PathParam("id") UUID id, @PathParam("version") String version);
 

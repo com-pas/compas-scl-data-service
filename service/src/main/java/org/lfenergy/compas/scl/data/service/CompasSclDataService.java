@@ -3,11 +3,20 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.service;
 
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.unchecked.Unchecked;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.SystemException;
+import jakarta.transaction.TransactionManager;
 import jakarta.transaction.Transactional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
+import org.lfenergy.compas.scl.data.dto.ResourceMetaData;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.*;
@@ -28,8 +37,7 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static jakarta.transaction.Transactional.TxType.REQUIRED;
-import static jakarta.transaction.Transactional.TxType.SUPPORTS;
+import static jakarta.transaction.Transactional.TxType.*;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
 import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.*;
@@ -44,15 +52,37 @@ public class CompasSclDataService {
     private final CompasSclDataRepository repository;
     private final ElementConverter converter;
     private final SclElementProcessor sclElementProcessor;
-    private final ICompasSclDataArchivingService archivingService;
+    private ICompasSclDataArchivingService archivingService;
+    private static final Logger LOGGER = LogManager.getLogger(CompasSclDataService.class);
+    @ConfigProperty(name = "scl-data-service.archiving.connector.enabled", defaultValue = "false")
+    String isEloEnabled;
+
+    @Inject
+    CompasSclDataArchivingServiceImpl fileSystemArchivingService;
+
+    @Inject
+    CompasSclDataArchivingEloServiceImpl eloArchivingService;
+
+    @Inject
+    TransactionManager tm;
 
     @Inject
     public CompasSclDataService(CompasSclDataRepository repository, ElementConverter converter,
-                                SclElementProcessor sclElementProcessor, ICompasSclDataArchivingService archivingService) {
+                                SclElementProcessor sclElementProcessor) {
         this.repository = repository;
         this.converter = converter;
         this.sclElementProcessor = sclElementProcessor;
-        this.archivingService = archivingService;
+    }
+
+    @PostConstruct
+    void init() {
+        if (isEloEnabled.equalsIgnoreCase("true")) {
+            LOGGER.info("Initializing ELO archiving service");
+            this.archivingService = eloArchivingService;
+        } else {
+            LOGGER.info("Initializing FileSystem archiving service");
+            this.archivingService = fileSystemArchivingService;
+        }
     }
 
     /**
@@ -496,7 +526,10 @@ public class CompasSclDataService {
     @Transactional(REQUIRED)
     public ILocationMetaItem createLocation(String key, String name, String description, String author) {
         if (repository.hasDuplicateLocationValues(key, name)) {
-            throw new CompasSclDataServiceException(CREATION_ERROR_CODE, "Duplicate location key or name provided!");
+            String errorMessage = String.format("Unable to create location, duplicate location key '%s' or name '%s' provided!", key, name);
+            LOGGER.warn(errorMessage);
+            throw new CompasSclDataServiceException(CREATION_ERROR_CODE,
+                errorMessage);
         }
         ILocationMetaItem createdLocation = repository.createLocation(key, name, description);
         repository.addLocationTags(createdLocation, author);
@@ -514,8 +547,10 @@ public class CompasSclDataService {
         ILocationMetaItem locationToDelete = repository.findLocationByUUID(id);
         int assignedResourceCount = locationToDelete.getAssignedResources();
         if (assignedResourceCount > 0) {
+            String errorMessage = String.format("Deletion of Location '%s' not allowed, unassign resources before deletion", id);
+            LOGGER.warn(errorMessage);
             throw new CompasSclDataServiceException(LOCATION_DELETION_NOT_ALLOWED_ERROR_CODE,
-                String.format("Deletion of Location '%s' not allowed, unassign resources before deletion", id));
+                errorMessage);
         }
 
         repository.deleteLocationTags(locationToDelete);
@@ -546,7 +581,9 @@ public class CompasSclDataService {
     public void assignResourceToLocation(UUID locationId, UUID resourceId) {
         ILocationMetaItem locationItem = repository.findLocationByUUID(locationId);
         if (repository.listHistory(resourceId).isEmpty()) {
-            throw new CompasNoDataFoundException(String.format("Unable to find resource with id '%s'.", resourceId));
+            String errorMessage = String.format("Unable to assign resource '%s' to location '%s', cannot find resource.", resourceId, locationId);
+            LOGGER.warn(errorMessage);
+            throw new CompasNoDataFoundException(errorMessage);
         }
         if (locationItem != null) {
             repository.assignResourceToLocation(locationId, resourceId);
@@ -563,7 +600,9 @@ public class CompasSclDataService {
     public void unassignResourceFromLocation(UUID locationId, UUID resourceId) {
         ILocationMetaItem locationItem = repository.findLocationByUUID(locationId);
         if (repository.listHistory(resourceId).isEmpty()) {
-            throw new CompasNoDataFoundException(String.format("Unable to find resource with id '%s'.", resourceId));
+            String errorMessage = String.format("Unable to unassign resource '%s' from location '%s', cannot find resource.", resourceId, locationId);
+            LOGGER.warn(errorMessage);
+            throw new CompasNoDataFoundException(errorMessage);
         }
         if (locationItem != null) {
             repository.unassignResourceFromLocation(locationId, resourceId);
@@ -581,21 +620,33 @@ public class CompasSclDataService {
      * @param body The content of the resource
      * @return The created archived resource item
      */
-    @Transactional(REQUIRED)
-    public IAbstractArchivedResourceMetaItem archiveResource(UUID id, String version, String author, String approver, String contentType, String filename, File body) {
+    @Transactional(REQUIRES_NEW)
+    public Uni<IAbstractArchivedResourceMetaItem> archiveResource(UUID id, String version, String author, String approver, String contentType, String filename, File body) {
         List<IHistoryMetaItem> historyItem = repository.listHistoryVersionsByUUID(id);
         if (!historyItem.isEmpty() && historyItem.get(0).getLocation() == null) {
-            throw new CompasSclDataServiceException(NO_LOCATION_ASSIGNED_TO_SCL_DATA_ERROR_CODE,
-                String.format("Unable to archive file '%s' for scl resource '%s' with version %s, no location assigned!", filename, id, version));
+            String errorMessage = String.format("Unable to archive file '%s' for scl resource '%s' with version %s, no location assigned!", filename, id, version);
+            LOGGER.warn(errorMessage);
+            return Uni.createFrom().failure(new CompasSclDataServiceException(NO_LOCATION_ASSIGNED_TO_SCL_DATA_ERROR_CODE,
+                errorMessage));
         } else if (historyItem.isEmpty() || historyItem.stream().noneMatch(hi -> hi.getVersion().equals(version))) {
-            throw new CompasNoDataFoundException(
-                String.format("Unable to archive file '%s' for scl resource '%s' with version %s, unable to find scl resource '%s' with version %s!", filename, id, version, id, version));
+            String errorMessage = String.format("Unable to archive file '%s' for scl resource '%s' with version %s, unable to find scl resource '%s' with version %s!", filename, id, version, id, version);
+            LOGGER.warn(errorMessage);
+            return Uni.createFrom().failure(new CompasNoDataFoundException(
+                errorMessage));
         }
-        IAbstractArchivedResourceMetaItem archivedResource = repository.archiveResource(id, new Version(version), author, approver, contentType, filename);
-        if (body != null) {
-            archivingService.archiveData(repository.findLocationByUUID(UUID.fromString(archivedResource.getLocationId())).getName(), filename, id, body, archivedResource);
-        }
-        return archivedResource;
+        return Uni.createFrom()
+            .item(() -> repository.archiveResource(id, new Version(version), author, approver, contentType, filename))
+            .onItem()
+            .ifNotNull()
+            .call(item ->
+                storeResourceData(archivingService.archiveData(
+                    repository.findLocationByUUID(UUID.fromString(item.getLocationId())).getName(),
+                    filename,
+                    id,
+                    body,
+                    item
+                ), "Error while archiving resource: {}")
+            );
     }
 
     /**
@@ -606,19 +657,48 @@ public class CompasSclDataService {
      * @param approver The approver of the archiving action
      * @return The archived resource item
      */
-    @Transactional(REQUIRED)
-    public IAbstractArchivedResourceMetaItem archiveSclResource(UUID id, Version version, String approver) {
+    @Transactional(REQUIRES_NEW)
+    public Uni<IAbstractArchivedResourceMetaItem> archiveSclResource(UUID id, Version version, String approver) {
         List<IHistoryMetaItem> historyItem = repository.listHistory(id);
         if (!historyItem.isEmpty() && historyItem.get(0).getLocation() == null) {
+            String errorMessage = String.format("Unable to archive scl file '%s' with version %s, no location assigned!", id, version);
+            LOGGER.warn(errorMessage);
             throw new CompasSclDataServiceException(NO_LOCATION_ASSIGNED_TO_SCL_DATA_ERROR_CODE,
-                String.format("Unable to archive scl file '%s' with version %s, no location assigned!", id, version));
+                errorMessage);
         }
-        IAbstractArchivedResourceMetaItem archivedResource = repository.archiveSclResource(id, version, approver);
-        String data = repository.findByUUID(id, version);
-        if (data != null) {
-            archivingService.archiveSclData(id, archivedResource, repository.findLocationByUUID(UUID.fromString(archivedResource.getLocationId())).getName(), data);
+
+        if(!repository.listHistoryVersionsByUUID(id).isEmpty() &&
+            repository.listHistoryVersionsByUUID(id).stream().anyMatch(hi -> hi.getVersion().equals(version.toString()) && hi.isArchived())) {
+            return Uni.createFrom().failure(new CompasSclDataServiceException(
+                RESOURCE_ALREADY_ARCHIVED,
+                String.format("Unable to archive  version %s of scl resource '%s' because it is already archived.", version, id)));
         }
-        return archivedResource;
+
+        return Uni.createFrom()
+            .item(() -> repository.archiveSclResource(id, version, approver))
+            .onItem()
+            .ifNotNull()
+            .call(archivedResource ->
+                storeResourceData(archivingService.archiveSclData(
+                    id,
+                    archivedResource,
+                    repository.findLocationByUUID(UUID.fromString(archivedResource.getLocationId())).getName(),
+                    repository.findByUUID(id, version)
+                ), "Error while archiving scl resource: {}")
+            );
+    }
+
+    private Uni<ResourceMetaData> storeResourceData(Uni<ResourceMetaData> archivingRequest, String errorMessage) {
+        return archivingRequest
+            .onFailure()
+            .invoke(Unchecked.consumer(throwable -> {
+                LOGGER.warn(errorMessage, throwable.getMessage());
+                try {
+                    tm.setRollbackOnly();
+                } catch (SystemException e) {
+                    throw new RuntimeException(e);
+                }
+            }));
     }
 
     /**

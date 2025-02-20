@@ -35,8 +35,7 @@ public class ArchiveResource implements ArchivingApi {
     @Override
     public Uni<ArchivedResource> archiveResource(UUID id, String version, String xAuthor, String xApprover, String contentType, String xFilename, File body) {
         LOGGER.info("Archiving resource '{}' for scl resource with id '{}' and version '{}'", xFilename, id, version);
-        return Uni.createFrom()
-            .item(() -> compasSclDataService.archiveResource(id, version, xAuthor, xApprover, contentType, xFilename, body))
+        return compasSclDataService.archiveResource(id, version, xAuthor, xApprover, contentType, xFilename, body)
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()
             .transform(this::mapToArchivedResource);
@@ -46,8 +45,7 @@ public class ArchiveResource implements ArchivingApi {
     public Uni<ArchivedResource> archiveSclResource(UUID id, String version) {
         LOGGER.info("Archiving scl resource with id '{}' and version '{}'", id, version);
         String approver = jsonWebToken.getClaim(userInfoProperties.name());
-        return Uni.createFrom()
-            .item(() -> compasSclDataService.archiveSclResource(id, new Version(version), approver))
+        return compasSclDataService.archiveSclResource(id, new Version(version), approver)
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()
             .transform(this::mapToArchivedResource);
