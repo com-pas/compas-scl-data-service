@@ -5,6 +5,7 @@ import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.response.Response;
+import io.smallrye.mutiny.Uni;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.junit.jupiter.api.Test;
@@ -48,7 +49,7 @@ class LocationsResourceTest {
         ILocationMetaItem testData = new LocationResourceTestDataBuilder().setId(uuid.toString()).build();
 
         when(jwt.getClaim("name")).thenReturn("test user");
-        when(compasSclDataService.createLocation(key, name, description)).thenReturn(testData);
+        when(compasSclDataService.createLocation(key, name, description)).thenReturn(Uni.createFrom().item(testData));
         Response response = given()
             .contentType(MediaType.APPLICATION_JSON)
             .body(location)

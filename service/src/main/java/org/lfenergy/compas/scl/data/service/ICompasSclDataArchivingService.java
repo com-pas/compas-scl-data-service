@@ -1,6 +1,7 @@
 package org.lfenergy.compas.scl.data.service;
 
 import io.smallrye.mutiny.Uni;
+import org.lfenergy.compas.scl.data.dto.LocationMetaData;
 import org.lfenergy.compas.scl.data.dto.ResourceMetaData;
 import org.lfenergy.compas.scl.data.model.IAbstractArchivedResourceMetaItem;
 import org.lfenergy.compas.scl.data.model.ILocationMetaItem;
@@ -10,7 +11,7 @@ import java.util.UUID;
 
 public interface ICompasSclDataArchivingService {
 
-    void createLocation(ILocationMetaItem location);
+    Uni<LocationMetaData> createLocation(ILocationMetaItem location);
 
     Uni<ResourceMetaData> archiveData(String locationName, String filename, UUID uuid, File body, IAbstractArchivedResourceMetaItem archivedResource);
 

@@ -19,6 +19,7 @@ public interface LocationsApi {
     Uni<Void> assignResourceToLocation(@PathParam("locationId") UUID locationId, @PathParam("uuid") UUID uuid);
 
     @POST
+    @Blocking
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     Uni<Location> createLocation(@Valid @NotNull Location location);

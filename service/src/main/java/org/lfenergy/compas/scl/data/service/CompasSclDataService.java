@@ -524,17 +524,25 @@ public class CompasSclDataService {
      * @return The created Location entry
      */
     @Transactional(REQUIRED)
-    public ILocationMetaItem createLocation(String key, String name, String description) {
+    public Uni<ILocationMetaItem> createLocation(String key, String name, String description) {
         if (repository.hasDuplicateLocationValues(key, name)) {
             String errorMessage = String.format("Unable to create location, duplicate location key '%s' or name '%s' provided!", key, name);
             LOGGER.warn(errorMessage);
-            throw new CompasSclDataServiceException(CREATION_ERROR_CODE,
-                errorMessage);
+            return Uni.createFrom().failure(new CompasSclDataServiceException(CREATION_ERROR_CODE, errorMessage));
         }
-        ILocationMetaItem createdLocation = repository.createLocation(key, name, description);
-        repository.addLocationTags(createdLocation);
-        archivingService.createLocation(createdLocation);
-        return createdLocation;
+        return Uni.createFrom()
+            .item(repository.createLocation(key, name, description))
+            .invoke(repository::addLocationTags)
+            .call(createdLocation -> archivingService.createLocation(createdLocation)
+                .onFailure()
+                .invoke(Unchecked.consumer(throwable -> {
+                    LOGGER.warn("Error while creating location: {}", throwable.getMessage());
+                    try {
+                        tm.setRollbackOnly();
+                    } catch (SystemException e) {
+                        throw new RuntimeException(e);
+                    }
+                })));
     }
 
     /**
@@ -667,7 +675,7 @@ public class CompasSclDataService {
                 errorMessage);
         }
 
-        if(!repository.listHistoryVersionsByUUID(id).isEmpty() &&
+        if (!repository.listHistoryVersionsByUUID(id).isEmpty() &&
             repository.listHistoryVersionsByUUID(id).stream().anyMatch(hi -> hi.getVersion().equals(version.toString()) && hi.isArchived())) {
             return Uni.createFrom().failure(new CompasSclDataServiceException(
                 RESOURCE_ALREADY_ARCHIVED,

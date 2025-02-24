@@ -41,12 +41,11 @@ public class LocationsResource implements LocationsApi {
     @Override
     public Uni<Location> createLocation(Location location) {
         LOGGER.info("Creating location '{}'", location.getName());
-        return Uni.createFrom()
-            .item(() -> compasSclDataService.createLocation(
+        return compasSclDataService.createLocation(
                 location.getKey(),
                 location.getName(),
                 location.getDescription()
-            ))
+            )
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()
             .transform(this::mapToLocation);
@@ -90,8 +89,8 @@ public class LocationsResource implements LocationsApi {
     @Override
     public Uni<Location> updateLocation(UUID locationId, Location location) {
         LOGGER.info("Updating resource '{}'", locationId);
-        return Uni.createFrom().
-            item(() -> compasSclDataService.updateLocation(locationId, location.getKey(), location.getName(), location.getDescription()))
+        return Uni.createFrom()
+            .item(() -> compasSclDataService.updateLocation(locationId, location.getKey(), location.getName(), location.getDescription()))
             .runSubscriptionOn(Infrastructure.getDefaultExecutor())
             .onItem()
             .transform(this::mapToLocation);

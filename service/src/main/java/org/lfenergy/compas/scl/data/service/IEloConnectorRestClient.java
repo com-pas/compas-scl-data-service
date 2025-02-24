@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import org.lfenergy.compas.scl.data.dto.LocationData;
+import org.lfenergy.compas.scl.data.dto.LocationMetaData;
 import org.lfenergy.compas.scl.data.dto.ResourceData;
 import org.lfenergy.compas.scl.data.dto.ResourceMetaData;
 
@@ -22,6 +24,11 @@ public interface IEloConnectorRestClient {
     @Path("/archiving")
     Uni<ResourceMetaData> createArchivedResource(@Valid @NotNull ResourceData resourceData);
 
+    @POST
+    @Path("/location")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    Uni<LocationMetaData> createLocation(@Valid @NotNull LocationData locationData);
 
     @GET
     @Consumes({ "application/json" })

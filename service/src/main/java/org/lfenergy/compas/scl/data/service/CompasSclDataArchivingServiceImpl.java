@@ -5,6 +5,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.lfenergy.compas.scl.data.dto.LocationMetaData;
 import org.lfenergy.compas.scl.data.dto.ResourceMetaData;
 import org.lfenergy.compas.scl.data.dto.ResourceTag;
 import org.lfenergy.compas.scl.data.dto.TypeEnum;
@@ -23,10 +24,17 @@ public class CompasSclDataArchivingServiceImpl implements ICompasSclDataArchivin
     String locationPath;
 
     @Override
-    public void createLocation(ILocationMetaItem location) {
+    public Uni<LocationMetaData> createLocation(ILocationMetaItem location) {
         LOGGER.info("locationPath: {}", locationPath);
         File newLocationDirectory = new File(locationPath + File.separator + location.getName());
         newLocationDirectory.mkdirs();
+        return Uni.createFrom()
+            .item(new LocationMetaData()
+                .uuid(UUID.fromString(location.getId()))
+                .key(location.getKey())
+                .name(location.getName())
+                .description(location.getDescription())
+                .assignedResources(location.getAssignedResources()));
     }
 
     @Override
