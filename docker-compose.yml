@@ -31,7 +31,6 @@ services:
     container_name: compas-scl-data-service
     depends_on:
       - postgres
-      - transnetbw-elo-connector
     ports:
       - "8080:8080"
     environment:
@@ -57,44 +56,7 @@ services:
     networks:
       - compas-network
 
-  transnetbw-elo-connector:
-    image: transnetbw/compas-elo-connector:1.0.0-SNAPSHOT
-    container_name: elo-connector
-    depends_on:
-      - keycloak
-    ports:
-      - "8181:8080"
-    environment:
-      # JWT Security Variables
-      JWT_VERIFY_KEY: http://localhost:8089/auth/realms/compas/protocol/openid-connect/certs
-      JWT_VERIFY_ISSUER: http://localhost:8089/auth/realms/compas
-      JWT_VERIFY_CLIENT_ID: scl-data-service
-      JWT_GROUPS_PATH: resource_access/scl-data-service/roles
-      # UserInfo variables
-      USERINFO_NAME_CLAIMNAME: name
-      USERINFO_WHO_CLAIMNAME: name
-      USERINFO_SESSION_WARNING: 20
-      USERINFO_SESSION_EXPIRES: 30
-    restart: on-failure
-    networks:
-      - compas-network
-
-  wiremock:
-    image: "wiremock/wiremock:3.10.0-alpine"
-    container_name: wiremock-dev
-    ports:
-      - "48080:8080"
-    volumes:
-      - ./_dev/wiremock_resources/mappings:/home/wiremock/mappings
-      - ./_dev/wiremock_resources/__files:/home/wiremock/__files
-    entrypoint: [
-      "/docker-entrypoint.sh",
-      "--global-response-templating",
-      "--disable-gzip"
-    ]
-    networks:
-      - compas-network
-
 networks:
   compas-network:
+    name: compas-network
     driver: bridge
