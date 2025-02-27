@@ -9,6 +9,8 @@ import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.w3c.dom.Element;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -125,6 +127,7 @@ class SclElementProcessorTest {
 
     @Test
     void addHistoryItem_WhenCalledWithoutHistoryElement_ThenElementIsAdded() {
+        var when = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").format(new Date());
         var version = new Version("1.3.2");
         var username = "The Tester";
         var message = "The Message";
@@ -136,7 +139,7 @@ class SclElementProcessorTest {
         var historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME, SCL_NS_URI);
         assertFalse(historyElement.isPresent());
 
-        var result = processor.addHistoryItem(header.get(), username, message, version);
+        var result = processor.addHistoryItem(header.get(), username, when, message, version);
         assertNotNull(result);
 
         historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME, SCL_NS_URI);
@@ -152,6 +155,7 @@ class SclElementProcessorTest {
 
     @Test
     void addHistoryItem_WhenCalledWithHistoryItemElement_ThenElementIsAdded() {
+        var when = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").format(new Date());
         var version = new Version("1.3.2");
         var scl = readSCL("scl_with_history.scd");
         var header = processor.getSclHeader(scl);
@@ -160,7 +164,7 @@ class SclElementProcessorTest {
         var historyElement = processor.getChildNodeByName(header.get(), SCL_HISTORY_ELEMENT_NAME, SCL_NS_URI);
         assertTrue(historyElement.isPresent());
 
-        var result = processor.addHistoryItem(header.get(), "The Tester", "The Message", version);
+        var result = processor.addHistoryItem(header.get(), "The Tester", when, "The Message", version);
         assertNotNull(result);
         assertEquals(version.toString(), result.getAttribute(SCL_VERSION_ATTR));
 

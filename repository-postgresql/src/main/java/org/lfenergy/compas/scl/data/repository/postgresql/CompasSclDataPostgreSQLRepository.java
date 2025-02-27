@@ -4,24 +4,20 @@
 
 package org.lfenergy.compas.scl.data.repository.postgresql;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import javax.sql.DataSource;
-import jakarta.transaction.Transactional;
-import java.sql.Array;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.sql.*;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.*;
 
 import static jakarta.transaction.Transactional.TxType.REQUIRED;
 import static jakarta.transaction.Transactional.TxType.SUPPORTS;
@@ -38,6 +34,13 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private static final String HITEM_WHO_FIELD = "hitem_who";
     private static final String HITEM_WHEN_FIELD = "hitem_when";
     private static final String HITEM_WHAT_FIELD = "hitem_what";
+    private static final String HISTORYMETAITEM_TYPE_FIELD = "type";
+    private static final String HISTORYMETAITEM_AUTHOR_FIELD = "author";
+    private static final String HISTORYMETAITEM_COMMENT_FIELD = "comment";
+    private static final String HISTORYMETAITEM_CHANGEDAT_FIELD = "changedAt";
+    private static final String HISTORYMETAITEM_AVAILABLE_FIELD = "available";
+    private static final String HISTORYMETAITEM_ARCHIVED_FIELD = "archived";
+    private static final String HISTORYMETAITEM_IS_DELETED_FIELD = "is_deleted";
 
     private final DataSource dataSource;
 
@@ -56,6 +59,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                   from (select distinct on (scl_file.id) *
                           from scl_file
                          where scl_file.type = ?
+                         and scl_file.is_deleted = false
                          order by scl_file.id
                                 , scl_file.major_version desc
                                 , scl_file.minor_version desc
@@ -115,6 +119,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                        and scl_data.patch_version = scl_file.patch_version
                  where scl_file.id   = ?
                  and   scl_file.type = ?
+                 and   scl_file.is_deleted = false
                  order by scl_file.major_version
                         , scl_file.minor_version
                         , scl_file.patch_version
@@ -186,6 +191,37 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(SUPPORTS)
+    public String findByUUID(UUID id, Version version) {
+        var sql = """
+                select scl_file.scl_data
+                  from scl_file
+                 where scl_file.id   = ?
+                 and   scl_file.major_version = ?
+                 and   scl_file.minor_version = ?
+                 and   scl_file.patch_version = ?
+                """;
+
+        try (var connection = dataSource.getConnection();
+             var stmt = connection.prepareStatement(sql)) {
+            stmt.setObject(1, id);
+            stmt.setInt(2, version.getMajorVersion());
+            stmt.setInt(3, version.getMinorVersion());
+            stmt.setInt(4, version.getPatchVersion());
+
+            try (var resultSet = stmt.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString(SCL_DATA_FIELD);
+                }
+                var message = String.format("No record found with ID '%s' and version '%s'", id, version);
+                throw new CompasNoDataFoundException(message);
+            }
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_SELECT_ERROR_CODE, "Error select scl data from database!", exp);
+        }
+    }
+
+    @Override
+    @Transactional(SUPPORTS)
     public boolean hasDuplicateSclName(SclFileType type, String name) {
         var sql = """
                 select distinct on (scl_file.id) scl_file.name
@@ -221,6 +257,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                   from scl_file
                  where scl_file.id   = ?
                  and   scl_file.type = ?
+                 and   scl_file.is_deleted = false
                  order by scl_file.major_version desc, scl_file.minor_version desc, scl_file.patch_version desc
                 """;
 
@@ -322,7 +359,26 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(REQUIRED)
-    public void delete(SclFileType type, UUID id, Version version) {
+    public void softDelete(SclFileType type, UUID id) {
+        var sql = """
+                UPDATE scl_file
+                SET   is_deleted = true
+                WHERE scl_file.id = ?
+                AND   scl_file.type = ?
+                """;
+        try (var connection = dataSource.getConnection();
+             var sclStmt = connection.prepareStatement(sql)) {
+            sclStmt.setObject(1, id);
+            sclStmt.setObject(2, type.name());
+            sclStmt.executeUpdate();
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error marking SCL as deleted in database!", exp);
+        }
+    }
+
+    @Override
+    @Transactional(REQUIRED)
+    public void deleteVersion(SclFileType type, UUID id, Version version) {
         var sql = """
                 delete from scl_file
                  where scl_file.id   = ?
@@ -345,6 +401,32 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         }
     }
 
+    @Override
+    @Transactional(REQUIRED)
+    public void softDeleteVersion(SclFileType type, UUID id, Version version) {
+        var sql = """
+                UPDATE scl_file
+                SET    is_deleted = true
+                WHERE  scl_file.id = ?
+                AND    scl_file.type = ?
+                AND    scl_file.major_version = ?
+                AND    scl_file.minor_version = ?
+                AND    scl_file.patch_version = ?
+                """;
+
+        try (var connection = dataSource.getConnection();
+             var sclStmt = connection.prepareStatement(sql)) {
+            sclStmt.setObject(1, id);
+            sclStmt.setString(2, type.name());
+            sclStmt.setInt(3, version.getMajorVersion());
+            sclStmt.setInt(4, version.getMinorVersion());
+            sclStmt.setInt(5, version.getPatchVersion());
+            sclStmt.executeUpdate();
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error marking SCL version as deleted in database!", exp);
+        }
+    }
+
     private String createVersion(ResultSet resultSet) throws SQLException {
         var version = new Version(resultSet.getInt(MAJOR_VERSION_FIELD),
                 resultSet.getInt(MINOR_VERSION_FIELD),
@@ -363,5 +445,208 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                     );
         }
         return labelsList;
+    }
+
+    @Override
+    @Transactional(REQUIRED)
+    public void createHistoryVersion(UUID id, String name, Version version, SclFileType type, String author, String comment, OffsetDateTime changedAt, Boolean archived, Boolean available) {
+        var sql = """
+                INSERT INTO scl_history(id, name, major_version, minor_version, patch_version, type, author, comment, changedAt, archived, available)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """;
+
+        try (var connection = dataSource.getConnection();
+             var sclStmt = connection.prepareStatement(sql)) {
+            sclStmt.setObject(1, id);
+            sclStmt.setString(2, name);
+            sclStmt.setInt(3, version.getMajorVersion());
+            sclStmt.setInt(4, version.getMinorVersion());
+            sclStmt.setInt(5, version.getPatchVersion());
+            sclStmt.setString(6, type.toString());
+            sclStmt.setString(7, author);
+            sclStmt.setString(8, comment);
+            sclStmt.setObject(9, changedAt);
+            sclStmt.setBoolean(10, archived);
+            sclStmt.setBoolean(11, available);
+            sclStmt.executeUpdate();
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(POSTGRES_INSERT_ERROR_CODE, "Error adding SCL History to database!", exp);
+        }
+    }
+
+    @Override
+    @Transactional(SUPPORTS)
+    public List<IHistoryMetaItem> listHistory() {
+        var sql = """
+                SELECT *
+                FROM (
+                    SELECT DISTINCT ON (scl_history.id) scl_history.*, scl_file.is_deleted
+                    FROM scl_history
+                    JOIN scl_file ON scl_history.id = scl_file.id
+                        AND scl_history.major_version = scl_file.major_version
+                        AND scl_history.minor_version = scl_file.minor_version
+                        AND scl_history.patch_version = scl_file.patch_version
+                    ORDER BY
+                        scl_history.id,
+                        scl_history.major_version DESC,
+                        scl_history.minor_version DESC,
+                        scl_history.patch_version DESC
+                ) subquery
+                ORDER BY subquery.name
+                """;
+        return executeHistoryQuery(sql, Collections.emptyList());
+    }
+
+    @Override
+    @Transactional(SUPPORTS)
+    public List<IHistoryMetaItem> listHistory(UUID id) {
+        var sql = """
+                SELECT *
+                FROM (
+                    SELECT DISTINCT ON (scl_history.id) scl_history.*, scl_file.is_deleted
+                    FROM scl_history
+                    JOIN scl_file
+                        ON  scl_history.id            = scl_file.id
+                        AND scl_history.major_version = scl_file.major_version
+                        AND scl_history.minor_version = scl_file.minor_version
+                        AND scl_history.patch_version = scl_file.patch_version
+                    WHERE scl_history.id  = ?
+                    ORDER BY
+                        scl_history.id,
+                        scl_history.major_version DESC,
+                        scl_history.minor_version DESC,
+                        scl_history.patch_version DESC
+                ) subquery
+                ORDER BY subquery.name
+                """;
+        return executeHistoryQuery(sql, Collections.singletonList(id));
+    }
+
+    @Override
+    @Transactional(SUPPORTS)
+    public List<IHistoryMetaItem> listHistory(SclFileType type, String name, String author, OffsetDateTime from, OffsetDateTime to) {
+        StringBuilder sqlBuilder = new StringBuilder("""
+                SELECT *
+                FROM (
+                    SELECT DISTINCT ON (scl_history.id) scl_history.*, scl_file.is_deleted
+                    FROM scl_history
+                    JOIN scl_file
+                        ON  scl_history.id            = scl_file.id
+                        AND scl_history.major_version = scl_file.major_version
+                        AND scl_history.minor_version = scl_file.minor_version
+                        AND scl_history.patch_version = scl_file.patch_version
+                    ORDER BY
+                        scl_history.id,
+                        scl_history.major_version DESC,
+                        scl_history.minor_version DESC,
+                        scl_history.patch_version DESC
+                ) subquery
+                ORDER BY subquery.name
+                WHERE 1=1
+                """);
+
+        List<Object> parameters = new ArrayList<>();
+
+        if (type != null) {
+            sqlBuilder.append(" AND subquery.type = ?");
+            parameters.add(type.toString());
+        }
+
+        if (name != null) {
+            sqlBuilder.append(" AND subquery.name ILIKE ?");
+            parameters.add("%" + name + "%");
+        }
+
+        if (author != null) {
+            sqlBuilder.append(" AND subquery.author = ?");
+            parameters.add(author);
+        }
+
+        if (from != null) {
+            sqlBuilder.append(" AND subquery.changedAt >= ?");
+            parameters.add(from);
+        }
+
+        if (to != null) {
+            sqlBuilder.append(" AND subquery.changedAt <= ?");
+            parameters.add(to);
+        }
+
+        sqlBuilder.append(System.lineSeparator());
+        sqlBuilder.append("""
+                ORDER BY
+                    scl_history.name,
+                    scl_history.major_version,
+                    scl_history.minor_version,
+                    scl_history.patch_version
+                """);
+
+        return executeHistoryQuery(sqlBuilder.toString(), parameters);
+    }
+
+
+    @Override
+    @Transactional(SUPPORTS)
+    public List<IHistoryMetaItem> listHistoryVersionsByUUID(UUID id) {
+        var sql = """
+                SELECT scl_history.*, scl_file.is_deleted
+                FROM scl_history
+                JOIN scl_file
+                    ON  scl_history.id            = scl_file.id
+                    AND scl_history.major_version = scl_file.major_version
+                    AND scl_history.minor_version = scl_file.minor_version
+                    AND scl_history.patch_version = scl_file.patch_version
+                WHERE scl_history.id = ?
+                ORDER BY
+                    scl_history.name,
+                    scl_history.major_version,
+                    scl_history.minor_version,
+                    scl_history.patch_version
+                """;
+        return executeHistoryQuery(sql, Collections.singletonList(id));
+    }
+
+    private List<IHistoryMetaItem> executeHistoryQuery(String sql, List<Object> parameters) {
+        List<IHistoryMetaItem> items = new ArrayList<>();
+        try (
+                Connection connection = dataSource.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql);
+        ) {
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                while (resultSet.next()) {
+                    items.add(mapResultSetToHistoryMetaItem(resultSet));
+                }
+            }
+        } catch (SQLException exp) {
+            throw new CompasSclDataServiceException(
+                    POSTGRES_SELECT_ERROR_CODE,
+                    "Error listing scl entries from database!", exp
+            );
+        }
+        return items;
+    }
+
+    private HistoryMetaItem mapResultSetToHistoryMetaItem(ResultSet resultSet) throws SQLException {
+        return new HistoryMetaItem(
+                resultSet.getString(ID_FIELD),
+                resultSet.getString(NAME_FIELD),
+                createVersion(resultSet),
+                resultSet.getString(HISTORYMETAITEM_TYPE_FIELD),
+                resultSet.getString(HISTORYMETAITEM_AUTHOR_FIELD),
+                resultSet.getString(HISTORYMETAITEM_COMMENT_FIELD),
+                convertToOffsetDateTime(resultSet.getTimestamp(HISTORYMETAITEM_CHANGEDAT_FIELD)),
+                resultSet.getBoolean(HISTORYMETAITEM_ARCHIVED_FIELD),
+                resultSet.getBoolean(HISTORYMETAITEM_AVAILABLE_FIELD),
+                resultSet.getBoolean(HISTORYMETAITEM_IS_DELETED_FIELD)
+        );
+    }
+
+    private OffsetDateTime convertToOffsetDateTime(Timestamp sqlTimestamp) {
+        return sqlTimestamp != null
+                ? sqlTimestamp.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime()
+                : null;
     }
 }

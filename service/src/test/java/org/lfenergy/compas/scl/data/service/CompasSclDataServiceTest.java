@@ -15,11 +15,10 @@ import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.IHistoryItem;
-import org.lfenergy.compas.scl.data.xml.HistoryItem;
-import org.lfenergy.compas.scl.data.xml.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
+import org.lfenergy.compas.scl.data.xml.SclMetaInfo;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -189,6 +188,26 @@ class CompasSclDataServiceTest {
     }
 
     @Test
+    void create_WhenCalledWithFeatureHistoryEnabled_ThenCreateHistoryVersionEntriesInRepository() throws IOException {
+        var name = "JUSTSOMENAME";
+        var comment = "Some comments";
+        var who = "User A";
+
+        var scl = readSCL("scl_test_file.scd");
+
+        when(compasSclDataRepository.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(false);
+        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
+
+        scl = compasSclDataService.create(SCL_TYPE, name, who, comment, scl, true);
+
+        assertNotNull(scl);
+        assertCompasExtension(scl, name);
+        assertHistoryItem(scl, 2, INITIAL_VERSION, comment);
+        verify(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
+        verify(compasSclDataRepository).hasDuplicateSclName(SCL_TYPE, name);
+    }
+
+    @Test
     void update_WhenCalledWithoutCompasElements_ThenSCLReturnedWithCorrectCompasExtensionAndHistory() throws IOException {
         var previousName = "Previous SCL Filename";
         var uuid = UUID.randomUUID();
@@ -306,21 +325,21 @@ class CompasSclDataServiceTest {
 
         doNothing().when(compasSclDataRepository).delete(SCL_TYPE, uuid);
 
-        compasSclDataService.delete(SCL_TYPE, uuid);
+        compasSclDataService.delete(SCL_TYPE, uuid, false);
 
         verify(compasSclDataRepository).delete(SCL_TYPE, uuid);
     }
 
     @Test
-    void delete_WhenCalledWithVersion_ThenRepositoryIsCalled() {
+    void deleteVersion_WhenCalledWithVersion_ThenRepositoryIsCalled() {
         var uuid = UUID.randomUUID();
         var version = new Version(1, 0, 0);
 
-        doNothing().when(compasSclDataRepository).delete(SCL_TYPE, uuid, version);
+        doNothing().when(compasSclDataRepository).deleteVersion(SCL_TYPE, uuid, version);
 
-        compasSclDataService.delete(SCL_TYPE, uuid, version);
+        compasSclDataService.deleteVersion(SCL_TYPE, uuid, version, false);
 
-        verify(compasSclDataRepository).delete(SCL_TYPE, uuid, version);
+        verify(compasSclDataRepository).deleteVersion(SCL_TYPE, uuid, version);
     }
 
     @Test

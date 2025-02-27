@@ -57,6 +57,7 @@ target
 out
 lib
 bin
+data
 .java-version
 *.orig
 *.rej

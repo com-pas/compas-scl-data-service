@@ -1,0 +1,560 @@
+openapi: 3.0.3
+info:
+  title: CoMPAS SCL Data Service History API
+  version: 1.0.0
+
+servers:
+  - url: https://demo.compas.energy
+    description: DSOM Versatel Production URL
+
+tags:
+  - name: locations
+    description: Endpoints managing locations and assigning resources
+  - name: archiving
+    description: Archiving related endpoints
+
+security:
+  - open-id-connect:
+      - read
+      - write
+      - admin
+
+paths:
+  /api/locations:
+    post:
+      tags:
+        - locations
+      summary: Create location
+      security:
+        - open-id-connect: [ admin ]
+      operationId: createLocation
+      requestBody:
+        description: Location information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Location'
+      responses:
+        '200':
+          description: Successfully generated location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+        '400':
+          description: One of the specified Parameters is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+    get:
+      tags:
+        - locations
+      summary: Retrieve locations
+      operationId: getLocations
+      parameters:
+        - name: page
+          in: query
+          description: Page number starting by 1
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: pageSize
+          in: query
+          description: Page size must be > 0
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 25
+      responses:
+        '200':
+          description: Successfully retrieved locations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+        '400':
+          description: One of the specified Parameters is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+  /api/locations/{locationId}:
+    parameters:
+      - name: locationId
+        in: path
+        description: Unique location identifier
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - locations
+      summary: Retrieve location
+      operationId: getLocation
+      responses:
+        '200':
+          description: Successfully retrieved location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+        '400':
+          description: One of the specified Parameters is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '404':
+          description: Unable to find location with locationId
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+    put:
+      tags:
+        - locations
+      summary: Update location
+      operationId: updateLocation
+      requestBody:
+        description: Location information, location uuid will be ignored
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Location'
+      responses:
+        '200':
+          description: Successfully generated location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+        '400':
+          description: One of the specified Parameters is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+    delete:
+      tags:
+        - locations
+      summary: Delete location
+      description: Deleting a location is only allowed when location has no resources assigned
+      operationId: deleteLocation
+      responses:
+        '204':
+          description: Successfully deleted location
+        '400':
+          description: One of the specified Parameters is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '404':
+          description: Unable to find location with locationId
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+  /api/locations/{locationId}/resources/{uuid}/assign:
+    post:
+      tags:
+        - locations
+      summary: Assigns a resource
+      security:
+        - open-id-connect: [ write ]
+      description: |-
+        Assigns or moves a resource to the specified location. If resource already assigned, the previous assignment
+        will be removed.
+      operationId: assignResourceToLocation
+      parameters:
+        - name: locationId
+          in: path
+          description: Unique location identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: uuid
+          in: path
+          description: Unique resource identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Successfully assigned the resource to the location
+        '400':
+          description: One of the specified Parameters is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '404':
+          description: Unable to find location or resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+  /api/locations/{locationId}/resources/{uuid}/unassign:
+    post:
+      tags:
+        - locations
+      summary: Unassigns a resource
+      security:
+        - open-id-connect: [ write ]
+      description: |-
+        Removes the assignment of a resource from the assigned location.
+      operationId: unassignResourceToLocation
+      parameters:
+        - name: locationId
+          in: path
+          description: Unique location identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: uuid
+          in: path
+          description: Unique resource identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Successfully unassigned the resource from the location
+        '400':
+          description: One of the specified Parameters is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '404':
+          description: Unable to find location or resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+
+  /api/archive/scl/{id}/versions/{version}:
+    parameters:
+      - name: id
+        in: path
+        description: Unique data resource identifier
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: version
+        in: path
+        description: Data resource version
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - archiving
+      summary: Archive an existing scl file
+      security:
+        - open-id-connect: [ write ]
+      operationId: archiveSclResource
+      responses:
+        '200':
+          description: Successfully generated location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchivedResource'
+        '400':
+          description: One of the specified Parameters is not valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '403':
+          description: Authorization failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '404':
+          description: Unable to find location or resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+  /api/archive/referenced-resource/{id}/versions/{version}:
+    post:
+      tags:
+        - archiving
+      summary: Archive resource linked to existing resource
+      security:
+        - open-id-connect: [ write ]
+      operationId: archiveResource
+      parameters:
+        - in: header
+          name: X-author
+          description: Name of the author who created the file and send for approval
+          schema:
+            type: string
+        - in: header
+          name: X-approver
+          description: Name of the approver
+          schema:
+            type: string
+        - in: header
+          name: Content-Type
+          description: File content type
+          schema:
+            type: string
+        - in: header
+          name: X-filename
+          description: File name
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Successfully generated location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchivedResource'
+        '401':
+          description: Authentication information is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '403':
+          description: Authorization failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        '404':
+          description: Unable to find location or resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+        default:
+          description: Unexpected Error, cannot handle request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDto'
+
+components:
+  securitySchemes:
+    open-id-connect:   # <--- Arbitrary name for the security scheme. Used to refer to it from elsewhere.
+      type: openIdConnect
+      openIdConnectUrl: https://example.com/.well-known/openid-configuration
+
+  schemas:
+    Locations:
+      type: object
+      required:
+        - locations
+      properties:
+        locations:
+          type: array
+          description: "List of locations"
+          items:
+            $ref: '#/components/schemas/Location'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    Pagination:
+      type: object
+      required:
+        - page
+        - pageSize
+      properties:
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+    Location:
+      type: object
+      required:
+        - key
+        - name
+      properties:
+        uuid:
+          type: string
+          description: "Unique location uuid generated by backend during creation"
+        key:
+          type: string
+          description: "Location key, defined once manually when creating a location"
+        name:
+          type: string
+          description: "Location name"
+        description:
+          type: string
+          description: "Location description"
+    ArchivedResource:
+      type: object
+      required:
+        - uuid
+        - name
+        - contentType
+        - version
+        - fields
+      properties:
+        uuid:
+          type: string
+          description: "Unique resource identifier"
+        name:
+          type: string
+          description: "Resource name"
+        contentType:
+          type: string
+          description: "Content type"
+        version:
+          type: string
+          description: "Version"
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceTag'
+    ResourceTag:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          description: "Tag key"
+        value:
+          type: string
+          description: "Tag value"
+    ErrorResponseDto:
+      required:
+        - timestamp
+        - code
+        - message
+      type: object
+      properties:
+        timestamp:
+          type: string
+          description: 2017-07-21T17:32:28Z.
+          format: 'date-time'
+        code:
+          type: string
+          example: RESOURCE_NOT_FOUND
+        message:
+          type: string
+          example: Unable to find resource with id 'xy'.

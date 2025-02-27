@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: compas_postgresql
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: compas
+      PGDATA: /var/lib/postgresql/data/compas
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - compas-network
+
+  keycloak:
+    image: compas_keycloak:latest  # Assuming the Keycloak image is already built
+    container_name: compas_keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8089:8080"
+    networks:
+      - compas-network
+
+  compas-scl-data-service:
+    image: lfenergy/compas-scl-data-service:0.15.3-SNAPSHOT-postgresql  # Use the latest compas-scl-data-service image, you can generate it with ./mvnw package -Pnative-image
+    container_name: compas-scl-data-service
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    environment:
+      POSTGRESQL_HOST: postgres
+      POSTGRESQL_PORT: 5432
+      POSTGRESQL_DB: compas
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_PASSWORD: postgres
+      # JWT Security Variables
+      JWT_VERIFY_KEY: http://localhost:8089/auth/realms/compas/protocol/openid-connect/certs
+      JWT_VERIFY_ISSUER: http://localhost:8089/auth/realms/compas
+      JWT_VERIFY_CLIENT_ID: scl-data-service
+      JWT_GROUPS_PATH: resource_access/scl-data-service/roles
+      # UserInfo variables
+      USERINFO_NAME_CLAIMNAME: name
+      USERINFO_WHO_CLAIMNAME: name
+      USERINFO_SESSION_WARNING: 20
+      USERINFO_SESSION_EXPIRES: 30
+    restart: on-failure # will restart until it's success
+    networks:
+      - compas-network
+
+networks:
+  compas-network:
+    driver: bridge

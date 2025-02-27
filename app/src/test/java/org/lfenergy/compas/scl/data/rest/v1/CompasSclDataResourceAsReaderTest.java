@@ -3,18 +3,19 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest.v1;
 
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.data.xml.HistoryItem;
-import org.lfenergy.compas.scl.data.xml.Item;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.v1.model.CreateRequest;
 import org.lfenergy.compas.scl.data.rest.v1.model.UpdateRequest;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
+import org.lfenergy.compas.scl.data.xml.HistoryItem;
+import org.lfenergy.compas.scl.data.xml.Item;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import java.io.IOException;
@@ -28,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_NS_URI;
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
 import static org.mockito.Mockito.*;
-import io.quarkus.test.InjectMock;
 
 @QuarkusTest
 @TestHTTPEndpoint(CompasSclDataResource.class)
@@ -192,7 +192,7 @@ class CompasSclDataResourceAsReaderTest {
         var uuid = UUID.randomUUID();
         var type = SclFileType.SCD;
 
-        doNothing().when(compasSclDataService).delete(type, uuid);
+        doNothing().when(compasSclDataService).delete(type, uuid, false);
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -210,7 +210,7 @@ class CompasSclDataResourceAsReaderTest {
         var type = SclFileType.SCD;
         var version = new Version(1, 2, 3);
 
-        doNothing().when(compasSclDataService).delete(type, uuid, version);
+        doNothing().when(compasSclDataService).deleteVersion(type, uuid, version, false);
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
