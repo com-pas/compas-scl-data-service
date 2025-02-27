@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
+import org.lfenergy.compas.scl.data.dto.LocationMetaData;
 import org.lfenergy.compas.scl.data.dto.ResourceMetaData;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
@@ -532,17 +533,7 @@ public class CompasSclDataService {
         }
         return Uni.createFrom()
             .item(repository.createLocation(key, name, description))
-            .invoke(repository::addLocationTags)
-            .call(createdLocation -> archivingService.createLocation(createdLocation)
-                .onFailure()
-                .invoke(Unchecked.consumer(throwable -> {
-                    LOGGER.warn("Error while creating location: {}", throwable.getMessage());
-                    try {
-                        tm.setRollbackOnly();
-                    } catch (SystemException e) {
-                        throw new RuntimeException(e);
-                    }
-                })));
+            .invoke(repository::addLocationTags);
     }
 
     /**
@@ -616,6 +607,7 @@ public class CompasSclDataService {
             repository.unassignResourceFromLocation(locationId, resourceId);
         }
     }
+
     /**
      * Archive a resource and link it to the corresponding scl_file entry
      *
@@ -647,14 +639,34 @@ public class CompasSclDataService {
             .onItem()
             .ifNotNull()
             .call(item ->
-                storeResourceData(archivingService.archiveData(
-                    repository.findLocationByUUID(UUID.fromString(item.getLocationId())).getName(),
-                    filename,
-                    id,
-                    body,
-                    item
-                ), "Error while archiving resource: {}")
+                Uni.createFrom()
+                    .item(repository.findLocationByUUID(UUID.fromString(item.getLocationId())))
+                    .flatMap(location ->
+                        createLocationInArchive(location)
+                            .onItem()
+                            .call(createdLocation ->
+                                storeResourceDataInArchive(archivingService.archiveData(
+                                    location.getKey(),
+                                    filename,
+                                    id,
+                                    body,
+                                    item
+                                ), "Error while archiving resource: {}"))
+                    )
             );
+    }
+
+    private Uni<LocationMetaData> createLocationInArchive(ILocationMetaItem location) {
+        return archivingService.createLocation(location)
+            .onFailure()
+            .invoke(Unchecked.consumer(throwable -> {
+                LOGGER.warn("Error while creating location: {}", throwable.getMessage());
+                try {
+                    tm.setRollbackOnly();
+                } catch (SystemException e) {
+                    throw new RuntimeException(e);
+                }
+            }));
     }
 
     /**
@@ -686,17 +698,24 @@ public class CompasSclDataService {
             .item(() -> repository.archiveSclResource(id, version, approver))
             .onItem()
             .ifNotNull()
-            .call(archivedResource ->
-                storeResourceData(archivingService.archiveSclData(
-                    id,
-                    archivedResource,
-                    repository.findLocationByUUID(UUID.fromString(archivedResource.getLocationId())).getName(),
-                    repository.findByUUID(id, version)
-                ), "Error while archiving scl resource: {}")
+            .call(archivedSclResource ->
+                Uni.createFrom()
+                    .item(repository.findLocationByUUID(UUID.fromString(archivedSclResource.getLocationId())))
+                    .flatMap( location ->
+                        createLocationInArchive(location)
+                            .onItem()
+                            .call(createdLocation ->
+                                storeResourceDataInArchive(archivingService.archiveSclData(
+                                    id,
+                                    archivedSclResource,
+                                    location.getKey(),
+                                    repository.findByUUID(id, version)
+                                ), "Error while archiving scl resource: {}"))
+                    )
             );
     }
 
-    private Uni<ResourceMetaData> storeResourceData(Uni<ResourceMetaData> archivingRequest, String errorMessage) {
+    private Uni<ResourceMetaData> storeResourceDataInArchive(Uni<ResourceMetaData> archivingRequest, String errorMessage) {
         return archivingRequest
             .onFailure()
             .invoke(Unchecked.consumer(throwable -> {

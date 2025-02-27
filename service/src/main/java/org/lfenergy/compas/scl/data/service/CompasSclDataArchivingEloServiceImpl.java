@@ -1,6 +1,10 @@
 package org.lfenergy.compas.scl.data.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.unchecked.Unchecked;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
@@ -25,6 +29,7 @@ import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCo
 public class CompasSclDataArchivingEloServiceImpl implements ICompasSclDataArchivingService {
 
     private static final Logger LOGGER = LogManager.getLogger(CompasSclDataArchivingEloServiceImpl.class);
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Inject
     @RestClient
@@ -32,8 +37,7 @@ public class CompasSclDataArchivingEloServiceImpl implements ICompasSclDataArchi
 
     @Override
     public Uni<LocationMetaData> createLocation(ILocationMetaItem location) {
-        LOGGER.debug("Creating a new location in ELO!");
-
+        LOGGER.debug("Creating a new location '{}' in ELO!", location.getId());
         LocationData locationData = new LocationData()
             .name(location.getName())
             .key(location.getKey())
@@ -42,13 +46,19 @@ public class CompasSclDataArchivingEloServiceImpl implements ICompasSclDataArchi
             .onFailure()
             .transform(throwable -> new CompasSclDataServiceException(CREATION_ERROR_CODE, String.format("Error while creating location '%s' in ELO: %s", location.getId(), throwable.getMessage())))
             .onItem()
-            .invoke(eloLocation ->
-                LOGGER.debug("returned created ELO location item {} ", eloLocation));
+            .invoke(Unchecked.consumer(eloLocation ->
+            {
+                try {
+                    LOGGER.debug("returned ELO location item {}", objectMapper.writeValueAsString(eloLocation));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }));
     }
 
     @Override
     public Uni<ResourceMetaData> archiveData(String locationName, String filename, UUID uuid, File body, IAbstractArchivedResourceMetaItem archivedResource) {
-        LOGGER.debug("Archiving related resource in ELO!");
+        LOGGER.debug("Archiving related resource '{}' in ELO!", archivedResource.getId());
 
         String extension = archivedResource.getName().substring(archivedResource.getName().lastIndexOf(".") + 1).toLowerCase();
         String contentType = archivedResource.getContentType();
@@ -61,16 +71,23 @@ public class CompasSclDataArchivingEloServiceImpl implements ICompasSclDataArchi
             .name(name);
 
         try (FileInputStream fis = new FileInputStream(body)) {
-            byte[] fileData = new byte[(int) body.length()];
-            fis.read(fileData);
-            resourceData.data(Base64.getEncoder().encodeToString(fileData));
-            return eloClient.createArchivedResource(resourceData)
-                .onFailure()
-                .transform(throwable ->  new CompasSclDataServiceException(CREATION_ERROR_CODE, String.format("Error while archiving referenced resource '%s' in ELO!", uuid)))
-                .onItem()
-                .invoke(item ->
-                    LOGGER.debug("returned archived related item {} ", item)
-                );
+            return Uni.createFrom()
+                .item(fis.readAllBytes())
+                .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
+                .map( fileData -> resourceData.data(Base64.getEncoder().encodeToString(fileData)))
+                .flatMap(resource -> eloClient.createArchivedResource(resourceData)
+                    .onFailure()
+                    .transform(throwable ->  new CompasSclDataServiceException(CREATION_ERROR_CODE, String.format("Error while archiving referenced resource '%s' in ELO!", uuid)))
+                    .onItem()
+                    .invoke(Unchecked.consumer(item ->
+                        {
+                            try {
+                                LOGGER.debug("returned archived related item {} ", objectMapper.writeValueAsString(item));
+                            } catch (JsonProcessingException e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                    ));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -91,7 +108,7 @@ public class CompasSclDataArchivingEloServiceImpl implements ICompasSclDataArchi
 
     @Override
     public Uni<ResourceMetaData> archiveSclData(UUID uuid, IAbstractArchivedResourceMetaItem archivedResource, String locationName, String data) throws CompasSclDataServiceException {
-        LOGGER.debug("Archiving scl resource in ELO!");
+        LOGGER.debug("Archiving scl resource '{}' in ELO!", uuid);
 
         String extension = archivedResource.getType();
         String contentType = MediaType.APPLICATION_OCTET_STREAM_TYPE.getType();
@@ -108,8 +125,14 @@ public class CompasSclDataArchivingEloServiceImpl implements ICompasSclDataArchi
             .onFailure()
             .transform(throwable -> new CompasSclDataServiceException(CREATION_ERROR_CODE, String.format("Error while archiving scl resource '%s' in ELO!", uuid)))
             .onItem()
-            .invoke(item ->
-                LOGGER.debug("returned archived scl item {} ", item)
+            .invoke(Unchecked.consumer(item ->
+                {
+                    try {
+                        LOGGER.debug("returned archived scl item {} ", objectMapper.writeValueAsString(item));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
             );
     }
 }

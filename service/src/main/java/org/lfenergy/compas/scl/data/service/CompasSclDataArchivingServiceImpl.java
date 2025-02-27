@@ -19,15 +19,15 @@ import java.util.UUID;
 @ApplicationScoped
 public class CompasSclDataArchivingServiceImpl implements ICompasSclDataArchivingService {
 
-    private static final Logger LOGGER = LogManager.getLogger(CompasSclDataArchivingServiceImpl.class);
     @ConfigProperty(name = "scl-data-service.archiving.filesystem.location", defaultValue = "/work/locations")
     String locationPath;
 
     @Override
     public Uni<LocationMetaData> createLocation(ILocationMetaItem location) {
-        LOGGER.info("locationPath: {}", locationPath);
         File newLocationDirectory = new File(locationPath + File.separator + location.getName());
-        newLocationDirectory.mkdirs();
+        if (!newLocationDirectory.exists()) {
+            newLocationDirectory.mkdirs();
+        }
         return Uni.createFrom()
             .item(new LocationMetaData()
                 .uuid(UUID.fromString(location.getId()))
@@ -43,6 +43,9 @@ public class CompasSclDataArchivingServiceImpl implements ICompasSclDataArchivin
         File locationDir = new File(absolutePath);
         locationDir.mkdirs();
         File f = new File(absolutePath + File.separator + filename);
+        if (f.exists() && !f.isDirectory()) {
+            return Uni.createFrom().failure(new RuntimeException("File '"+filename+"' already exists"));
+        }
         try (FileOutputStream fos = new FileOutputStream(f)) {
             try (FileInputStream fis = new FileInputStream(body)) {
                 fos.write(fis.readAllBytes());
