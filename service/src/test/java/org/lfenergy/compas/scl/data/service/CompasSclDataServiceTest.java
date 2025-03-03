@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
+import org.lfenergy.compas.scl.data.dto.LocationMetaData;
 import org.lfenergy.compas.scl.data.dto.ResourceMetaData;
 import org.lfenergy.compas.scl.data.dto.TypeEnum;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
@@ -546,11 +547,12 @@ class CompasSclDataServiceTest {
         ILocationMetaItem expectedLocation = new LocationMetaItem(UUID.randomUUID().toString(), "locationKey", "locationName", null, 0);
         when(compasSclDataRepository.createLocation("locationKey", "locationName", null)).thenReturn(expectedLocation);
         when(compasSclDataRepository.hasDuplicateLocationValues("locationKey", "locationName")).thenReturn(false);
-        Uni<ILocationMetaItem> actualLocation = compasSclDataService.createLocation("locationKey", "locationName", null);
+
+        UniAssertSubscriber<ILocationMetaItem> result = compasSclDataService.createLocation("locationKey", "locationName", null).subscribe().withSubscriber(UniAssertSubscriber.create());
 
         verify(compasSclDataRepository, times(1)).createLocation(any(), any(), any());
-        verify(compasSclDataArchivingServiceImpl, times(1)).createLocation(any());
-        assertEquals(expectedLocation, actualLocation);
+        verify(compasSclDataRepository, times(1)).addLocationTags(any());
+        assertEquals(expectedLocation, result.getItem());
     }
 
     @Test
@@ -744,7 +746,26 @@ class CompasSclDataServiceTest {
                         null
                     )
                 );
-
+            LocationMetaItem locationMetaItem = new LocationMetaItem(
+                locationId.toString(),
+                "locationKey",
+                "locationName",
+                null,
+                1
+            );
+            when(compasSclDataRepository.findLocationByUUID(locationId))
+                .thenReturn(
+                    locationMetaItem
+                );
+            when(compasSclDataArchivingServiceImpl.createLocation(locationMetaItem))
+                .thenReturn(Uni.createFrom()
+                    .item(new LocationMetaData()
+                        .uuid(locationId)
+                        .name("locationName")
+                        .key("locationKey")
+                        .description(null)
+                        .assignedResources(1)
+                ));
             when(compasSclDataArchivingServiceImpl.archiveData(any(), any(), any(), any(), any())).thenReturn(Uni.createFrom().item(
                 new ResourceMetaData(
                     TypeEnum.RESOURCE,
@@ -789,14 +810,15 @@ class CompasSclDataServiceTest {
 
         UUID locationId = UUID.randomUUID();
         when(compasSclDataRepository.listHistoryVersionsByUUID(resourceId)).thenReturn(List.of(historyMetaItem));
+        LocationMetaItem locationMetaItem = new LocationMetaItem(
+            locationId.toString(),
+            "someKey",
+            "someName",
+            "someDescription",
+            1
+        );
         when(compasSclDataRepository.findLocationByUUID(UUID.fromString(locationId.toString()))).thenReturn(
-            new LocationMetaItem(
-                locationId.toString(),
-                "someKey",
-                "someName",
-                "someDescription",
-                1
-            )
+            locationMetaItem
         );
         when(compasSclDataRepository.archiveResource(resourceId, new Version(version), author, approver, contentType, filename))
             .thenReturn(
@@ -816,7 +838,6 @@ class CompasSclDataServiceTest {
                     null
                 )
             );
-
         when(compasSclDataArchivingServiceImpl.archiveData(any(), any(), any(), any(), any())).thenReturn(Uni.createFrom().item(
             new ResourceMetaData(
                 TypeEnum.RESOURCE,
@@ -825,11 +846,19 @@ class CompasSclDataServiceTest {
                 List.of()
             )
         ));
+        when(compasSclDataArchivingServiceImpl.createLocation(locationMetaItem))
+            .thenReturn(Uni.createFrom()
+                .item(new LocationMetaData()
+                    .uuid(locationId)
+                    .name("locationName")
+                    .key("locationKey")
+                    .description("someDescription")
+                    .assignedResources(1)
+                ));
 
         UniAssertSubscriber<IAbstractArchivedResourceMetaItem> cut = compasSclDataService.archiveResource(resourceId, version, author, approver, contentType, filename, null).subscribe().withSubscriber(UniAssertSubscriber.create());
 
         cut.assertCompleted();
-
         verify(compasSclDataRepository, times(1)).archiveResource(resourceId, new Version(version), author, approver, contentType, filename);
         verify(compasSclDataArchivingService, times(0)).archiveSclData(any(), any(), any(), any());
     }
@@ -859,16 +888,16 @@ class CompasSclDataServiceTest {
 
         when(compasSclDataRepository.archiveSclResource(resourceId, new Version(version), approver)).thenReturn(archivedResource);
         when(compasSclDataRepository.findByUUID(resourceId, new Version(version))).thenReturn(sclData);
-        when(compasSclDataRepository.findLocationByUUID(locationId)).thenReturn(
-            new LocationMetaItem(
-                locationId.toString(),
-                "locationKey",
-                "locationName",
-                null,
-                0
-            )
+        LocationMetaItem locationMetaItem = new LocationMetaItem(
+            locationId.toString(),
+            "locationKey",
+            "locationName",
+            null,
+            0
         );
-
+        when(compasSclDataRepository.findLocationByUUID(locationId)).thenReturn(
+            locationMetaItem
+        );
         when(compasSclDataArchivingServiceImpl.archiveSclData(any(), any(), any(), any())).thenReturn(Uni.createFrom().item(
             new ResourceMetaData(
                 TypeEnum.RESOURCE,
@@ -877,14 +906,22 @@ class CompasSclDataServiceTest {
                 List.of()
             )
         ));
+        when(compasSclDataArchivingServiceImpl.createLocation(locationMetaItem))
+            .thenReturn(Uni.createFrom()
+                .item(new LocationMetaData()
+                    .uuid(locationId)
+                    .name("locationName")
+                    .key("locationKey")
+                    .description(null)
+                    .assignedResources(0)
+                ));
 
         UniAssertSubscriber<IAbstractArchivedResourceMetaItem> result = compasSclDataService.archiveSclResource(resourceId, new Version(version), approver).subscribe().withSubscriber(UniAssertSubscriber.create());
 
         result.assertCompleted();
-
         verify(compasSclDataRepository, times(1)).archiveSclResource(resourceId, new Version(version), approver);
         verify(compasSclDataRepository, times(1)).findByUUID(resourceId, new Version(version));
-        verify(compasSclDataArchivingServiceImpl, times(1)).archiveSclData(resourceId, archivedResource, "locationName", sclData);
+        verify(compasSclDataArchivingServiceImpl, times(1)).archiveSclData(resourceId, archivedResource, "locationKey", sclData);
     }
 
     @Test
