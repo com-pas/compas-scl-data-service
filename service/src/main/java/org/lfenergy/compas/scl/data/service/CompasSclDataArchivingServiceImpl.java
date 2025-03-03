@@ -2,8 +2,6 @@ package org.lfenergy.compas.scl.data.service;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.lfenergy.compas.scl.data.dto.LocationMetaData;
 import org.lfenergy.compas.scl.data.dto.ResourceMetaData;
@@ -38,8 +36,8 @@ public class CompasSclDataArchivingServiceImpl implements ICompasSclDataArchivin
     }
 
     @Override
-    public Uni<ResourceMetaData> archiveData(String locationName, String filename, UUID resourceId, File body, IAbstractArchivedResourceMetaItem archivedResource) {
-        String absolutePath = generateSclDataLocation(resourceId, archivedResource, locationName) + File.separator + "referenced_resources";
+    public Uni<ResourceMetaData> archiveData(String locationKey, String filename, UUID resourceId, File body, IAbstractArchivedResourceMetaItem archivedResource) {
+        String absolutePath = generateSclDataLocation(resourceId, archivedResource, locationKey) + File.separator + "referenced_resources";
         File locationDir = new File(absolutePath);
         locationDir.mkdirs();
         File f = new File(absolutePath + File.separator + filename);
@@ -54,12 +52,12 @@ public class CompasSclDataArchivingServiceImpl implements ICompasSclDataArchivin
             return Uni.createFrom().failure(new RuntimeException(e));
         }
         List<ResourceTag> archivedResourceTag = archivedResource.getFields().stream().map(field -> new ResourceTag(field.getKey(), field.getValue())).toList();
-        return Uni.createFrom().item(new ResourceMetaData(TypeEnum.RESOURCE, resourceId, locationName, archivedResourceTag));
+        return Uni.createFrom().item(new ResourceMetaData(TypeEnum.RESOURCE, resourceId, locationKey, archivedResourceTag));
     }
 
     @Override
-    public Uni<ResourceMetaData> archiveSclData(UUID resourceId, IAbstractArchivedResourceMetaItem archivedResource, String locationName, String data) {
-        String absolutePath = generateSclDataLocation(resourceId, archivedResource, locationName);
+    public Uni<ResourceMetaData> archiveSclData(UUID resourceId, IAbstractArchivedResourceMetaItem archivedResource, String locationKey, String data) {
+        String absolutePath = generateSclDataLocation(resourceId, archivedResource, locationKey);
         File locationDir = new File(absolutePath);
         locationDir.mkdirs();
         File f = new File(locationDir + File.separator + archivedResource.getName() + "." + archivedResource.getType().toLowerCase());
@@ -69,10 +67,10 @@ public class CompasSclDataArchivingServiceImpl implements ICompasSclDataArchivin
             throw new RuntimeException(e);
         }
         List<ResourceTag> archivedResourceTag = archivedResource.getFields().stream().map(field -> new ResourceTag(field.getKey(), field.getValue())).toList();
-        return Uni.createFrom().item(new ResourceMetaData(TypeEnum.RESOURCE, resourceId, locationName, archivedResourceTag));
+        return Uni.createFrom().item(new ResourceMetaData(TypeEnum.RESOURCE, resourceId, locationKey, archivedResourceTag));
     }
 
-    private String generateSclDataLocation(UUID resourceId, IAbstractArchivedResourceMetaItem archivedResource, String locationName) {
-        return locationPath + File.separator + locationName + File.separator + resourceId + File.separator + archivedResource.getVersion();
+    private String generateSclDataLocation(UUID resourceId, IAbstractArchivedResourceMetaItem archivedResource, String locationKey) {
+        return locationPath + File.separator + locationKey + File.separator + resourceId + File.separator + archivedResource.getVersion();
     }
 }

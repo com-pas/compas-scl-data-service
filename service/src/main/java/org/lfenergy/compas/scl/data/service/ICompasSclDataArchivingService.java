@@ -13,7 +13,7 @@ public interface ICompasSclDataArchivingService {
 
     Uni<LocationMetaData> createLocation(ILocationMetaItem location);
 
-    Uni<ResourceMetaData> archiveData(String locationName, String filename, UUID uuid, File body, IAbstractArchivedResourceMetaItem archivedResource);
+    Uni<ResourceMetaData> archiveData(String locationKey, String filename, UUID uuid, File body, IAbstractArchivedResourceMetaItem archivedResource);
 
-    Uni<ResourceMetaData> archiveSclData(UUID uuid, IAbstractArchivedResourceMetaItem archivedResource, String locationName, String data);
+    Uni<ResourceMetaData> archiveSclData(UUID uuid, IAbstractArchivedResourceMetaItem archivedResource, String locationKey, String data);
 }

@@ -57,7 +57,7 @@ public class CompasSclDataArchivingEloServiceImpl implements ICompasSclDataArchi
     }
 
     @Override
-    public Uni<ResourceMetaData> archiveData(String locationName, String filename, UUID uuid, File body, IAbstractArchivedResourceMetaItem archivedResource) {
+    public Uni<ResourceMetaData> archiveData(String locationKey, String filename, UUID uuid, File body, IAbstractArchivedResourceMetaItem archivedResource) {
         LOGGER.debug("Archiving related resource '{}' in ELO!", archivedResource.getId());
 
         String extension = archivedResource.getName().substring(archivedResource.getName().lastIndexOf(".") + 1).toLowerCase();
@@ -67,7 +67,7 @@ public class CompasSclDataArchivingEloServiceImpl implements ICompasSclDataArchi
         generateBaseResourceDataDto(archivedResource, resourceData, extension, contentType);
         resourceData.uuid(UUID.fromString(archivedResource.getId()))
             .type(TypeEnum.RESOURCE)
-            .location(locationName)
+            .location(locationKey)
             .name(name);
 
         try (FileInputStream fis = new FileInputStream(body)) {
@@ -107,7 +107,7 @@ public class CompasSclDataArchivingEloServiceImpl implements ICompasSclDataArchi
     }
 
     @Override
-    public Uni<ResourceMetaData> archiveSclData(UUID uuid, IAbstractArchivedResourceMetaItem archivedResource, String locationName, String data) throws CompasSclDataServiceException {
+    public Uni<ResourceMetaData> archiveSclData(UUID uuid, IAbstractArchivedResourceMetaItem archivedResource, String locationKey, String data) throws CompasSclDataServiceException {
         LOGGER.debug("Archiving scl resource '{}' in ELO!", uuid);
 
         String extension = archivedResource.getType();
@@ -117,7 +117,7 @@ public class CompasSclDataArchivingEloServiceImpl implements ICompasSclDataArchi
         generateBaseResourceDataDto(archivedResource, resourceData, extension, contentType);
         resourceData.uuid(uuid)
             .type(TypeEnum.RESOURCE)
-            .location(locationName)
+            .location(locationKey)
             .name(archivedResource.getName())
             .data(encodedDataString);
 
