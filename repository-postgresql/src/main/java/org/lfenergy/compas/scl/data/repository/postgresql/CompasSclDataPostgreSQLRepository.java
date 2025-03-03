@@ -711,12 +711,12 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     public void addLocationTags(ILocationMetaItem location) {
-        String locationName = location.getName();
-        ResourceTagItem locationNameTag = getResourceTag("LOCATION", locationName);
+        String locationKey = location.getKey();
+        ResourceTagItem locationNameTag = getResourceTag("LOCATION", locationKey);
 
         if (locationNameTag == null) {
-            createResourceTag("LOCATION", locationName);
-            locationNameTag = getResourceTag("LOCATION", locationName);
+            createResourceTag("LOCATION", locationKey);
+            locationNameTag = getResourceTag("LOCATION", locationKey);
         }
         UUID locationUuid = UUID.fromString(location.getId());
         updateTagMappingForLocation(locationUuid, List.of(Objects.requireNonNull(locationNameTag)));
@@ -1141,9 +1141,9 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     }
 
     private List<IResourceTagItem> generateFieldsFromResultSet(ResultSet resultSet, String examiner) throws SQLException {
-        String locationName = findLocationByUUID(UUID.fromString(resultSet.getString(ARCHIVEMETAITEM_LOCATION_FIELD))).getName();
+        String locationKey = findLocationByUUID(UUID.fromString(resultSet.getString(ARCHIVEMETAITEM_LOCATION_FIELD))).getKey();
         return generateFields(
-            locationName,
+            locationKey,
             resultSet.getString(ID_FIELD),
             resultSet.getString("created_by"),
             examiner,
