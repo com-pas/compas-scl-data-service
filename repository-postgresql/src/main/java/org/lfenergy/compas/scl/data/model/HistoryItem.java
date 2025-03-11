@@ -9,7 +9,7 @@ public class HistoryItem extends AbstractItem implements IHistoryItem {
     private final String what;
 
     public HistoryItem(final String id, final String name, final String version, final String who, final String when, final String what) {
-        super(id, name, version);
+        super(id, name, version, null);
         this.who = who;
         this.when = when;
         this.what = what;

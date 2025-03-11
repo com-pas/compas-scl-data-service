@@ -5,7 +5,7 @@ package org.lfenergy.compas.scl.data.model;
 
 public class SclMetaInfo extends AbstractItem {
 
-    public SclMetaInfo(final String id, final String name, final String version) {
-        super(id, name, version);
+    public SclMetaInfo(final String id, final String name, final String version, final String locationId) {
+        super(id, name, version, locationId);
     }
 }

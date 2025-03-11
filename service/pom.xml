@@ -23,7 +23,7 @@ SPDX-License-Identifier: Apache-2.0
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <scope>provƒided</scope>
+            <scope>provided</scope>
             <version>4.0.5</version>
         </dependency>
         <dependency>
@@ -49,6 +49,20 @@ SPDX-License-Identifier: Apache-2.0
             <artifactId>log4j-core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-client-jackson</artifactId>
+            <version>3.17.7</version>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-narayana-jta</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-client-oidc-filter</artifactId>
+            <version>3.18.0</version>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
@@ -64,6 +78,11 @@ SPDX-License-Identifier: Apache-2.0
         <dependency>
             <groupId>com.openpojo</groupId>
             <artifactId>openpojo</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.lfenergy.compas.scl.data</groupId>
+            <artifactId>repository-postgresql</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -11,14 +11,15 @@ import io.quarkus.test.security.jwt.Claim;
 import io.quarkus.test.security.jwt.JwtSecurity;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl.data.config.FeatureFlagService;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.data.xml.HistoryItem;
-import org.lfenergy.compas.scl.data.xml.Item;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.v1.model.CreateRequest;
 import org.lfenergy.compas.scl.data.rest.v1.model.DuplicateNameCheckRequest;
 import org.lfenergy.compas.scl.data.rest.v1.model.UpdateRequest;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
+import org.lfenergy.compas.scl.data.xml.HistoryItem;
+import org.lfenergy.compas.scl.data.xml.Item;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import java.io.IOException;
@@ -45,6 +46,9 @@ class CompasSclDataResourceAsEditorTest {
 
     @InjectMock
     private CompasSclDataService compasSclDataService;
+
+    @InjectMock
+    private FeatureFlagService featureFlagService;
 
     @Test
     void list_WhenCalled_ThenItemResponseRetrieved() {
@@ -159,7 +163,7 @@ class CompasSclDataResourceAsEditorTest {
         request.setComment(comment);
         request.setSclData(scl);
 
-        when(compasSclDataService.create(type, name, USERNAME, comment, scl)).thenReturn(scl);
+        when(compasSclDataService.create(type, name, USERNAME, comment, scl, false)).thenReturn(scl);
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -171,8 +175,8 @@ class CompasSclDataResourceAsEditorTest {
                 .extract()
                 .response();
 
+        verify(compasSclDataService).create(type, name, USERNAME, comment, scl, false);
         assertEquals(scl, response.xmlPath().getString("CreateWsResponse.SclData"));
-        verify(compasSclDataService).create(type, name, USERNAME, comment, scl);
     }
 
     @Test
@@ -215,7 +219,7 @@ class CompasSclDataResourceAsEditorTest {
         request.setComment(comment);
         request.setSclData(scl);
 
-        when(compasSclDataService.update(type, uuid, changeSetType, USERNAME, comment, scl)).thenReturn(scl);
+        when(compasSclDataService.update(type, uuid, changeSetType, USERNAME, comment, scl, false)).thenReturn(scl);
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -229,7 +233,7 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         assertEquals(scl, response.xmlPath().getString("CreateWsResponse.SclData"));
-        verify(compasSclDataService).update(type, uuid, changeSetType, USERNAME, comment, scl);
+        verify(compasSclDataService).update(type, uuid, changeSetType, USERNAME, comment, scl, false);
     }
 
     @Test
@@ -237,7 +241,7 @@ class CompasSclDataResourceAsEditorTest {
         var uuid = UUID.randomUUID();
         var type = SclFileType.SCD;
 
-        doNothing().when(compasSclDataService).delete(type, uuid);
+        doNothing().when(compasSclDataService).delete(type, uuid, false);
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -246,7 +250,7 @@ class CompasSclDataResourceAsEditorTest {
                 .then()
                 .statusCode(204);
 
-        verify(compasSclDataService).delete(type, uuid);
+        verify(compasSclDataService).delete(type, uuid, false);
     }
 
     @Test
@@ -255,7 +259,7 @@ class CompasSclDataResourceAsEditorTest {
         var type = SclFileType.SCD;
         var version = new Version(1, 2, 3);
 
-        doNothing().when(compasSclDataService).delete(type, uuid, version);
+        doNothing().when(compasSclDataService).deleteVersion(type, uuid, version, false);
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -265,7 +269,7 @@ class CompasSclDataResourceAsEditorTest {
                 .then()
                 .statusCode(204);
 
-        verify(compasSclDataService).delete(type, uuid, version);
+        verify(compasSclDataService).deleteVersion(type, uuid, version, false);
     }
 
     @Test
@@ -320,7 +324,7 @@ class CompasSclDataResourceAsEditorTest {
         try (var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd")) {
             assert inputStream != null;
 
-            return new String(inputStream.readAllBytes());
+            return new String(inputStream.readAllBytes()).replace("\r\n", "\n");
         }
     }
 }

@@ -6,26 +6,31 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.service;
 
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
+import org.lfenergy.compas.scl.data.dto.LocationMetaData;
+import org.lfenergy.compas.scl.data.dto.ResourceMetaData;
+import org.lfenergy.compas.scl.data.dto.TypeEnum;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
-import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.data.model.IHistoryItem;
-import org.lfenergy.compas.scl.data.xml.HistoryItem;
-import org.lfenergy.compas.scl.data.xml.SclMetaInfo;
-import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
+import org.lfenergy.compas.scl.data.xml.SclMetaInfo;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.w3c.dom.Element;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,14 +49,23 @@ class CompasSclDataServiceTest {
     @Mock
     private CompasSclDataRepository compasSclDataRepository;
 
+    @Mock
+    private ICompasSclDataArchivingService compasSclDataArchivingService;
+
+    @Mock
+    private CompasSclDataArchivingServiceImpl compasSclDataArchivingServiceImpl;
+
     private CompasSclDataService compasSclDataService;
 
     private final ElementConverter converter = new ElementConverter();
     private final SclElementProcessor processor = new SclElementProcessor();
 
     @BeforeEach
-    void beforeEach() {
+    void beforeEach() throws NoSuchFieldException, IllegalAccessException {
         compasSclDataService = new CompasSclDataService(compasSclDataRepository, converter, processor);
+        Field archivingServiceField = compasSclDataService.getClass().getDeclaredField("archivingService");
+        archivingServiceField.setAccessible(true);
+        archivingServiceField.set(compasSclDataService, compasSclDataArchivingServiceImpl);
     }
 
     @Test
@@ -189,6 +203,26 @@ class CompasSclDataServiceTest {
     }
 
     @Test
+    void create_WhenCalledWithFeatureHistoryEnabled_ThenCreateHistoryVersionEntriesInRepository() throws IOException {
+        var name = "JUSTSOMENAME";
+        var comment = "Some comments";
+        var who = "User A";
+
+        var scl = readSCL("scl_test_file.scd");
+
+        when(compasSclDataRepository.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(false);
+        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
+
+        scl = compasSclDataService.create(SCL_TYPE, name, who, comment, scl, true);
+
+        assertNotNull(scl);
+        assertCompasExtension(scl, name);
+        assertHistoryItem(scl, 2, INITIAL_VERSION, comment);
+        verify(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
+        verify(compasSclDataRepository).hasDuplicateSclName(SCL_TYPE, name);
+    }
+
+    @Test
     void update_WhenCalledWithoutCompasElements_ThenSCLReturnedWithCorrectCompasExtensionAndHistory() throws IOException {
         var previousName = "Previous SCL Filename";
         var uuid = UUID.randomUUID();
@@ -306,21 +340,21 @@ class CompasSclDataServiceTest {
 
         doNothing().when(compasSclDataRepository).delete(SCL_TYPE, uuid);
 
-        compasSclDataService.delete(SCL_TYPE, uuid);
+        compasSclDataService.delete(SCL_TYPE, uuid, false);
 
         verify(compasSclDataRepository).delete(SCL_TYPE, uuid);
     }
 
     @Test
-    void delete_WhenCalledWithVersion_ThenRepositoryIsCalled() {
+    void deleteVersion_WhenCalledWithVersion_ThenRepositoryIsCalled() {
         var uuid = UUID.randomUUID();
         var version = new Version(1, 0, 0);
 
-        doNothing().when(compasSclDataRepository).delete(SCL_TYPE, uuid, version);
+        doNothing().when(compasSclDataRepository).deleteVersion(SCL_TYPE, uuid, version);
 
-        compasSclDataService.delete(SCL_TYPE, uuid, version);
+        compasSclDataService.deleteVersion(SCL_TYPE, uuid, version, false);
 
-        verify(compasSclDataRepository).delete(SCL_TYPE, uuid, version);
+        verify(compasSclDataRepository).deleteVersion(SCL_TYPE, uuid, version);
     }
 
     @Test
@@ -367,6 +401,663 @@ class CompasSclDataServiceTest {
         assertFalse(compasSclDataService.validateLabel(createLabelElement("")));
         assertFalse(compasSclDataService.validateLabel(createLabelElement("1-Label")));
         assertFalse(compasSclDataService.validateLabel(createLabelElement("Label*")));
+    }
+
+    @Test
+    void listHistory_WhenCalled_ThenReturnHistoryItemWithLatestVersion() {
+        String itemId = UUID.randomUUID().toString();
+        IHistoryMetaItem historyItem = new HistoryMetaItem(
+            itemId,
+            "TestItem1",
+            "1.0.1",
+            "IID",
+            "User1",
+            "Comment after update",
+            null,
+            null,
+            false,
+            true,
+            false
+        );
+        when(compasSclDataRepository.listHistory()).thenReturn(List.of(historyItem));
+        List<IHistoryMetaItem> items = compasSclDataService.listHistory();
+
+        verify(compasSclDataRepository).listHistory();
+        assertEquals(1, items.size());
+    }
+
+    @Test
+    void listHistory_WhenCalledWithId_ThenReturnHistoryItemWithLatestVersion() {
+        UUID itemId = UUID.randomUUID();
+        IHistoryMetaItem historyItem = new HistoryMetaItem(
+            itemId.toString(),
+            "TestItem1",
+            "1.0.1",
+            "IID",
+            "User1",
+            "Comment after update",
+            null,
+            null,
+            false,
+            true,
+            false
+        );
+        when(compasSclDataRepository.listHistory(itemId)).thenReturn(List.of(historyItem));
+        List<IHistoryMetaItem> items = compasSclDataService.listHistory(itemId);
+
+        verify(compasSclDataRepository).listHistory(itemId);
+        assertEquals(1, items.size());
+    }
+
+    @Test
+    void listHistory_WhenCalledWithSearchParameters_ThenReturnHistoryItemWithLatestVersion() {
+        UUID itemId = UUID.randomUUID();
+        IHistoryMetaItem historyItem = new HistoryMetaItem(
+            itemId.toString(),
+            "TestItem1",
+            "1.0.1",
+            "IID",
+            "User1",
+            "Comment after update",
+            null,
+            null,
+            false,
+            true,
+            false
+        );
+        SclFileType searchFileType = SclFileType.IID;
+        when(compasSclDataRepository.listHistory(searchFileType, "TestItem1", "User1", null, null)).thenReturn(List.of(historyItem));
+        List<IHistoryMetaItem> items = compasSclDataService.listHistory(searchFileType, "TestItem1", "User1", null, null);
+
+        verify(compasSclDataRepository).listHistory(searchFileType, "TestItem1", "User1", null, null);
+        assertEquals(1, items.size());
+    }
+
+    @Test
+    void listHistoryVersionsByUUID_WhenCalledWithId_ThenReturnHistoryItems() {
+        UUID itemId = UUID.randomUUID();
+        IHistoryMetaItem historyItem = new HistoryMetaItem(
+            itemId.toString(),
+            "TestItem1",
+            "1.0.0",
+            "IID",
+            "User1",
+            null,
+            null,
+            null,
+            false,
+            true,
+            false
+        );
+        IHistoryMetaItem historyItem1 = new HistoryMetaItem(
+            itemId.toString(),
+            "TestItem1",
+            "1.0.1",
+            "IID",
+            "User1",
+            "Comment after update",
+            null,
+            OffsetDateTime.now(),
+            false,
+            true,
+            false
+        );
+        when(compasSclDataRepository.listHistoryVersionsByUUID(itemId)).thenReturn(List.of(historyItem, historyItem1));
+        List<IHistoryMetaItem> items = compasSclDataService.listHistoryVersionsByUUID(itemId);
+
+        verify(compasSclDataRepository).listHistoryVersionsByUUID(itemId);
+        assertEquals(2, items.size());
+    }
+
+    @Test
+    void findLocationByUUID_WhenCalledWithId_ThenReturnLocation() {
+        UUID locationId = UUID.randomUUID();
+        ILocationMetaItem expectedLocation = new LocationMetaItem(
+            locationId.toString(),
+            "locationKey",
+            "locationName",
+            "some description",
+            0
+        );
+        when(compasSclDataRepository.findLocationByUUID(locationId)).thenReturn(expectedLocation);
+
+        ILocationMetaItem actualLocation =  compasSclDataService.findLocationByUUID(locationId);
+
+        verify(compasSclDataRepository).findLocationByUUID(locationId);
+        assertEquals(expectedLocation, actualLocation);
+    }
+
+    @Test
+    void listLocations_WhenCalledWithPageAndPageSize_ThenReturnLocations() {
+        ILocationMetaItem location1 = new LocationMetaItem(UUID.randomUUID().toString(), "locationKey1", "locationName1", "", 0);
+        ILocationMetaItem location2 = new LocationMetaItem(UUID.randomUUID().toString(), "locationKey2", "locationName2", "", 0);
+        ILocationMetaItem location3 = new LocationMetaItem(UUID.randomUUID().toString(), "locationKey3", "locationName3", "", 0);
+
+        List<ILocationMetaItem> expectedLocations = List.of(location1, location2, location3);
+        when(compasSclDataRepository.listLocations(0, 25)).thenReturn(expectedLocations);
+
+        List<ILocationMetaItem> actualLocations = compasSclDataService.listLocations(0, 25);
+
+        verify(compasSclDataRepository).listLocations(0, 25);
+        assertEquals(expectedLocations.size(), actualLocations.size());
+    }
+
+    @Test
+    void createLocation_WhenCalled_ThenReturnCreatedLocation() {
+        ILocationMetaItem expectedLocation = new LocationMetaItem(UUID.randomUUID().toString(), "locationKey", "locationName", null, 0);
+        when(compasSclDataRepository.createLocation("locationKey", "locationName", null)).thenReturn(expectedLocation);
+        when(compasSclDataRepository.hasDuplicateLocationValues("locationKey", "locationName")).thenReturn(false);
+
+        UniAssertSubscriber<ILocationMetaItem> result = compasSclDataService.createLocation("locationKey", "locationName", null).subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        verify(compasSclDataRepository, times(1)).createLocation(any(), any(), any());
+        verify(compasSclDataRepository, times(1)).addLocationTags(any());
+        assertEquals(expectedLocation, result.getItem());
+    }
+
+    @Test
+    void deleteLocation_WhenCalled_ThenLocationIsDeleted() {
+        UUID locationId = UUID.randomUUID();
+        ILocationMetaItem locationToRemove = new LocationMetaItem(locationId.toString(), "locationKey", "locationName", null, 0);
+        when(compasSclDataRepository.findLocationByUUID(locationId)).thenReturn(locationToRemove);
+
+        compasSclDataService.deleteLocation(locationId);
+
+        verify(compasSclDataRepository).deleteLocationTags(locationToRemove);
+        verify(compasSclDataRepository).deleteLocation(locationId);
+    }
+
+    @Test
+    void deleteLocation_WhenResourceIsAssigned_ThenExceptionIsThrown() {
+        UUID locationId = UUID.randomUUID();
+        ILocationMetaItem locationToRemove = new LocationMetaItem(locationId.toString(), "locationKey", "locationName", null, 1);
+        when(compasSclDataRepository.findLocationByUUID(locationId)).thenReturn(locationToRemove);
+
+        assertThrows(CompasSclDataServiceException.class, () -> compasSclDataService.deleteLocation(locationId));
+
+        verify(compasSclDataRepository, times(1)).findLocationByUUID(locationId);
+        verify(compasSclDataRepository, times(0)).deleteLocationTags(locationToRemove);
+        verify(compasSclDataRepository, times(0)).deleteLocation(locationId);
+    }
+
+    @Test
+    void updateLocation_WhenCalled_ThenLocationIsUpdated() {
+        UUID locationId = UUID.randomUUID();
+        ILocationMetaItem expectedLocation = new LocationMetaItem(locationId.toString(), "locationKey", "locationName", "updatedDescription", 0);
+        when(compasSclDataRepository.updateLocation(locationId, "locationKey", "locationName", "updatedDescription")).thenReturn(expectedLocation);
+
+        ILocationMetaItem actualLocation = compasSclDataService.updateLocation(locationId, "locationKey", "locationName", "updatedDescription");
+
+        verify(compasSclDataRepository, times(1)).updateLocation(locationId, "locationKey", "locationName", "updatedDescription");
+        assertEquals(expectedLocation, actualLocation);
+    }
+
+    @Test
+    void assignResourceToLocation_WhenCalled_ThenLocationIsAssigned() {
+        UUID locationId = UUID.randomUUID();
+        UUID resourceId = UUID.randomUUID();
+        ILocationMetaItem locationItem = new LocationMetaItem(locationId.toString(), "locationKey", "locationName", null, 0);
+        HistoryMetaItem historyMetaItem = new HistoryMetaItem(
+            resourceId.toString(),
+            "sclDataName",
+            "1.0.0",
+            null,
+            "someUser",
+            "IID",
+            "locationName",
+            null,
+            true,
+            true,
+            false
+        );
+        when(compasSclDataRepository.findLocationByUUID(locationId)).thenReturn(locationItem);
+        when(compasSclDataRepository.listHistory(resourceId)).thenReturn(List.of(historyMetaItem));
+
+        compasSclDataService.assignResourceToLocation(locationId, resourceId);
+        verify(compasSclDataRepository, times(1)).assignResourceToLocation(locationId, resourceId);
+        verify(compasSclDataRepository, times(1)).listHistory(resourceId);
+    }
+
+    @Test
+    void assignResourceToLocation_WhenResourceHasLocationAssignedWithArchivedItems_ThenNewLocationIsAssignedAndArchivedItemsAreMoved() {
+        UUID resourceId = UUID.randomUUID();
+        UUID newLocationId = UUID.randomUUID();
+        ILocationMetaItem newLocationItem = new LocationMetaItem(newLocationId.toString(), "newLocationKey", "newLocationName", null, 0);
+        IHistoryMetaItem historyMetaItem = new HistoryMetaItem(
+            resourceId.toString(),
+            "sclDataName",
+            "1.0.0",
+            null,
+            "someUser",
+            "IID",
+            "locationName",
+            null,
+            true,
+            true,
+            false
+        );
+        when(compasSclDataRepository.findLocationByUUID(newLocationId)).thenReturn(newLocationItem);
+        when(compasSclDataRepository.listHistory(resourceId)).thenReturn(List.of(historyMetaItem));
+
+        compasSclDataService.assignResourceToLocation(newLocationId, resourceId);
+
+        verify(compasSclDataRepository, times(1)).assignResourceToLocation(newLocationId, resourceId);
+        verify(compasSclDataRepository, times(1)).assignResourceToLocation(newLocationId, resourceId);
+        verify(compasSclDataRepository, times(1)).assignResourceToLocation(newLocationId, resourceId);
+    }
+
+    @Test
+    void unassignResourcesFromLocation_WhenCalled_ThenLocationIsUnassigned() {
+        UUID locationId = UUID.randomUUID();
+        UUID resourceId = UUID.randomUUID();
+
+        ILocationMetaItem assignedLocation = new LocationMetaItem(locationId.toString(), "locationKey", "locationName", null, 1);
+        HistoryMetaItem historyMetaItem = new HistoryMetaItem(
+            resourceId.toString(),
+            "sclDataName",
+            "1.0.0",
+            null,
+            "someUser",
+            "IID",
+            "locationName",
+            null,
+            true,
+            true,
+            false
+        );
+
+        when(compasSclDataRepository.listHistory(resourceId)).thenReturn(List.of(historyMetaItem));
+        when(compasSclDataRepository.findLocationByUUID(locationId)).thenReturn(assignedLocation);
+
+        compasSclDataService.unassignResourceFromLocation(locationId, resourceId);
+
+        verify(compasSclDataRepository, times(1)).findLocationByUUID(locationId);
+        verify(compasSclDataRepository, times(1)).listHistory(resourceId);
+        verify(compasSclDataRepository, times(1)).unassignResourceFromLocation(locationId, resourceId);
+    }
+
+    @Test
+    void unassignResourcesFromLocation_WhenLocationNotFound_ThenExceptionIsThrown() {
+        UUID locationId = UUID.randomUUID();
+        UUID resourceId = UUID.randomUUID();
+
+        when(compasSclDataRepository.findLocationByUUID(locationId)).thenThrow(new CompasNoDataFoundException(String.format("Unable to find Location with id %s.", locationId)));
+
+        assertThrows(CompasNoDataFoundException.class, () -> compasSclDataService.unassignResourceFromLocation(locationId, resourceId));
+
+        verify(compasSclDataRepository, times(1)).findLocationByUUID(locationId);
+        verify(compasSclDataRepository, times(0)).unassignResourceFromLocation(locationId, resourceId);
+        verify(compasSclDataRepository, times(0)).searchArchivedResource(any(), any(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void archiveResource_WhenCalled_ThenResourceIsArchived() {
+        UUID resourceId = UUID.randomUUID();
+        UUID locationId = UUID.randomUUID();
+        String version = "1.0.0";
+        String author = "someUser";
+        String approver = "someOtherUser";
+        String contentType = "application/pdf";
+        String filename = "test.pdf";
+        File file = new File("test.pdf");
+        try {
+            file.createNewFile();
+            when(compasSclDataRepository.findLocationByUUID(locationId)).thenReturn(
+                new LocationMetaItem(
+                    locationId.toString(),
+                    "locationKey",
+                    "locationName",
+                    null,
+                    0
+                )
+            );
+            when(compasSclDataRepository.listHistoryVersionsByUUID(resourceId)).thenReturn(
+                List.of(
+                    new HistoryMetaItem(
+                        resourceId.toString(),
+                        "someName",
+                        version,
+                        null,
+                        author,
+                        null,
+                        locationId.toString(),
+                        OffsetDateTime.now(),
+                        false,
+                        true,
+                        false
+                    )
+                )
+            );
+            when(compasSclDataRepository.archiveResource(resourceId, new Version(version), author, approver, contentType, filename))
+                .thenReturn(
+                    new ArchivedSclResourceMetaItem(
+                        UUID.randomUUID().toString(),
+                        "someName",
+                        version,
+                        author,
+                        approver,
+                        null,
+                        contentType,
+                        locationId.toString(),
+                        List.of(),
+                        null,
+                        OffsetDateTime.now(),
+                        null,
+                        null
+                    )
+                );
+            LocationMetaItem locationMetaItem = new LocationMetaItem(
+                locationId.toString(),
+                "locationKey",
+                "locationName",
+                null,
+                1
+            );
+            when(compasSclDataRepository.findLocationByUUID(locationId))
+                .thenReturn(
+                    locationMetaItem
+                );
+            when(compasSclDataArchivingServiceImpl.createLocation(locationMetaItem))
+                .thenReturn(Uni.createFrom()
+                    .item(new LocationMetaData()
+                        .uuid(locationId)
+                        .name("locationName")
+                        .key("locationKey")
+                        .description(null)
+                        .assignedResources(1)
+                ));
+            when(compasSclDataArchivingServiceImpl.archiveData(any(), any(), any(), any(), any())).thenReturn(Uni.createFrom().item(
+                new ResourceMetaData(
+                    TypeEnum.RESOURCE,
+                    UUID.randomUUID(),
+                    locationId.toString(),
+                    List.of()
+                )
+            ));
+
+            UniAssertSubscriber<IAbstractArchivedResourceMetaItem> result = compasSclDataService.archiveResource(resourceId, version, author, approver, contentType, filename, file).subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            result.assertCompleted();
+            verify(compasSclDataRepository, times(1)).archiveResource(resourceId, new Version(version), author, approver, contentType, filename);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            file.delete();
+        }
+    }
+
+    @Test
+    void archiveResource_WhenFileIsNull_ThenFileIsNotWritten() {
+        UUID resourceId = UUID.randomUUID();
+        String version = "1.0.0";
+        String author = "someUser";
+        String approver = "someOtherUser";
+        String contentType = "application/pdf";
+        String filename = "test.pdf";
+        IHistoryMetaItem historyMetaItem = new HistoryMetaItem(
+            resourceId.toString(),
+            "sclDataName",
+            version,
+            null,
+            "someUser",
+            "IID",
+            "locationName",
+            null,
+            true,
+            true,
+            false
+        );
+
+        UUID locationId = UUID.randomUUID();
+        when(compasSclDataRepository.listHistoryVersionsByUUID(resourceId)).thenReturn(List.of(historyMetaItem));
+        LocationMetaItem locationMetaItem = new LocationMetaItem(
+            locationId.toString(),
+            "someKey",
+            "someName",
+            "someDescription",
+            1
+        );
+        when(compasSclDataRepository.findLocationByUUID(UUID.fromString(locationId.toString()))).thenReturn(
+            locationMetaItem
+        );
+        when(compasSclDataRepository.archiveResource(resourceId, new Version(version), author, approver, contentType, filename))
+            .thenReturn(
+                new ArchivedSclResourceMetaItem(
+                    UUID.randomUUID().toString(),
+                    "someName",
+                    version,
+                    author,
+                    approver,
+                    null,
+                    contentType,
+                    locationId.toString(),
+                    List.of(),
+                    null,
+                    OffsetDateTime.now(),
+                    null,
+                    null
+                )
+            );
+        when(compasSclDataArchivingServiceImpl.archiveData(any(), any(), any(), any(), any())).thenReturn(Uni.createFrom().item(
+            new ResourceMetaData(
+                TypeEnum.RESOURCE,
+                UUID.randomUUID(),
+                locationId.toString(),
+                List.of()
+            )
+        ));
+        when(compasSclDataArchivingServiceImpl.createLocation(locationMetaItem))
+            .thenReturn(Uni.createFrom()
+                .item(new LocationMetaData()
+                    .uuid(locationId)
+                    .name("locationName")
+                    .key("locationKey")
+                    .description("someDescription")
+                    .assignedResources(1)
+                ));
+
+        UniAssertSubscriber<IAbstractArchivedResourceMetaItem> cut = compasSclDataService.archiveResource(resourceId, version, author, approver, contentType, filename, null).subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        cut.assertCompleted();
+        verify(compasSclDataRepository, times(1)).archiveResource(resourceId, new Version(version), author, approver, contentType, filename);
+        verify(compasSclDataArchivingService, times(0)).archiveSclData(any(), any(), any(), any());
+    }
+
+    @Test
+    void archiveSclResource_WhenCalled_ThenResourceIsArchived() {
+        UUID resourceId = UUID.randomUUID();
+        UUID locationId = UUID.randomUUID();
+        String version = "1.0.0";
+        String approver = "someOtherUser";
+        ArchivedSclResourceMetaItem archivedResource = new ArchivedSclResourceMetaItem(
+            UUID.randomUUID().toString(),
+            "someName",
+            version,
+            "someAuthor",
+            approver,
+            "IID",
+            null,
+            locationId.toString(),
+            List.of(),
+            null,
+            OffsetDateTime.now(),
+            null,
+            null
+        );
+        String sclData = "someData";
+
+        when(compasSclDataRepository.archiveSclResource(resourceId, new Version(version), approver)).thenReturn(archivedResource);
+        when(compasSclDataRepository.findByUUID(resourceId, new Version(version))).thenReturn(sclData);
+        LocationMetaItem locationMetaItem = new LocationMetaItem(
+            locationId.toString(),
+            "locationKey",
+            "locationName",
+            null,
+            0
+        );
+        when(compasSclDataRepository.findLocationByUUID(locationId)).thenReturn(
+            locationMetaItem
+        );
+        when(compasSclDataArchivingServiceImpl.archiveSclData(any(), any(), any(), any())).thenReturn(Uni.createFrom().item(
+            new ResourceMetaData(
+                TypeEnum.RESOURCE,
+                UUID.randomUUID(),
+                locationId.toString(),
+                List.of()
+            )
+        ));
+        when(compasSclDataArchivingServiceImpl.createLocation(locationMetaItem))
+            .thenReturn(Uni.createFrom()
+                .item(new LocationMetaData()
+                    .uuid(locationId)
+                    .name("locationName")
+                    .key("locationKey")
+                    .description(null)
+                    .assignedResources(0)
+                ));
+
+        UniAssertSubscriber<IAbstractArchivedResourceMetaItem> result = compasSclDataService.archiveSclResource(resourceId, new Version(version), approver).subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        result.assertCompleted();
+        verify(compasSclDataRepository, times(1)).archiveSclResource(resourceId, new Version(version), approver);
+        verify(compasSclDataRepository, times(1)).findByUUID(resourceId, new Version(version));
+        verify(compasSclDataArchivingServiceImpl, times(1)).archiveSclData(resourceId, archivedResource, "locationKey", sclData);
+    }
+
+    @Test
+    void getArchivedResourceHistory_whenCalled_ThenResourceHistoryIsReturned() {
+        UUID archivedResourceId = UUID.randomUUID();
+        IArchivedResourceVersion archivedResourceVersion = new ArchivedResourceVersion(
+            archivedResourceId.toString(),
+            "archivedResourceName",
+            "1.0.0",
+            "someLocation",
+            "some note",
+            "someAuthor",
+            "someApprover",
+            "someType",
+            null,
+            null,
+            List.of(),
+            null,
+            OffsetDateTime.now(),
+            null,
+            true
+        );
+        IArchivedResourcesHistoryMetaItem archivedResourceHistory = new ArchivedResourcesHistoryMetaItem(List.of(archivedResourceVersion));
+
+        when(compasSclDataRepository.searchArchivedResourceHistory(archivedResourceId)).thenReturn(archivedResourceHistory);
+
+        IArchivedResourcesHistoryMetaItem actualMetaItems = compasSclDataService.getArchivedResourceHistory(archivedResourceId);
+
+        assertFalse(actualMetaItems.getVersions().isEmpty());
+        verify(compasSclDataRepository, times(1)).searchArchivedResourceHistory(archivedResourceId);
+    }
+
+    @Test
+    void searchArchivedResources_whenCalled_ThenResourcesAreReturned() {
+        UUID archivedResourceId = UUID.randomUUID();
+        IAbstractArchivedResourceMetaItem archivedResourceVersion = new ArchivedSclResourceMetaItem(
+            archivedResourceId.toString(),
+            "archivedResourceName",
+            "1.0.0",
+            "someAuthor",
+            "someApprover",
+            "someType",
+            null,
+            "someLocation",
+            List.of(),
+            null,
+            OffsetDateTime.now(),
+            null,
+            null
+        );
+        IArchivedResourcesMetaItem archivedResources = new ArchivedResourcesMetaItem(List.of(archivedResourceVersion));
+        when(compasSclDataRepository.searchArchivedResource(archivedResourceId)).thenReturn(archivedResources);
+
+        IArchivedResourcesMetaItem actualMetaItems = compasSclDataService.searchArchivedResources(archivedResourceId);
+
+        assertFalse(actualMetaItems.getResources().isEmpty());
+        verify(compasSclDataRepository, times(1)).searchArchivedResource(archivedResourceId);
+    }
+
+    @Test
+    void searchArchivedResources_whenCalledWithMultipleParameters_ThenResourcesAreReturned() {
+        UUID archivedResourceId = UUID.randomUUID();
+        UUID archivedResourceId1 = UUID.randomUUID();
+        IAbstractArchivedResourceMetaItem archivedResourceVersion = new ArchivedSclResourceMetaItem(
+            archivedResourceId.toString(),
+            "archivedResourceName",
+            "1.0.0",
+            "someAuthor",
+            "someApprover",
+            "someType",
+            null,
+            "someLocation",
+            List.of(),
+            null,
+            OffsetDateTime.now(),
+            null,
+            null
+        );
+        IAbstractArchivedResourceMetaItem archivedResourceVersion1 = new ArchivedReferencedResourceMetaItem(
+            archivedResourceId1.toString(),
+            "test.pdf",
+            "1.0.0",
+            "someAuthor",
+            "someApprover",
+            "someType",
+            "application/pdf",
+            "someLocation",
+            List.of(),
+            null,
+            OffsetDateTime.now(),
+            null
+        );
+        IArchivedResourcesMetaItem archivedResources1 = new ArchivedResourcesMetaItem(List.of(archivedResourceVersion, archivedResourceVersion1));
+
+        when(compasSclDataRepository.searchArchivedResource("someLocation", null, "someApprover", null, null, null, null, null))
+            .thenReturn(archivedResources1);
+
+        IArchivedResourcesMetaItem actualMetaItem = compasSclDataService.searchArchivedResources("someLocation", null, "someApprover", null, null, null, null, null);
+
+        assertFalse(actualMetaItem.getResources().isEmpty());
+        verify(compasSclDataRepository, times(1)).searchArchivedResource("someLocation", null, "someApprover", null, null, null, null, null);
+    }
+
+    @Test
+    void searchArchivedResources_whenCalledWithWrongSclFileTypeParameter_ThenThrowsException() {
+        assertThrows(CompasSclDataServiceException.class, () -> compasSclDataService.searchArchivedResources("someLocation", null, "someApprover", "asdf", null, null, null, null));
+        verify(compasSclDataRepository, times(0)).searchArchivedResource("someLocation", null, "someApprover", "asdf", null, null, null, null);
+    }
+
+    @Test
+    void searchArchivedResources_whenCalledValidSclFileTypeParameter_ThenResourcesAreReturned() {
+        UUID archivedResourceId = UUID.randomUUID();
+        IAbstractArchivedResourceMetaItem archivedResourceVersion = new ArchivedSclResourceMetaItem(
+            archivedResourceId.toString(),
+            "archivedResourceName",
+            "1.0.0",
+            "someAuthor",
+            "someApprover",
+            "IID",
+            null,
+            "someLocation",
+            List.of(),
+            null,
+            OffsetDateTime.now(),
+            null,
+            null
+        );
+        IArchivedResourcesMetaItem archivedResources1 = new ArchivedResourcesMetaItem(List.of(archivedResourceVersion));
+
+        when(compasSclDataRepository.searchArchivedResource("someLocation", null, "someApprover", "IID", null, null, null, null))
+            .thenReturn(archivedResources1);
+
+        IArchivedResourcesMetaItem actualMetaItem = compasSclDataService.searchArchivedResources("someLocation", null, "someApprover", "IID", null, null, null, null);
+
+        assertFalse(actualMetaItem.getResources().isEmpty());
+        verify(compasSclDataRepository, times(1)).searchArchivedResource("someLocation", null, "someApprover", "IID", null, null, null, null);
     }
 
     private Element createLabelElement(String validLabel) {

@@ -3,15 +3,13 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.util;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -146,12 +144,12 @@ public class SclElementProcessor {
      *
      * @param header      The Header Element from SCL under which the History Element can be found/added.
      * @param who         Teh name of the user that made the change (who).
+     * @param when        The date of the change
      * @param fullmessage The message that will be set (what).
      * @param version     The version to be set (version).
      * @return The Hitem created and added to the History Element.
      */
-    public Element addHistoryItem(Element header, String who, String fullmessage, Version version) {
-        var formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+    public Element addHistoryItem(Element header, String who, String when, String fullmessage, Version version) {
         var document = header.getOwnerDocument();
 
         var history = getChildNodesByName(header, SCL_HISTORY_ELEMENT_NAME, SCL_NS_URI).stream().findFirst()
@@ -164,7 +162,7 @@ public class SclElementProcessor {
         Element hItem = document.createElementNS(SCL_NS_URI, SCL_HITEM_ELEMENT_NAME);
         hItem.setAttribute(SCL_VERSION_ATTR, version.toString());
         hItem.setAttribute(SCL_REVISION_ATTR, "");
-        hItem.setAttribute(SCL_WHEN_ATTR, formatter.format(new Date()));
+        hItem.setAttribute(SCL_WHEN_ATTR, when);
         hItem.setAttribute(SCL_WHO_ATTR, who);
         hItem.setAttribute(SCL_WHAT_ATTR, fullmessage);
         history.appendChild(hItem);

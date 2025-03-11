@@ -65,6 +65,10 @@ SPDX-License-Identifier: Apache-2.0
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-websockets</artifactId>
         </dependency>
 
@@ -192,6 +196,79 @@ SPDX-License-Identifier: Apache-2.0
             </plugin>
 
             <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>7.8.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-history-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/openapi/history-api.yaml</inputSpec>
+                            <generatorName>jaxrs-spec</generatorName>
+                            <output>${project.build.directory}/generated-sources/openapi</output>
+                            <library>quarkus</library>
+                            <apiPackage>org.lfenergy.compas.scl.data.rest.api.scl</apiPackage>
+                            <modelPackage>org.lfenergy.compas.scl.data.rest.api.scl.model</modelPackage>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <configOptions>
+                                <useTags>true</useTags>
+                                <interfaceOnly>true</interfaceOnly>
+                                <dateLibrary>java8</dateLibrary>
+                                <supportAsync>true</supportAsync>
+                                <useMutiny>true</useMutiny>
+                                <useJakartaEe>true</useJakartaEe>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+<!--                    <execution> &lt;!&ndash; note: disabled because bug in maven codegen doesn't allow custom properties&ndash;&gt;-->
+<!--                        <id>generate-archiving-api</id>-->
+<!--                        <goals>-->
+<!--                            <goal>generate</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <inputSpec>${project.basedir}/src/main/openapi/archiving-api.yaml</inputSpec>-->
+<!--                            <generatorName>jaxrs-spec</generatorName>-->
+<!--                            <output>${project.build.directory}/generated-sources/openapi</output>-->
+<!--                            <library>quarkus</library>-->
+<!--                            <apiPackage>org.lfenergy.compas.scl.data.rest.api.locations</apiPackage>-->
+<!--                            <modelPackage>org.lfenergy.compas.scl.data.rest.api.locations.model</modelPackage>-->
+<!--                            <generateSupportingFiles>false</generateSupportingFiles>-->
+<!--                            <configOptions>-->
+<!--                                <useTags>true</useTags>-->
+<!--                                <interfaceOnly>true</interfaceOnly>-->
+<!--                                <dateLibrary>java8</dateLibrary>-->
+<!--                                <supportAsync>true</supportAsync>-->
+<!--                                <useMutiny>true</useMutiny>-->
+<!--                                <useJakartaEe>true</useJakartaEe>-->
+<!--                            </configOptions>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/openapi/src/gen/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
@@ -201,6 +278,7 @@ SPDX-License-Identifier: Apache-2.0
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 
@@ -242,7 +320,6 @@ SPDX-License-Identifier: Apache-2.0
 
         <profile>
             <id>native-image</id>
-
             <properties>
                 <!-- Make a Docker Image, so the integration tests will be executed against the container -->
                 <quarkus.container-image.build>true</quarkus.container-image.build>
@@ -267,7 +344,6 @@ SPDX-License-Identifier: Apache-2.0
 
         <profile>
             <id>sonar</id>
-
             <properties>
                 <sonar.coverage.jacoco.xmlReportPaths>
                     target/jacoco-report/jacoco.xml,
@@ -278,7 +354,6 @@ SPDX-License-Identifier: Apache-2.0
 
         <profile>
             <id>release</id>
-
             <properties>
                 <!-- Make a Docker Image from the component -->
                 <quarkus.container-image.build>true</quarkus.container-image.build>

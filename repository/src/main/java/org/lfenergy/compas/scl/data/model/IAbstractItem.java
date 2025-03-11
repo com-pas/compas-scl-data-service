@@ -8,4 +8,7 @@ public interface IAbstractItem {
     String getId();
     String getName();
     String getVersion();
+    default String getLocationId() {
+        return null;
+    }
 }
