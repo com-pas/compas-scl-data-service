@@ -26,6 +26,16 @@ There is currently one database implementations available.
 > **Note:** When switching between implementation it's a good practise to first execute a maven clean to remove
 > old dependencies from the target directory in the app module.
 
+## Development
+
+Run application with local postgresql database in development mode:
+```bash
+  docker run --rm -d --name compas-db -p 5432:5432 -e POSTGRES_USER=compas \
+      -e POSTGRES_PASSWORD=compas -e POSTGRES_DB=compas postgres:14 -d
+
+  mvn -DskipTests=true -Dquarkus.profile=dev-postgresql,local package io.quarkus:quarkus-maven-plugin::dev
+```
+
 ## Common Environment variables
 
 Below environment variable(s) can be used to configure which claims and information are used to fill the UserInfo
@@ -86,4 +96,3 @@ configured as needed.
 - STD_DELETE
 - STD_READ
 - STD_UPDATE
-

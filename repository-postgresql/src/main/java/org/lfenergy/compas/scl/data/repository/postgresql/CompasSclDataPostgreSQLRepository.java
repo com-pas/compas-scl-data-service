@@ -10,8 +10,6 @@ import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import javax.sql.DataSource;
 import jakarta.transaction.Transactional;
 import java.sql.Array;
@@ -27,7 +25,6 @@ import static jakarta.transaction.Transactional.TxType.REQUIRED;
 import static jakarta.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
 
-@ApplicationScoped
 public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepository {
     private static final String ID_FIELD = "id";
     private static final String MAJOR_VERSION_FIELD = "major_version";
@@ -39,9 +36,8 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private static final String HITEM_WHEN_FIELD = "hitem_when";
     private static final String HITEM_WHAT_FIELD = "hitem_what";
 
-    private final DataSource dataSource;
+    protected final DataSource dataSource;
 
-    @Inject
     public CompasSclDataPostgreSQLRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -56,6 +52,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                   from (select distinct on (scl_file.id) *
                           from scl_file
                          where scl_file.type = ?
+                         AND scl_file.is_deleted = false
                          order by scl_file.id
                                 , scl_file.major_version desc
                                 , scl_file.minor_version desc
@@ -115,6 +112,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                        and scl_data.patch_version = scl_file.patch_version
                  where scl_file.id   = ?
                  and   scl_file.type = ?
+                 and   scl_file.is_deleted = false
                  order by scl_file.major_version
                         , scl_file.minor_version
                         , scl_file.patch_version
@@ -162,6 +160,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                  and   scl_file.major_version = ?
                  and   scl_file.minor_version = ?
                  and   scl_file.patch_version = ?
+                 and   scl_file.is_deleted = false
                 """;
 
         try (var connection = dataSource.getConnection();
@@ -191,6 +190,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 select distinct on (scl_file.id) scl_file.name
                   from scl_file
                  where scl_file.type = ?
+                 and scl_file.is_deleted = false
                  order by scl_file.id
                         , scl_file.major_version desc
                         , scl_file.minor_version desc
@@ -221,6 +221,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                   from scl_file
                  where scl_file.id   = ?
                  and   scl_file.type = ?
+                 and   scl_file.is_deleted = false
                  order by scl_file.major_version desc, scl_file.minor_version desc, scl_file.patch_version desc
                 """;
 
