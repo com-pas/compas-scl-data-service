@@ -255,4 +255,4 @@ insert into scl_file(
 		</EnumType>
 	</DataTypeTemplates>
 </SCL>')
-        on duplicate key update id=id;
+        on conflict (id, major_version, minor_version, patch_version) do nothing;
