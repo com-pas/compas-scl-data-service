@@ -15,7 +15,7 @@ insert into scl_file(
         0,
         0,
         'SSD',
-        'LNodeTypeLibrary',
+        'LNode-Type-Library',
         'system',
         '<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
 	<Private type="compas_scl">
