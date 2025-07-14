@@ -254,4 +254,5 @@ insert into scl_file(
 			<EnumVal ord="3">both</EnumVal>
 		</EnumType>
 	</DataTypeTemplates>
-</SCL>');
+</SCL>')
+        on duplicate key update id=id;
