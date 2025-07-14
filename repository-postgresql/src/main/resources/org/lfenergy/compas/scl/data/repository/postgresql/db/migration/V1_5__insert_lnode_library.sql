@@ -17,12 +17,17 @@ insert into scl_file(
         'SSD',
         'LNodeTypeLibrary',
         'system',
-        '<?xml version="1.0" encoding="UTF-8"?>
-<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
+        '<SCL xmlns="http://www.iec.ch/61850/2003/SCL" version="2007" revision="B" release="4" xmlns:compas="https://www.lfenergy.org/compas/extension/v1">
 	<Private type="compas_scl">
 		<compas:Labels/>
+		<compas:SclName>LNode-Type-Library</compas:SclName>
+		<compas:SclFileType>SSD</compas:SclFileType>
 	</Private>
-	<Header id="LNodeTypeBasic"/>
+	<Header id="fc55c46d-c109-4ccd-bf66-9f1d0e135689" version="1.0.0">
+		<History>
+			<Hitem revision="" version="1.0.0" what="SCL created" when="2025-07-14T12:31:58Z" who="system"/>
+		</History>
+	</Header>
 	<DataTypeTemplates>
 		<LNodeType lnClass="TVTR" desc="Voltage Transformer" id="TVTR$oscd$_a0be960c8dfd3708">
 			<DO name="Beh" type="Beh$oscd$_c6ed035c8137b35a"/>
