@@ -28,13 +28,7 @@ There is currently one database implementations available.
 
 ## Development
 
-Run application with local postgresql database in development mode:
-```bash
-  docker run --rm -d --name compas-db -p 5432:5432 -e POSTGRES_USER=compas \
-      -e POSTGRES_PASSWORD=compas -e POSTGRES_DB=compas postgres:14 -d
-
-  mvn -DskipTests=true -Dquarkus.profile=dev-postgresql,local package io.quarkus:quarkus-maven-plugin::dev
-```
+See [development](doc/development.md) documentation.
 
 ## Common Environment variables
 

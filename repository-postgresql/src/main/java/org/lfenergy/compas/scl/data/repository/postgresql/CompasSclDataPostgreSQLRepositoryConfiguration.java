@@ -4,27 +4,30 @@
 
 package org.lfenergy.compas.scl.data.repository.postgresql;
 
-import io.quarkus.arc.DefaultBean;
-import io.quarkus.arc.lookup.LookupIfProperty;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 
 import javax.sql.DataSource;
 
 public class CompasSclDataPostgreSQLRepositoryConfiguration {
 
-    @Produces
-    @ApplicationScoped
-    @LookupIfProperty(name = "compas.scl-data-service.features.soft-delete-enabled", stringValue = "true")
-    CompasSclDataRepository softDeleteCompasSclDataPostgreSQLRepository(DataSource dataSource) {
-        return new SoftDeleteCompasSclDataPostgreSQLRepository(dataSource);
-    }
+    private static final Logger LOGGER = LogManager.getLogger(CompasSclDataPostgreSQLRepositoryConfiguration.class);
+
+    @ConfigProperty(name = "compas.scl-data-service.features.soft-delete-enabled", defaultValue = "false")
+    private boolean softDeleteEnabled;
 
     @Produces
     @ApplicationScoped
-    @DefaultBean
-    CompasSclDataRepository defaultCompasSclDataPostgreSQLRepository(DataSource dataSource) {
-        return new CompasSclDataPostgreSQLRepository(dataSource);
+    CompasSclDataRepository softDeleteCompasSclDataPostgreSQLRepository(DataSource dataSource) {
+        if (!softDeleteEnabled) {
+            LOGGER.warn("Soft delete feature is disabled, using default repository.");
+            return new CompasSclDataPostgreSQLRepository(dataSource);
+        }
+        LOGGER.info("Soft delete feature is enabled. Using SoftDeleteCompasSclDataPostgreSQLRepository.");
+        return new SoftDeleteCompasSclDataPostgreSQLRepository(dataSource);
     }
 }

@@ -27,7 +27,7 @@ public class SoftDeleteCompasSclDataPostgreSQLRepository extends CompasSclDataPo
     public void delete(SclFileType type, UUID id) {
         var sql = """
                 UPDATE scl_file
-                 SET scl_file.is_deleted = true
+                 SET is_deleted = true
                  where scl_file.id   = ?
                  and   scl_file.type = ?
                 """;
@@ -47,7 +47,7 @@ public class SoftDeleteCompasSclDataPostgreSQLRepository extends CompasSclDataPo
     public void delete(SclFileType type, UUID id, Version version) {
         var sql = """
                 UPDATE scl_file
-                 SET scl_file.is_deleted = true
+                 SET is_deleted = true
                  where scl_file.id   = ?
                  and   scl_file.type = ?
                  and   scl_file.major_version = ?
