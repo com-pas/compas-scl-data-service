@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 BearingPoint GmbH
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Development
 
 Run application with local postgresql database in development mode:
