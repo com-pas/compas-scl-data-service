@@ -8,6 +8,7 @@ import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,16 +60,35 @@ public abstract class AbstractCompasSclDataRepositoryTest {
     }
 
     @Test
-    void deleteVersion_WhenCalledWithExistingUUID_ThenSpecificVersionIsDeleted() {
-        var uuid = UUID.randomUUID();
+    void delete_AllVersions_SoftDeleted() {
+        UUID uuid = UUID.randomUUID();
+        Version version1 = new Version(1, 0, 0);
+        Version version2 = new Version(2, 0, 0);
 
-        getRepository().delete(TYPE, uuid);
+        var repository = getRepository();
+        repository.create(TYPE, uuid, "TestName", "<SCL></SCL>", version1, "tester", List.of("label"));
+        repository.create(TYPE, uuid, "TestName", "<SCL></SCL>", version2, "tester", List.of("label"));
+
+        repository.delete(TYPE, uuid);
+
+        var items = repository.listVersionsByUUID(TYPE, uuid);
+        assertEquals(0, items.size(), "All versions should be soft deleted");
     }
 
     @Test
-    void deleteVersion_WhenCalledWithExistingUUIDAndVersion_ThenSpecificVersionIsDeleted() {
-        var uuid = UUID.randomUUID();
+    void delete_SpecificVersion_Deleted() {
+        UUID uuid = UUID.randomUUID();
+        Version version1 = new Version(1, 0, 0);
+        Version version2 = new Version(2, 0, 0);
 
-        getRepository().delete(TYPE, uuid, new Version(1, 3, 2));
+        var repository = getRepository();
+        repository.create(TYPE, uuid, "TestName", "<SCL></SCL>", version1, "tester", List.of("label"));
+        repository.create(TYPE, uuid, "TestName", "<SCL></SCL>", version2, "tester", List.of("label"));
+
+        repository.delete(TYPE, uuid, version1);
+
+        var items = repository.listVersionsByUUID(TYPE, uuid);
+        assertEquals(1, items.size(), "Only one version should remain");
+        assertEquals(version2.toString(), items.get(0).getVersion(), "Remaining version should be version2");
     }
 }
