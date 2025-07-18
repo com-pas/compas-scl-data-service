@@ -33,3 +33,28 @@ The `<ACCESS_TOKEN>` should be replaced with a valid JWT token obtained from Key
     -H "Content-Type: application/x-www-form-urlencoded" \
     -d "client_id=scl-data-service&username=scl-data-editor&password=editor&grant_type=password"
 ```
+
+## Connecting to local database
+
+To connect to the local PostgreSQL database, you first need to start the PostgreSQL service using Docker Compose:
+```
+    cd app/src/test/resources/docker-compose.yml
+    docker-compose up postgresql
+```
+
+then enable the postgresql configuration by uncomment following lines in file `src/main/resources/application-local.properties`:
+```properties
+    quarkus.datasource.devservices.enabled = false
+    quarkus.datasource.db-kind             = postgresql
+    quarkus.datasource.jdbc.url            = jdbc:postgresql://${POSTGRESQL_HOST:localhost}:${POSTGRESQL_PORT:5432}/${POSTGRESQL_DB:compas}
+    quarkus.datasource.jdbc.max-size       = 16
+    quarkus.datasource.username            = ${POSTGRESQL_USERNAME:postgres}
+    quarkus.datasource.password            = ${POSTGRESQL_PASSWORD:postgres}
+```
+
+Start the application in development mode with the local profile:
+```bash
+    mvn -DskipTests=true -Dquarkus.profile=local package io.quarkus:quarkus-maven-plugin::dev
+```
+
+You can then verify the setup described above by using the same curl commands as mentioned earlier.
