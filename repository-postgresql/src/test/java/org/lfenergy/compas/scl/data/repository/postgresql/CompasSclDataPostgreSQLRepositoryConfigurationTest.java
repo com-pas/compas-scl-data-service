@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl.data.model.Version;
 
+import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -19,12 +20,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({MockitoExtension.class, PostgreSQLServerJUnitExtension.class})
 class CompasSclDataPostgreSQLRepositoryConfigurationTest {
-    private SoftDeleteCompasSclDataPostgreSQLRepository repository;
-    private static final String TYPE = "SCD";
+
+    private CompasSclDataRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new SoftDeleteCompasSclDataPostgreSQLRepository(PostgreSQLServerJUnitExtension.getDataSource());
+        CompasSclDataPostgreSQLRepositoryConfiguration configuration = new CompasSclDataPostgreSQLRepositoryConfiguration();
+        repository = configuration.softDeleteCompasSclDataPostgreSQLRepository(PostgreSQLServerJUnitExtension.getDataSource());
     }
 
     @Test
