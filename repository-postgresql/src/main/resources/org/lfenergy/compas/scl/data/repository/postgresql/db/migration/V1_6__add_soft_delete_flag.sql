@@ -11,4 +11,4 @@
 ALTER TABLE scl_file 
 ADD COLUMN is_deleted BOOLEAN DEFAULT false;
 
-comment on column scl_file.is_deleted is 'Flag is the SCL File is deleted.';
+comment on column scl_file.is_deleted is 'Flag indicating whether the SCL file is soft deleted.';
