@@ -24,6 +24,10 @@ SPDX-License-Identifier: Apache-2.0
             <groupId>org.lfenergy.compas.core</groupId>
             <artifactId>scl-extension</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-arc</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>jakarta.xml.bind</groupId>

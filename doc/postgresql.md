@@ -37,6 +37,7 @@ Table: scl_file
 | type          | varchar(3)   | True     | The type of SCL stored                                             |
 | name          | varchar(255) | True     | The name of the SCL File                                           |
 | scl_data      | text         | True     | The SCL XML Content                                                |
+| is_deleted    | boolean      | False    | Flag indicating whether the record is marked as deleted            |
 
 ## Development
 

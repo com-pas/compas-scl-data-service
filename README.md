@@ -26,6 +26,10 @@ There is currently one database implementations available.
 > **Note:** When switching between implementation it's a good practise to first execute a maven clean to remove
 > old dependencies from the target directory in the app module.
 
+## Development
+
+See [development](doc/development.md) documentation.
+
 ## Common Environment variables
 
 Below environment variable(s) can be used to configure which claims and information are used to fill the UserInfo
@@ -86,4 +90,3 @@ configured as needed.
 - STD_DELETE
 - STD_READ
 - STD_UPDATE
-
