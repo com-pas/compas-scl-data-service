@@ -38,6 +38,21 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     protected final DataSource dataSource;
 
+    protected static String DELETE_SCL_FILE_SQL = """
+        delete from scl_file
+         where scl_file.id   = ?
+         and   scl_file.type = ?
+        """;
+
+    protected static String DELETE_SCL_FILE_SQL_BY_VERSION = """
+        delete from scl_file
+         where scl_file.id   = ?
+         and   scl_file.type = ?
+         and   scl_file.major_version = ?
+         and   scl_file.minor_version = ?
+         and   scl_file.patch_version = ?
+        """;
+
     public CompasSclDataPostgreSQLRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -305,14 +320,9 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     @Transactional(REQUIRED)
     public void delete(SclFileType type, UUID id) {
-        var sql = """
-                delete from scl_file
-                 where scl_file.id   = ?
-                 and   scl_file.type = ?
-                """;
 
         try (var connection = dataSource.getConnection();
-             var stmt = connection.prepareStatement(sql)) {
+             var stmt = connection.prepareStatement(DELETE_SCL_FILE_SQL)) {
             stmt.setObject(1, id);
             stmt.setString(2, type.name());
             stmt.executeUpdate();
@@ -324,17 +334,9 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     @Transactional(REQUIRED)
     public void delete(SclFileType type, UUID id, Version version) {
-        var sql = """
-                delete from scl_file
-                 where scl_file.id   = ?
-                 and   scl_file.type = ?
-                 and   scl_file.major_version = ?
-                 and   scl_file.minor_version = ?
-                 and   scl_file.patch_version = ?
-                """;
 
         try (var connection = dataSource.getConnection();
-             var stmt = connection.prepareStatement(sql)) {
+             var stmt = connection.prepareStatement(DELETE_SCL_FILE_SQL_BY_VERSION)) {
             stmt.setObject(1, id);
             stmt.setString(2, type.name());
             stmt.setInt(3, version.getMajorVersion());
