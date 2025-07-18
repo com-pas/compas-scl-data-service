@@ -5,6 +5,7 @@ package org.lfenergy.compas.scl.data.repository;
 
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
+import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import java.util.UUID;
@@ -46,6 +47,7 @@ public abstract class AbstractCompasSclDataRepositoryTest {
                 () -> repository.findByUUID(TYPE, uuid));
         assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
     }
+
     @Test
     void findMetaInfoByUUID_WhenCalledWithUnknownUUID_ThenExceptionIsThrown() {
         var uuid = UUID.randomUUID();
@@ -56,4 +58,17 @@ public abstract class AbstractCompasSclDataRepositoryTest {
         assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
     }
 
+    @Test
+    void deleteVersion_WhenCalledWithExistingUUID_ThenSpecificVersionIsDeleted() {
+        var uuid = UUID.randomUUID();
+
+        getRepository().delete(TYPE, uuid);
+    }
+
+    @Test
+    void deleteVersion_WhenCalledWithExistingUUIDAndVersion_ThenSpecificVersionIsDeleted() {
+        var uuid = UUID.randomUUID();
+
+        getRepository().delete(TYPE, uuid, new Version(1, 3, 2));
+    }
 }
