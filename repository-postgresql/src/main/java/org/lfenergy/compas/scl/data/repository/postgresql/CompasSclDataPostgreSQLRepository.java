@@ -67,7 +67,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                   from (select distinct on (scl_file.id) *
                           from scl_file
                          where scl_file.type = ?
-                         AND scl_file.is_deleted = false
+                         and scl_file.is_deleted = false
                          order by scl_file.id
                                 , scl_file.major_version desc
                                 , scl_file.minor_version desc

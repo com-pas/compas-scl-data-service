@@ -9,8 +9,8 @@ import javax.sql.DataSource;
 public class SoftDeleteCompasSclDataPostgreSQLRepository extends CompasSclDataPostgreSQLRepository {
 
     private static final String SOFT_DELETE_SCL_FILE_SQL = """
-        UPDATE scl_file
-         SET is_deleted = true
+        update scl_file
+         set is_deleted = true
          where scl_file.id   = ?
          and   scl_file.type = ?
         """;
