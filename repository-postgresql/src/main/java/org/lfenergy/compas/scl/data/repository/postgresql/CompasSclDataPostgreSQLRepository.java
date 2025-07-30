@@ -10,8 +10,6 @@ import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import javax.sql.DataSource;
 import jakarta.transaction.Transactional;
 import java.sql.Array;
@@ -27,7 +25,6 @@ import static jakarta.transaction.Transactional.TxType.REQUIRED;
 import static jakarta.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
 
-@ApplicationScoped
 public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepository {
     private static final String ID_FIELD = "id";
     private static final String MAJOR_VERSION_FIELD = "major_version";
@@ -39,9 +36,23 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     private static final String HITEM_WHEN_FIELD = "hitem_when";
     private static final String HITEM_WHAT_FIELD = "hitem_what";
 
-    private final DataSource dataSource;
+    protected final DataSource dataSource;
 
-    @Inject
+    protected static String DELETE_SCL_FILE_SQL = """
+        delete from scl_file
+         where scl_file.id   = ?
+         and   scl_file.type = ?
+        """;
+
+    protected static String DELETE_SCL_FILE_SQL_BY_VERSION = """
+        delete from scl_file
+         where scl_file.id   = ?
+         and   scl_file.type = ?
+         and   scl_file.major_version = ?
+         and   scl_file.minor_version = ?
+         and   scl_file.patch_version = ?
+        """;
+
     public CompasSclDataPostgreSQLRepository(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -56,6 +67,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                   from (select distinct on (scl_file.id) *
                           from scl_file
                          where scl_file.type = ?
+                         and scl_file.is_deleted = false
                          order by scl_file.id
                                 , scl_file.major_version desc
                                 , scl_file.minor_version desc
@@ -115,6 +127,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                        and scl_data.patch_version = scl_file.patch_version
                  where scl_file.id   = ?
                  and   scl_file.type = ?
+                 and   scl_file.is_deleted = false
                  order by scl_file.major_version
                         , scl_file.minor_version
                         , scl_file.patch_version
@@ -162,6 +175,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                  and   scl_file.major_version = ?
                  and   scl_file.minor_version = ?
                  and   scl_file.patch_version = ?
+                 and   scl_file.is_deleted = false
                 """;
 
         try (var connection = dataSource.getConnection();
@@ -191,6 +205,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                 select distinct on (scl_file.id) scl_file.name
                   from scl_file
                  where scl_file.type = ?
+                 and scl_file.is_deleted = false
                  order by scl_file.id
                         , scl_file.major_version desc
                         , scl_file.minor_version desc
@@ -221,6 +236,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
                   from scl_file
                  where scl_file.id   = ?
                  and   scl_file.type = ?
+                 and   scl_file.is_deleted = false
                  order by scl_file.major_version desc, scl_file.minor_version desc, scl_file.patch_version desc
                 """;
 
@@ -304,14 +320,9 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     @Transactional(REQUIRED)
     public void delete(SclFileType type, UUID id) {
-        var sql = """
-                delete from scl_file
-                 where scl_file.id   = ?
-                 and   scl_file.type = ?
-                """;
 
         try (var connection = dataSource.getConnection();
-             var stmt = connection.prepareStatement(sql)) {
+             var stmt = connection.prepareStatement(DELETE_SCL_FILE_SQL)) {
             stmt.setObject(1, id);
             stmt.setString(2, type.name());
             stmt.executeUpdate();
@@ -323,17 +334,9 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
     @Override
     @Transactional(REQUIRED)
     public void delete(SclFileType type, UUID id, Version version) {
-        var sql = """
-                delete from scl_file
-                 where scl_file.id   = ?
-                 and   scl_file.type = ?
-                 and   scl_file.major_version = ?
-                 and   scl_file.minor_version = ?
-                 and   scl_file.patch_version = ?
-                """;
 
         try (var connection = dataSource.getConnection();
-             var stmt = connection.prepareStatement(sql)) {
+             var stmt = connection.prepareStatement(DELETE_SCL_FILE_SQL_BY_VERSION)) {
             stmt.setObject(1, id);
             stmt.setString(2, type.name());
             stmt.setInt(3, version.getMajorVersion());

@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2025 BearingPoint GmbH
+#
+# SPDX-License-Identifier: Apache-2.0
+
+version: '3.8'
+
+services:
+  keycloak:
+    image: ghcr.io/ase-compas/compas/compas-keycloak:main
+    container_name: keycloak
+    labels:
+      compas: true
+    ports:
+      - "8089:8080"
+    environment:
+      - KC_HOSTNAME=http://127.0.0.1:8089/auth/
+      - KC_HTTP_RELATIVE_PATH=auth
+      - KC_HTTP_ENABLED=true
+      - KC_PROXY_HEADERS=xforwarded
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+
+  postgresql:
+    image: postgres:latest
+    container_name: compas_postgresql
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: compas
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped

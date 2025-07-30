@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.lfenergy.compas.scl.data</groupId>
     <artifactId>compas-scl-data-service</artifactId>
-    <version>0.15.3-SNAPSHOT</version>
+    <version>0.15.6</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0
         <surefire-plugin.version>3.2.5</surefire-plugin.version>
         <sonarqube-plugin.version>3.2.0</sonarqube-plugin.version>
 
-        <compas.core.version>0.16.0</compas.core.version>
+        <compas.core.version>0.22.0</compas.core.version>
         <quarkus.platform.version>3.11.0</quarkus.platform.version>
 
         <microprofile-openapi-api.version>3.1.1</microprofile-openapi-api.version>
@@ -174,7 +174,7 @@ SPDX-License-Identifier: Apache-2.0
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.4.2</version>
                     <executions>
                         <execution>
                             <goals>
@@ -249,7 +249,7 @@ SPDX-License-Identifier: Apache-2.0
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-source-plugin</artifactId>
-                            <version>3.3.0</version>
+                            <version>3.3.1</version>
                             <executions>
                                 <execution>
                                     <id>attach-sources</id>
@@ -263,7 +263,7 @@ SPDX-License-Identifier: Apache-2.0
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>3.6.3</version>
+                            <version>3.11.2</version>
                             <executions>
                                 <execution>
                                     <id>attach-javadocs</id>
