@@ -11,15 +11,6 @@
 * upgraded compas-core version to 0.22.0 ([4e0dbd6](https://github.com/com-pas/compas-scl-data-service/commit/4e0dbd61d5b378b4d2a124b0f55b220bc084e5f4))
 
 
-### Bug Fixes
-
-* add SPDX license information to documentation files ([4b408cc](https://github.com/com-pas/compas-scl-data-service/commit/4b408cc5a1397870f3e23fadf26e88f0f080e7f9))
-* Fix header meta data ([fc98b66](https://github.com/com-pas/compas-scl-data-service/commit/fc98b667f3d4888b76864fa136bdc0c0b862135c))
-* Fix on conflict ([d4a912c](https://github.com/com-pas/compas-scl-data-service/commit/d4a912c6ba25872ffd2e9b93893dae238904880b))
-* Fix scl file name ([052bc19](https://github.com/com-pas/compas-scl-data-service/commit/052bc19a97c9a9eba4a72a8bd2851f252e4faaf8))
-* update SPDX copyright year to 2025 in documentation files ([2bc01ab](https://github.com/com-pas/compas-scl-data-service/commit/2bc01ab5d4b4ed534dea15151e96102d4559e3c6))
-
-
 ### Documentation
 
 * add required docs and codeowners config ([43eea51](https://github.com/com-pas/compas-scl-data-service/commit/43eea510827530764d9b81c5db429d31c07d7cf3))
