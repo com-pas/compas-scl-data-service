@@ -35,7 +35,6 @@ public class PostgreSQLServerJUnitExtension implements BeforeAllCallback, Extens
         lock.lock();
         if (pg == null) {
             pg = EmbeddedPostgres.builder()
-                    .setTag("15-alpine")
                     .start();
 
             // We will also run Flyway to upgrade the database.
