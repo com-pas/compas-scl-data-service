@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.16.0](https://github.com/com-pas/compas-scl-data-service/compare/v0.15.6...v0.16.0) (2025-07-30)
+
+
+### Features
+
+* [[#464](https://github.com/com-pas/compas-scl-data-service/issues/464)] added soft-delete to database (flyway file version collision) ([2c8d481](https://github.com/com-pas/compas-scl-data-service/commit/2c8d481c199700c7b67701a2b33365d0de2b6a73))
+* Add default lnodetype library migration ([03f3dcf](https://github.com/com-pas/compas-scl-data-service/commit/03f3dcff1543150390fd0df7090f9e74bc6552da))
+* Do nothing if scl file already exists ([0244162](https://github.com/com-pas/compas-scl-data-service/commit/0244162eccdadeba8da473c360e6184665ab1723))
+* upgraded compas-core version to 0.22.0 ([4e0dbd6](https://github.com/com-pas/compas-scl-data-service/commit/4e0dbd61d5b378b4d2a124b0f55b220bc084e5f4))
+
+
+### Documentation
+
+* add required docs and codeowners config ([43eea51](https://github.com/com-pas/compas-scl-data-service/commit/43eea510827530764d9b81c5db429d31c07d7cf3))
+
 ## [0.15.6](https://github.com/com-pas/compas-scl-data-service/compare/v0.15.5...v0.15.6) (2025-02-10)
 
 
