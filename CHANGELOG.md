@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/com-pas/compas-scl-data-service/compare/v0.16.0...v0.16.1) (2025-09-01)
+
+
+### Documentation
+
+* Update readme ([4b84f36](https://github.com/com-pas/compas-scl-data-service/commit/4b84f36e37f9a1d70a89e2930ee7f21dd94a3c19))
+
 ## [0.16.0](https://github.com/com-pas/compas-scl-data-service/compare/v0.15.6...v0.16.0) (2025-07-30)
 
 
