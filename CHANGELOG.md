@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.2](https://github.com/com-pas/compas-scl-data-service/compare/v0.16.1...v0.16.2) (2025-11-27)
+
+
+### Bug Fixes
+
+* trigger release ([24e84e7](https://github.com/com-pas/compas-scl-data-service/commit/24e84e73bb9b5032c6af041be1749eb22c5d43ce))
+
 ## [0.16.1](https://github.com/com-pas/compas-scl-data-service/compare/v0.16.0...v0.16.1) (2025-09-01)
 
 
