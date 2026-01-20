@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.17.0](https://github.com/com-pas/compas-scl-data-service/compare/v0.16.3...v0.17.0) (2026-01-20)
+
+
+### Features
+
+* add micrometer prometheus registry and configure metrics endpoint ([5b60e50](https://github.com/com-pas/compas-scl-data-service/commit/5b60e50f587d6970c5b5542333b8e372e6b2cdd7))
+* add Micrometer Prometheus registry and configure metrics endpoint permissions ([e96e452](https://github.com/com-pas/compas-scl-data-service/commit/e96e45263869af43a4fd9a71bb2264a2595f24f3))
+* update authorization for metrics endpoint and adjust allowed paths ([7a38bb0](https://github.com/com-pas/compas-scl-data-service/commit/7a38bb0af6f42265e5705e41c315e09b8520c18b))
+
 ## [0.16.3](https://github.com/com-pas/compas-scl-data-service/compare/v0.16.2...v0.16.3) (2026-01-06)
 
 
