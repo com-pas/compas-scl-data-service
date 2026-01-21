@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.17.1](https://github.com/com-pas/compas-scl-data-service/compare/v0.17.0...v0.17.1) (2026-01-21)
+
+
+### Bug Fixes
+
+* move metrics endpoint to 9090 ([c99675a](https://github.com/com-pas/compas-scl-data-service/commit/c99675a4d1a67d9e1b8a76bbfa5c3016b7785e03))
+* move metrics to 9090 ([eb96b4d](https://github.com/com-pas/compas-scl-data-service/commit/eb96b4d4c59653249e63962653debcb728d8cb0b))
+
 ## [0.17.0](https://github.com/com-pas/compas-scl-data-service/compare/v0.16.3...v0.17.0) (2026-01-20)
 
 
