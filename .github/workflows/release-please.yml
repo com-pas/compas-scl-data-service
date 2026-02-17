@@ -51,6 +51,13 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
+      - name: Set Docker API version
+        # Workaround for Docker 29.x incompatibility with Testcontainers/EmbeddedPostgres.
+        # See: https://github.com/testcontainers/testcontainers-java/issues/11212
+        # This forces the Docker Java client to use API version 1.44, which is compatible with current Testcontainers/EmbeddedPostgres.
+        run: |
+          echo "api.version=1.44" > $HOME/.docker-java.properties
+          
       - name: Create custom Maven Settings.xml
         if: ${{ steps.release.outputs.release_created }}
         uses: whelk-io/maven-settings-xml-action@v22
