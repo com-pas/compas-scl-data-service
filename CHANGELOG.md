@@ -1,17 +1,5 @@
 # Changelog
 
-## [0.17.3](https://github.com/com-pas/compas-scl-data-service/compare/v0.17.2...v0.17.3) (2026-02-17)
-
-
-### Bug Fixes
-
-* add Docker API version in sonarcloud-build ([236279d](https://github.com/com-pas/compas-scl-data-service/commit/236279d68db02440c2c05b632235aa7fbff7bcf5))
-* set docker api version release please action ([1a23775](https://github.com/com-pas/compas-scl-data-service/commit/1a23775800e8b68b53a756d0945f5f3b8939b8c0))
-* set docker api version release please action ([db3bfc9](https://github.com/com-pas/compas-scl-data-service/commit/db3bfc9390cedf4a05e934ffc604fbd581dd577d))
-* set Docker API version to 1.44 for compatibility with Testcontainer ([653981b](https://github.com/com-pas/compas-scl-data-service/commit/653981b574937a594e9de11fcb171e7732557150))
-* set Docker API version to 1.44 for compatibility with Testcontainers ([bffb323](https://github.com/com-pas/compas-scl-data-service/commit/bffb3233436f6b33c0743f2a25209a4f54108627))
-* trigger release ([a5bb594](https://github.com/com-pas/compas-scl-data-service/commit/a5bb594b1953728d9fc6e23b6ef1eb856bdee75f))
-
 ## [0.17.2](https://github.com/com-pas/compas-scl-data-service/compare/v0.17.1...v0.17.2) (2026-02-02)
 
 
