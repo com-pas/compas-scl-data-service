@@ -1,0 +1,390 @@
+openapi: 3.0.3
+info:
+  title: CoMPAS SCL Data Service API
+  description: API for uploading and managing SCL data files
+  version: 1.0.0
+  contact:
+    name: CoMPAS Community
+  license:
+    name: MPL-2.0
+    url: https://www.mozilla.org/en-US/MPL/2.0/
+
+servers:
+  - url: http://compas-scl-data-service
+    description: API Version 1
+
+tags:
+  - name: plugins-custom-resources
+    description: Plugins custom resources
+
+paths:
+  /api/plugins/resources:
+    get:
+      tags:
+        - plugins-custom-resources
+      summary: Get all data entries
+      description: Retrieve metadata for all uploaded data entries with optional filtering
+      operationId: getAllData
+      parameters:
+        - name: type
+          in: query
+          required: true
+          description: Filter by data type
+          schema:
+            type: string
+          example: "engineering-wizard_process"
+        - name: uploadedAfter
+          in: query
+          description: Filter by upload date (ISO 8601 format)
+          schema:
+            type: string
+            format: date-time
+          example: "2026-02-18T10:30:00Z"
+        - name: uploadedBefore
+          in: query
+          description: Filter by upload date (ISO 8601 format)
+          schema:
+            type: string
+            format: date-time
+          example: "2026-02-18T10:30:00Z"
+        - name: name
+          in: query
+          description: Filter by name (contains search)
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number for pagination (0-indexed)
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: List of data entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DataEntry'
+                  totalElements:
+                    type: integer
+                    description: Total number of entries
+                  totalPages:
+                    type: integer
+                    description: Total number of pages
+                  page:
+                    type: integer
+                    description: Current page number
+                  size:
+                    type: integer
+                    description: Page size
+              example:
+                content:
+                  - id: "550e8400-e29b-41d4-a716-446655440000"
+                    type: "engineering-wizard_process"
+                    tenant: "transnetbw"
+                    name: "substation-configuration"
+                    description: "Process definition for substation engineering wizard"
+                    contentType: "application/json"
+                    version: "1.2.3"
+                    dataCompatibilityVersion: "1.0.0"
+                    uploadedAt: "2026-02-18T10:30:00Z"
+                  - id: "660f9511-f39c-52e5-b827-557766551111"
+                    type: "engineering-wizard_process"
+                    tenant: "transnetbw"
+                    name: "line-configuration"
+                    description: "Process definition for line engineering"
+                    contentType: "application/xml"
+                    version: "2.0.0"
+                    dataCompatibilityVersion: "2.0.0"
+                    uploadedAt: "2026-02-17T14:20:00Z"
+                totalElements: 42
+                totalPages: 3
+                page: 0
+                size: 20
+        '400':
+          description: Bad request - Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - plugins-custom-resources
+      summary: Upload data file
+      description: Upload a JSON or XML data file with associated metadata
+      operationId: uploadData
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - type
+                - name
+                - content-type
+                - content
+                - data-compatibility-version
+              properties:
+                type:
+                  type: string
+                  description: Type of the data being uploaded
+                  example: "engineering-wizard_process"
+                name:
+                  type: string
+                  description: Name of the data file
+                  example: "substation-configuration"
+                description:
+                  type: string
+                  description: Optional description of the data file
+                  example: "Process definition for substation engineering wizard"
+                content-type:
+                  type: string
+                  description: Content type of the uploaded file
+                  enum:
+                    - application/json
+                    - application/xml
+                  example: "application/json"
+                content:
+                  type: string
+                  format: binary
+                  description: The JSON or XML file content
+                version:
+                  type: string
+                  pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+                  description: Semantic version of the data file (semver format)
+                  example: "1.2.3"
+                nextVersionType:
+                  type: string
+                  description: |-
+                    Type of the next version (used for automatic version increment)
+                    If provided, the service will automatically increment the version based on the specified type. If not
+                    provided, the version must be explicitly specified in the 'version' field.
+                  enum:
+                    - major
+                    - minor
+                    - patch
+                data-compatibility-version:
+                  type: string
+                  pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+                  description: Data compatibility version (semver format)
+                  example: "1.0.0"
+            encoding:
+              content:
+                contentType: application/json, application/xml, text/xml
+      responses:
+        '201':
+          description: Data uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: Unique identifier for the uploaded data
+                  type:
+                    type: string
+                  tenant:
+                    type: string
+                  name:
+                    type: string
+                  version:
+                    type: string
+                  uploadedAt:
+                    type: string
+                    format: date-time
+                    description: Timestamp of the upload
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                type: "SCL"
+                tenant: "transnetbw"
+                name: "substation-config"
+                version: "1.2.3"
+                uploadedAt: "2026-02-18T10:30:00Z"
+        '400':
+          description: Bad request - Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: "INVALID_INPUT"
+                message: "Invalid semantic version format"
+        '409':
+          description: Conflict - Data with this name and version already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: "DUPLICATE_VERSION"
+                message: "Data with name 'substation-config' and version '1.2.3' already exists"
+        '413':
+          description: Payload too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '415':
+          description: Unsupported media type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/plugins/resources/{id}:
+    get:
+      tags:
+        - plugins-custom-resources
+      summary: Get data entry by ID
+      description: Retrieve a single data entry by its unique identifier, including the full content
+      operationId: getDataById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the data entry
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Data entry retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEntryWithContent'
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                type: "engineering-wizard_process"
+                tenant: "transnetbw"
+                name: "substation-configuration"
+                description: "Process definition for substation engineering wizard"
+                contentType: "application/json"
+                version: "1.2.3"
+                dataCompatibilityVersion: "1.0.0"
+                uploadedAt: "2026-02-18T10:30:00Z"
+                content: |
+                  {
+                    "process": "substation-engineering",
+                    "steps": ["design", "validation", "approval"]
+                  }
+        '404':
+          description: Data entry not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: "NOT_FOUND"
+                message: "Data entry with id '550e8400-e29b-41d4-a716-446655440000' not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    DataEntry:
+      type: object
+      required:
+        - id
+        - type
+        - tenant
+        - name
+        - contentType
+        - version
+        - dataCompatibilityVersion
+        - uploadedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the data entry
+        type:
+          type: string
+          description: Type of the data
+        tenant:
+          type: string
+          description: Tenant identifier
+        name:
+          type: string
+          description: Name of the data file
+        description:
+          type: string
+          description: Optional description of the data file
+        contentType:
+          type: string
+          description: Content type of the file
+          enum:
+            - application/json
+            - application/xml
+        version:
+          type: string
+          description: Semantic version of the data file
+        dataCompatibilityVersion:
+          type: string
+          description: Data compatibility version
+        uploadedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the data was uploaded
+    
+    DataEntryWithContent:
+      allOf:
+        - $ref: '#/components/schemas/DataEntry'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: string
+              description: The actual content of the file (JSON or XML as string)
+    
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error details
+          additionalProperties: true
