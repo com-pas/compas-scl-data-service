@@ -6,8 +6,8 @@ info:
   contact:
     name: CoMPAS Community
   license:
-    name: MPL-2.0
-    url: https://www.mozilla.org/en-US/MPL/2.0/
+    name: Apache License Version 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
 
 servers:
   - url: http://compas-scl-data-service
