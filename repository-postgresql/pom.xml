@@ -36,6 +36,10 @@ SPDX-License-Identifier: Apache-2.0
             <version>3.32.0</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jdbc-postgresql</artifactId>
+        </dependency>
         <!-- Bridge is needed for other dependency -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
