@@ -209,6 +209,35 @@ SPDX-License-Identifier: Apache-2.0
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>7.12.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-api</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>api/plugins-custom-resources.yaml</inputSpec>
+                            <generatorName>jaxrs-spec</generatorName>
+                            <output>${project.build.directory}/generated-sources/plugins-custom-resources</output>
+                            <configOptions>
+                                <sourceFolder>src/main/java</sourceFolder>
+                                <apiPackage>org.lfenergy.compas.scl.data.rest</apiPackage>
+                                <modelPackage>org.lfenergy.compas.scl.data.rest.dto</modelPackage>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useTags>true</useTags>
+                                <useJakartaEe>true</useJakartaEe>
+                                <useSwaggerAnnotations>false</useSwaggerAnnotations>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
