@@ -15,7 +15,7 @@ class CompasSclUpdateServerEndpointAsReaderTest extends AbstractServerEndpointAs
     private URI uri;
 
     @Test
-    void createSCL_WhenCalled_ThenExpectedResponseIsRetrieved() {
+    void createSCL_WhenCalled_ThenExpectedResponseIsRetrieved() throws Exception {
         testWhenForbiddenToExecute(uri);
     }
 }
