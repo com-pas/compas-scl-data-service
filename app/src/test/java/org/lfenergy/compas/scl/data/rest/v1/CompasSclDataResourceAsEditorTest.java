@@ -29,7 +29,7 @@ import java.util.UUID;
 import static io.restassured.RestAssured.given;
 import static io.restassured.path.xml.config.XmlPathConfig.xmlPathConfig;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_NS_URI;
+import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_DATA_SERVICE_V1_NS_URI;
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
 import static org.mockito.Mockito.*;
 
@@ -117,8 +117,8 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
-        assertEquals(scl, xmlPath.get("GetWsResponse.SclData"));
+                .using(xmlPathConfig().declaredNamespace("sds", SCL_DATA_SERVICE_V1_NS_URI));
+        assertEquals(scl, xmlPath.get("GetResponse.SclData"));
         verify(compasSclDataService).findByUUID(type, uuid);
     }
 
@@ -142,8 +142,8 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
-        assertEquals(scl, xmlPath.get("GetWsResponse.SclData"));
+                .using(xmlPathConfig().declaredNamespace("sds", SCL_DATA_SERVICE_V1_NS_URI));
+        assertEquals(scl, xmlPath.get("GetResponse.SclData"));
         verify(compasSclDataService).findByUUID(type, uuid, version);
     }
 
@@ -171,7 +171,9 @@ class CompasSclDataResourceAsEditorTest {
                 .extract()
                 .response();
 
-        assertEquals(scl, response.xmlPath().getString("CreateWsResponse.SclData"));
+        var xmlPath = response.xmlPath()
+                .using(xmlPathConfig().declaredNamespace("sds", SCL_DATA_SERVICE_V1_NS_URI));
+        assertEquals(scl, xmlPath.getString("CreateResponse.SclData"));
         verify(compasSclDataService).create(type, name, USERNAME, comment, scl);
     }
 
@@ -228,7 +230,9 @@ class CompasSclDataResourceAsEditorTest {
                 .extract()
                 .response();
 
-        assertEquals(scl, response.xmlPath().getString("CreateWsResponse.SclData"));
+        var xmlPath = response.xmlPath()
+                .using(xmlPathConfig().declaredNamespace("sds", SCL_DATA_SERVICE_V1_NS_URI));
+        assertEquals(scl, xmlPath.getString("UpdateResponse.SclData"));
         verify(compasSclDataService).update(type, uuid, changeSetType, USERNAME, comment, scl);
     }
 
