@@ -22,9 +22,11 @@ import jakarta.validation.Valid;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
+import java.io.IOException;
 
 import static org.lfenergy.compas.core.websocket.WebsocketSupport.handleException;
 import static org.lfenergy.compas.scl.data.rest.Constants.TYPE_PATH_PARAM;
+import static org.lfenergy.compas.scl.data.rest.Constants.UPDATE_ROLE;
 
 @Authenticated
 @ApplicationScoped
@@ -50,6 +52,15 @@ public class CompasSclUpdateServerEndpoint {
     @OnOpen
     public void onOpen(Session session, @PathParam(TYPE_PATH_PARAM) String type) {
         LOGGER.debug("Starting (update) session {} for type {}.", session.getId(), type);
+        var requiredRole = type + "_" + UPDATE_ROLE;
+        if (!jsonWebToken.getGroups().contains(requiredRole)) {
+            LOGGER.warn("User lacks role {} for update session {}.", requiredRole, session.getId());
+            try {
+                session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Forbidden"));
+            } catch (IOException e) {
+                LOGGER.error("Error closing unauthorized session {}.", session.getId(), e);
+            }
+        }
     }
 
     @OnMessage
