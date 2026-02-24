@@ -117,7 +117,7 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("sds", SCL_DATA_SERVICE_V1_NS_URI));
+                .using(xmlPathConfig().declaredNamespace("sds", SCL_DATA_SERVICE_V1_NS_URI)).using(xmlPathConfig().namespaceAware(true));
         assertEquals(scl, xmlPath.get("GetResponse.SclData"));
         verify(compasSclDataService).findByUUID(type, uuid);
     }
@@ -142,7 +142,7 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("sds", SCL_DATA_SERVICE_V1_NS_URI));
+                .using(xmlPathConfig().declaredNamespace("sds", SCL_DATA_SERVICE_V1_NS_URI)).using(xmlPathConfig().namespaceAware(true));
         assertEquals(scl, xmlPath.get("GetResponse.SclData"));
         verify(compasSclDataService).findByUUID(type, uuid, version);
     }
@@ -172,7 +172,7 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("sds", SCL_DATA_SERVICE_V1_NS_URI));
+                .using(xmlPathConfig().declaredNamespace("sds", SCL_DATA_SERVICE_V1_NS_URI)).using(xmlPathConfig().namespaceAware(true));
         assertEquals(scl, xmlPath.getString("CreateResponse.SclData"));
         verify(compasSclDataService).create(type, name, USERNAME, comment, scl);
     }
@@ -231,7 +231,7 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("sds", SCL_DATA_SERVICE_V1_NS_URI));
+                .using(xmlPathConfig().declaredNamespace("sds", SCL_DATA_SERVICE_V1_NS_URI)).using(xmlPathConfig().namespaceAware(true));
         assertEquals(scl, xmlPath.getString("UpdateResponse.SclData"));
         verify(compasSclDataService).update(type, uuid, changeSetType, USERNAME, comment, scl);
     }
