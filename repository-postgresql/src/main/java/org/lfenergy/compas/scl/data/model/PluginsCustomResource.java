@@ -22,116 +22,35 @@ public class PluginsCustomResource extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    public UUID id;
 
     @Column(nullable = false)
-    private String type;
+    public String type;
 
     @Column(nullable = false)
-    private String tenant = "default";
+    public String tenant = "default";
 
     @Column(nullable = false)
-    private String name;
+    public String name;
 
     @Column(columnDefinition = "text")
-    private String description;
+    public String description;
 
     @Column(name = "content_type", nullable = false, length = 50)
-    private String contentType;
+    public String contentType;
 
     @Column(nullable = false, columnDefinition = "text")
-    private String content;
+    public String content;
 
     @Column(name = "version", nullable = false, length = 50)
-    private String version;
+    public String version;
 
     @Column(name = "data_compatibility_version", nullable = false, length = 50)
-    private String dataCompatibilityVersion;
+    public String dataCompatibilityVersion;
 
     @Column(name = "uploaded_at", nullable = false)
     @CreationTimestamp
-    private OffsetDateTime uploadedAt;
-
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(String tenant) {
-        this.tenant = tenant;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public String getDataCompatibilityVersion() {
-        return dataCompatibilityVersion;
-    }
-
-    public void setDataCompatibilityVersion(String dataCompatibilityVersion) {
-        this.dataCompatibilityVersion = dataCompatibilityVersion;
-    }
-
-    public OffsetDateTime getUploadedAt() {
-        return uploadedAt;
-    }
-
-    public void setUploadedAt(OffsetDateTime uploadedAt) {
-        this.uploadedAt = uploadedAt;
-    }
+    public OffsetDateTime uploadedAt;
 
     @Override
     public boolean equals(Object o) {
