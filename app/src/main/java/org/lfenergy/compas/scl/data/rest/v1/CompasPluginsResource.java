@@ -13,7 +13,7 @@ import org.lfenergy.compas.scl.data.model.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.rest.PluginsCustomResourcesApi;
 import org.lfenergy.compas.scl.data.rest.dto.DataEntry;
 import org.lfenergy.compas.scl.data.rest.dto.DataEntryWithContent;
-import org.lfenergy.compas.scl.data.rest.dto.GetAllData200Response;
+import org.lfenergy.compas.scl.data.rest.dto.PagedDataEntryResponse;
 import org.lfenergy.compas.scl.data.rest.dto.UploadData201Response;
 import org.lfenergy.compas.scl.data.service.CompasPluginsResourceService;
 
@@ -39,7 +39,7 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
     }
 
     @Override
-    public GetAllData200Response getAllData(String type,
+    public PagedDataEntryResponse getAllData(String type,
                                             Date uploadedAfter,
                                             Date uploadedBefore,
                                             String name,
@@ -56,7 +56,7 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
 
         int totalPages = size > 0 ? (int) Math.ceil((double) totalElements / size) : 0;
 
-        var response = new GetAllData200Response();
+        var response = new PagedDataEntryResponse();
         response.setContent(entries);
         response.setTotalElements((int) totalElements);
         response.setTotalPages(totalPages);

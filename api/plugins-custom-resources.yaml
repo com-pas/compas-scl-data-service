@@ -73,24 +73,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  content:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/DataEntry'
-                  totalElements:
-                    type: integer
-                    description: Total number of entries
-                  totalPages:
-                    type: integer
-                    description: Total number of pages
-                  page:
-                    type: integer
-                    description: Current page number
-                  size:
-                    type: integer
-                    description: Page size
+                $ref: '#/components/schemas/PagedDataEntryResponse'
               example:
                 content:
                   - id: "550e8400-e29b-41d4-a716-446655440000"
@@ -372,6 +355,26 @@ components:
               type: string
               description: The actual content of the file (JSON or XML as string)
     
+    PagedDataEntryResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataEntry'
+        totalElements:
+          type: integer
+          description: Total number of entries
+        totalPages:
+          type: integer
+          description: Total number of pages
+        page:
+          type: integer
+          description: Current page number
+        size:
+          type: integer
+          description: Page size
+
     Error:
       type: object
       required:
