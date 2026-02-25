@@ -14,7 +14,7 @@ import org.lfenergy.compas.scl.data.rest.PluginsCustomResourcesApi;
 import org.lfenergy.compas.scl.data.rest.dto.DataEntry;
 import org.lfenergy.compas.scl.data.rest.dto.DataEntryWithContent;
 import org.lfenergy.compas.scl.data.rest.dto.PagedDataEntryResponse;
-import org.lfenergy.compas.scl.data.rest.dto.UploadData201Response;
+import org.lfenergy.compas.scl.data.rest.dto.UploadDataResponse;
 import org.lfenergy.compas.scl.data.service.CompasPluginsResourceService;
 
 import java.io.IOException;
@@ -74,7 +74,7 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
     }
 
     @Override
-    public UploadData201Response uploadData(String type,
+    public UploadDataResponse uploadData(String type,
                                              String name,
                                              String contentType,
                                              InputStream contentInputStream,
@@ -92,7 +92,7 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
         var entity = service.upload(type, name, contentType, content,
                 dataCompatibilityVersion, description, version, nextVersionType);
 
-        var response = new UploadData201Response();
+        var response = new UploadDataResponse();
         response.setId(entity.id);
         response.setType(entity.type);
         response.setTenant(entity.tenant);

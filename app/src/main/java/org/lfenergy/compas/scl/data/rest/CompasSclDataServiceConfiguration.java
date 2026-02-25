@@ -19,7 +19,7 @@ import jakarta.enterprise.inject.Produces;
         org.lfenergy.compas.scl.data.rest.dto.DataEntry.class,
         org.lfenergy.compas.scl.data.rest.dto.DataEntryWithContent.class,
         org.lfenergy.compas.scl.data.rest.dto.PagedDataEntryResponse.class,
-        org.lfenergy.compas.scl.data.rest.dto.UploadData201Response.class,
+        org.lfenergy.compas.scl.data.rest.dto.UploadDataResponse.class,
         org.lfenergy.compas.scl.data.rest.dto.Error.class
 })
 public class CompasSclDataServiceConfiguration {

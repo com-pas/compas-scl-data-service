@@ -181,24 +181,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                    description: Unique identifier for the uploaded data
-                  type:
-                    type: string
-                  tenant:
-                    type: string
-                  name:
-                    type: string
-                  version:
-                    type: string
-                  uploadedAt:
-                    type: string
-                    format: date-time
-                    description: Timestamp of the upload
+                $ref: '#/components/schemas/UploadDataResponse'
               example:
                 id: "550e8400-e29b-41d4-a716-446655440000"
                 type: "SCL"
@@ -374,6 +357,26 @@ components:
         size:
           type: integer
           description: Page size
+
+    UploadDataResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the uploaded data
+        type:
+          type: string
+        tenant:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        uploadedAt:
+          type: string
+          format: date-time
+          description: Timestamp of the upload
 
     Error:
       type: object
