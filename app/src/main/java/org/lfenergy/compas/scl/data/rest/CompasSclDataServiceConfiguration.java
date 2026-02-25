@@ -18,7 +18,7 @@ import jakarta.enterprise.inject.Produces;
         org.lfenergy.compas.core.commons.model.ErrorMessage.class,
         org.lfenergy.compas.scl.data.rest.dto.DataEntry.class,
         org.lfenergy.compas.scl.data.rest.dto.DataEntryWithContent.class,
-        org.lfenergy.compas.scl.data.rest.dto.GetAllData200Response.class,
+        org.lfenergy.compas.scl.data.rest.dto.PagedDataEntryResponse.class,
         org.lfenergy.compas.scl.data.rest.dto.UploadData201Response.class,
         org.lfenergy.compas.scl.data.rest.dto.Error.class
 })
