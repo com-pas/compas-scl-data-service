@@ -6,6 +6,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.service.CompasPluginsResourceService;
 
@@ -27,17 +28,15 @@ import static org.mockito.Mockito.when;
 @TestHTTPEndpoint(CompasPluginsResource.class)
 public class CompasPluginsResourceGetDataTest {
 
-    @InjectMock
-    private EntityManager entityManager;
 
     @InjectMock
-    CompasPluginsResourceService compasPluginsResourceService;
+    private CompasPluginsResourceService compasPluginsResourceService;
 
     @Test
     void getDataById_WhenCalledWithValidUUID_ThenReturnsResource() {
 
         var resource = createTestResource();
-        when(entityManager.find(PluginsCustomResource.class, resource.id))
+        when(compasPluginsResourceService.findById(resource.id))
                 .thenReturn(resource);
 
         given()
@@ -59,29 +58,13 @@ public class CompasPluginsResourceGetDataTest {
     @Test
     void getDataById_WhenCalledWithNonExistingUUID_ThenReturnsNotFoundError() {
 
-        var resource = createTestResource();
         var nonExistingId = java.util.UUID.randomUUID();
-        when(entityManager.find(PluginsCustomResource.class, resource.id))
-                .thenReturn(resource);
+        when(compasPluginsResourceService.findById(nonExistingId))
+                .thenThrow(CompasNoDataFoundException.class);
 
         given()
         .when()
-            .get("/{id}",nonExistingId)
-        .then()
-            .statusCode(404);
-    }
-
-    @Test
-    void getAllData_WhenCalledWithValidType_ThenReturnsListOfResources() {
-
-        var resource = createTestResource();
-        var nonExistingId = java.util.UUID.randomUUID();
-        when(entityManager.find(PluginsCustomResource.class, resource.id))
-                .thenReturn(resource);
-
-        given()
-        .when()
-            .get("",nonExistingId)
+            .get("/{id}", nonExistingId)
         .then()
             .statusCode(404);
     }
@@ -102,20 +85,20 @@ public class CompasPluginsResourceGetDataTest {
                 .thenReturn(2L);
 
         given()
-                .queryParam("type", type)
-                .when()
-                .get()
-                .then()
-                .statusCode(200)
-                .body("page", equalTo(page))
-                .body("size", equalTo(size))
-                .body("totalElements", equalTo(2))
-                .body("totalPages", equalTo(1))
-                .body("content", hasSize(2))
-                .body("content[0].id", equalTo(resource1.id.toString()))
-                .body("content[0].name", equalTo(resource1.name))
-                .body("content[1].id", equalTo(resource2.id.toString()))
-                .body("content[1].name", equalTo(resource2.name));
+            .queryParam("type", type)
+        .when()
+            .get()
+        .then()
+            .statusCode(200)
+            .body("page", equalTo(page))
+            .body("size", equalTo(size))
+            .body("totalElements", equalTo(2))
+            .body("totalPages", equalTo(1))
+            .body("content", hasSize(2))
+            .body("content[0].id", equalTo(resource1.id.toString()))
+            .body("content[0].name", equalTo(resource1.name))
+            .body("content[1].id", equalTo(resource2.id.toString()))
+            .body("content[1].name", equalTo(resource2.name));
     }
 
     @Test
@@ -132,18 +115,18 @@ public class CompasPluginsResourceGetDataTest {
                 .thenReturn(6L); // e.g. 6 total entries -> 2 pages of 5
 
         given()
-                .queryParam("type", type)
-                .queryParam("page", page)
-                .queryParam("size", size)
-                .when()
-                .get()
-                .then()
-                .statusCode(200)
-                .body("page", equalTo(page))
-                .body("size", equalTo(size))
-                .body("totalElements", equalTo(6))
-                .body("totalPages", equalTo(2))
-                .body("content", hasSize(1));
+            .queryParam("type", type)
+            .queryParam("page", page)
+            .queryParam("size", size)
+        .when()
+            .get()
+        .then()
+            .statusCode(200)
+            .body("page", equalTo(page))
+            .body("size", equalTo(size))
+            .body("totalElements", equalTo(6))
+            .body("totalPages", equalTo(2))
+            .body("content", hasSize(1));
     }
 
     @Test
@@ -158,16 +141,16 @@ public class CompasPluginsResourceGetDataTest {
                 .thenReturn(0L);
 
         given()
-                .queryParam("type", type)
-                .when()
-                .get()
-                .then()
-                .statusCode(200)
-                .body("content", hasSize(0))
-                .body("totalElements", equalTo(0))
-                .body("totalPages", equalTo(0))
-                .body("page", equalTo(page))
-                .body("size", equalTo(size));
+            .queryParam("type", type)
+        .when()
+            .get()
+        .then()
+            .statusCode(200)
+            .body("content", hasSize(0))
+            .body("totalElements", equalTo(0))
+            .body("totalPages", equalTo(0))
+            .body("page", equalTo(page))
+            .body("size", equalTo(size));
     }
 
 
