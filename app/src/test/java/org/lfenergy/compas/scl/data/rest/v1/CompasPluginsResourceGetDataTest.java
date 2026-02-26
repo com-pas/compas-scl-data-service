@@ -1,10 +1,13 @@
+// SPDX-FileCopyrightText: 2026 BearingPoint GmbH
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package org.lfenergy.compas.scl.data.rest.v1;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.PluginsCustomResource;
