@@ -4,16 +4,17 @@
 
 package org.lfenergy.compas.scl.data.repository.postgresql;
 
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
+import io.quarkus.arc.ClientProxy;
+import io.quarkus.test.component.QuarkusComponentTest;
+import io.quarkus.test.component.TestConfigProperty;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-@QuarkusTest
-@TestProfile(SoftDeleteEnabledTestProfile.class)
+@QuarkusComponentTest(CompasSclDataPostgreSQLRepositoryConfiguration.class)
+@TestConfigProperty(key = "compas.scl-data-service.features.soft-delete-enabled", value = "true")
 class CompasSclDataPostgreSQLRepositoryConfigurationSoftDeleteTest {
 
     @Inject
@@ -21,6 +22,6 @@ class CompasSclDataPostgreSQLRepositoryConfigurationSoftDeleteTest {
 
     @Test
     void whenSoftDeleteEnabled_thenReturnsSoftDeleteRepository() {
-        assertInstanceOf(SoftDeleteCompasSclDataPostgreSQLRepository.class, repository);
+        assertInstanceOf(SoftDeleteCompasSclDataPostgreSQLRepository.class, ClientProxy.unwrap(repository));
     }
 }
