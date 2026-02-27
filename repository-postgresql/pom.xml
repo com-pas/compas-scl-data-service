@@ -77,6 +77,11 @@ SPDX-License-Identifier: Apache-2.0
             <artifactId>quarkus-junit5-component</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jacoco</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
