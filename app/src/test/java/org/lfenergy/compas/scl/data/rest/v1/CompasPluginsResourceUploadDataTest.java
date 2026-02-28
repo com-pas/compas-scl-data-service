@@ -20,7 +20,7 @@ import static org.hamcrest.Matchers.not;
 @QuarkusTest
 @TestSecurity(user = "test-user")
 @TestHTTPEndpoint(CompasPluginsResource.class)
-public class CompasPluginsResourceUploadDataTest {
+class CompasPluginsResourceUploadDataTest {
 
     private static final String UUID_PATTERN =
             "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$";
