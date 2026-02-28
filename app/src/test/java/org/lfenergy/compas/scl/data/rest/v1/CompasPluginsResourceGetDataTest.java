@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 @QuarkusTest
 @TestSecurity(user = "test-user")
 @TestHTTPEndpoint(CompasPluginsResource.class)
-public class CompasPluginsResourceGetDataTest {
+class CompasPluginsResourceGetDataTest {
 
 
     @InjectMock
