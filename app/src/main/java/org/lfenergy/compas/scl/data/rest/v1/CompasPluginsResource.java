@@ -16,6 +16,7 @@ import org.lfenergy.compas.scl.data.rest.dto.DataEntryWithContent;
 import org.lfenergy.compas.scl.data.rest.dto.PagedDataEntryResponse;
 import org.lfenergy.compas.scl.data.rest.dto.UploadDataResponse;
 import org.lfenergy.compas.scl.data.service.CompasPluginsResourceService;
+import org.lfenergy.compas.scl.data.service.UploadRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RequestScoped
 @Blocking
@@ -52,7 +52,7 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
 
         var entries = entities.stream()
                 .map(this::toDataEntry)
-                .collect(Collectors.toList());
+                .toList();
 
         int totalPages = size > 0 ? (int) Math.ceil((double) totalElements / size) : 0;
 
@@ -89,8 +89,8 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
             throw new CompasInvalidInputException("Failed to read content from upload");
         }
 
-        var entity = service.upload(type, name, contentType, content,
-                dataCompatibilityVersion, description, version, nextVersionType);
+        var entity = service.upload(new UploadRequest(type, name, contentType, content,
+                dataCompatibilityVersion, description, version, nextVersionType));
 
         var response = new UploadDataResponse();
         response.setId(entity.id);

@@ -124,8 +124,8 @@ class CompasPluginsResourceServiceTest {
         var duplicateQuery = mockTypedQuery(Long.class);
         when(duplicateQuery.getSingleResult()).thenReturn(0L);
 
-        var result = service.upload("xml", "name", "application/xml", "<root/>",
-                "1.0.0", "desc", "2.0.0", null);
+        var result = service.upload(new UploadRequest("xml", "name", "application/xml", "<root/>",
+                "1.0.0", "desc", "2.0.0", null));
 
         verify(entityManager).persist(any(PluginsCustomResource.class));
         assertEquals("xml", result.type);
@@ -144,8 +144,8 @@ class CompasPluginsResourceServiceTest {
         when(duplicateQuery.getSingleResult()).thenReturn(1L);
 
         assertThrows(CompasDuplicateVersionException.class, () ->
-                service.upload("xml", "name", "application/xml", "<root/>",
-                        "1.0.0", "desc", "2.0.0", null));
+                service.upload(new UploadRequest("xml", "name", "application/xml", "<root/>",
+                        "1.0.0", "desc", "2.0.0", null)));
     }
 
     @Test
@@ -160,8 +160,8 @@ class CompasPluginsResourceServiceTest {
         existing.version = "1.2.3";
         when(existingQuery.getResultList()).thenReturn(List.of(existing));
 
-        var result = service.upload("xml", "name", "application/json", "{}",
-                "1.0.0", "desc", null, "MAJOR");
+        var result = service.upload(new UploadRequest("xml", "name", "application/json", "{}",
+                "1.0.0", "desc", null, "MAJOR"));
 
         assertEquals("2.0.0", result.version);
     }
@@ -176,8 +176,8 @@ class CompasPluginsResourceServiceTest {
         existing.version = "1.2.3";
         when(existingQuery.getResultList()).thenReturn(List.of(existing));
 
-        var result = service.upload("xml", "name", "application/json", "{}",
-                "1.0.0", "desc", null, "minor");
+        var result = service.upload(new UploadRequest("xml", "name", "application/json", "{}",
+                "1.0.0", "desc", null, "minor"));
 
         assertEquals("1.3.0", result.version);
     }
@@ -192,8 +192,8 @@ class CompasPluginsResourceServiceTest {
         existing.version = "1.2.3";
         when(existingQuery.getResultList()).thenReturn(List.of(existing));
 
-        var result = service.upload("xml", "name", "application/json", "{}",
-                "1.0.0", "desc", null, "patch");
+        var result = service.upload(new UploadRequest("xml", "name", "application/json", "{}",
+                "1.0.0", "desc", null, "patch"));
 
         assertEquals("1.2.4", result.version);
     }
@@ -206,8 +206,8 @@ class CompasPluginsResourceServiceTest {
         var existingQuery = mockTypedQuery(PluginsCustomResource.class);
         when(existingQuery.getResultList()).thenReturn(List.of());
 
-        var result = service.upload("xml", "name", "application/json", "{}",
-                "1.0.0", "desc", null, "MAJOR");
+        var result = service.upload(new UploadRequest("xml", "name", "application/json", "{}",
+                "1.0.0", "desc", null, "MAJOR"));
 
         assertEquals("1.0.0", result.version);
     }
@@ -215,22 +215,22 @@ class CompasPluginsResourceServiceTest {
     @Test
     void upload_WhenInvalidNextVersionType_ThenThrowsCompasInvalidInputException() {
         assertThrows(CompasInvalidInputException.class, () ->
-                service.upload("xml", "name", "application/xml", "<root/>",
-                        "1.0.0", "desc", null, "INVALID"));
+                service.upload(new UploadRequest("xml", "name", "application/xml", "<root/>",
+                        "1.0.0", "desc", null, "INVALID")));
     }
 
     @Test
     void upload_WhenNoVersionAndNoNextVersionType_ThenThrowsCompasInvalidInputException() {
         assertThrows(CompasInvalidInputException.class, () ->
-                service.upload("xml", "name", "application/xml", "<root/>",
-                        "1.0.0", "desc", null, null));
+                service.upload(new UploadRequest("xml", "name", "application/xml", "<root/>",
+                        "1.0.0", "desc", null, null)));
     }
 
     @Test
     void upload_WhenBlankVersionAndBlankNextVersionType_ThenThrowsCompasInvalidInputException() {
         assertThrows(CompasInvalidInputException.class, () ->
-                service.upload("xml", "name", "application/xml", "<root/>",
-                        "1.0.0", "desc", "  ", "  "));
+                service.upload(new UploadRequest("xml", "name", "application/xml", "<root/>",
+                        "1.0.0", "desc", "  ", "  ")));
     }
 
     // --- validation ---
@@ -238,29 +238,29 @@ class CompasPluginsResourceServiceTest {
     @Test
     void upload_WhenInvalidContentType_ThenThrowsCompasInvalidInputException() {
         assertThrows(CompasInvalidInputException.class, () ->
-                service.upload("xml", "name", "text/plain", "<root/>",
-                        "1.0.0", "desc", "1.0.0", null));
+                service.upload(new UploadRequest("xml", "name", "text/plain", "<root/>",
+                        "1.0.0", "desc", "1.0.0", null)));
     }
 
     @Test
     void upload_WhenNullContentType_ThenThrowsCompasInvalidInputException() {
         assertThrows(CompasInvalidInputException.class, () ->
-                service.upload("xml", "name", null, "<root/>",
-                        "1.0.0", "desc", "1.0.0", null));
+                service.upload(new UploadRequest("xml", "name", null, "<root/>",
+                        "1.0.0", "desc", "1.0.0", null)));
     }
 
     @Test
     void upload_WhenInvalidSemverForDataCompatibilityVersion_ThenThrowsCompasInvalidInputException() {
         assertThrows(CompasInvalidInputException.class, () ->
-                service.upload("xml", "name", "application/xml", "<root/>",
-                        "not-a-version", "desc", "1.0.0", null));
+                service.upload(new UploadRequest("xml", "name", "application/xml", "<root/>",
+                        "not-a-version", "desc", "1.0.0", null)));
     }
 
     @Test
     void upload_WhenInvalidSemverForExplicitVersion_ThenThrowsCompasInvalidInputException() {
         assertThrows(CompasInvalidInputException.class, () ->
-                service.upload("xml", "name", "application/xml", "<root/>",
-                        "1.0.0", "desc", "bad", null));
+                service.upload(new UploadRequest("xml", "name", "application/xml", "<root/>",
+                        "1.0.0", "desc", "bad", null)));
     }
 
     // --- helpers ---
