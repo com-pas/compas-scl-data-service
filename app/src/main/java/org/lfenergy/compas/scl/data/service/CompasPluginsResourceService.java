@@ -78,41 +78,39 @@ public class CompasPluginsResourceService {
     }
 
     @Transactional(REQUIRED)
-    public PluginsCustomResource upload(String type, String name, String contentType, String content,
-                                        String dataCompatibilityVersion, String description,
-                                        String version, String nextVersionType) {
-        LOGGER.info("Uploading plugins custom resource type='{}', name='{}'", type, name);
+    public PluginsCustomResource upload(UploadRequest request) {
+        LOGGER.info("Uploading plugins custom resource type='{}', name='{}'", request.type(), request.name());
 
-        validateContentType(contentType);
-        validateSemver(dataCompatibilityVersion, "data-compatibility-version");
+        validateContentType(request.contentType());
+        validateSemver(request.dataCompatibilityVersion(), "data-compatibility-version");
 
-        String resolvedVersion = resolveVersion(type, name, version, nextVersionType);
+        String resolvedVersion = resolveVersion(request.type(), request.name(), request.version(), request.nextVersionType());
 
         Long duplicateCount = entityManager.createQuery(
                         "SELECT COUNT(e) FROM PluginsCustomResource e " +
                                 "WHERE e.type = :type AND e.tenant = :tenant AND e.name = :name AND e.version = :version",
                         Long.class)
-                .setParameter("type", type)
+                .setParameter("type", request.type())
                 .setParameter("tenant", DEFAULT_TENANT)
-                .setParameter("name", name)
+                .setParameter("name", request.name())
                 .setParameter("version", resolvedVersion)
                 .getSingleResult();
 
         if (duplicateCount > 0) {
             throw new CompasDuplicateVersionException(
                     String.format("Data with name '%s' and version '%s' already exists for type '%s'",
-                            name, resolvedVersion, type));
+                            request.name(), resolvedVersion, request.type()));
         }
 
         var entity = new PluginsCustomResource();
-        entity.type = type;
+        entity.type = request.type();
         entity.tenant = DEFAULT_TENANT;
-        entity.name = name;
-        entity.description = description;
-        entity.contentType = contentType;
-        entity.content = content;
+        entity.name = request.name();
+        entity.description = request.description();
+        entity.contentType = request.contentType();
+        entity.content = request.content();
         entity.version = resolvedVersion;
-        entity.dataCompatibilityVersion = dataCompatibilityVersion;
+        entity.dataCompatibilityVersion = request.dataCompatibilityVersion();
         entityManager.persist(entity);
 
         LOGGER.info("Persisted plugins custom resource with id '{}'", entity.id);
