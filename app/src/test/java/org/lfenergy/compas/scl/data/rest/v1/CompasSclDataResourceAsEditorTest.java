@@ -314,7 +314,7 @@ class CompasSclDataResourceAsEditorTest {
         try (var inputStream = getClass().getResourceAsStream("/scl/icd_import_ied_test.scd")) {
             assert inputStream != null;
 
-            return new String(inputStream.readAllBytes()).replace("\r\n", "\n");
+            return new String(inputStream.readAllBytes());
         }
     }
 }
