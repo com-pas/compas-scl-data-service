@@ -52,6 +52,7 @@ public class CompasSclUpdateServerEndpoint {
     @OnOpen
     public void onOpen(Session session, @PathParam(TYPE_PATH_PARAM) String type) {
         LOGGER.debug("Starting (update) session {} for type {}.", session.getId(), type);
+        // TODO: Workaround - remove once HTTP auth permissions are enforced on WebSocket upgrade.
         var requiredRole = type + "_" + UPDATE_ROLE;
         if (!jsonWebToken.getGroups().contains(requiredRole)) {
             LOGGER.warn("User lacks role {} for update session {}.", requiredRole, session.getId());
