@@ -23,9 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
-import static io.restassured.path.xml.config.XmlPathConfig.xmlPathConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.lfenergy.compas.scl.data.SclDataServiceConstants.SCL_NS_URI;
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
 import static org.mockito.Mockito.*;
 import io.quarkus.test.InjectMock;
@@ -108,9 +106,7 @@ class CompasSclDataResourceAsReaderTest {
                 .extract()
                 .response();
 
-        var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
-        assertEquals(scl, xmlPath.get("GetWsResponse.SclData"));
+        assertEquals(scl, response.xmlPath().getString("GetResponse.SclData"));
         verify(compasSclDataService).findByUUID(type, uuid);
     }
 
@@ -133,9 +129,7 @@ class CompasSclDataResourceAsReaderTest {
                 .extract()
                 .response();
 
-        var xmlPath = response.xmlPath()
-                .using(xmlPathConfig().declaredNamespace("scl", SCL_NS_URI));
-        assertEquals(scl, xmlPath.get("GetWsResponse.SclData"));
+        assertEquals(scl, response.xmlPath().getString("GetResponse.SclData"));
         verify(compasSclDataService).findByUUID(type, uuid, version);
     }
 
