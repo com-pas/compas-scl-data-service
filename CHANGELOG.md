@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.17.4](https://github.com/com-pas/compas-scl-data-service/compare/v0.17.3...v0.17.4) (2026-03-18)
+
+
+### Bug Fixes
+
+* Add role check to WebSocket Create/Update endpoints ([33e6225](https://github.com/com-pas/compas-scl-data-service/commit/33e622580682fe724bc8e015d20d398abda8cc3e))
+* Bump microprofile-openapi-api to 4.1.1 for Quarkus 3.31 compatibility ([b4713ed](https://github.com/com-pas/compas-scl-data-service/commit/b4713ed307b1db2505ea668e3eed3037260f21db))
+* checkout base repository instead of fork in SonarCloud workflow ([a18a075](https://github.com/com-pas/compas-scl-data-service/commit/a18a07536a02a763a38983b148a3fd442e25b666))
+* Correct XPath references and namespace handling in REST endpoint tests ([a0c8372](https://github.com/com-pas/compas-scl-data-service/commit/a0c83723b0e0a1b864611f110f9a2c33a2c576c8))
+* enforce LF for SCD files via .gitattributes and revert dependabot actor check ([e30ae9d](https://github.com/com-pas/compas-scl-data-service/commit/e30ae9d52e2b87711293281575c881fb4b3250e4))
+* explicit config setting for namespace awareness ([cad7539](https://github.com/com-pas/compas-scl-data-service/commit/cad7539489a9f63ac508b5f6de2b16270e127598))
+* Normalize line endings in REST test SCL fixtures ([3ccb826](https://github.com/com-pas/compas-scl-data-service/commit/3ccb82657548eb57f0a1c14d5dc063c93aa7816e))
+* now using shas instead of versions in workflows. Recommended by SonarCube ([d0f029a](https://github.com/com-pas/compas-scl-data-service/commit/d0f029add28774aa22d7e04bd5c5fab0e046423b))
+* prevent forgeable actor checks and command injection in CI workflows ([f97e083](https://github.com/com-pas/compas-scl-data-service/commit/f97e08368c803dc306ba5b1181f4d46914c08119))
+* Renamed resteasy-reactive artifacts for Quarkus 3.31 compatibility ([a501b6f](https://github.com/com-pas/compas-scl-data-service/commit/a501b6fa314cc499e5cf2152628ad29a49d6bb8f))
+* revert SonarCloud checkout to use fork repo and head branch Rest… ([df0335e](https://github.com/com-pas/compas-scl-data-service/commit/df0335e34f2c14b0ecefd4a5aeccceb0a910477c))
+* revert SonarCloud checkout to use fork repo and head branch Restores head_repository.full_name and head_branch in checkout step,reverting a18a075 which broke fork PR analysis. ([1b2571c](https://github.com/com-pas/compas-scl-data-service/commit/1b2571cf153d8d893dd0be11e1568c758996a642))
+* reverted changes for unneccessary dependabot check ([f2c40d4](https://github.com/com-pas/compas-scl-data-service/commit/f2c40d44ca9c8bd5c673360d4fa318223d9740b0))
+* set docker api version release please action ([1a23775](https://github.com/com-pas/compas-scl-data-service/commit/1a23775800e8b68b53a756d0945f5f3b8939b8c0))
+* set docker api version release please action ([db3bfc9](https://github.com/com-pas/compas-scl-data-service/commit/db3bfc9390cedf4a05e934ffc604fbd581dd577d))
+* Update InjectMock import for Quarkus 3.31 compatibility ([0253f6b](https://github.com/com-pas/compas-scl-data-service/commit/0253f6b410300834bdf7547310fe91576b228249))
+* Update WebSocket reader tests for Quarkus 3.31 behavior ([10ee979](https://github.com/com-pas/compas-scl-data-service/commit/10ee979c19e03d0058b89883960697448ad6a1df))
+* upgrade Quarkus to 3.31.4 with compatibility and security fixes ([8283262](https://github.com/com-pas/compas-scl-data-service/commit/82832623b7d6690331d10571d9b5885a4543f281))
+
 ## [0.17.3](https://github.com/com-pas/compas-scl-data-service/compare/v0.17.2...v0.17.3) (2026-02-17)
 
 
