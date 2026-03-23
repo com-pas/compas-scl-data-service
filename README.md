@@ -90,6 +90,8 @@ configured as needed.
 - STD_DELETE
 - STD_READ
 - STD_UPDATE
+- PLUGINS_RESOURCES_WRITE
+- PLUGINS_RESOURCES_READ
 
 ## Contributing
 
