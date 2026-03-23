@@ -18,7 +18,7 @@ tags:
     description: Plugins custom resources
 
 paths:
-  /api/plugins/resources:
+  /plugins/resources/v1:
     get:
       tags:
         - plugins-custom-resources
@@ -226,7 +226,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /api/plugins/resources/{id}:
+  /plugins/resources/v1/{id}:
     get:
       tags:
         - plugins-custom-resources
