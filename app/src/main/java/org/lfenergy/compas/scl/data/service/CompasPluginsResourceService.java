@@ -30,6 +30,12 @@ public class CompasPluginsResourceService {
     private static final Logger LOGGER = LogManager.getLogger(CompasPluginsResourceService.class);
     private static final String DEFAULT_TENANT = "default";
 
+
+    private static final List<String> ALLOWED_CONTENT_TYPES = List.of(
+            "application/json",
+            "application/xml"
+    );
+
     private final EntityManager entityManager;
 
     @Inject
@@ -78,7 +84,7 @@ public class CompasPluginsResourceService {
     }
 
     @Transactional(REQUIRED)
-    public PluginsCustomResource upload(UploadRequest request) {
+    public PluginsCustomResource upload(UploadCustomPluginsResourceData request) {
         LOGGER.info("Uploading plugins custom resource type='{}', name='{}'", request.type(), request.name());
 
         validateContentType(request.contentType());
@@ -177,10 +183,10 @@ public class CompasPluginsResourceService {
     }
 
     private void validateContentType(String contentType) {
-        if (contentType == null ||
-                (!"application/json".equals(contentType) && !"application/xml".equals(contentType))) {
+        var normalizedContentType = contentType != null ? contentType.trim().toLowerCase() : "";
+        if (!ALLOWED_CONTENT_TYPES.contains(normalizedContentType)) {
             throw new CompasInvalidInputException(
-                    "Content type must be 'application/json' or 'application/xml'");
+                    "Content type must be one of the following: " + String.join(", ", ALLOWED_CONTENT_TYPES));
         }
     }
 
