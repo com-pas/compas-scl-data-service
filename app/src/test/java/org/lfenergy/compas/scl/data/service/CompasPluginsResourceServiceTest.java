@@ -126,7 +126,7 @@ class CompasPluginsResourceServiceTest {
         var duplicateQuery = mockTypedQuery(Long.class);
         when(duplicateQuery.getSingleResult()).thenReturn(0L);
 
-        var result = service.upload(new UploadRequest("xml", "name", "application/xml", "<root/>",
+        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "2.0.0", null));
 
         verify(entityManager).persist(any(PluginsCustomResource.class));
@@ -145,7 +145,7 @@ class CompasPluginsResourceServiceTest {
         var duplicateQuery = mockTypedQuery(Long.class);
         when(duplicateQuery.getSingleResult()).thenReturn(1L);
 
-        var request = new UploadRequest("xml", "name", "application/xml", "<root/>",
+        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "2.0.0", null);
         assertThrows(CompasDuplicateVersionException.class, () -> service.upload(request));
     }
@@ -161,7 +161,7 @@ class CompasPluginsResourceServiceTest {
         existing.version = "1.2.3";
         when(existingQuery.getResultList()).thenReturn(List.of(existing));
 
-        var result = service.upload(new UploadRequest("xml", "name", "application/json", "{}",
+        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
                 "1.0.0", "desc", null, nextVersionType));
 
         assertEquals(expectedVersion, result.version);
@@ -175,7 +175,7 @@ class CompasPluginsResourceServiceTest {
         var existingQuery = mockTypedQuery(PluginsCustomResource.class);
         when(existingQuery.getResultList()).thenReturn(List.of());
 
-        var result = service.upload(new UploadRequest("xml", "name", "application/json", "{}",
+        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
                 "1.0.0", "desc", null, "MAJOR"));
 
         assertEquals("1.0.0", result.version);
@@ -183,21 +183,21 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void upload_WhenInvalidNextVersionType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadRequest("xml", "name", "application/xml", "<root/>",
+        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", null, "INVALID");
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenNoVersionAndNoNextVersionType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadRequest("xml", "name", "application/xml", "<root/>",
+        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", null, null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenBlankVersionAndBlankNextVersionType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadRequest("xml", "name", "application/xml", "<root/>",
+        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "  ", "  ");
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
@@ -206,28 +206,28 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void upload_WhenInvalidContentType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadRequest("xml", "name", "text/plain", "<root/>",
+        var request = new UploadCustomPluginsResourceData("xml", "name", "text/plain", "<root/>",
                 "1.0.0", "desc", "1.0.0", null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenNullContentType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadRequest("xml", "name", null, "<root/>",
+        var request = new UploadCustomPluginsResourceData("xml", "name", null, "<root/>",
                 "1.0.0", "desc", "1.0.0", null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenInvalidSemverForDataCompatibilityVersion_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadRequest("xml", "name", "application/xml", "<root/>",
+        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "not-a-version", "desc", "1.0.0", null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenInvalidSemverForExplicitVersion_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadRequest("xml", "name", "application/xml", "<root/>",
+        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "bad", null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
