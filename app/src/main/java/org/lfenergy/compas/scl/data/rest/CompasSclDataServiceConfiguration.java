@@ -15,7 +15,12 @@ import jakarta.enterprise.inject.Produces;
  */
 @RegisterForReflection(targets = {
         org.lfenergy.compas.core.commons.model.ErrorResponse.class,
-        org.lfenergy.compas.core.commons.model.ErrorMessage.class
+        org.lfenergy.compas.core.commons.model.ErrorMessage.class,
+        org.lfenergy.compas.scl.data.rest.dto.DataEntry.class,
+        org.lfenergy.compas.scl.data.rest.dto.DataEntryWithContent.class,
+        org.lfenergy.compas.scl.data.rest.dto.PagedDataEntryResponse.class,
+        org.lfenergy.compas.scl.data.rest.dto.UploadDataResponse.class,
+        org.lfenergy.compas.scl.data.rest.dto.Error.class
 })
 public class CompasSclDataServiceConfiguration {
     @Produces
