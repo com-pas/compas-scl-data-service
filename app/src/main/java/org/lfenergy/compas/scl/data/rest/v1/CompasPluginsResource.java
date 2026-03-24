@@ -16,7 +16,7 @@ import org.lfenergy.compas.scl.data.rest.dto.DataEntryWithContent;
 import org.lfenergy.compas.scl.data.rest.dto.PagedDataEntryResponse;
 import org.lfenergy.compas.scl.data.rest.dto.UploadDataResponse;
 import org.lfenergy.compas.scl.data.service.CompasPluginsResourceService;
-import org.lfenergy.compas.scl.data.service.UploadRequest;
+import org.lfenergy.compas.scl.data.service.UploadCustomPluginsResourceData;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,7 +89,7 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
             throw new CompasInvalidInputException("Failed to read content from upload");
         }
 
-        var entity = service.upload(new UploadRequest(type, name, contentType, content,
+        var entity = service.upload(new UploadCustomPluginsResourceData(type, name, contentType, content,
                 dataCompatibilityVersion, description, version, nextVersionType));
 
         var response = new UploadDataResponse();

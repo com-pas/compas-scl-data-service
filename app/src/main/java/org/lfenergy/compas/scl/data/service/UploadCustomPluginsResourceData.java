@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.service;
 
-public record UploadRequest(
+public record UploadCustomPluginsResourceData(
         String type,
         String name,
         String contentType,
