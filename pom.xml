@@ -34,6 +34,7 @@ SPDX-License-Identifier: Apache-2.0
         <module>repository-postgresql</module>
         <module>service</module>
         <module>app</module>
+        <module>api</module>
     </modules>
 
     <distributionManagement>
@@ -62,6 +63,11 @@ SPDX-License-Identifier: Apache-2.0
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>org.lfenergy.compas.scl.data</groupId>
+                <artifactId>api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.lfenergy.compas.scl.data</groupId>
                 <artifactId>service</artifactId>
