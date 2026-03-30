@@ -12,8 +12,8 @@ SPDX-License-Identifier: Apache-2.0
         <groupId>org.lfenergy.compas.scl.data</groupId>
         <artifactId>compas-scl-data-service</artifactId>
         <version>0.17.3</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
-
     <artifactId>api</artifactId>
     <packaging>jar</packaging>
 
