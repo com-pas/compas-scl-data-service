@@ -8,12 +8,13 @@ SPDX-License-Identifier: Apache-2.0
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.lfenergy.compas.scl.data</groupId>
         <artifactId>compas-scl-data-service</artifactId>
         <version>0.17.4</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
+
     <artifactId>api</artifactId>
     <packaging>jar</packaging>
 
@@ -29,6 +30,13 @@ SPDX-License-Identifier: Apache-2.0
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
