@@ -9,3 +9,4 @@ If changes are made to the specification file, the API code must be re-generated
 ```bash
 cd ./api
 mvn openapi-generator:generate@generate-api
+```
