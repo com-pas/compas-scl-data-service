@@ -67,3 +67,6 @@ build
 
 # Quarkus specific
 quarkus.log
+
+# OpenAPI generator specific
+api/.openapi-generator/

@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 BearingPoint GmbH
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 Quarkus Hibernate with Panache Next
 ==================================
 

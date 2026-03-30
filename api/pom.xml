@@ -16,7 +16,11 @@ SPDX-License-Identifier: Apache-2.0
 
     <artifactId>api</artifactId>
     <packaging>jar</packaging>
-    
+
+    <properties>
+        <quarkus.container-image.group>lfenergy</quarkus.container-image.group>
+        <quarkus.container-image.name>compas-scl-data-service</quarkus.container-image.name>
+    </properties>
 
     <dependencies>
         <dependency>
