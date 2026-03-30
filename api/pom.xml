@@ -17,11 +17,6 @@ SPDX-License-Identifier: Apache-2.0
     <artifactId>api</artifactId>
     <packaging>jar</packaging>
 
-    <properties>
-        <quarkus.container-image.group>lfenergy</quarkus.container-image.group>
-        <quarkus.container-image.name>compas-scl-data-service</quarkus.container-image.name>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -72,28 +67,6 @@ SPDX-License-Identifier: Apache-2.0
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- Tell Maven that src/generated contains Java sources -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.4.0</version>
-                <executions>
-                    <execution>
-                        <id>add-generated</id>
-                        <phase>generate-sources</phase>
-                        <goals><goal>add-source</goal></goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.basedir}/src/generated/src/main/java</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
     </build>
-
-
 </project>
