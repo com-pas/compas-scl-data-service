@@ -46,6 +46,7 @@ SPDX-License-Identifier: Apache-2.0
                         <goals>
                             <goal>generate</goal>
                         </goals>
+                        <phase>none</phase>
 
                         <configuration>
                             <inputSpec>${project.basedir}/plugins-custom-resources.yaml</inputSpec>
