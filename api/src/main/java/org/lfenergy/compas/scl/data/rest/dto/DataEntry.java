@@ -6,7 +6,6 @@ package org.lfenergy.compas.scl.data.rest.dto;
 import java.util.Date;
 import java.util.UUID;
 import jakarta.validation.constraints.*;
-import jakarta.validation.Valid;
 
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
