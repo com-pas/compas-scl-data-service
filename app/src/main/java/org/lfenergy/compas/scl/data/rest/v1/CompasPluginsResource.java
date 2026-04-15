@@ -104,6 +104,19 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
 
     private DataEntry toDataEntry(PluginsCustomResource entity) {
         var entry = new DataEntry();
+        mapCommonDataEntryFields(entry, entity);
+        return entry;
+    }
+
+    private DataEntryWithContent toDataEntryWithContent(PluginsCustomResource entity) {
+        var entry = new DataEntryWithContent();
+        mapCommonDataEntryFields(entry, entity);
+        entry.setContent(entity.content);
+        return entry;
+    }
+
+
+    private void mapCommonDataEntryFields(DataEntry entry, PluginsCustomResource entity) {
         entry.setId(entity.id);
         entry.setType(entity.type);
         entry.setTenant(entity.tenant);
@@ -113,22 +126,6 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
         entry.setVersion(entity.version);
         entry.setDataCompatibilityVersion(entity.dataCompatibilityVersion);
         entry.setUploadedAt(toDate(entity.uploadedAt));
-        return entry;
-    }
-
-    private DataEntryWithContent toDataEntryWithContent(PluginsCustomResource entity) {
-        var entry = new DataEntryWithContent();
-        entry.setId(entity.id);
-        entry.setType(entity.type);
-        entry.setTenant(entity.tenant);
-        entry.setName(entity.name);
-        entry.setDescription(entity.description);
-        entry.setContentType(DataEntryWithContent.ContentTypeEnum.fromString(entity.contentType));
-        entry.setVersion(entity.version);
-        entry.setDataCompatibilityVersion(entity.dataCompatibilityVersion);
-        entry.setUploadedAt(toDate(entity.uploadedAt));
-        entry.setContent(entity.content);
-        return entry;
     }
 
     private Date toDate(OffsetDateTime odt) {
