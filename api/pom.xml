@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 BearingPoint GmbH
+
+SPDX-License-Identifier: Apache-2.0
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.lfenergy.compas.scl.data</groupId>
+        <artifactId>compas-scl-data-service</artifactId>
+        <version>0.17.4</version>
+    </parent>
+
+    <artifactId>api</artifactId>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>7.12.0</version>
+
+                <executions>
+                    <execution>
+                        <id>generate-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>none</phase>
+
+                        <configuration>
+                            <inputSpec>${project.basedir}/plugins-custom-resources.yaml</inputSpec>
+                            <generatorName>jaxrs-spec</generatorName>
+                            <output>${project.basedir}</output>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+
+                            <configOptions>
+                                <sourceFolder>src/main/java</sourceFolder>
+                                <apiPackage>org.lfenergy.compas.scl.data.rest</apiPackage>
+                                <modelPackage>org.lfenergy.compas.scl.data.rest.dto</modelPackage>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useTags>true</useTags>
+                                <useJakartaEe>true</useJakartaEe>
+                                <useSwaggerAnnotations>false</useSwaggerAnnotations>
+                                <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

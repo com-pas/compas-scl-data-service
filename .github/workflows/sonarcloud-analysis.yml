@@ -4,7 +4,7 @@
 
 name: SonarCloud Analysis
 
-on: 
+on:
   workflow_run:
     workflows: [SonarCloud Build]
     types: [completed]
