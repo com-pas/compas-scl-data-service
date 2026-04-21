@@ -1,5 +1,59 @@
 # Changelog
 
+## [0.18.0](https://github.com/com-pas/compas-scl-data-service/compare/v0.17.4...v0.18.0) (2026-04-21)
+
+
+### Features
+
+* Add ([3c7919c](https://github.com/com-pas/compas-scl-data-service/commit/3c7919c841d58c177d584c63d015a8b5b75c706a))
+* Added endpoint tests for CompasPluginsResource ([1d7529f](https://github.com/com-pas/compas-scl-data-service/commit/1d7529f5fc020696bbcb88f2f2c7440db39fcf4f))
+* Added exception classes for plugins custom resources ([328c490](https://github.com/com-pas/compas-scl-data-service/commit/328c490f53dc767c9c786d8e879da66aa331cdf7))
+* Added Hibernate ORM config and auth permissions for plugins endpoints ([0635710](https://github.com/com-pas/compas-scl-data-service/commit/06357106b319825ee5a5f43826ee89c8f385c14c))
+* Added PluginsCustomResource entity ([f630819](https://github.com/com-pas/compas-scl-data-service/commit/f630819509e8e34e71899726758a7fd722591a3f))
+* Added rest endpoints for 594_plugins_custom_resources ([5a3b3aa](https://github.com/com-pas/compas-scl-data-service/commit/5a3b3aaa97e8aa34d75a04d6ec27e3af350c15bd))
+* Implemented plugins custom resources REST endpoints ([88a0a61](https://github.com/com-pas/compas-scl-data-service/commit/88a0a618971473b03902ddebe49d5782397de96c))
+* Registered generated  DTOs for native image reflection ([3b6fe6b](https://github.com/com-pas/compas-scl-data-service/commit/3b6fe6b2914bc9bab1c1df8239bc2d417736f0cc))
+
+
+### Bug Fixes
+
+* added api module with the sources generated from OpenAPI ([2ae84ff](https://github.com/com-pas/compas-scl-data-service/commit/2ae84ffd854b67c0a7f660cc60310f4c5fdefed6))
+* Added hibernate processor config ([6a589ab](https://github.com/com-pas/compas-scl-data-service/commit/6a589abae18015245a2c55b91edb7a2d61ad85d4))
+* added index dependency for repository-postgresql and hibernate orm config in application.properties ([e282956](https://github.com/com-pas/compas-scl-data-service/commit/e2829568fbee20925b3d8537877fc10b75b82a22))
+* Added license to CompasPluginsResource ([6fd9a80](https://github.com/com-pas/compas-scl-data-service/commit/6fd9a80c411575738773cbe35409647c6d07276a))
+* added licenses for the generated files ([75e7a13](https://github.com/com-pas/compas-scl-data-service/commit/75e7a131280b9569f3575b011a40250aa4ab9f7b))
+* added licenses for the new readme files ([c44fef6](https://github.com/com-pas/compas-scl-data-service/commit/c44fef61593e40b26152b261f1c68b1baa0eae60))
+* added list for content types ([8ceb204](https://github.com/com-pas/compas-scl-data-service/commit/8ceb20410000890d51ecbb2c3395feb321b7d46b))
+* added missing license comments ([5fb2490](https://github.com/com-pas/compas-scl-data-service/commit/5fb249069818a541c65fe4d183d72ee34594911d))
+* added missing license to file repository-postgresql/src/test/resources/application.properties ([7d6b9f7](https://github.com/com-pas/compas-scl-data-service/commit/7d6b9f724e5974544f43f6ed3b6404d6444315d7))
+* Added missing licensing file ([ab8807a](https://github.com/com-pas/compas-scl-data-service/commit/ab8807aa56feb45c0e1a7c50226b8c8c0f96897b))
+* added new step in build-project.yml that installs parent POM ([0192ac3](https://github.com/com-pas/compas-scl-data-service/commit/0192ac3ba9f7c22581c77e7beecfc4d955d8cb2f))
+* added quarkus reactive dependencies to native-image profile ([2e76d4c](https://github.com/com-pas/compas-scl-data-service/commit/2e76d4cbf7a4081de376bc03b5aa1925e219f4ce))
+* Added quarkus-jdbc-postgresql dependency ([5491705](https://github.com/com-pas/compas-scl-data-service/commit/5491705747848f67eaea08041b5d580044bcdac1))
+* added readme for quarkus hibernate with panache next ([98d983a](https://github.com/com-pas/compas-scl-data-service/commit/98d983a47bb890bb901570825e5f6f42bead6602))
+* added relative path for parent ([3f747d7](https://github.com/com-pas/compas-scl-data-service/commit/3f747d7f66de5a566d511ac16aa31153668ade38))
+* added schema definition for getAllData definiton in the openApi. ToDo: same has to be done for UploadData201Response ([24bb8da](https://github.com/com-pas/compas-scl-data-service/commit/24bb8daa0e6f5fcd6f9a42e9ebe5dc25420ad9c5))
+* extracted new UploadRequest(...) from assertThrows each lambda has therefore only one invocation ([f19c4dc](https://github.com/com-pas/compas-scl-data-service/commit/f19c4dca0610e26e47b1257e97a3fb0d84498195))
+* Fixed license ([e6ab13f](https://github.com/com-pas/compas-scl-data-service/commit/e6ab13f045b090822496a72b32281e14ad93206b))
+* map common data entry fields in a dedicated method ([490a76c](https://github.com/com-pas/compas-scl-data-service/commit/490a76ccbc3cdbb9a8a6c42807a66a1479a15184))
+* Modified all PluginsCustomResource fields to be public ([0ffb4fd](https://github.com/com-pas/compas-scl-data-service/commit/0ffb4fd08edf25437750a7eb4cc5edca05532020))
+* moved panache-next dependency to repository module ([849b1fa](https://github.com/com-pas/compas-scl-data-service/commit/849b1fa528ff56b0d8a4e3d0f7050085b1cdcde6))
+* moved PluginsCustomResource entity to repository module ([02235d4](https://github.com/com-pas/compas-scl-data-service/commit/02235d4f031e2094fdc2c642617eb85c52cc87a4))
+* prevent forgeable actor checks and command injection in CI workflows ([c9a006e](https://github.com/com-pas/compas-scl-data-service/commit/c9a006e31afc0a67795ca5545b24a1aac2cc92dd))
+* remove unused import ([4cae00c](https://github.com/com-pas/compas-scl-data-service/commit/4cae00c21f69aa7a88c787aa9cf2c87e575b527e))
+* removed code smell on method that has more than 7 attributes. Recommended by SonarCube ([fc13b0c](https://github.com/com-pas/compas-scl-data-service/commit/fc13b0c44a1e87e90939cf49484e110fe0a99c62))
+* removed new step in build-project.yml that installs parent POM ([e0e4ccd](https://github.com/com-pas/compas-scl-data-service/commit/e0e4ccdd7094c3a3f2557b6bbaac8273e95b99cc))
+* Removed wrong mock in CompasPluginsResourceGetDataTest ([0d4d112](https://github.com/com-pas/compas-scl-data-service/commit/0d4d112b7f2e5f64db40f1616b391ee4396e90e3))
+* rename custom plugins paths application.properties ([363dcee](https://github.com/com-pas/compas-scl-data-service/commit/363dceebc1c0ffd4556b787a90a0f0f4cd8bf092))
+* rename paths for plugins custom resources ([02af6ab](https://github.com/com-pas/compas-scl-data-service/commit/02af6ab2f9d09d1eedb19c0332c85aa20ac2d683))
+* renamed UpdateRequest to UploadCustomPluginsResourceData ([5c17c77](https://github.com/com-pas/compas-scl-data-service/commit/5c17c77fcbd2556d197ee52b01728767587f1446))
+* rewrite new role names in uppercase for consistency ([e66b22a](https://github.com/com-pas/compas-scl-data-service/commit/e66b22a210967c439891d5988b829afa5f5345fe))
+* schema definition for inline defined  UploadDataResponse ([9a1d5cc](https://github.com/com-pas/compas-scl-data-service/commit/9a1d5cc73b3ab82b698dcb0767e83c8d189324dd))
+* typo in scope ([a8869af](https://github.com/com-pas/compas-scl-data-service/commit/a8869af636e31d6dd75b65e76d779ae3d898e1c3))
+* update parent pom version in api ([130f1c9](https://github.com/com-pas/compas-scl-data-service/commit/130f1c996c79dd518a83ed0277987c28108ad633))
+* use inheritance for DataEntry and DataEntryWithContent ([0afc97d](https://github.com/com-pas/compas-scl-data-service/commit/0afc97d6af6ffc3d212ea7196de39e7256e9a6ab))
+* version of api has been updated to 0.17.4 ([8c11713](https://github.com/com-pas/compas-scl-data-service/commit/8c11713f4277b904dbaf26bf36a31d8b516e2c9e))
+
 ## [0.17.4](https://github.com/com-pas/compas-scl-data-service/compare/v0.17.3...v0.17.4) (2026-03-18)
 
 
