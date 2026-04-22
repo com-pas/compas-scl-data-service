@@ -81,6 +81,6 @@ public interface PluginsCustomResourcesApi {
     @POST
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    UploadDataResponse uploadData(@FormParam(value = "type")  String type,@FormParam(value = "name")  String name,@FormParam(value = "content-type")  String contentType, @FormParam(value = "content") InputStream contentInputStream,@FormParam(value = "data-compatibility-version")  String dataCompatibilityVersion,@FormParam(value = "description")  String description,@FormParam(value = "version")  String version,@FormParam(value = "nextVersionType")  String nextVersionType);
+    UploadDataResponse uploadData(@FormParam(value = "type")  String type,@FormParam(value = "name")  String name,@FormParam(value = "content-type")  String contentType, @FormParam(value = "content") InputStream content,@FormParam(value = "data-compatibility-version")  String dataCompatibilityVersion,@FormParam(value = "description")  String description,@FormParam(value = "version")  String version,@FormParam(value = "nextVersionType")  String nextVersionType);
 
 }
