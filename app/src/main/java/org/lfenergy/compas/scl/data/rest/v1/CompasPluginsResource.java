@@ -77,19 +77,19 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
     public UploadDataResponse uploadData(String type,
                                              String name,
                                              String contentType,
-                                             InputStream contentInputStream,
+                                             InputStream content,
                                              String dataCompatibilityVersion,
                                              String description,
                                              String version,
                                              String nextVersionType) {
-        String content;
+        String contentText;
         try {
-            content = new String(contentInputStream.readAllBytes(), StandardCharsets.UTF_8);
+            contentText = new String(content.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new CompasInvalidInputException("Failed to read content from upload");
         }
 
-        var entity = service.upload(new UploadCustomPluginsResourceData(type, name, contentType, content,
+        var entity = service.upload(new UploadCustomPluginsResourceData(type, name, contentType, contentText,
                 dataCompatibilityVersion, description, version, nextVersionType));
 
         var response = new UploadDataResponse();
