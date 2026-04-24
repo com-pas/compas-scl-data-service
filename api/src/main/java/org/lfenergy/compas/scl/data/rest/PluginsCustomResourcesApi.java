@@ -20,7 +20,7 @@ import jakarta.validation.constraints.*;
 /**
 * Represents a collection of functions to interact with the API endpoints.
 */
-@Path("/plugins/resources/v1")
+@Path("/plugins/resources")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", comments = "Generator version: 7.12.0")
 public interface PluginsCustomResourcesApi {
 
