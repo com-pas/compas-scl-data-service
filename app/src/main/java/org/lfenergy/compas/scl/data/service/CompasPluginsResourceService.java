@@ -68,9 +68,10 @@ public class CompasPluginsResourceService {
 
         TypedQuery<PluginsCustomResource> query = entityManager.createQuery(queryBuilder.toString(), PluginsCustomResource.class);
         params.forEach(query::setParameter);
-        query.setFirstResult(page * size);
-        query.setMaxResults(size);
-        return query.getResultList();
+
+        return Boolean.TRUE.equals(latestOnly)
+                ? query.setMaxResults(1).getResultList()
+                : query.setFirstResult(page * size).setMaxResults(size).getResultList();
     }
 
     @Transactional(SUPPORTS)
