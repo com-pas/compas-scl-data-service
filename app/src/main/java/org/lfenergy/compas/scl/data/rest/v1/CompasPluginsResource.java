@@ -11,10 +11,10 @@ import org.apache.logging.log4j.Logger;
 import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
 import org.lfenergy.compas.scl.data.model.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.rest.PluginsCustomResourcesApi;
-import org.lfenergy.compas.scl.data.rest.dto.DataEntry;
-import org.lfenergy.compas.scl.data.rest.dto.DataEntryWithContent;
-import org.lfenergy.compas.scl.data.rest.dto.PagedDataEntryResponse;
-import org.lfenergy.compas.scl.data.rest.dto.UploadDataResponse;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntry;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntryWithContent;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.PagedDataEntryResponse;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.UploadDataResponse;
 import org.lfenergy.compas.scl.data.service.CompasPluginsResourceService;
 import org.lfenergy.compas.scl.data.service.UploadCustomPluginsResourceData;
 

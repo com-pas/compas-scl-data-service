@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 BearingPoint GmbH
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.rest.dto;
+package org.lfenergy.compas.scl.data.rest.api.plugins.resources;
 
 import java.util.Date;
 import java.util.UUID;

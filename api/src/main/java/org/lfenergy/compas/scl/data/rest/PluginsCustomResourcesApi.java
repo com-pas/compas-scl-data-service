@@ -3,23 +3,19 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest;
 
-import org.lfenergy.compas.scl.data.rest.dto.DataEntryWithContent;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntryWithContent;
 import java.util.Date;
-import org.lfenergy.compas.scl.data.rest.dto.Error;
-import java.io.File;
-import org.lfenergy.compas.scl.data.rest.dto.PagedDataEntryResponse;
+
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.PagedDataEntryResponse;
 import java.util.UUID;
-import org.lfenergy.compas.scl.data.rest.dto.UploadDataResponse;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.UploadDataResponse;
 
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Response;
 
 
 import java.io.InputStream;
-import java.util.Map;
-import java.util.List;
+
 import jakarta.validation.constraints.*;
-import jakarta.validation.Valid;
 
 /**
 * Represents a collection of functions to interact with the API endpoints.
