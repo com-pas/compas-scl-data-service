@@ -9,7 +9,7 @@ import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
-import org.lfenergy.compas.scl.data.model.PluginsCustomResource;
+import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.rest.PluginsCustomResourcesApi;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntry;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntryWithContent;

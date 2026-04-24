@@ -5,7 +5,9 @@ info:
 
 servers:
   - url: https://demo.compas.energy
-    description: DSOM Versatel Production URL
+    description: CoMPAS Demo URL
+  - url: http://localhost:8080/compas-scl-data-service
+    description: CoMPAS Local Testing URL
 
 tags:
   - name: history

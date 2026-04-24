@@ -10,7 +10,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
-import org.lfenergy.compas.scl.data.model.PluginsCustomResource;
+import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.service.CompasPluginsResourceService;
 
 import java.time.OffsetDateTime;
