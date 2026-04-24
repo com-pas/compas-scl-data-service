@@ -44,11 +44,12 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
                                             Date uploadedBefore,
                                             String name,
                                             Integer page,
-                                            Integer size) {
+                                            Integer size,
+                                             Boolean latestOnly) {
         LOGGER.info("Listing plugins custom resources for type '{}'", type);
 
-        var entities = service.list(type, uploadedAfter, uploadedBefore, name, page, size);
-        long totalElements = service.count(type, uploadedAfter, uploadedBefore, name);
+        var entities = service.list(type, uploadedAfter, uploadedBefore, name, page, size, latestOnly);
+        long totalElements = service.count(type, uploadedAfter, uploadedBefore, name, latestOnly);
 
         var entries = entities.stream()
                 .map(this::toDataEntry)

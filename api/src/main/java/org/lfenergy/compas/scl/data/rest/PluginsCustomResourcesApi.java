@@ -37,13 +37,14 @@ public interface PluginsCustomResourcesApi {
      * @param name Filter by name (contains search)
      * @param page Page number for pagination (0-indexed)
      * @param size Number of items per page
+     * @param latestOnly Filter by latest version per resource
      * @return List of data entries retrieved successfully
      * @return Bad request - Invalid query parameters
      * @return Internal server error
      */
     @GET
     @Produces({ "application/json" })
-    PagedDataEntryResponse getAllData(@QueryParam("type") @NotNull   String type,@QueryParam("uploadedAfter")   Date uploadedAfter,@QueryParam("uploadedBefore")   Date uploadedBefore,@QueryParam("name")   String name,@QueryParam("page") @Min(0) @DefaultValue("0")   Integer page,@QueryParam("size") @Min(1) @Max(100) @DefaultValue("20")   Integer size);
+    PagedDataEntryResponse getAllData(@QueryParam("type") @NotNull   String type,@QueryParam("uploadedAfter")   Date uploadedAfter,@QueryParam("uploadedBefore")   Date uploadedBefore,@QueryParam("name")   String name,@QueryParam("page") @Min(0) @DefaultValue("0")   Integer page,@QueryParam("size") @Min(1) @Max(100) @DefaultValue("20")   Integer size,@QueryParam("latestOnly") @DefaultValue("false")   Boolean latestOnly);
 
 
     /**

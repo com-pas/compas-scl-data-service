@@ -20,6 +20,7 @@ import org.lfenergy.compas.scl.data.model.Version;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static jakarta.transaction.Transactional.TxType.REQUIRED;
 import static jakarta.transaction.Transactional.TxType.SUPPORTS;
@@ -45,13 +46,25 @@ public class CompasPluginsResourceService {
 
     @Transactional(SUPPORTS)
     public List<PluginsCustomResource> list(String type, Date uploadedAfter, Date uploadedBefore,
-                                            String name, int page, int size) {
+                                            String name, int page, int size, Boolean latestOnly) {
         var queryBuilder = new StringBuilder("SELECT e FROM PluginsCustomResource e WHERE e.type = :type");
         var params = new HashMap<String, Object>();
         params.put("type", type);
 
         appendFilters(queryBuilder, params, uploadedAfter, uploadedBefore, name);
+
+        if (latestOnly != null && latestOnly) {
+            queryBuilder.append(" GROUP BY (e.name)");
+        }
+
         queryBuilder.append(" ORDER BY e.uploadedAt DESC");
+
+        if (latestOnly != null && latestOnly) {
+            queryBuilder.append(", split_part(e.version, '.', 1)::int DESC");
+            queryBuilder.append(", split_part(e.version, '.', 2)::int DESC");
+            queryBuilder.append(", split_part(e.version, '.', 3)::int DESC");
+            queryBuilder.append(", e.id DESC");
+        }
 
         TypedQuery<PluginsCustomResource> query = entityManager.createQuery(queryBuilder.toString(), PluginsCustomResource.class);
         params.forEach(query::setParameter);
@@ -61,16 +74,19 @@ public class CompasPluginsResourceService {
     }
 
     @Transactional(SUPPORTS)
-    public long count(String type, Date uploadedAfter, Date uploadedBefore, String name) {
-        var queryBuilder = new StringBuilder("SELECT COUNT(e) FROM PluginsCustomResource e WHERE e.type = :type");
+    public long count(String type, Date uploadedAfter, Date uploadedBefore, String name, Boolean latestOnly) {
+        var queryBuilder = new StringBuilder("SELECT e FROM PluginsCustomResource e WHERE e.type = :type");
         var params = new HashMap<String, Object>();
         params.put("type", type);
 
         appendFilters(queryBuilder, params, uploadedAfter, uploadedBefore, name);
 
-        TypedQuery<Long> query = entityManager.createQuery(queryBuilder.toString(), Long.class);
+        TypedQuery<PluginsCustomResource> query = entityManager.createQuery(queryBuilder.toString(), PluginsCustomResource.class);
         params.forEach(query::setParameter);
-        return query.getSingleResult();
+
+        List<PluginsCustomResource> resources = query.getResultList();
+
+        return resources.size();
     }
 
     @Transactional(SUPPORTS)
@@ -164,6 +180,18 @@ public class CompasPluginsResourceService {
                 .orElse(new Version(1, 0, 0));
 
         return latest.getNextVersion(changeSetType).toString();
+    }
+
+    private List<PluginsCustomResource> filterResourcesByLatestVersion(List<PluginsCustomResource> resources) {
+        return resources.stream()
+                .collect(Collectors.groupingBy(
+                        r -> r.name,
+                        Collectors.maxBy(Comparator.comparing(r -> new Version(r.version)))
+                ))
+                .values()
+                .stream()
+                .flatMap(Optional::stream)
+                .toList();
     }
 
     private void appendFilters(StringBuilder queryBuilder, Map<String, Object> params,

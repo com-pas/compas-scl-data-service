@@ -43,7 +43,7 @@ class CompasPluginsResourceServiceTest {
         var resource = createResource();
         when(query.getResultList()).thenReturn(List.of(resource));
 
-        var result = service.list("xml", null, null, null, 0, 20);
+        var result = service.list("xml", null, null, null, 0, 20, Boolean.FALSE);
 
         assertEquals(1, result.size());
         assertEquals(resource, result.get(0));
@@ -56,7 +56,7 @@ class CompasPluginsResourceServiceTest {
         var query = mockTypedQuery(PluginsCustomResource.class);
         when(query.getResultList()).thenReturn(List.of());
 
-        service.list("xml", new Date(), new Date(), "test", 1, 10);
+        service.list("xml", new Date(), new Date(), "test", 1, 10, null);
 
         var jpqlCaptor = ArgumentCaptor.forClass(String.class);
         verify(entityManager).createQuery(jpqlCaptor.capture(), eq(PluginsCustomResource.class));
@@ -76,7 +76,7 @@ class CompasPluginsResourceServiceTest {
         var query = mockTypedQuery(Long.class);
         when(query.getSingleResult()).thenReturn(5L);
 
-        var result = service.count("xml", null, null, null);
+        var result = service.count("xml", null, null, null, Boolean.FALSE);
 
         assertEquals(5L, result);
     }
@@ -86,7 +86,7 @@ class CompasPluginsResourceServiceTest {
         var query = mockTypedQuery(Long.class);
         when(query.getSingleResult()).thenReturn(3L);
 
-        var result = service.count("xml", new Date(), new Date(), "search");
+        var result = service.count("xml", new Date(), new Date(), "search", Boolean.FALSE);
 
         assertEquals(3L, result);
         var jpqlCaptor = ArgumentCaptor.forClass(String.class);

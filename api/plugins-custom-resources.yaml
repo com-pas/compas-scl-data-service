@@ -67,6 +67,12 @@ paths:
             minimum: 1
             maximum: 100
             default: 20
+        - name: latestOnly
+          in: query
+          description: Filter by latest version per resource
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: List of data entries retrieved successfully

@@ -32,12 +32,12 @@ class CompasPluginsResourceTest {
 
     @Test
     void getAllData_WhenSizeIsZero_ThenTotalPagesIsZero() {
-        when(service.list(eq("xml"), isNull(), isNull(), isNull(), eq(0), eq(0)))
+        when(service.list(eq("xml"), isNull(), isNull(), isNull(), eq(0), eq(0), isNull()))
                 .thenReturn(List.of());
-        when(service.count(eq("xml"), isNull(), isNull(), isNull()))
+        when(service.count(eq("xml"), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(5L);
 
-        var response = resource.getAllData("xml", null, null, null, 0, 0);
+        var response = resource.getAllData("xml", null, null, null, 0, 0, false);
 
         assertEquals(0, response.getTotalPages());
         assertEquals(5, response.getTotalElements());
