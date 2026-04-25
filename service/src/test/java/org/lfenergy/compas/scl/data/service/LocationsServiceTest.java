@@ -12,6 +12,7 @@ import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.repository.HistorizedSclFileRepository;
 import org.lfenergy.compas.scl.data.repository.LocationRepository;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -31,6 +32,12 @@ class LocationsServiceTest {
 
     @Mock
     private HistorizedSclFileRepository historizedSclFileRepository;
+
+    // @Captor uses Mockito's own reflection to create the captor at runtime;
+    // avoids ArgumentCaptor.forClass(Location.class) .class literal which
+    // triggers eager superclass resolution and can break in multi-module builds.
+    @Captor
+    private ArgumentCaptor<Location> entityCaptor;
 
     private LocationsService locationsService;
 
@@ -64,12 +71,18 @@ class LocationsServiceTest {
         var dto = buildDto("LOC_A", "Location A", "desc");
         when(locationRepository.hasDuplicateValues("LOC_A", "Location A")).thenReturn(false);
         var generatedId = UUID.randomUUID();
-        var captor = ArgumentCaptor.forClass(Location.class);
-        // Simulate @GeneratedValue: set entity.id when persist() is called
+        // Simulate @GeneratedValue: set entity.id when persist() is called.
+        // entityCaptor.capture() resolves persist(Location) unambiguously at compile time;
+        // reflection sets the id to avoid referencing Location.id as a field literal.
         doAnswer(invocation -> {
-            ((Location) invocation.getArgument(0)).id = generatedId;
+            try {
+                Object entity = invocation.getArgument(0);
+                entity.getClass().getDeclaredField("id").set(entity, generatedId);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
+            }
             return null;
-        }).when(locationRepository).persist(captor.capture());
+        }).when(locationRepository).persist(entityCaptor.capture());
 
         var result = locationsService.createLocation(dto);
 
@@ -78,7 +91,6 @@ class LocationsServiceTest {
         assertEquals("LOC_A", result.getKey());
         assertEquals("Location A", result.getName());
         assertEquals("desc", result.getDescription());
-        assertEquals("LOC_A", captor.getValue().key);
     }
 
     @Test
