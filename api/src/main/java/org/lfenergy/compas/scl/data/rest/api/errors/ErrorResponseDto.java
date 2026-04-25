@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 BearingPoint GmbH
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.rest.api.locations;
+package org.lfenergy.compas.scl.data.rest.api.errors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -13,7 +13,7 @@ import java.util.Objects;
 
 
 @JsonTypeName("ErrorResponseDto")
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2024-11-18T07:52:46.875467800+01:00[Europe/Vienna]", comments = "Generator version: 7.8.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", date = "2026-04-24T08:07:06.426123+02:00[Europe/Vienna]", comments = "Generator version: 7.8.0")
 public class ErrorResponseDto   {
   private OffsetDateTime timestamp;
   private String code;
@@ -27,7 +27,7 @@ public class ErrorResponseDto   {
     return this;
   }
 
-
+  
   @JsonProperty("timestamp")
   @NotNull public OffsetDateTime getTimestamp() {
     return timestamp;
@@ -45,7 +45,7 @@ public class ErrorResponseDto   {
     return this;
   }
 
-
+  
   @JsonProperty("code")
   @NotNull public String getCode() {
     return code;
@@ -63,7 +63,7 @@ public class ErrorResponseDto   {
     return this;
   }
 
-
+  
   @JsonProperty("message")
   @NotNull public String getMessage() {
     return message;
@@ -98,7 +98,7 @@ public class ErrorResponseDto   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ErrorResponseDto {\n");
-
+    
     sb.append("    timestamp: ").append(toIndentedString(timestamp)).append("\n");
     sb.append("    code: ").append(toIndentedString(code)).append("\n");
     sb.append("    message: ").append(toIndentedString(message)).append("\n");

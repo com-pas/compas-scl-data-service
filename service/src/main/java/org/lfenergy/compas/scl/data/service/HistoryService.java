@@ -97,7 +97,7 @@ public class HistoryService {
                 search.getType(), search.getName(), search.getLocation(),
                 search.getAuthor(), search.getFrom(), search.getTo());
         }
-        var results = entries.stream().map(entry -> toDataResource(entry)).toList();
+        var results = entries.stream().map(this::toDataResource).toList();
         return new DataResourcesResult().results(results);
     }
 

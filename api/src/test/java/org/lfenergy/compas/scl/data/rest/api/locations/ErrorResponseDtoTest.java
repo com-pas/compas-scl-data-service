@@ -4,6 +4,7 @@
 package org.lfenergy.compas.scl.data.rest.api.locations;
 
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl.data.rest.api.errors.ErrorResponseDto;
 
 import java.time.OffsetDateTime;
 
