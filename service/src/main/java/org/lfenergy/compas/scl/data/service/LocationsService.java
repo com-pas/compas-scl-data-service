@@ -23,6 +23,8 @@ import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCo
 @ApplicationScoped
 public class LocationsService {
 
+    private static final String ERR_MSG_LOCATION_NOT_FOUND = "Location not found: ";
+
     private final LocationRepository locationRepository;
     private final HistorizedSclFileRepository historizedSclFileRepository;
 
@@ -51,7 +53,7 @@ public class LocationsService {
     public Location updateLocation(UUID locationId, Location locationDto) {
         var entity = locationRepository.findByIdOptional(locationId)
                 .orElseThrow(() -> new CompasNoDataFoundException(
-                        "Location not found: " + locationId));
+                        ERR_MSG_LOCATION_NOT_FOUND + locationId));
         if (locationRepository.hasDuplicateValuesExcluding(
                 locationDto.getKey(), locationDto.getName(), locationId)) {
             throw new CompasSclDataServiceException(CREATION_ERROR_CODE,
@@ -68,7 +70,7 @@ public class LocationsService {
     public void deleteLocation(UUID locationId) {
         var entity = locationRepository.findByIdOptional(locationId)
             .orElseThrow(() -> new CompasNoDataFoundException(
-                "Location not found: " + locationId));
+                ERR_MSG_LOCATION_NOT_FOUND + locationId));
         if (entity.assignedResources > 0) {
             throw new CompasSclDataServiceException(INVALID_INPUT_ERROR_CODE,
                 "Deletion not allowed, location has " + entity.assignedResources + " assigned resources: " + locationId);
@@ -80,7 +82,7 @@ public class LocationsService {
     public Location getLocation(UUID locationId) {
         var entity = locationRepository.findByIdOptional(locationId)
             .orElseThrow(() -> new CompasNoDataFoundException(
-                "Location not found: " + locationId));
+                ERR_MSG_LOCATION_NOT_FOUND + locationId));
         return toDto(entity);
     }
 
@@ -92,14 +94,14 @@ public class LocationsService {
         } else {
             entities = locationRepository.listAll();
         }
-        return entities.stream().map(entity -> toDto(entity)).toList();
+        return entities.stream().map(this::toDto).toList();
     }
 
     @Transactional(REQUIRED)
     public void assignResourceToLocation(UUID locationId, UUID uuid) {
         var locationEntity = locationRepository.findByIdOptional(locationId)
                 .orElseThrow(() -> new CompasNoDataFoundException(
-                        "Location not found: " + locationId));
+                    ERR_MSG_LOCATION_NOT_FOUND + locationId));
         if (historizedSclFileRepository.countBySclFileId(uuid) == 0) {
             throw new CompasNoDataFoundException(
                     "Resource not found: " + uuid);
@@ -111,7 +113,7 @@ public class LocationsService {
     @Transactional(REQUIRED)
     public void unassignResourceFromLocation(UUID locationId, UUID uuid) {
         if (locationRepository.findByIdOptional(locationId).isEmpty()) {
-            throw new CompasNoDataFoundException("Location not found: " + locationId);
+            throw new CompasNoDataFoundException(ERR_MSG_LOCATION_NOT_FOUND + locationId);
         }
         if (historizedSclFileRepository.countBySclFileId(uuid) == 0) {
             throw new CompasNoDataFoundException(
