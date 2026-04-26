@@ -4,6 +4,7 @@
 package org.lfenergy.compas.scl.data.model;
 
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
