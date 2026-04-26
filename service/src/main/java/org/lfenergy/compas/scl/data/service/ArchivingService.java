@@ -49,32 +49,27 @@ public class ArchivingService {
     @Transactional(REQUIRED)
     public ArchivedResource archiveResource(UUID id, String version, String author, String approver,
                                             String contentType, String filename, File body) {
-        var historyEntries = historizedSclFileRepository.findAllBySclFileId(id);
-        if (historyEntries.isEmpty() || historyEntries.stream().noneMatch(h -> h.sclFile.id.version().equals(version))) {
-            throw new CompasNoDataFoundException(
-                "Resource " + id + " with version " + version + " not found");
+        var sclFileOptional = historizedSclFileRepository.findBySclFileIdAndVersion(id, version);
+        if (sclFileOptional.isEmpty()) {
+            throw new CompasNoDataFoundException("Resource " + id + " not found");
         }
-        var latestEntry = historyEntries.get(0);
-        if (latestEntry.location == null) {
+        if (sclFileOptional.get().location == null) {
             throw new CompasSclDataServiceException(INVALID_INPUT_ERROR_CODE,
-                "Resource " + id + " has no location assigned");
+                    "Resource " + id + " has no location assigned");
         }
-        var historyEntry = historyEntries.stream()
-            .filter(h -> h.sclFile.id.version().equals(version))
-            .findFirst()
-            .orElseThrow();
 
+        var sclFile = sclFileOptional.get();
         var entity = new org.lfenergy.compas.scl.data.entities.ArchivedResource();
         entity.resourceId = id;
-        entity.name = filename != null && !filename.isBlank() ? filename : historyEntry.sclFile.name;
+        entity.name = filename != null && !filename.isBlank() ? filename : sclFile.sclFile.name;
         entity.version = version;
-        entity.locationId = historyEntry.location != null ? historyEntry.location.id.toString() : null;
-        entity.location = historyEntry.location != null ? historyEntry.location.key : null;
+        entity.locationId = sclFile.location != null ? sclFile.location.id.toString() : null;
+        entity.location = sclFile.location != null ? sclFile.location.key : null;
         entity.author = author;
         entity.approver = approver;
-        entity.type = historyEntry.sclFile.type;
+        entity.type = sclFile.sclFile.type;
         entity.contentType = contentType;
-        entity.modifiedAt = historyEntry.changedAt;
+        entity.modifiedAt = sclFile.changedAt;
         entity.archivedAt = OffsetDateTime.now();
 
         archiveRepository.persist(entity);
@@ -88,45 +83,41 @@ public class ArchivingService {
      */
     @Transactional(REQUIRED)
     public ArchivedResource archiveSclResource(UUID id, String version) {
-        var historizedSclFiles = historizedSclFileRepository.findAllBySclFileId(id);
-        if (historizedSclFiles.isEmpty()) {
+        var sclFileOptional = historizedSclFileRepository.findLatestBySclFileId(id);
+        if (sclFileOptional.isEmpty()) {
             throw new CompasNoDataFoundException("Resource " + id + " not found");
         }
-        var latestEntry = historizedSclFiles.get(0);
-        if (latestEntry.location == null) {
+        if (sclFileOptional.get().location == null) {
             throw new CompasSclDataServiceException(INVALID_INPUT_ERROR_CODE,
-                "Resource " + id + " has no location assigned");
+                    "Resource " + id + " has no location assigned");
         }
         if (archiveRepository.existsByResourceIdAndVersion(id, version)) {
             throw new CompasSclDataServiceException(INVALID_INPUT_ERROR_CODE,
-                "Resource " + id + " version " + version + " is already archived");
+                    "Resource " + id + " version " + version + " is already archived");
         }
-        var historizedSclFile = historizedSclFiles.stream()
-            .filter(h -> h.sclFile.id.version().equals(version))
-            .findFirst()
-            .orElseThrow(() -> new CompasNoDataFoundException(
-                "Version " + version + " not found for resource " + id));
 
+        var sclFile = sclFileOptional.get();
         // Mark the referenced resource entry as archived
         var v = new Version(version);
         historizedSclFileRepository.update(
             "archived = true where sclFile.id.id = ?1 and sclFile.id.majorVersion = ?2 and sclFile.id.minorVersion = ?3 and sclFile.id.patchVersion = ?4",
             id, (short) v.getMajorVersion(), (short) v.getMinorVersion(), (short) v.getPatchVersion());
 
-        var entity = new org.lfenergy.compas.scl.data.entities.ArchivedResource();
-        entity.resourceId = id;
-        entity.name = historizedSclFile.sclFile.name;
-        entity.version = version;
-        entity.locationId = historizedSclFile.location != null ? historizedSclFile.location.id.toString() : null;
-        entity.location = historizedSclFile.location != null ? historizedSclFile.location.key : null;
-        entity.author = historizedSclFile.sclFile.createdBy;
-        entity.type = historizedSclFile.sclFile.type;
-        entity.contentType = historizedSclFile.sclFile.type;
-        entity.modifiedAt = historizedSclFile.changedAt;
-        entity.archivedAt = OffsetDateTime.now();
+        // FIXME: storing the SCL content in the archive as well, to be able to restore it later if needed
+        var archivedResource = new org.lfenergy.compas.scl.data.entities.ArchivedResource();
+        archivedResource.resourceId = id;
+        archivedResource.name = sclFile.sclFile.name;
+        archivedResource.version = version;
+        archivedResource.locationId = sclFile.location != null ? sclFile.location.id.toString() : null;
+        archivedResource.location = sclFile.location != null ? sclFile.location.key : null;
+        archivedResource.author = sclFile.sclFile.createdBy;
+        archivedResource.type = sclFile.sclFile.type;
+        archivedResource.contentType = sclFile.sclFile.type;
+        archivedResource.modifiedAt = sclFile.changedAt;
+        archivedResource.archivedAt = OffsetDateTime.now();
 
-        archiveRepository.persist(entity);
-        return toDto(entity);
+        archiveRepository.persist(archivedResource);
+        return toDto(archivedResource);
     }
 
     /**
