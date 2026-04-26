@@ -117,11 +117,17 @@ class DataEntryWithContentTest {
     }
 
     @Test
+    void equals_WhenSameInstance_ThenReturnsTrue() {
+        DataEntryWithContent entry = createSample();
+        assertTrue(entry.equals(entry));
+    }
+
+    @Test
     void equalsShouldReturnFalseForDifferentTypeOrNull() {
         DataEntryWithContent entry = createSample();
 
-        assertNotEquals(null, entry);
-        assertNotEquals(new Object(), entry);
+        assertFalse(entry.equals(null));
+        assertFalse(entry.equals(new Object()));
     }
 
     @Test
@@ -133,5 +139,14 @@ class DataEntryWithContentTest {
         assertTrue(result.contains("class DataEntryWithContent"));
         assertTrue(result.contains("content"));
         assertTrue(result.contains("DataEntry"));
+    }
+
+    @Test
+    void toString_WhenContentIsNull_ThenContainsNullLiteral() {
+        DataEntryWithContent entry = new DataEntryWithContent();
+        String result = entry.toString();
+
+        assertNotNull(result);
+        assertTrue(result.contains("null"));
     }
 }

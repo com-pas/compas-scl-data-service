@@ -46,14 +46,14 @@ class SclFileTest {
     void equals_WhenNull_ThenReturnsFalse() {
         var f = buildSclFile(buildFileId(UUID.randomUUID(), (short) 1, (short) 0, (short) 0),
                 "file", "SCD", false, "user");
-        assertNotEquals(null, f);
+        assertFalse(f.equals(null));
     }
 
     @Test
     void equals_WhenDifferentType_ThenReturnsFalse() {
         var f = buildSclFile(buildFileId(UUID.randomUUID(), (short) 1, (short) 0, (short) 0),
                 "file", "SCD", false, "user");
-        assertNotEquals("string", f);
+        assertFalse(f.equals("string"));
     }
 
     @Test
