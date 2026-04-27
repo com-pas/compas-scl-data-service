@@ -105,32 +105,44 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
 
     @Override
     public List<DataEntry> getLatestPerType(String type) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        LOGGER.info("Listing latest version per resource for type '{}'", type);
+        return service.listLatestPerType(type).stream()
+                .map(this::toDataEntry)
+                .toList();
     }
 
     @Override
     public List<DataEntry> getVersionsByName(String type, String name) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        LOGGER.info("Listing versions for type '{}' name '{}'", type, name);
+        return service.listByName(type, name).stream()
+                .map(this::toDataEntry)
+                .toList();
     }
 
     @Override
     public List<DataEntryWithContent> getVersionsWithContentByName(String type, String name) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        LOGGER.info("Listing versions with content for type '{}' name '{}'", type, name);
+        return service.listByName(type, name).stream()
+                .map(this::toDataEntryWithContent)
+                .toList();
     }
 
     @Override
     public DataEntryWithContent getLatestByName(String type, String name) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        LOGGER.info("Getting latest version for type '{}' name '{}'", type, name);
+        return toDataEntryWithContent(service.findLatestByName(type, name));
     }
 
     @Override
     public DataEntryWithContent getByNameAndVersion(String type, String name, String version) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        LOGGER.info("Getting type '{}' name '{}' version '{}'", type, name, version);
+        return toDataEntryWithContent(service.findByNameAndVersion(type, name, version));
     }
 
     @Override
     public void deleteByName(String type, String name) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        LOGGER.info("Deleting all versions of type '{}' name '{}'", type, name);
+        service.deleteByName(type, name);
     }
 
     private DataEntry toDataEntry(PluginsCustomResource entity) {
