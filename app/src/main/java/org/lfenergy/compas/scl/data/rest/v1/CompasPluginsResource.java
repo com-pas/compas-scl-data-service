@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @RequestScoped
@@ -100,6 +101,36 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
         response.setVersion(entity.version);
         response.setUploadedAt(toDate(entity.uploadedAt));
         return response;
+    }
+
+    @Override
+    public List<DataEntry> getLatestPerType(String type) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public List<DataEntry> getVersionsByName(String type, String name) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public List<DataEntryWithContent> getVersionsWithContentByName(String type, String name) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public DataEntryWithContent getLatestByName(String type, String name) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public DataEntryWithContent getByNameAndVersion(String type, String name, String version) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public void deleteByName(String type, String name) {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     private DataEntry toDataEntry(PluginsCustomResource entity) {

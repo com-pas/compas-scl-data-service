@@ -280,6 +280,230 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /plugins/resources/v1/{type}/latest:
+    get:
+      tags:
+        - plugins-custom-resources
+      summary: List latest version per resource
+      description: Returns the latest version of every resource of the given data type, without content
+      operationId: getLatestPerType
+      parameters:
+        - name: type
+          in: path
+          required: true
+          description: Data type
+          schema:
+            type: string
+          example: "engineering-wizard_process"
+      responses:
+        '200':
+          description: List of latest entries per resource
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataEntry'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /plugins/resources/v1/{type}/{name}:
+    get:
+      tags:
+        - plugins-custom-resources
+      summary: List all versions of a resource (without content)
+      description: Returns all versions of the named resource as DataEntry objects (no content)
+      operationId: getVersionsByName
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of versions for the resource
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataEntry'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - plugins-custom-resources
+      summary: Delete a resource and all its versions
+      description: Deletes every version of the named resource
+      operationId: deleteByName
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Resource deleted
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /plugins/resources/v1/{type}/{name}/versions:
+    get:
+      tags:
+        - plugins-custom-resources
+      summary: List all versions of a resource (with content)
+      description: Returns all versions of the named resource as DataEntryWithContent objects
+      operationId: getVersionsWithContentByName
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of versions with content
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataEntryWithContent'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /plugins/resources/v1/{type}/{name}/latest:
+    get:
+      tags:
+        - plugins-custom-resources
+      summary: Get the latest version of a resource
+      description: Returns the latest version of the named resource, with content
+      operationId: getLatestByName
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Latest version with content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEntryWithContent'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /plugins/resources/v1/{type}/{name}/{version}:
+    get:
+      tags:
+        - plugins-custom-resources
+      summary: Get a specific version of a resource
+      description: Returns the specified version of the named resource, with content
+      operationId: getByNameAndVersion
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resource version with content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEntryWithContent'
+        '404':
+          description: Resource version not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     DataEntry:
