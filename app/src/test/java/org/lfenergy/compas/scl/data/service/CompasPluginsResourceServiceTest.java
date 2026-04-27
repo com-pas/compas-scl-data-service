@@ -119,6 +119,125 @@ class CompasPluginsResourceServiceTest {
         assertTrue(exception.getMessage().contains(id.toString()));
     }
 
+    // --- listLatestPerType ---
+
+    @Test
+    void listLatestPerType_WhenMultipleVersionsPerName_ThenReturnsLatestPerName() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        var a1 = createResource(); a1.name = "a"; a1.version = "1.0.0";
+        var a2 = createResource(); a2.name = "a"; a2.version = "1.2.0";
+        var a3 = createResource(); a3.name = "a"; a3.version = "1.1.0";
+        var b1 = createResource(); b1.name = "b"; b1.version = "2.0.0";
+        when(query.getResultList()).thenReturn(List.of(a1, a2, a3, b1));
+
+        var result = service.listLatestPerType("xml");
+
+        assertEquals(2, result.size());
+        var byName = result.stream().collect(java.util.stream.Collectors.toMap(r -> r.name, r -> r.version));
+        assertEquals("1.2.0", byName.get("a"));
+        assertEquals("2.0.0", byName.get("b"));
+    }
+
+    @Test
+    void listLatestPerType_WhenNoResources_ThenReturnsEmptyList() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        when(query.getResultList()).thenReturn(List.of());
+
+        assertTrue(service.listLatestPerType("xml").isEmpty());
+    }
+
+    // --- listByName ---
+
+    @Test
+    void listByName_WhenVersionsExist_ThenReturnsAll() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        var v1 = createResource(); v1.version = "1.0.0";
+        var v2 = createResource(); v2.version = "1.1.0";
+        when(query.getResultList()).thenReturn(List.of(v1, v2));
+
+        var result = service.listByName("xml", "name");
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void listByName_WhenNoVersions_ThenThrowsCompasNoDataFoundException() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        when(query.getResultList()).thenReturn(List.of());
+
+        assertThrows(CompasNoDataFoundException.class, () -> service.listByName("xml", "missing"));
+    }
+
+    // --- findByNameAndVersion ---
+
+    @Test
+    void findByNameAndVersion_WhenExists_ThenReturnsEntity() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        var resource = createResource();
+        when(query.getResultList()).thenReturn(List.of(resource));
+
+        var result = service.findByNameAndVersion("xml", "name", "1.0.0");
+
+        assertEquals(resource, result);
+    }
+
+    @Test
+    void findByNameAndVersion_WhenMissing_ThenThrowsCompasNoDataFoundException() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        when(query.getResultList()).thenReturn(List.of());
+
+        assertThrows(CompasNoDataFoundException.class,
+                () -> service.findByNameAndVersion("xml", "name", "9.9.9"));
+    }
+
+    // --- findLatestByName ---
+
+    @Test
+    void findLatestByName_WhenMultipleVersions_ThenReturnsHighest() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        var v1 = createResource(); v1.version = "1.0.0";
+        var v2 = createResource(); v2.version = "2.5.1";
+        var v3 = createResource(); v3.version = "1.9.9";
+        when(query.getResultList()).thenReturn(List.of(v1, v2, v3));
+
+        var result = service.findLatestByName("xml", "name");
+
+        assertEquals("2.5.1", result.version);
+    }
+
+    @Test
+    void findLatestByName_WhenNoVersions_ThenThrowsCompasNoDataFoundException() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        when(query.getResultList()).thenReturn(List.of());
+
+        assertThrows(CompasNoDataFoundException.class,
+                () -> service.findLatestByName("xml", "missing"));
+    }
+
+    // --- deleteByName ---
+
+    @Test
+    void deleteByName_WhenVersionsExist_ThenRemovesAll() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        var v1 = createResource();
+        var v2 = createResource();
+        when(query.getResultList()).thenReturn(List.of(v1, v2));
+
+        service.deleteByName("xml", "name");
+
+        verify(entityManager).remove(v1);
+        verify(entityManager).remove(v2);
+    }
+
+    @Test
+    void deleteByName_WhenNoVersions_ThenThrowsCompasNoDataFoundException() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        when(query.getResultList()).thenReturn(List.of());
+
+        assertThrows(CompasNoDataFoundException.class, () -> service.deleteByName("xml", "missing"));
+        verify(entityManager, never()).remove(any());
+    }
+
     // --- upload ---
 
     @Test

@@ -158,6 +158,143 @@ class CompasPluginsResourceGetDataTest {
 
 
 
+    @Test
+    void getLatestPerType_WhenResourcesExist_ThenReturnsListWithoutContent() {
+        var r1 = createTestResource();
+        var r2 = createTestResource();
+        r2.name = "another";
+        when(compasPluginsResourceService.listLatestPerType("xml"))
+                .thenReturn(List.of(r1, r2));
+
+        given()
+        .when()
+            .get("/{type}/latest", "xml")
+        .then()
+            .statusCode(200)
+            .body("$", hasSize(2))
+            .body("[0].content", org.hamcrest.Matchers.nullValue())
+            .body("[1].content", org.hamcrest.Matchers.nullValue());
+    }
+
+    @Test
+    void getVersionsByName_WhenExists_ThenReturnsListWithoutContent() {
+        var r1 = createTestResource();
+        var r2 = createTestResource();
+        r2.version = "2.0.0";
+        when(compasPluginsResourceService.listByName("xml", "xml-resource"))
+                .thenReturn(List.of(r1, r2));
+
+        given()
+        .when()
+            .get("/{type}/{name}", "xml", "xml-resource")
+        .then()
+            .statusCode(200)
+            .body("$", hasSize(2))
+            .body("[0].content", org.hamcrest.Matchers.nullValue());
+    }
+
+    @Test
+    void getVersionsByName_WhenMissing_ThenReturns404() {
+        when(compasPluginsResourceService.listByName("xml", "missing"))
+                .thenThrow(CompasNoDataFoundException.class);
+
+        given()
+        .when()
+            .get("/{type}/{name}", "xml", "missing")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test
+    void getVersionsWithContentByName_WhenExists_ThenReturnsListWithContent() {
+        var r1 = createTestResource();
+        when(compasPluginsResourceService.listByName("xml", "xml-resource"))
+                .thenReturn(List.of(r1));
+
+        given()
+        .when()
+            .get("/{type}/{name}/versions", "xml", "xml-resource")
+        .then()
+            .statusCode(200)
+            .body("$", hasSize(1))
+            .body("[0].content", equalTo(r1.content));
+    }
+
+    @Test
+    void getLatestByName_WhenExists_ThenReturnsResourceWithContent() {
+        var r = createTestResource();
+        when(compasPluginsResourceService.findLatestByName("xml", "xml-resource"))
+                .thenReturn(r);
+
+        given()
+        .when()
+            .get("/{type}/{name}/latest", "xml", "xml-resource")
+        .then()
+            .statusCode(200)
+            .body("version", equalTo(r.version))
+            .body("content", equalTo(r.content));
+    }
+
+    @Test
+    void getLatestByName_WhenMissing_ThenReturns404() {
+        when(compasPluginsResourceService.findLatestByName("xml", "missing"))
+                .thenThrow(CompasNoDataFoundException.class);
+
+        given()
+        .when()
+            .get("/{type}/{name}/latest", "xml", "missing")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test
+    void getByNameAndVersion_WhenExists_ThenReturnsResourceWithContent() {
+        var r = createTestResource();
+        when(compasPluginsResourceService.findByNameAndVersion("xml", "xml-resource", "1.0.0"))
+                .thenReturn(r);
+
+        given()
+        .when()
+            .get("/{type}/{name}/{version}", "xml", "xml-resource", "1.0.0")
+        .then()
+            .statusCode(200)
+            .body("version", equalTo("1.0.0"))
+            .body("content", equalTo(r.content));
+    }
+
+    @Test
+    void getByNameAndVersion_WhenMissing_ThenReturns404() {
+        when(compasPluginsResourceService.findByNameAndVersion("xml", "xml-resource", "9.9.9"))
+                .thenThrow(CompasNoDataFoundException.class);
+
+        given()
+        .when()
+            .get("/{type}/{name}/{version}", "xml", "xml-resource", "9.9.9")
+        .then()
+            .statusCode(404);
+    }
+
+    @Test
+    void deleteByName_WhenExists_ThenReturns204() {
+        given()
+        .when()
+            .delete("/{type}/{name}", "xml", "xml-resource")
+        .then()
+            .statusCode(204);
+    }
+
+    @Test
+    void deleteByName_WhenMissing_ThenReturns404() {
+        org.mockito.Mockito.doThrow(CompasNoDataFoundException.class)
+                .when(compasPluginsResourceService).deleteByName("xml", "missing");
+
+        given()
+        .when()
+            .delete("/{type}/{name}", "xml", "missing")
+        .then()
+            .statusCode(404);
+    }
+
     private PluginsCustomResource createTestResource() {
         var resource = new PluginsCustomResource();
         resource.id = java.util.UUID.randomUUID();
