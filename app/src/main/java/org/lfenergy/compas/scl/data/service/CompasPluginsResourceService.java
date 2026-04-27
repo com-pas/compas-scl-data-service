@@ -20,6 +20,7 @@ import org.lfenergy.compas.scl.data.model.Version;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static jakarta.transaction.Transactional.TxType.REQUIRED;
 import static jakarta.transaction.Transactional.TxType.SUPPORTS;
@@ -81,6 +82,80 @@ public class CompasPluginsResourceService {
                     String.format("Data entry with id '%s' not found", id));
         }
         return entity;
+    }
+
+    @Transactional(SUPPORTS)
+    public List<PluginsCustomResource> listLatestPerType(String type) {
+        List<PluginsCustomResource> all = entityManager.createQuery(
+                        "SELECT e FROM PluginsCustomResource e WHERE e.type = :type",
+                        PluginsCustomResource.class)
+                .setParameter("type", type)
+                .getResultList();
+        return all.stream()
+                .collect(Collectors.groupingBy(
+                        r -> r.name,
+                        Collectors.maxBy(Comparator.comparing(r -> new Version(r.version)))))
+                .values()
+                .stream()
+                .flatMap(Optional::stream)
+                .toList();
+    }
+
+    @Transactional(SUPPORTS)
+    public List<PluginsCustomResource> listByName(String type, String name) {
+        List<PluginsCustomResource> versions = findVersions(type, name);
+        if (versions.isEmpty()) {
+            throw new CompasNoDataFoundException(
+                    String.format("No resource of type '%s' with name '%s' found", type, name));
+        }
+        return versions;
+    }
+
+    @Transactional(SUPPORTS)
+    public PluginsCustomResource findByNameAndVersion(String type, String name, String version) {
+        return entityManager.createQuery(
+                        "SELECT e FROM PluginsCustomResource e " +
+                                "WHERE e.type = :type AND e.name = :name AND e.version = :version",
+                        PluginsCustomResource.class)
+                .setParameter("type", type)
+                .setParameter("name", name)
+                .setParameter("version", version)
+                .getResultList()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new CompasNoDataFoundException(
+                        String.format("Resource of type '%s' with name '%s' and version '%s' not found",
+                                type, name, version)));
+    }
+
+    @Transactional(SUPPORTS)
+    public PluginsCustomResource findLatestByName(String type, String name) {
+        return findVersions(type, name).stream()
+                .max(Comparator.comparing(e -> new Version(e.version)))
+                .orElseThrow(() -> new CompasNoDataFoundException(
+                        String.format("No resource of type '%s' with name '%s' found", type, name)));
+    }
+
+    @Transactional(REQUIRED)
+    public void deleteByName(String type, String name) {
+        List<PluginsCustomResource> versions = findVersions(type, name);
+        if (versions.isEmpty()) {
+            throw new CompasNoDataFoundException(
+                    String.format("No resource of type '%s' with name '%s' found", type, name));
+        }
+        versions.forEach(entityManager::remove);
+        LOGGER.info("Deleted {} version(s) of plugins custom resource type='{}', name='{}'",
+                versions.size(), type, name);
+    }
+
+    private List<PluginsCustomResource> findVersions(String type, String name) {
+        return entityManager.createQuery(
+                        "SELECT e FROM PluginsCustomResource e " +
+                                "WHERE e.type = :type AND e.name = :name",
+                        PluginsCustomResource.class)
+                .setParameter("type", type)
+                .setParameter("name", name)
+                .getResultList();
     }
 
     @Transactional(REQUIRED)
