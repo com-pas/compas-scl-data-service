@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Table(name = "archived_resource_version")
+@Table(name = "archived_resource")
 public class ArchivedResource extends PanacheEntityBase {
 
     @Id
@@ -70,12 +70,12 @@ public class ArchivedResource extends PanacheEntityBase {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
-            name = "archived_resource_version_tag",
-            joinColumns = @JoinColumn(name = "archived_resource_version_id")
+            name = "archived_resource_tag",
+            joinColumns = @JoinColumn(name = "archived_resource_id")
     )
     public List<ResourceTag> fields = new ArrayList<>();
 
-    @Column(columnDefinition = "text")
+    @Column(name = "archiving_comment", columnDefinition = "text")
     public String archivingComment;
 
     @Override
