@@ -21,8 +21,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
-import static org.lfenergy.compas.scl.data.rest.Constants.DELETE_ROLE;
-import static org.lfenergy.compas.scl.data.rest.Constants.READ_ROLE;
+import static org.lfenergy.compas.scl.data.rest.Constants.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -30,7 +29,7 @@ import static org.mockito.Mockito.when;
 
 
 @QuarkusTest
-@TestSecurity(user = "test-user", roles = {"SCD_" + READ_ROLE, "SCD_" + DELETE_ROLE})
+@TestSecurity(user = "test-user", roles = {"SCD_" + READ_ROLE, "SCD_" + DELETE_ROLE, "SCD_" + PLUGINS_RESOURCES + "_" + READ_ROLE, PLUGINS_RESOURCES + "_" + UPDATE_ROLE})
 @TestHTTPEndpoint(CompasPluginsResource.class)
 class CompasPluginsResourceGetDataTest {
 
