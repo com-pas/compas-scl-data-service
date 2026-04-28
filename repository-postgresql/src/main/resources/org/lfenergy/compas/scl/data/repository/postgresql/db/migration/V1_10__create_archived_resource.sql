@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: 2026 BearingPoint GmbH
+--
+-- SPDX-License-Identifier: Apache-2.0
 CREATE TABLE archived_resource (
     id UUID PRIMARY KEY,
     resource_id UUID,
