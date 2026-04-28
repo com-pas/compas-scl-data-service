@@ -110,7 +110,7 @@ class ArchivedResourceRepositoryTest {
     // ---- existsByResourceIdAndVersion --------------------------------------
 
     @Test
-    void existsByResourceIdAndVersion_WhenArchived_ThenReturnsTrue() {
+    void existsByResourceIdAndVersion_WhenEntryExists_ThenReturnsTrue() {
         var resourceId = UUID.randomUUID();
         doReturn(1L).when(repository).count(anyString(), eq(resourceId), eq("1.0.0"));
 
@@ -118,7 +118,7 @@ class ArchivedResourceRepositoryTest {
     }
 
     @Test
-    void existsByResourceIdAndVersion_WhenNotArchived_ThenReturnsFalse() {
+    void existsByResourceIdAndVersion_WhenEntryDoesNotExist_ThenReturnsFalse() {
         var resourceId = UUID.randomUUID();
         doReturn(0L).when(repository).count(anyString(), eq(resourceId), eq("1.0.0"));
 
@@ -126,7 +126,7 @@ class ArchivedResourceRepositoryTest {
     }
 
     @Test
-    void existsByResourceIdAndVersion_WhenCalled_ThenQueryChecksArchivedFlag() {
+    void existsByResourceIdAndVersion_WhenCalled_ThenQueryChecksResourceIdAndVersion() {
         var resourceId = UUID.randomUUID();
         doReturn(0L).when(repository).count(anyString(), eq(resourceId), eq("2.0.0"));
 
@@ -134,8 +134,10 @@ class ArchivedResourceRepositoryTest {
 
         var captor = org.mockito.ArgumentCaptor.forClass(String.class);
         verify(repository).count(captor.capture(), any(), any());
-        assertTrue(captor.getValue().contains("archived = true"),
-                "Query must filter on archived = true");
+        assertTrue(captor.getValue().contains("resourceId = ?1"),
+                "Query must filter on resourceId");
+        assertTrue(captor.getValue().contains("version = ?2"),
+                "Query must filter on version");
     }
 
     // ---- searchByFilters — no filters → listAll() -------------------------

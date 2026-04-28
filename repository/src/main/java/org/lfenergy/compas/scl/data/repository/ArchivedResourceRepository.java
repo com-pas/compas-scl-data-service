@@ -35,7 +35,7 @@ public class ArchivedResourceRepository implements PanacheManagedBlockingReposit
      * Returns true if the given resource version has already been archived.
      */
     public boolean existsByResourceIdAndVersion(UUID resourceId, String version) {
-        return count("resourceId = ?1 and version = ?2 and archived = true", resourceId, version) > 0;
+        return count("resourceId = ?1 and version = ?2", resourceId, version) > 0;
     }
 
     /**
