@@ -18,7 +18,7 @@ tags:
     description: Plugins custom resources
 
 paths:
-  /plugins/resources/v1:
+  /plugins/resources:
     get:
       tags:
         - plugins-custom-resources
@@ -226,7 +226,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /plugins/resources/v1/{id}:
+  /plugins/resources/{id}:
     get:
       tags:
         - plugins-custom-resources
@@ -273,6 +273,198 @@ paths:
               example:
                 code: "NOT_FOUND"
                 message: "Data entry with id '550e8400-e29b-41d4-a716-446655440000' not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - plugins-custom-resources
+      summary: Delete data entries by data type
+      description: Delete all data entries for the given data type
+      operationId: deleteDataByType
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Data type of the entries to delete
+          schema:
+            type: string
+          example: "engineering-wizard_process"
+      responses:
+        '204':
+          description: Data entries deleted successfully
+        '404':
+          description: No data entries found for the given data type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: "NOT_FOUND"
+                message: "No data entries found for type 'engineering-wizard_process'"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /plugins/resources/{data-type}/latest:
+    get:
+      tags:
+        - plugins-custom-resources
+      summary: Get latest data entries by data type
+      description: Retrieve all resources for the given data type, reduced to the latest version per resource name, without content
+      operationId: getLatestDataByType
+      parameters:
+        - name: data-type
+          in: path
+          required: true
+          description: Data type of the entries to retrieve
+          schema:
+            type: string
+          example: "engineering-wizard_process"
+      responses:
+        '200':
+          description: Data entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataEntry'
+              example:
+                - id: "550e8400-e29b-41d4-a716-446655440000"
+                  type: "engineering-wizard_process"
+                  tenant: "transnetbw"
+                  name: "substation-configuration"
+                  description: "Process definition for substation engineering wizard"
+                  contentType: "application/json"
+                  version: "1.2.3"
+                  dataCompatibilityVersion: "1.0.0"
+                  uploadedAt: "2026-02-18T10:30:00Z"
+                - id: "660f9511-f39c-52e5-b827-557766551111"
+                  type: "engineering-wizard_process"
+                  tenant: "transnetbw"
+                  name: "line-configuration"
+                  description: "Process definition for line engineering"
+                  contentType: "application/xml"
+                  version: "2.0.0"
+                  dataCompatibilityVersion: "2.0.0"
+                  uploadedAt: "2026-02-17T14:20:00Z"
+        '404':
+          description: Data entries not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: "NOT_FOUND"
+                message: "No data entries found for type 'engineering-wizard_process'"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /plugins/resources/{data-type}/{name}:
+    delete:
+      tags:
+        - plugins-custom-resources
+      summary: Delete data entries by data type and name
+      description: Delete all data entries for the given data type and resource name
+      operationId: deleteDataByTypeAndName
+      parameters:
+        - name: data-type
+          in: path
+          required: true
+          description: Data type of the entries to delete
+          schema:
+            type: string
+          example: "engineering-wizard_process"
+        - name: name
+          in: path
+          required: true
+          description: Name of the entries to delete
+          schema:
+            type: string
+          example: "substation-configuration"
+      responses:
+        '204':
+          description: Data entries deleted successfully
+        '404':
+          description: No data entries found for the given data type and name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: "NOT_FOUND"
+                message: "No data entries found for type 'engineering-wizard_process' and name 'substation-configuration'"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /plugins/resources/{data-type}/{name}/latest:
+    get:
+      tags:
+        - plugins-custom-resources
+      summary: Get latest data entry by data type and name
+      description: Retrieve the latest version of a data entry for the given data type and resource name, including the full content
+      operationId: getLatestDataByTypeAndName
+      parameters:
+        - name: data-type
+          in: path
+          required: true
+          description: Data type of the entry to retrieve
+          schema:
+            type: string
+          example: "engineering-wizard_process"
+        - name: name
+          in: path
+          required: true
+          description: Name of the entry to retrieve
+          schema:
+            type: string
+          example: "substation-configuration"
+      responses:
+        '200':
+          description: Data entry retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEntryWithContent'
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                type: "engineering-wizard_process"
+                tenant: "transnetbw"
+                name: "substation-configuration"
+                description: "Process definition for substation engineering wizard"
+                contentType: "application/json"
+                version: "1.2.3"
+                dataCompatibilityVersion: "1.0.0"
+                uploadedAt: "2026-02-18T10:30:00Z"
+                content: |
+                  {
+                    "process": "substation-engineering",
+                    "steps": ["design", "validation", "approval"]
+                  }
+        '404':
+          description: Data entry not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: "NOT_FOUND"
+                message: "No data entries found for type 'engineering-wizard_process' and name 'substation-configuration'"
         '500':
           description: Internal server error
           content:
