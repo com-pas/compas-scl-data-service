@@ -3,10 +3,12 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest;
 
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntry;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntryWithContent;
 import java.util.Date;
 
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.PagedDataEntryResponse;
+import java.util.List;
 import java.util.UUID;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.UploadDataResponse;
 
@@ -54,6 +56,62 @@ public interface PluginsCustomResourcesApi {
     @Path("/{id}")
     @Produces({ "application/json" })
     DataEntryWithContent getDataById(@PathParam("id") UUID id);
+
+
+    /**
+     * Delete all data entries for the given data type
+     *
+     * @param dataType Data type of the entries to delete
+     * @return Data entries deleted successfully
+     * @return No data entries found for the given data type
+     * @return Internal server error
+     */
+    @DELETE
+    @Path("/{data-type}")
+    void deleteDataByType(@PathParam("data-type") String dataType);
+
+
+    /**
+    * Retrieve all resources for the given data type, reduced to the latest version per resource name, without content
+     *
+    * @param dataType Data type of the entries to retrieve
+    * @return Data entries retrieved successfully
+    * @return Data entries not found
+     * @return Internal server error
+     */
+    @GET
+    @Path("/{data-type}/latest")
+    @Produces({ "application/json" })
+    List<DataEntry> getLatestDataByType(@PathParam("data-type") String dataType);
+
+
+    /**
+     * Delete all data entries for the given data type and resource name
+     *
+     * @param dataType Data type of the entries to delete
+     * @param name Name of the entries to delete
+     * @return Data entries deleted successfully
+     * @return No data entries found for the given data type and name
+     * @return Internal server error
+     */
+    @DELETE
+    @Path("/{data-type}/{name}")
+    void deleteDataByTypeAndName(@PathParam("data-type") String dataType, @PathParam("name") String name);
+
+
+    /**
+     * Retrieve the latest version of a data entry for the given data type and resource name, including the full content
+     *
+     * @param dataType Data type of the entry to retrieve
+     * @param name Name of the entry to retrieve
+     * @return Data entry retrieved successfully
+     * @return Data entry not found
+     * @return Internal server error
+     */
+    @GET
+    @Path("/{data-type}/{name}/latest")
+    @Produces({ "application/json" })
+    DataEntryWithContent getLatestDataByTypeAndName(@PathParam("data-type") String dataType, @PathParam("name") String name);
 
 
     /**
