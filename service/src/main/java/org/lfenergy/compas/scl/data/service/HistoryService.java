@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,7 +55,8 @@ public class HistoryService {
         var sclContent = compasSclDataRepository.findByUUID(sclType, id, new Version(version));
 
         try {
-            var tempFile = Files.createTempFile("resource_" + id + "_", ".xml").toFile();
+            var tempDir = Files.createTempDirectory("temp-dir" );
+            var tempFile = Files.createTempFile(tempDir, "resource_" + id + "_", ".xml").toFile();
             tempFile.setReadable(true, true);
             tempFile.setWritable(true, true);
             tempFile.setExecutable(false);
