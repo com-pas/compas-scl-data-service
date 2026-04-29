@@ -108,9 +108,9 @@ public class HistoryService {
         }
 
         File tempFile = File.createTempFile(prefix, ".xml", tempDir);
-        tempFile.setReadable(true, true);
-        tempFile.setWritable(true, true);
-        tempFile.setExecutable(false);
+        var setReadPermission = tempFile.setReadable(true, true);
+        var setWritePermission = tempFile.setWritable(true, true);
+        var setExecPermission = tempFile.setExecutable(false);
 
         return tempFile;
     }
