@@ -110,7 +110,11 @@ public class HistoryService {
         File tempFile = File.createTempFile(prefix, ".xml", tempDir);
         var setReadPermission = tempFile.setReadable(true, true);
         var setWritePermission = tempFile.setWritable(true, true);
-        var setExecPermission = tempFile.setExecutable(false);
+
+        if (!setWritePermission)
+            throw new IllegalStateException("Failed to set write permissions on: " + tempFile.getAbsolutePath());
+        if (!setReadPermission)
+            throw new IllegalStateException("Failed to set read permissions on: " + tempFile.getAbsolutePath());
 
         return tempFile;
     }
