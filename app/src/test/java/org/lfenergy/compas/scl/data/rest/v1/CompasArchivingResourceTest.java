@@ -94,7 +94,7 @@ class CompasArchivingResourceTest {
     @Test
     void archiveResource_WhenServiceThrowsException_ThenUniPropagatesException() throws IOException {
         var id = UUID.randomUUID();
-        var body = File.createTempFile("temp-directory/test", ".xml");
+        var body = File.createTempFile("./temp-directory/test", ".xml");
         body.deleteOnExit();
         when(archivingService.archiveResource(any(), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new RuntimeException("archive failed"));
