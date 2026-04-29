@@ -102,7 +102,7 @@ public class HistoryService {
     }
 
     private File createTempFile(String prefix) throws IOException {
-        File tempDir = new File("/temp-directory");
+        File tempDir = new File("./temp-directory");
         if (!tempDir.exists() && !tempDir.mkdirs()) {
             throw new IllegalStateException("Failed to create temp directory: " + tempDir.getAbsolutePath());
         }
