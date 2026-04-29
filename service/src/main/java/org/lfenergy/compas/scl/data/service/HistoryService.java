@@ -56,8 +56,11 @@ public class HistoryService {
         var sclContent = compasSclDataRepository.findByUUID(sclType, id, new Version(version));
 
         try {
-            var ownerOnly = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
-            var tempFile = Files.createTempFile("resource_" + id + "_", ".xml", ownerOnly).toFile();
+            var tempFile = Files.createTempFile("resource_" + id + "_", ".xml").toFile();
+            tempFile.setReadable(true, true);
+            tempFile.setWritable(true, true);
+            tempFile.setExecutable(false);
+
             tempFile.deleteOnExit();
             Files.writeString(tempFile.toPath(), sclContent, StandardCharsets.UTF_8);
             return tempFile;
