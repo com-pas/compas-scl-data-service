@@ -55,11 +55,7 @@ public class HistoryService {
         var sclContent = compasSclDataRepository.findByUUID(sclType, id, new Version(version));
 
         try {
-            var tempFile = File.createTempFile("resource_" + id + "_", ".xml", new File("/temp-directory"));
-            tempFile.setReadable(true, true);
-            tempFile.setWritable(true, true);
-            tempFile.setExecutable(false);
-
+            var tempFile = createTempFile("resource_" + id + "_");
             tempFile.deleteOnExit();
             Files.writeString(tempFile.toPath(), sclContent, StandardCharsets.UTF_8);
             return tempFile;
@@ -103,6 +99,20 @@ public class HistoryService {
         }
         var results = entries.stream().map(this::toDataResource).toList();
         return new DataResourcesResult().results(results);
+    }
+
+    private File createTempFile(String prefix) throws IOException {
+        File tempDir = new File("/temp-directory");
+        if (!tempDir.exists() && !tempDir.mkdirs()) {
+            throw new IllegalStateException("Failed to create temp directory: " + tempDir.getAbsolutePath());
+        }
+
+        File tempFile = File.createTempFile(prefix, ".xml", tempDir);
+        tempFile.setReadable(true, true);
+        tempFile.setWritable(true, true);
+        tempFile.setExecutable(false);
+
+        return tempFile;
     }
 
     private DataResourceVersion toDataResourceVersion(org.lfenergy.compas.scl.data.entities.HistorizedSclFile entry) {

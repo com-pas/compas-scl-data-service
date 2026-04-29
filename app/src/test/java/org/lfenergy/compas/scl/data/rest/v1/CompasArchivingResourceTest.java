@@ -36,7 +36,7 @@ class CompasArchivingResourceTest {
     void archiveResource_WhenCalled_ThenDelegatesToServiceAndReturnsUni() throws IOException {
         var id = UUID.randomUUID();
         var version = "1.0.0";
-        var body = File.createTempFile("test", ".xml");
+        var body = File.createTempFile("temp-directory/test", ".xml");
         body.deleteOnExit();
         var expected = new ArchivedResource();
         when(archivingService.archiveResource(id, version, "author", "approver",
@@ -94,7 +94,7 @@ class CompasArchivingResourceTest {
     @Test
     void archiveResource_WhenServiceThrowsException_ThenUniPropagatesException() throws IOException {
         var id = UUID.randomUUID();
-        var body = File.createTempFile("test", ".xml");
+        var body = File.createTempFile("temp-directory/test", ".xml");
         body.deleteOnExit();
         when(archivingService.archiveResource(any(), any(), any(), any(), any(), any(), any()))
                 .thenThrow(new RuntimeException("archive failed"));
