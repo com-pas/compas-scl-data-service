@@ -55,8 +55,7 @@ public class HistoryService {
         var sclContent = compasSclDataRepository.findByUUID(sclType, id, new Version(version));
 
         try {
-            var tempDir = Files.createTempDirectory("temp-dir" );
-            var tempFile = Files.createTempFile(tempDir, "resource_" + id + "_", ".xml").toFile();
+            var tempFile = File.createTempFile("resource_" + id + "_", ".xml", new File("/temp-directory"));
             tempFile.setReadable(true, true);
             tempFile.setWritable(true, true);
             tempFile.setExecutable(false);
