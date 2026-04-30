@@ -57,6 +57,7 @@ SPDX-License-Identifier: Apache-2.0
                             <inputSpec>${project.basedir}/plugins-custom-resources.yaml</inputSpec>
                             <generatorName>jaxrs-spec</generatorName>
                             <output>${project.basedir}</output>
+                            <templateDirectory>${project.basedir}/src/main/resources/templates</templateDirectory>
                             <generateSupportingFiles>false</generateSupportingFiles>
 
                             <configOptions>
