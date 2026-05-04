@@ -54,7 +54,7 @@ SPDX-License-Identifier: Apache-2.0
                         <phase>none</phase>
 
                         <configuration>
-                            <inputSpec>${project.basedir}/plugins-custom-resources.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/openapi/plugins-custom-resources.yaml</inputSpec>
                             <generatorName>jaxrs-spec</generatorName>
                             <output>${project.basedir}</output>
                             <templateDirectory>${project.basedir}/src/main/resources/templates</templateDirectory>
@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0
                             <configOptions>
                                 <sourceFolder>src/main/java</sourceFolder>
                                 <apiPackage>org.lfenergy.compas.scl.data.rest</apiPackage>
-                                <modelPackage>org.lfenergy.compas.scl.data.rest.dto</modelPackage>
+                                <modelPackage>org.lfenergy.compas.scl.data.rest.api.plugins.resources</modelPackage>
                                 <interfaceOnly>true</interfaceOnly>
                                 <useTags>true</useTags>
                                 <useJakartaEe>true</useJakartaEe>

@@ -1,11 +1,9 @@
-// SPDX-FileCopyrightText: 2026 BearingPoint GmbH
-//
-// SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest.api.plugins.resources;
 
 import java.util.Date;
 import java.util.UUID;
 import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
 
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;

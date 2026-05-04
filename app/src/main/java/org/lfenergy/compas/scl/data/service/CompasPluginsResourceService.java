@@ -16,6 +16,8 @@ import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.repository.CustomPluginsResourceRepository;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntryWithContent;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -39,10 +41,12 @@ public class CompasPluginsResourceService {
     );
 
     private final EntityManager entityManager;
+    private final CustomPluginsResourceRepository repository;
 
     @Inject
-    public CompasPluginsResourceService(EntityManager entityManager) {
+    public CompasPluginsResourceService(EntityManager entityManager, CustomPluginsResourceRepository repository) {
         this.entityManager = entityManager;
+        this.repository = repository;
     }
 
     @Transactional(SUPPORTS)
@@ -128,6 +132,26 @@ public class CompasPluginsResourceService {
                 .orElseThrow(() -> new CompasNoDataFoundException(
                         String.format("No data entries found for type '%s' and name '%s'", type, name)));
     }
+
+    public List<PluginsCustomResource> getAllVersionsWithContentByTypeAndName(String dataType, String name) {
+        List<PluginsCustomResource> entities = repository.findAllVersionsByTypeAndName(dataType, name);
+
+        if (entities.isEmpty()) {
+            throw new CompasNoDataFoundException(
+                    String.format("No data entries found for type '%s' and name '%s'", dataType, name));
+        }
+
+        return entities;
+    }
+
+    public PluginsCustomResource getSpecificVersionByTypeAndName(String dataType, String name, String version) {
+        return repository.findSpecificVersionByTypeAndName(dataType, name, version)
+                .orElseThrow(() -> new CompasNoDataFoundException(
+                    String.format("No data entry found for type '%s', name '%s' and version '%s'", dataType, name, version)
+                )
+        );
+    }
+    
 
     @Transactional(REQUIRED)
     public void deleteByType(String type) {

@@ -67,6 +67,20 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
     }
 
     @Override
+    public List<DataEntryWithContent> getAllVersionsWithContentByTypeAndName(String dataType, String name) {
+        LOGGER.info("Getting all versions of a resource by name '{}' and type '{}'", name, dataType);
+        return service.getAllVersionsWithContentByTypeAndName(dataType, name).stream()
+                .map(this::toDataEntryWithContent)
+                .toList();
+    }
+
+    @Override
+    public DataEntryWithContent getSpecificVersionByTypeAndName(String dataType, String name, String version) {
+        LOGGER.info("Getting specific version of a resource by version '{}', name '{}' and type '{}'",version ,name, dataType);
+        return toDataEntryWithContent(service.getSpecificVersionByTypeAndName(dataType, name, version));
+    }
+
+    @Override
     public DataEntryWithContent getDataById(UUID id) {
         LOGGER.info("Getting plugins custom resource by id '{}'", id);
 
@@ -102,6 +116,7 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
         var entity = service.findLatestByTypeAndName(dataType, name);
         return toDataEntryWithContent(entity);
     }
+
 
     @Override
     public UploadDataResponse uploadData(String type,

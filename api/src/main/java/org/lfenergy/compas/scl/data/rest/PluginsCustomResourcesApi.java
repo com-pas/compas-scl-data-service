@@ -8,7 +8,6 @@ import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntryWithCont
 import java.util.Date;
 
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.PagedDataEntryResponse;
-import java.util.List;
 import java.util.UUID;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.UploadDataResponse;
 
@@ -16,7 +15,7 @@ import jakarta.ws.rs.*;
 
 
 import java.io.InputStream;
-
+import java.util.List;
 import jakarta.validation.constraints.*;
 
 /**
@@ -25,6 +24,35 @@ import jakarta.validation.constraints.*;
 @Path("/plugins/resources")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", comments = "Generator version: 7.12.0")
 public interface PluginsCustomResourcesApi {
+
+    /**
+     * Delete all data entries for the given data type
+     *
+     * @param id Data type of the entries to delete
+     * @return Data entries deleted successfully
+     * @return No data entries found for the given data type
+     * @return Internal server error
+     */
+    @DELETE
+    @Path("/{id}")
+    @Produces({ "application/json" })
+    void deleteDataByType(@PathParam("id") String id);
+
+
+    /**
+     * Delete all data entries for the given data type and resource name
+     *
+     * @param dataType Data type of the entries to delete
+     * @param name Name of the entries to delete
+     * @return Data entries deleted successfully
+     * @return No data entries found for the given data type and name
+     * @return Internal server error
+     */
+    @DELETE
+    @Path("/{data-type}/{name}")
+    @Produces({ "application/json" })
+    void deleteDataByTypeAndName(@PathParam("data-type") String dataType,@PathParam("name") String name);
+
 
     /**
      * Retrieve metadata for all uploaded data entries with optional filtering
@@ -45,6 +73,37 @@ public interface PluginsCustomResourcesApi {
 
 
     /**
+     * Returns all versions of the named resource as DataEntryWithContent objects
+     *
+     * @param dataType 
+     * @param name 
+     * @return List of versions with content
+     * @return Resource not found
+     * @return Internal server error
+     */
+    @GET
+    @Path("/{data-type}/{name}/versions")
+    @Produces({ "application/json" })
+    List<DataEntryWithContent> getAllVersionsWithContentByTypeAndName(@PathParam("data-type") String dataType,@PathParam("name") String name);
+
+
+
+    /**
+     * Returns the specified version of the named resource, with content
+     *
+     * @param dataType
+     * @param name
+     * @param version
+     * @return Resource version with content
+     * @return Resource version not found
+     * @return Internal server error
+     */
+    @GET
+    @Path("/v1/{data-type}/{name}/{version}")
+    @Produces({ "application/json" })
+    DataEntryWithContent getSpecificVersionByTypeAndName(@PathParam("data-type") String dataType,@PathParam("name") String name,@PathParam("version") String version);
+
+    /**
      * Retrieve a single data entry by its unique identifier, including the full content
      *
      * @param id Unique identifier of the data entry
@@ -56,19 +115,6 @@ public interface PluginsCustomResourcesApi {
     @Path("/{id}")
     @Produces({ "application/json" })
     DataEntryWithContent getDataById(@PathParam("id") UUID id);
-
-
-    /**
-     * Delete all data entries for the given data type
-     *
-     * @param dataType Data type of the entries to delete
-     * @return Data entries deleted successfully
-     * @return No data entries found for the given data type
-     * @return Internal server error
-     */
-    @DELETE
-    @Path("/{data-type}")
-    void deleteDataByType(@PathParam("data-type") String dataType);
 
 
     /**
@@ -86,20 +132,6 @@ public interface PluginsCustomResourcesApi {
 
 
     /**
-     * Delete all data entries for the given data type and resource name
-     *
-     * @param dataType Data type of the entries to delete
-     * @param name Name of the entries to delete
-     * @return Data entries deleted successfully
-     * @return No data entries found for the given data type and name
-     * @return Internal server error
-     */
-    @DELETE
-    @Path("/{data-type}/{name}")
-    void deleteDataByTypeAndName(@PathParam("data-type") String dataType, @PathParam("name") String name);
-
-
-    /**
      * Retrieve the latest version of a data entry for the given data type and resource name, including the full content
      *
      * @param dataType Data type of the entry to retrieve
@@ -111,7 +143,7 @@ public interface PluginsCustomResourcesApi {
     @GET
     @Path("/{data-type}/{name}/latest")
     @Produces({ "application/json" })
-    DataEntryWithContent getLatestDataByTypeAndName(@PathParam("data-type") String dataType, @PathParam("name") String name);
+    DataEntryWithContent getLatestDataByTypeAndName(@PathParam("data-type") String dataType,@PathParam("name") String name);
 
 
     /**
