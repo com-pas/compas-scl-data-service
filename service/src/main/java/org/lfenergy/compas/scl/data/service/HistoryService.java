@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,8 +55,7 @@ public class HistoryService {
         var sclContent = compasSclDataRepository.findByUUID(sclType, id, new Version(version));
 
         try {
-            var ownerOnly = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
-            var tempFile = Files.createTempFile("resource_" + id + "_", ".xml", ownerOnly).toFile();
+            var tempFile = createTempFile("resource_" + id + "_");
             tempFile.deleteOnExit();
             Files.writeString(tempFile.toPath(), sclContent, StandardCharsets.UTF_8);
             return tempFile;
@@ -101,6 +99,24 @@ public class HistoryService {
         }
         var results = entries.stream().map(this::toDataResource).toList();
         return new DataResourcesResult().results(results);
+    }
+
+    private File createTempFile(String prefix) throws IOException {
+        File tempDir = new File("./temp-directory");
+        if (!tempDir.exists() && !tempDir.mkdirs()) {
+            throw new IllegalStateException("Failed to create temp directory: " + tempDir.getAbsolutePath());
+        }
+
+        File tempFile = File.createTempFile(prefix, ".xml", tempDir);
+        var setReadPermission = tempFile.setReadable(true, true);
+        var setWritePermission = tempFile.setWritable(true, true);
+
+        if (!setWritePermission)
+            throw new IllegalStateException("Failed to set write permissions on: " + tempFile.getAbsolutePath());
+        if (!setReadPermission)
+            throw new IllegalStateException("Failed to set read permissions on: " + tempFile.getAbsolutePath());
+
+        return tempFile;
     }
 
     private DataResourceVersion toDataResourceVersion(org.lfenergy.compas.scl.data.entities.HistorizedSclFile entry) {

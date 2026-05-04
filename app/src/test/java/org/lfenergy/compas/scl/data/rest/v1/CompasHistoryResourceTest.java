@@ -33,7 +33,7 @@ class CompasHistoryResourceTest {
     void retrieveDataResourceByVersion_WhenCalled_ThenDelegatesToServiceAndReturnsUni() throws Exception {
         var id = UUID.randomUUID();
         var version = "1.0.0";
-        var tempFile = File.createTempFile("resource_" + id, ".xml");
+        var tempFile = File.createTempFile("./temp-directory/resource_" + id, ".xml");
         tempFile.deleteOnExit();
         when(historyService.retrieveDataResourceByVersion(id, version)).thenReturn(tempFile);
 
