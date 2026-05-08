@@ -80,23 +80,15 @@ public class HistoryService {
     }
 
     /**
-     * Searches for data resources.  If {@code search.uuid} is set, only entries for that
-     * resource are considered (returning the latest version).  Otherwise the optional
-     * filter fields (type, name, location, author, from, to) constrain the result.
+     * Searches for data resources.  If {@code search.uuid} is set, it performs a partial match.
+     * All optional filter fields (uuid, type, name, location, author, from, to) constrain the result.
      */
     @Transactional(SUPPORTS)
     public DataResourcesResult searchForResources(DataResourceSearch search) {
-        List<org.lfenergy.compas.scl.data.entities.HistorizedSclFile> entries;
-        if (search.getUuid() != null && !search.getUuid().isBlank()) {
-            entries = historizedSclFileRepository
-                .findLatestBySclFileId(UUID.fromString(search.getUuid()))
-                .map(List::of)
-                .orElse(List.of());
-        } else {
-            entries = historizedSclFileRepository.searchLatest(
-                search.getType(), search.getName(), search.getLocation(),
+        List<org.lfenergy.compas.scl.data.entities.HistorizedSclFile> entries = historizedSclFileRepository.searchLatest(
+                search.getUuid(), search.getType(), search.getName(), search.getLocation(),
                 search.getAuthor(), search.getFrom(), search.getTo());
-        }
+
         var results = entries.stream().map(this::toDataResource).toList();
         return new DataResourcesResult().results(results);
     }

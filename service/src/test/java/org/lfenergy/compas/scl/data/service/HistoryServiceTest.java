@@ -200,66 +200,33 @@ class HistoryServiceTest {
     // ---- searchForResources ------------------------------------------------
 
     @Test
-    void searchForResources_WhenUuidProvided_ThenSearchesByLatestForThatUuid() {
-        var id = UUID.randomUUID();
-        var entry = buildEntry(id, "SCD", "file", "1.0.0", true, false);
-        var search = new DataResourceSearch().uuid(id.toString());
-
-        when(historizedSclFileRepository.findLatestBySclFileId(id))
-                .thenReturn(Optional.of(entry));
-
-        var result = historyService.searchForResources(search);
-
-        assertNotNull(result);
-        assertEquals(1, result.getResults().size());
-        verify(historizedSclFileRepository).findLatestBySclFileId(id);
-        verify(historizedSclFileRepository, never()).searchLatest(any(), any(), any(), any(), any(), any());
-    }
-
-    @Test
-    void searchForResources_WhenUuidProvidedButNotFound_ThenReturnsEmptyResult() {
-        var id = UUID.randomUUID();
-        var search = new DataResourceSearch().uuid(id.toString());
-
-        when(historizedSclFileRepository.findLatestBySclFileId(id))
-                .thenReturn(Optional.empty());
-
-        var result = historyService.searchForResources(search);
-
-        assertNotNull(result);
-        assertEquals(0, result.getResults().size());
-    }
-
-    @Test
     void searchForResources_WhenNoUuidProvided_ThenDelegatesToSearchLatest() {
         var id = UUID.randomUUID();
         var entry = buildEntry(id, "SCD", "file", "1.0.0", true, false);
         var search = new DataResourceSearch().type("SCD").name("file");
 
         when(historizedSclFileRepository.searchLatest(
-                eq("SCD"), eq("file"), isNull(), isNull(), isNull(), isNull()))
+                isNull(), eq("SCD"), eq("file"), isNull(), isNull(), isNull(), isNull()))
                 .thenReturn(List.of(entry));
 
         var result = historyService.searchForResources(search);
 
         assertNotNull(result);
         assertEquals(1, result.getResults().size());
-        verify(historizedSclFileRepository).searchLatest("SCD", "file", null, null, null, null);
-        verify(historizedSclFileRepository, never()).findLatestBySclFileId(any());
+        verify(historizedSclFileRepository).searchLatest(null, "SCD", "file", null, null, null, null);
     }
 
     @Test
     void searchForResources_WhenBlankUuidProvided_ThenDelegatesToSearchLatest() {
         var search = new DataResourceSearch().uuid("  ");
 
-        when(historizedSclFileRepository.searchLatest(any(), any(), any(), any(), any(), any()))
+        when(historizedSclFileRepository.searchLatest(eq("  "), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of());
 
         var result = historyService.searchForResources(search);
 
         assertNotNull(result);
-        verify(historizedSclFileRepository).searchLatest(any(), any(), any(), any(), any(), any());
-        verify(historizedSclFileRepository, never()).findLatestBySclFileId(any());
+        verify(historizedSclFileRepository).searchLatest(eq("  "), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -272,7 +239,7 @@ class HistoryServiceTest {
         entry.location = location;
         var search = new DataResourceSearch();
 
-        when(historizedSclFileRepository.searchLatest(any(), any(), any(), any(), any(), any()))
+        when(historizedSclFileRepository.searchLatest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of(entry));
 
         var result = historyService.searchForResources(search);
@@ -287,7 +254,7 @@ class HistoryServiceTest {
         entry.location = null;
         var search = new DataResourceSearch();
 
-        when(historizedSclFileRepository.searchLatest(any(), any(), any(), any(), any(), any()))
+        when(historizedSclFileRepository.searchLatest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of(entry));
 
         var result = historyService.searchForResources(search);
@@ -301,12 +268,86 @@ class HistoryServiceTest {
         var entry = buildEntry(id, "SCD", "file", "1.0.0", false, true);
         var search = new DataResourceSearch();
 
-        when(historizedSclFileRepository.searchLatest(any(), any(), any(), any(), any(), any()))
+        when(historizedSclFileRepository.searchLatest(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of(entry));
 
         var result = historyService.searchForResources(search);
 
         assertTrue(result.getResults().get(0).getDeleted());
         assertFalse(result.getResults().get(0).getAvailable());
+    }
+
+    @Test
+    void searchForResources_WhenUuidIsProvided_ThenDelegatesToSearchLatestWithUuid() {
+        DataResourceSearch search = new DataResourceSearch();
+        search.setUuid(UUID.randomUUID().toString());
+
+        var sclFileId = new org.lfenergy.compas.scl.data.entities.SclFileId();
+        sclFileId.id = UUID.fromString(search.getUuid());
+
+        var sclFile = new org.lfenergy.compas.scl.data.entities.SclFile();
+        sclFile.id = sclFileId;
+
+        org.lfenergy.compas.scl.data.entities.HistorizedSclFile histFile = new org.lfenergy.compas.scl.data.entities.HistorizedSclFile();
+        histFile.sclFile = sclFile;
+
+        when(historizedSclFileRepository.searchLatest(search.getUuid(), null, null, null, null, null, null))
+            .thenReturn(List.of(histFile));
+
+        var result = historyService.searchForResources(search);
+
+        verify(historizedSclFileRepository).searchLatest(search.getUuid(), null, null, null, null, null, null);
+        assertEquals(1, result.getResults().size());
+        assertEquals(search.getUuid(), result.getResults().get(0).getUuid().toString());
+    }
+
+    @Test
+    void searchForResources_WhenTypeFilterProvided_ThenCallsSearchLatest() {
+        DataResourceSearch search = new DataResourceSearch();
+        search.setType("SCD");
+
+        when(historizedSclFileRepository.searchLatest(null, "SCD", null, null, null, null, null))
+            .thenReturn(List.of());
+
+        var result = historyService.searchForResources(search);
+
+        verify(historizedSclFileRepository).searchLatest(null, "SCD", null, null, null, null, null);
+        assertTrue(result.getResults().isEmpty());
+    }
+
+    @Test
+    void searchForResources_WhenAuthorFilterProvided_ThenCallsSearchLatest() {
+        DataResourceSearch search = new DataResourceSearch();
+        search.setAuthor("JohnDoe");
+
+        when(historizedSclFileRepository.searchLatest(null, null, null, null, "JohnDoe", null, null))
+            .thenReturn(List.of());
+
+        var result = historyService.searchForResources(search);
+
+        verify(historizedSclFileRepository).searchLatest(null, null, null, null, "JohnDoe", null, null);
+        assertTrue(result.getResults().isEmpty());
+    }
+
+    @Test
+    void searchForResources_WhenAllFiltersProvided_ThenCallsSearchLatestWithAllParams() {
+        DataResourceSearch search = new DataResourceSearch();
+        search.setUuid("1234");
+        search.setType("SCD");
+        search.setName("Substation");
+        search.setLocation(UUID.randomUUID().toString());
+        search.setAuthor("Jane");
+        search.setFrom(OffsetDateTime.parse("2023-01-01T00:00:00Z"));
+        search.setTo(OffsetDateTime.parse("2023-12-31T23:59:59Z"));
+
+        when(historizedSclFileRepository.searchLatest(search.getUuid(), search.getType(), search.getName(),
+            search.getLocation(), search.getAuthor(), search.getFrom(), search.getTo()))
+            .thenReturn(List.of());
+
+        var result = historyService.searchForResources(search);
+
+        verify(historizedSclFileRepository).searchLatest(search.getUuid(), search.getType(), search.getName(),
+            search.getLocation(), search.getAuthor(), search.getFrom(), search.getTo());
+        assertTrue(result.getResults().isEmpty());
     }
 }

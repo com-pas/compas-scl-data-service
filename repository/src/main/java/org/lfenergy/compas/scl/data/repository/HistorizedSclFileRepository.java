@@ -117,13 +117,17 @@ public class HistorizedSclFileRepository implements PanacheManagedBlockingReposi
      * Searches for the latest version of each resource matching the supplied optional
      * filter criteria. Any parameter that is {@code null} or blank is ignored.
      */
-    public List<HistorizedSclFile> searchLatest(String type, String name, String locationId,
+    public List<HistorizedSclFile> searchLatest(String uuid, String type, String name, String locationId,
                                                  String author, OffsetDateTime from, OffsetDateTime to) {
         Map<String, Object> params = new HashMap<>();
         StringBuilder sb = new StringBuilder(
                 "from HistorizedSclFile r " +
                 "where r.changedAt = (select max(r2.changedAt) from HistorizedSclFile r2 where r2.sclFile.id.id = r.sclFile.id.id)");
 
+        if (uuid != null && !uuid.isBlank()) {
+            sb.append(" and cast(r.sclFile.id.id as string) like :uuid");
+            params.put("uuid", "%" + uuid.toLowerCase() + "%");
+        }
         if (type != null && !type.isBlank()) {
             sb.append(" and r.sclFile.type = :type");
             params.put("type", type);
@@ -137,7 +141,7 @@ public class HistorizedSclFileRepository implements PanacheManagedBlockingReposi
             params.put("locationId", UUID.fromString(locationId));
         }
         if (author != null && !author.isBlank()) {
-            sb.append(" and lower(r.author) like :author");
+            sb.append(" and lower(r.sclFile.createdBy) like :author");
             params.put("author", "%" + author.toLowerCase() + "%");
         }
         if (from != null) {
