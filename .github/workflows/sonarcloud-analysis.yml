@@ -40,6 +40,15 @@ jobs:
         full_name: ${{ github.event.repository.full_name }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Extract PR data
+      if: github.event.workflow_run.event == 'pull_request' || (github.event.workflow_run.actor == 'dependabot[bot]' && github.event.workflow_run.event == 'pull_request_target')
+      id: pr_data
+      env:
+        DATA: ${{ steps.get_pr_data.outputs.data }}
+      run: |
+        echo "head_ref=$(echo "$DATA" | jq -r '.head.ref')" >> $GITHUB_OUTPUT
+        echo "number=$(echo "$DATA" | jq -r '.number')" >> $GITHUB_OUTPUT
+        echo "base_ref=$(echo "$DATA" | jq -r '.base.ref')" >> $GITHUB_OUTPUT
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       with:
         repository: ${{ github.event.workflow_run.head_repository.full_name }}
@@ -49,7 +58,7 @@ jobs:
       if: github.event.workflow_run.event == 'pull_request' || (github.event.workflow_run.actor == 'dependabot[bot]' && github.event.workflow_run.event == 'pull_request_target')
       env:
         CLONE_URL: ${{ github.event.repository.clone_url }}
-        BASE_REF: ${{ fromJson(steps.get_pr_data.outputs.data).base.ref }}
+        BASE_REF: ${{ steps.pr_data.outputs.base_ref }}
         HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
       run: |
         git remote add upstream "$CLONE_URL"
@@ -93,9 +102,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_OPTS: ${{ steps.sonar_env.outputs.sonar_opts }}
-        PR_HEAD_REF: ${{ fromJson(steps.get_pr_data.outputs.data).head.ref }}
-        PR_NUMBER: ${{ fromJson(steps.get_pr_data.outputs.data).number }}
-        PR_BASE_REF: ${{ fromJson(steps.get_pr_data.outputs.data).base.ref }}
+        PR_HEAD_REF: ${{ steps.pr_data.outputs.head_ref }}
+        PR_NUMBER: ${{ steps.pr_data.outputs.number }}
+        PR_BASE_REF: ${{ steps.pr_data.outputs.base_ref }}
         HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
       run: |
         ./mvnw -B -s custom_maven_settings.xml -Psonar \
