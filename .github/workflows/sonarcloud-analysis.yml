@@ -14,24 +14,28 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'success'
     timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
     steps:
     - name: echo event
       run: cat $GITHUB_EVENT_PATH
     - name: Download PR number artifact
-      if: github.event.workflow_run.event == 'pull_request' || (github.event.workflow_run.actor == 'dependabot[bot]' && github.event.workflow_run.event == 'pull_request_target')
+      if: github.event.workflow_run.event == 'pull_request'
       uses: dawidd6/action-download-artifact@b6e2e70617bc3265edd6dab6c906732b2f1ae151 # v21
       with:
         workflow: SonarCloud Build
         run_id: ${{ github.event.workflow_run.id }}
         name: PR_NUMBER
     - name: Read PR_NUMBER.txt
-      if: github.event.workflow_run.event == 'pull_request' || (github.event.workflow_run.actor == 'dependabot[bot]' && github.event.workflow_run.event == 'pull_request_target')
+      if: github.event.workflow_run.event == 'pull_request'
       id: pr_number
       uses: juliangruber/read-file-action@271ff311a4947af354c6abcd696a306553b9ec18 # v1
       with:
         path: ./PR_NUMBER.txt
     - name: Request GitHub API for PR data
-      if: github.event.workflow_run.event == 'pull_request' || (github.event.workflow_run.actor == 'dependabot[bot]' && github.event.workflow_run.event == 'pull_request_target')
+      if: github.event.workflow_run.event == 'pull_request'
       uses: octokit/request-action@b91aabaa861c777dcdb14e2387e30eddf04619ae # v3.0.0
       id: get_pr_data
       with:
@@ -41,7 +45,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Extract PR data
-      if: github.event.workflow_run.event == 'pull_request' || (github.event.workflow_run.actor == 'dependabot[bot]' && github.event.workflow_run.event == 'pull_request_target')
+      if: github.event.workflow_run.event == 'pull_request'
       id: pr_data
       env:
         DATA: ${{ steps.get_pr_data.outputs.data }}
@@ -51,23 +55,15 @@ jobs:
         echo "base_ref=$(echo "$DATA" | jq -r '.base.ref')" >> $GITHUB_OUTPUT
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       with:
-        repository: ${{ github.event.workflow_run.head_repository.full_name }}
-        ref: ${{ github.event.workflow_run.head_branch }}
         fetch-depth: 0
-    - name: Checkout base branch
-      if: github.event.workflow_run.event == 'pull_request' || (github.event.workflow_run.actor == 'dependabot[bot]' && github.event.workflow_run.event == 'pull_request_target')
-      env:
-        CLONE_URL: ${{ github.event.repository.clone_url }}
-        BASE_REF: ${{ steps.pr_data.outputs.base_ref }}
-        HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
-      run: |
-        git remote add upstream "$CLONE_URL"
-        git fetch upstream
-        git checkout -B "$BASE_REF" "upstream/$BASE_REF"
-        git checkout "$HEAD_BRANCH"
-        git clean -ffdx && git reset --hard HEAD
+    - name: Download build artifacts
+      uses: dawidd6/action-download-artifact@b6e2e70617bc3265edd6dab6c906732b2f1ae151 # v21
+      with:
+        workflow: SonarCloud Build
+        run_id: ${{ github.event.workflow_run.id }}
+        name: build-artifacts
     - name: Cache SonarCloud packages
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+      uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5
       with:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-sonar
@@ -85,19 +81,20 @@ jobs:
       with:
         distribution: 'zulu'
         java-version: '17'
+        
     - name: Set Common Sonar Variables
       id: sonar_env
       run: |
-        echo "##[set-output name=sonar_opts;]$(echo -Dsonar.host.url=https://sonarcloud.io \
+        echo "sonar_opts=-Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.projectKey=com-pas_compas-scl-data-service \
-          -Dsonar.organization=com-pas )"
+          -Dsonar.organization=com-pas" >> $GITHUB_OUTPUT
     - name: Create custom Maven Settings.xml
       uses: whelk-io/maven-settings-xml-action@9dc09b23833fa9aa7f27b63db287951856f3433d # v22
       with:
         output_file: custom_maven_settings.xml
         servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
     - name: Build and analyze (Pull Request)
-      if: ${{ github.event.workflow_run.event == 'pull_request' || (github.event.workflow_run.actor == 'dependabot[bot]' && github.event.workflow_run.event == 'pull_request_target') }}
+      if: ${{ github.event.workflow_run.event == 'pull_request' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -107,13 +104,13 @@ jobs:
         PR_BASE_REF: ${{ steps.pr_data.outputs.base_ref }}
         HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
       run: |
-        ./mvnw -B -s custom_maven_settings.xml -Psonar \
+        mvn -B -s custom_maven_settings.xml -Psonar \
           $SONAR_OPTS \
           -Dsonar.pullrequest.branch="$PR_HEAD_REF" \
           -Dsonar.pullrequest.key="$PR_NUMBER" \
           -Dsonar.pullrequest.base="$PR_BASE_REF" \
           -Dsonar.scm.revision="$HEAD_SHA" \
-          clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
     - name: Build and analyze (Push)
       if: ${{ github.event.workflow_run.event == 'push' }}
       env:
@@ -123,8 +120,8 @@ jobs:
         HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
       run: |
-        ./mvnw -B -s custom_maven_settings.xml -Psonar \
+        mvn -B -s custom_maven_settings.xml -Psonar \
           $SONAR_OPTS \
           -Dsonar.scm.revision="$HEAD_SHA" \
           -Dsonar.branch.name="$HEAD_BRANCH" \
-          clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
