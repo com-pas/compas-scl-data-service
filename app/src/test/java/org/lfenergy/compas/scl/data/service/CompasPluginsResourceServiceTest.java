@@ -3,9 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
-import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,13 +11,14 @@ import org.lfenergy.compas.scl.data.exception.CompasDuplicateVersionException;
 import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
-import org.mockito.ArgumentCaptor;
+import org.lfenergy.compas.scl.data.repository.CustomPluginsResourceRepository;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,7 +29,7 @@ import static org.mockito.Mockito.*;
 class CompasPluginsResourceServiceTest {
 
     @Mock
-    EntityManager entityManager;
+    CustomPluginsResourceRepository repository;
 
     @InjectMocks
     CompasPluginsResourceService service;
@@ -40,42 +38,32 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void list_WhenCalledWithTypeOnly_ThenReturnsResults() {
-        var query = mockTypedQuery(PluginsCustomResource.class);
         var resource = createResource();
-        when(query.getResultList()).thenReturn(List.of(resource));
+        when(repository.listFiltered("xml", null, null, null, 0, 20)).thenReturn(List.of(resource));
 
         var result = service.list("xml", null, null, null, 0, 20);
 
         assertEquals(1, result.size());
         assertEquals(resource, result.get(0));
-        verify(query).setFirstResult(0);
-        verify(query).setMaxResults(20);
     }
 
     @Test
     void list_WhenCalledWithAllFilters_ThenAppliesAllFilters() {
-        var query = mockTypedQuery(PluginsCustomResource.class);
-        when(query.getResultList()).thenReturn(List.of());
+        Date uploadedAfter = new Date();
+        Date uploadedBefore = new Date();
+        when(repository.listFiltered("xml", uploadedAfter, uploadedBefore, "test", 1, 10)).thenReturn(List.of());
 
-        service.list("xml", new Date(), new Date(), "test", 1, 10);
+        var result = service.list("xml", uploadedAfter, uploadedBefore, "test", 1, 10);
 
-        var jpqlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(entityManager).createQuery(jpqlCaptor.capture(), eq(PluginsCustomResource.class));
-        var jpql = jpqlCaptor.getValue();
-        assertTrue(jpql.contains("e.uploadedAt >= :uploadedAfter"));
-        assertTrue(jpql.contains("e.uploadedAt <= :uploadedBefore"));
-        assertTrue(jpql.contains("LOWER(e.name) LIKE :name"));
-        verify(query).setParameter(eq("name"), contains("test"));
-        verify(query).setFirstResult(10);
-        verify(query).setMaxResults(10);
+        assertEquals(0, result.size());
+        verify(repository).listFiltered("xml", uploadedAfter, uploadedBefore, "test", 1, 10);
     }
 
     // --- count ---
 
     @Test
     void count_WhenCalledWithTypeOnly_ThenReturnsCount() {
-        var query = mockTypedQuery(Long.class);
-        when(query.getSingleResult()).thenReturn(5L);
+        when(repository.countFiltered("xml", null, null, null)).thenReturn(5L);
 
         var result = service.count("xml", null, null, null);
 
@@ -84,18 +72,14 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void count_WhenCalledWithFilters_ThenAppliesFilters() {
-        var query = mockTypedQuery(Long.class);
-        when(query.getSingleResult()).thenReturn(3L);
+        Date uploadedAfter = new Date();
+        Date uploadedBefore = new Date();
+        when(repository.countFiltered("xml", uploadedAfter, uploadedBefore, "search")).thenReturn(3L);
 
-        var result = service.count("xml", new Date(), new Date(), "search");
+        var result = service.count("xml", uploadedAfter, uploadedBefore, "search");
 
         assertEquals(3L, result);
-        var jpqlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(entityManager).createQuery(jpqlCaptor.capture(), eq(Long.class));
-        var jpql = jpqlCaptor.getValue();
-        assertTrue(jpql.contains("uploadedAfter"));
-        assertTrue(jpql.contains("uploadedBefore"));
-        assertTrue(jpql.contains("LOWER(e.name) LIKE :name"));
+        verify(repository).countFiltered("xml", uploadedAfter, uploadedBefore, "search");
     }
 
     // --- findById ---
@@ -104,7 +88,7 @@ class CompasPluginsResourceServiceTest {
     void findById_WhenEntityExists_ThenReturnsEntity() {
         var id = UUID.randomUUID();
         var resource = createResource();
-        when(entityManager.find(PluginsCustomResource.class, id)).thenReturn(resource);
+        when(repository.findByIdOptional(id)).thenReturn(Optional.of(resource));
 
         var result = service.findById(id);
 
@@ -114,7 +98,7 @@ class CompasPluginsResourceServiceTest {
     @Test
     void findById_WhenEntityDoesNotExist_ThenThrowsCompasNoDataFoundException() {
         var id = UUID.randomUUID();
-        when(entityManager.find(PluginsCustomResource.class, id)).thenReturn(null);
+        when(repository.findByIdOptional(id)).thenReturn(Optional.empty());
 
         var exception = assertThrows(CompasNoDataFoundException.class, () -> service.findById(id));
         assertTrue(exception.getMessage().contains(id.toString()));
@@ -122,7 +106,6 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void findLatestByType_WhenEntitiesExist_ThenReturnsLatestPerName() {
-        var query = mockTypedQuery(PluginsCustomResource.class);
         var older = createResource();
         older.name = "config";
         older.version = "1.2.3";
@@ -132,20 +115,18 @@ class CompasPluginsResourceServiceTest {
         var another = createResource();
         another.name = "another";
         another.version = "2.0.0";
-        when(query.getResultList()).thenReturn(List.of(older, newer, another));
+        when(repository.list("type", "xml")).thenReturn(List.of(older, newer, another));
 
         var result = service.findLatestByType("xml");
 
         assertEquals(2, result.size());
         assertEquals(another, result.get(0));
         assertEquals(newer, result.get(1));
-        verify(query).setParameter("type", "xml");
     }
 
     @Test
     void findLatestByType_WhenNoEntityExists_ThenThrowsCompasNoDataFoundException() {
-        var query = mockTypedQuery(PluginsCustomResource.class);
-        when(query.getResultList()).thenReturn(List.of());
+        when(repository.list("type", "xml")).thenReturn(List.of());
 
         var exception = assertThrows(CompasNoDataFoundException.class, () -> service.findLatestByType("xml"));
 
@@ -154,26 +135,22 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void findLatestByTypeAndName_WhenEntitiesExist_ThenReturnsHighestVersion() {
-        var query = mockTypedQuery(PluginsCustomResource.class);
         var older = createResource();
         older.name = "config";
         older.version = "1.2.3";
         var newer = createResource();
         newer.name = "config";
         newer.version = "1.10.0";
-        when(query.getResultList()).thenReturn(List.of(older, newer));
+        when(repository.list("type = ?1 and name = ?2", "xml", "config")).thenReturn(List.of(older, newer));
 
         var result = service.findLatestByTypeAndName("xml", "config");
 
         assertEquals(newer, result);
-        verify(query).setParameter("type", "xml");
-        verify(query).setParameter("name", "config");
     }
 
     @Test
     void findLatestByTypeAndName_WhenNoEntityExists_ThenThrowsCompasNoDataFoundException() {
-        var query = mockTypedQuery(PluginsCustomResource.class);
-        when(query.getResultList()).thenReturn(List.of());
+        when(repository.list("type = ?1 and name = ?2", "xml", "config")).thenReturn(List.of());
 
         var exception = assertThrows(CompasNoDataFoundException.class,
                 () -> service.findLatestByTypeAndName("xml", "config"));
@@ -184,23 +161,16 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void deleteByType_WhenEntriesExist_ThenDeletesEntries() {
-        Query deleteQuery = mock(Query.class);
-        when(entityManager.createQuery(anyString())).thenReturn(deleteQuery);
-        when(deleteQuery.setParameter(anyString(), any())).thenReturn(deleteQuery);
-        when(deleteQuery.executeUpdate()).thenReturn(2);
+        when(repository.delete("type = ?1", "xml")).thenReturn(2L);
 
         service.deleteByType("xml");
 
-        verify(deleteQuery).setParameter("type", "xml");
-        verify(deleteQuery).executeUpdate();
+        verify(repository).delete("type = ?1", "xml");
     }
 
     @Test
     void deleteByType_WhenNoEntriesExist_ThenThrowsCompasNoDataFoundException() {
-        Query deleteQuery = mock(Query.class);
-        when(entityManager.createQuery(anyString())).thenReturn(deleteQuery);
-        when(deleteQuery.setParameter(anyString(), any())).thenReturn(deleteQuery);
-        when(deleteQuery.executeUpdate()).thenReturn(0);
+        when(repository.delete("type = ?1", "xml")).thenReturn(0L);
 
         var exception = assertThrows(CompasNoDataFoundException.class, () -> service.deleteByType("xml"));
 
@@ -209,24 +179,16 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void deleteByTypeAndName_WhenEntriesExist_ThenDeletesEntries() {
-        Query deleteQuery = mock(Query.class);
-        when(entityManager.createQuery(anyString())).thenReturn(deleteQuery);
-        when(deleteQuery.setParameter(anyString(), any())).thenReturn(deleteQuery);
-        when(deleteQuery.executeUpdate()).thenReturn(2);
+        when(repository.delete("type = ?1 and name = ?2", "xml", "config")).thenReturn(2L);
 
         service.deleteByTypeAndName("xml", "config");
 
-        verify(deleteQuery).setParameter("type", "xml");
-        verify(deleteQuery).setParameter("name", "config");
-        verify(deleteQuery).executeUpdate();
+        verify(repository).delete("type = ?1 and name = ?2", "xml", "config");
     }
 
     @Test
     void deleteByTypeAndName_WhenNoEntriesExist_ThenThrowsCompasNoDataFoundException() {
-        Query deleteQuery = mock(Query.class);
-        when(entityManager.createQuery(anyString())).thenReturn(deleteQuery);
-        when(deleteQuery.setParameter(anyString(), any())).thenReturn(deleteQuery);
-        when(deleteQuery.executeUpdate()).thenReturn(0);
+        when(repository.delete("type = ?1 and name = ?2", "xml", "config")).thenReturn(0L);
 
         var exception = assertThrows(CompasNoDataFoundException.class,
                 () -> service.deleteByTypeAndName("xml", "config"));
@@ -239,13 +201,12 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void upload_WhenCalledWithExplicitVersion_ThenPersistsEntity() {
-        var duplicateQuery = mockTypedQuery(Long.class);
-        when(duplicateQuery.getSingleResult()).thenReturn(0L);
+        when(repository.countDuplicate("xml", "default", "name", "2.0.0")).thenReturn(0L);
 
         var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "2.0.0", null));
 
-        verify(entityManager).persist(any(PluginsCustomResource.class));
+        verify(repository).persist(any(PluginsCustomResource.class));
         assertEquals("xml", result.type);
         assertEquals("name", result.name);
         assertEquals("application/xml", result.contentType);
@@ -258,8 +219,7 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void upload_WhenDuplicateVersionExists_ThenThrowsCompasDuplicateVersionException() {
-        var duplicateQuery = mockTypedQuery(Long.class);
-        when(duplicateQuery.getSingleResult()).thenReturn(1L);
+        when(repository.countDuplicate("xml", "default", "name", "2.0.0")).thenReturn(1L);
 
         var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "2.0.0", null);
@@ -269,13 +229,10 @@ class CompasPluginsResourceServiceTest {
     @ParameterizedTest
     @CsvSource({"MAJOR, 2.0.0", "minor, 1.3.0", "patch, 1.2.4"})
     void upload_WhenNextVersionType_ThenIncrementsVersion(String nextVersionType, String expectedVersion) {
-        var duplicateQuery = mockTypedQuery(Long.class);
-        when(duplicateQuery.getSingleResult()).thenReturn(0L);
-
-        var existingQuery = mockTypedQuery(PluginsCustomResource.class);
         var existing = createResource();
         existing.version = "1.2.3";
-        when(existingQuery.getResultList()).thenReturn(List.of(existing));
+        when(repository.list("type = ?1 and tenant = ?2 and name = ?3", "xml", "default", "name")).thenReturn(List.of(existing));
+        when(repository.countDuplicate("xml", "default", "name", expectedVersion)).thenReturn(0L);
 
         var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
                 "1.0.0", "desc", null, nextVersionType));
@@ -285,11 +242,8 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void upload_WhenNextVersionTypeWithNoExistingVersions_ThenReturns100() {
-        var duplicateQuery = mockTypedQuery(Long.class);
-        when(duplicateQuery.getSingleResult()).thenReturn(0L);
-
-        var existingQuery = mockTypedQuery(PluginsCustomResource.class);
-        when(existingQuery.getResultList()).thenReturn(List.of());
+        when(repository.list("type = ?1 and tenant = ?2 and name = ?3", "xml", "default", "name")).thenReturn(List.of());
+        when(repository.countDuplicate("xml", "default", "name", "1.0.0")).thenReturn(0L);
 
         var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
                 "1.0.0", "desc", null, "MAJOR"));
@@ -349,14 +303,6 @@ class CompasPluginsResourceServiceTest {
     }
 
     // --- helpers ---
-
-    @SuppressWarnings("unchecked")
-    private <T> TypedQuery<T> mockTypedQuery(Class<T> resultClass) {
-        TypedQuery<T> query = mock(TypedQuery.class);
-        when(entityManager.createQuery(anyString(), eq(resultClass))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        return query;
-    }
 
     private PluginsCustomResource createResource() {
         var resource = new PluginsCustomResource();

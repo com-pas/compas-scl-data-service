@@ -5,8 +5,6 @@ package org.lfenergy.compas.scl.data.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,62 +38,33 @@ public class CompasPluginsResourceService {
             "application/xml"
     );
 
-    private final EntityManager entityManager;
     private final CustomPluginsResourceRepository repository;
 
     @Inject
-    public CompasPluginsResourceService(EntityManager entityManager, CustomPluginsResourceRepository repository) {
-        this.entityManager = entityManager;
+    public CompasPluginsResourceService(CustomPluginsResourceRepository repository) {
         this.repository = repository;
     }
 
     @Transactional(SUPPORTS)
     public List<PluginsCustomResource> list(String type, Date uploadedAfter, Date uploadedBefore,
                                             String name, int page, int size) {
-        var queryBuilder = new StringBuilder("SELECT e FROM PluginsCustomResource e WHERE e.type = :type");
-        var params = new HashMap<String, Object>();
-        params.put("type", type);
-
-        appendFilters(queryBuilder, params, uploadedAfter, uploadedBefore, name);
-        queryBuilder.append(" ORDER BY e.uploadedAt DESC");
-
-        TypedQuery<PluginsCustomResource> query = entityManager.createQuery(queryBuilder.toString(), PluginsCustomResource.class);
-        params.forEach(query::setParameter);
-        query.setFirstResult(page * size);
-        query.setMaxResults(size);
-        return query.getResultList();
+        return repository.listFiltered(type, uploadedAfter, uploadedBefore, name, page, size);
     }
 
     @Transactional(SUPPORTS)
     public long count(String type, Date uploadedAfter, Date uploadedBefore, String name) {
-        var queryBuilder = new StringBuilder("SELECT COUNT(e) FROM PluginsCustomResource e WHERE e.type = :type");
-        var params = new HashMap<String, Object>();
-        params.put("type", type);
-
-        appendFilters(queryBuilder, params, uploadedAfter, uploadedBefore, name);
-
-        TypedQuery<Long> query = entityManager.createQuery(queryBuilder.toString(), Long.class);
-        params.forEach(query::setParameter);
-        return query.getSingleResult();
+        return repository.countFiltered(type, uploadedAfter, uploadedBefore, name);
     }
 
     @Transactional(SUPPORTS)
     public PluginsCustomResource findById(UUID id) {
-        PluginsCustomResource entity = entityManager.find(PluginsCustomResource.class, id);
-        if (entity == null) {
-            throw new CompasNoDataFoundException(
-                    String.format("Data entry with id '%s' not found", id));
-        }
-        return entity;
+        return repository.findByIdOptional(id).orElseThrow(() -> new CompasNoDataFoundException(
+                String.format("Data entry with id '%s' not found", id)));
     }
 
     @Transactional(SUPPORTS)
     public List<PluginsCustomResource> findLatestByType(String type) {
-        TypedQuery<PluginsCustomResource> query = entityManager.createQuery(
-            "SELECT e FROM PluginsCustomResource e WHERE e.type = :type",
-            PluginsCustomResource.class);
-        query.setParameter("type", type);
-        List<PluginsCustomResource> entities = query.getResultList();
+        List<PluginsCustomResource> entities = repository.list("type", type);
 
         if (entities.isEmpty()) {
             throw new CompasNoDataFoundException(
@@ -115,12 +84,7 @@ public class CompasPluginsResourceService {
 
     @Transactional(SUPPORTS)
     public PluginsCustomResource findLatestByTypeAndName(String type, String name) {
-        List<PluginsCustomResource> entities = entityManager.createQuery(
-                        "SELECT e FROM PluginsCustomResource e WHERE e.type = :type AND e.name = :name",
-                        PluginsCustomResource.class)
-                .setParameter("type", type)
-                .setParameter("name", name)
-                .getResultList();
+        List<PluginsCustomResource> entities = repository.list("type = ?1 and name = ?2", type, name);
 
         if (entities.isEmpty()) {
             throw new CompasNoDataFoundException(
@@ -151,13 +115,10 @@ public class CompasPluginsResourceService {
                 )
         );
     }
-    
 
     @Transactional(REQUIRED)
     public void deleteByType(String type) {
-        int deletedCount = entityManager.createQuery("DELETE FROM PluginsCustomResource e WHERE e.type = :type")
-                .setParameter("type", type)
-                .executeUpdate();
+        long deletedCount = repository.delete("type = ?1", type);
 
         if (deletedCount == 0) {
             throw new CompasNoDataFoundException(
@@ -167,11 +128,7 @@ public class CompasPluginsResourceService {
 
     @Transactional(REQUIRED)
     public void deleteByTypeAndName(String type, String name) {
-        int deletedCount = entityManager.createQuery(
-                        "DELETE FROM PluginsCustomResource e WHERE e.type = :type AND e.name = :name")
-                .setParameter("type", type)
-                .setParameter("name", name)
-                .executeUpdate();
+        long deletedCount = repository.delete("type = ?1 and name = ?2", type, name);
 
         if (deletedCount == 0) {
             throw new CompasNoDataFoundException(
@@ -188,15 +145,7 @@ public class CompasPluginsResourceService {
 
         String resolvedVersion = resolveVersion(request.type(), request.name(), request.version(), request.nextVersionType());
 
-        Long duplicateCount = entityManager.createQuery(
-                        "SELECT COUNT(e) FROM PluginsCustomResource e " +
-                                "WHERE e.type = :type AND e.tenant = :tenant AND e.name = :name AND e.version = :version",
-                        Long.class)
-                .setParameter("type", request.type())
-                .setParameter("tenant", DEFAULT_TENANT)
-                .setParameter("name", request.name())
-                .setParameter("version", resolvedVersion)
-                .getSingleResult();
+        long duplicateCount = repository.countDuplicate(request.type(), DEFAULT_TENANT, request.name(), resolvedVersion);
 
         if (duplicateCount > 0) {
             throw new CompasDuplicateVersionException(
@@ -213,7 +162,7 @@ public class CompasPluginsResourceService {
         entity.content = request.content();
         entity.version = resolvedVersion;
         entity.dataCompatibilityVersion = request.dataCompatibilityVersion();
-        entityManager.persist(entity);
+        repository.persist(entity);
 
         LOGGER.info("Persisted plugins custom resource with id '{}'", entity.id);
         return entity;
@@ -241,14 +190,7 @@ public class CompasPluginsResourceService {
 
     private String findLatestVersionAndIncrement(String type, String name,
                                                  ChangeSetType changeSetType) {
-        List<PluginsCustomResource> existing = entityManager.createQuery(
-                        "SELECT e FROM PluginsCustomResource e " +
-                                "WHERE e.type = :type AND e.tenant = :tenant AND e.name = :name",
-                        PluginsCustomResource.class)
-                .setParameter("type", type)
-                .setParameter("tenant", DEFAULT_TENANT)
-                .setParameter("name", name)
-                .getResultList();
+        List<PluginsCustomResource> existing = repository.list("type = ?1 and tenant = ?2 and name = ?3", type, DEFAULT_TENANT, name);
 
         if (existing.isEmpty()) {
             return new Version(1, 0, 0).toString();
@@ -260,22 +202,6 @@ public class CompasPluginsResourceService {
                 .orElse(new Version(1, 0, 0));
 
         return latest.getNextVersion(changeSetType).toString();
-    }
-
-    private void appendFilters(StringBuilder queryBuilder, Map<String, Object> params,
-                               Date uploadedAfter, Date uploadedBefore, String name) {
-        if (uploadedAfter != null) {
-            queryBuilder.append(" AND e.uploadedAt >= :uploadedAfter");
-            params.put("uploadedAfter", toOffsetDateTime(uploadedAfter));
-        }
-        if (uploadedBefore != null) {
-            queryBuilder.append(" AND e.uploadedAt <= :uploadedBefore");
-            params.put("uploadedBefore", toOffsetDateTime(uploadedBefore));
-        }
-        if (name != null && !name.isBlank()) {
-            queryBuilder.append(" AND LOWER(e.name) LIKE :name");
-            params.put("name", "%" + name.toLowerCase() + "%");
-        }
     }
 
     private void validateContentType(String contentType) {
@@ -292,10 +218,5 @@ public class CompasPluginsResourceService {
                     String.format("Invalid semantic version format for field '%s': '%s'",
                             fieldName, version));
         }
-    }
-
-    private OffsetDateTime toOffsetDateTime(Date date) {
-        if (date == null) return null;
-        return date.toInstant().atOffset(ZoneOffset.UTC);
     }
 }
