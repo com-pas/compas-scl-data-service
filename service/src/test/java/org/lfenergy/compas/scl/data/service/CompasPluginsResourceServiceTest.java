@@ -203,7 +203,7 @@ class CompasPluginsResourceServiceTest {
     void upload_WhenCalledWithExplicitVersion_ThenPersistsEntity() {
         when(repository.countDuplicate("xml", "default", "name", "2.0.0")).thenReturn(0L);
 
-        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var result = service.upload(new org.lfenergy.compas.scl.data.util.UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "2.0.0", null));
 
         verify(repository).persist(any(PluginsCustomResource.class));
@@ -221,7 +221,7 @@ class CompasPluginsResourceServiceTest {
     void upload_WhenDuplicateVersionExists_ThenThrowsCompasDuplicateVersionException() {
         when(repository.countDuplicate("xml", "default", "name", "2.0.0")).thenReturn(1L);
 
-        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var request = new org.lfenergy.compas.scl.data.util.UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "2.0.0", null);
         assertThrows(CompasDuplicateVersionException.class, () -> service.upload(request));
     }
@@ -234,7 +234,7 @@ class CompasPluginsResourceServiceTest {
         when(repository.list("type = ?1 and tenant = ?2 and name = ?3", "xml", "default", "name")).thenReturn(List.of(existing));
         when(repository.countDuplicate("xml", "default", "name", expectedVersion)).thenReturn(0L);
 
-        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
+        var result = service.upload(new org.lfenergy.compas.scl.data.util.UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
                 "1.0.0", "desc", null, nextVersionType));
 
         assertEquals(expectedVersion, result.version);
@@ -245,7 +245,7 @@ class CompasPluginsResourceServiceTest {
         when(repository.list("type = ?1 and tenant = ?2 and name = ?3", "xml", "default", "name")).thenReturn(List.of());
         when(repository.countDuplicate("xml", "default", "name", "1.0.0")).thenReturn(0L);
 
-        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
+        var result = service.upload(new org.lfenergy.compas.scl.data.util.UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
                 "1.0.0", "desc", null, "MAJOR"));
 
         assertEquals("1.0.0", result.version);
@@ -253,21 +253,21 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void upload_WhenInvalidNextVersionType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var request = new org.lfenergy.compas.scl.data.util.UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", null, "INVALID");
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenNoVersionAndNoNextVersionType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var request = new org.lfenergy.compas.scl.data.util.UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", null, null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenBlankVersionAndBlankNextVersionType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var request = new org.lfenergy.compas.scl.data.util.UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "  ", "  ");
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
@@ -276,28 +276,28 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void upload_WhenInvalidContentType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", "text/plain", "<root/>",
+        var request = new org.lfenergy.compas.scl.data.util.UploadCustomPluginsResourceData("xml", "name", "text/plain", "<root/>",
                 "1.0.0", "desc", "1.0.0", null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenNullContentType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", null, "<root/>",
+        var request = new org.lfenergy.compas.scl.data.util.UploadCustomPluginsResourceData("xml", "name", null, "<root/>",
                 "1.0.0", "desc", "1.0.0", null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenInvalidSemverForDataCompatibilityVersion_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var request = new org.lfenergy.compas.scl.data.util.UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "not-a-version", "desc", "1.0.0", null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenInvalidSemverForExplicitVersion_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var request = new org.lfenergy.compas.scl.data.util.UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "bad", null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }

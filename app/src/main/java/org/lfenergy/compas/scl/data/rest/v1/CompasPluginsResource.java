@@ -16,7 +16,7 @@ import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntryWithCont
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.PagedDataEntryResponse;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.UploadDataResponse;
 import org.lfenergy.compas.scl.data.service.CompasPluginsResourceService;
-import org.lfenergy.compas.scl.data.service.UploadCustomPluginsResourceData;
+import org.lfenergy.compas.scl.data.util.UploadCustomPluginsResourceData;
 
 import java.io.IOException;
 import java.io.InputStream;

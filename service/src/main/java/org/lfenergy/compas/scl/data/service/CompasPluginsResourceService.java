@@ -15,10 +15,8 @@ import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CustomPluginsResourceRepository;
-import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntryWithContent;
+import org.lfenergy.compas.scl.data.util.UploadCustomPluginsResourceData;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.*;
 import java.util.stream.Collectors;
