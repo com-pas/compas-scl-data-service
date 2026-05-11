@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
   packages: write
   pull-requests: write
 
@@ -52,12 +53,17 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Set Docker API version
+        if: ${{ steps.release.outputs.release_created }}
         # Workaround for Docker 29.x incompatibility with Testcontainers/EmbeddedPostgres.
         # See: https://github.com/testcontainers/testcontainers-java/issues/11212
         # This forces the Docker Java client to use API version 1.44, which is compatible with current Testcontainers/EmbeddedPostgres.
         run: |
           echo "api.version=1.44" > $HOME/.docker-java.properties
           
+      - name: Install Cosign
+        if: ${{ steps.release.outputs.release_created }}
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
       - name: Create custom Maven Settings.xml
         if: ${{ steps.release.outputs.release_created }}
         uses: whelk-io/maven-settings-xml-action@9dc09b23833fa9aa7f27b63db287951856f3433d # v22
@@ -69,3 +75,9 @@ jobs:
         run: ./mvnw -B -s custom_maven_settings.xml -Pjvm-image,release clean deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Sign Docker image with Cosign
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          DIGEST=$(docker buildx imagetools inspect lfenergy/compas-scl-data-service:${{ steps.release.outputs.version }} --format '{{.Manifest.Digest}}')
+          cosign sign --yes lfenergy/compas-scl-data-service@${DIGEST}
