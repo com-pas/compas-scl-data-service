@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 BearingPoint GmbH
+//
+// SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.repository;
 
 import io.quarkus.hibernate.panache.managed.blocking.PanacheManagedBlockingRepositoryBase;
