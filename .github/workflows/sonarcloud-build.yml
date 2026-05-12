@@ -12,18 +12,15 @@ on:
     branches:
       - 'main'
       - 'develop'
-  pull_request_target:
-    branches:
-      - 'main'
-      - 'develop'
 
 jobs:
   precheck-build:
     name: Pre Check Build
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
 
-    if: ${{ (github.event_name != 'pull_request_target' && github.actor != 'dependabot[bot]') || (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request_target') }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -61,25 +58,32 @@ jobs:
         with:
           output_file: custom_maven_settings.xml
           servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
-      - name: Build and analyze (Pull Request)
-        if: ${{ github.event_name == 'pull_request' || (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request_target') }}
+      - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./mvnw -B -s custom_maven_settings.xml clean verify
-      - name: Build and analyze (Push)
-        if: ${{ github.event_name == 'push' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ./mvnw -B -s custom_maven_settings.xml clean verify
+          ./mvnw -B -s custom_maven_settings.xml -Psonar clean verify
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-artifacts
+          path: |
+            api/src/
+            app/src/
+            repository/src/
+            repository-postgresql/src/
+            service/src/
+            api/target/
+            app/target/
+            repository/target/
+            repository-postgresql/target/
+            service/target/
+          retention-days: 1
       - name: Save PR number to file
-        if: ${{ github.event_name == 'pull_request' || (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request_target') }}
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: echo "$PR_NUMBER" > PR_NUMBER.txt
+        if: github.event_name == 'pull_request'
+        run: echo ${{ github.event.pull_request.number }} > PR_NUMBER.txt
       - name: Archive PR number
-        if: ${{ github.event_name == 'pull_request' || (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request_target') }}
+        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: PR_NUMBER
