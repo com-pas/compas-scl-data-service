@@ -79,5 +79,5 @@ jobs:
       - name: Sign Docker image with Cosign
         if: ${{ steps.release.outputs.release_created }}
         run: |
-          DIGEST=$(docker buildx imagetools inspect lfenergy/compas-scl-data-service:${{ steps.release.outputs.version }} --format '{{.Manifest.Digest}}')
+          DIGEST=$(docker buildx imagetools inspect lfenergy/compas-scl-data-service:${{ steps.release.outputs.version }}-postgresql --format '{{.Manifest.Digest}}')
           cosign sign --yes lfenergy/compas-scl-data-service@${DIGEST}
