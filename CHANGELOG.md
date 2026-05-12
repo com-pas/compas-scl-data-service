@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.18.1](https://github.com/com-pas/compas-scl-data-service/compare/v0.18.0...v0.18.1) (2026-05-12)
+
+
+### Bug Fixes
+
+* fixed javadoc missmatch via mustache templating ([c1eabfe](https://github.com/com-pas/compas-scl-data-service/commit/c1eabfe849e13a29e31f54b6b1b4d9fcb9652218))
+* renamed contentInputStream to content ([e4e66a8](https://github.com/com-pas/compas-scl-data-service/commit/e4e66a8c3b8c069484c8274f584898c0f31788e0))
+
 ## [0.18.0](https://github.com/com-pas/compas-scl-data-service/compare/v0.17.4...v0.18.0) (2026-04-21)
 
 
