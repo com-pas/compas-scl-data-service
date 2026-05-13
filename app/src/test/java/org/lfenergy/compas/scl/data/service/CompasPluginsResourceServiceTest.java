@@ -4,6 +4,7 @@
 package org.lfenergy.compas.scl.data.service;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +13,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl.data.exception.CompasDuplicateVersionException;
 import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
-import org.lfenergy.compas.scl.data.model.PluginsCustomResource;
+import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -117,6 +118,121 @@ class CompasPluginsResourceServiceTest {
 
         var exception = assertThrows(CompasNoDataFoundException.class, () -> service.findById(id));
         assertTrue(exception.getMessage().contains(id.toString()));
+    }
+
+    @Test
+    void findLatestByType_WhenEntitiesExist_ThenReturnsLatestPerName() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        var older = createResource();
+        older.name = "config";
+        older.version = "1.2.3";
+        var newer = createResource();
+        newer.name = "config";
+        newer.version = "1.10.0";
+        var another = createResource();
+        another.name = "another";
+        another.version = "2.0.0";
+        when(query.getResultList()).thenReturn(List.of(older, newer, another));
+
+        var result = service.findLatestByType("xml");
+
+        assertEquals(2, result.size());
+        assertEquals(another, result.get(0));
+        assertEquals(newer, result.get(1));
+        verify(query).setParameter("type", "xml");
+    }
+
+    @Test
+    void findLatestByType_WhenNoEntityExists_ThenThrowsCompasNoDataFoundException() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        when(query.getResultList()).thenReturn(List.of());
+
+        var exception = assertThrows(CompasNoDataFoundException.class, () -> service.findLatestByType("xml"));
+
+        assertTrue(exception.getMessage().contains("xml"));
+    }
+
+    @Test
+    void findLatestByTypeAndName_WhenEntitiesExist_ThenReturnsHighestVersion() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        var older = createResource();
+        older.name = "config";
+        older.version = "1.2.3";
+        var newer = createResource();
+        newer.name = "config";
+        newer.version = "1.10.0";
+        when(query.getResultList()).thenReturn(List.of(older, newer));
+
+        var result = service.findLatestByTypeAndName("xml", "config");
+
+        assertEquals(newer, result);
+        verify(query).setParameter("type", "xml");
+        verify(query).setParameter("name", "config");
+    }
+
+    @Test
+    void findLatestByTypeAndName_WhenNoEntityExists_ThenThrowsCompasNoDataFoundException() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        when(query.getResultList()).thenReturn(List.of());
+
+        var exception = assertThrows(CompasNoDataFoundException.class,
+                () -> service.findLatestByTypeAndName("xml", "config"));
+
+        assertTrue(exception.getMessage().contains("xml"));
+        assertTrue(exception.getMessage().contains("config"));
+    }
+
+    @Test
+    void deleteByType_WhenEntriesExist_ThenDeletesEntries() {
+        Query deleteQuery = mock(Query.class);
+        when(entityManager.createQuery(anyString())).thenReturn(deleteQuery);
+        when(deleteQuery.setParameter(anyString(), any())).thenReturn(deleteQuery);
+        when(deleteQuery.executeUpdate()).thenReturn(2);
+
+        service.deleteByType("xml");
+
+        verify(deleteQuery).setParameter("type", "xml");
+        verify(deleteQuery).executeUpdate();
+    }
+
+    @Test
+    void deleteByType_WhenNoEntriesExist_ThenThrowsCompasNoDataFoundException() {
+        Query deleteQuery = mock(Query.class);
+        when(entityManager.createQuery(anyString())).thenReturn(deleteQuery);
+        when(deleteQuery.setParameter(anyString(), any())).thenReturn(deleteQuery);
+        when(deleteQuery.executeUpdate()).thenReturn(0);
+
+        var exception = assertThrows(CompasNoDataFoundException.class, () -> service.deleteByType("xml"));
+
+        assertTrue(exception.getMessage().contains("xml"));
+    }
+
+    @Test
+    void deleteByTypeAndName_WhenEntriesExist_ThenDeletesEntries() {
+        Query deleteQuery = mock(Query.class);
+        when(entityManager.createQuery(anyString())).thenReturn(deleteQuery);
+        when(deleteQuery.setParameter(anyString(), any())).thenReturn(deleteQuery);
+        when(deleteQuery.executeUpdate()).thenReturn(2);
+
+        service.deleteByTypeAndName("xml", "config");
+
+        verify(deleteQuery).setParameter("type", "xml");
+        verify(deleteQuery).setParameter("name", "config");
+        verify(deleteQuery).executeUpdate();
+    }
+
+    @Test
+    void deleteByTypeAndName_WhenNoEntriesExist_ThenThrowsCompasNoDataFoundException() {
+        Query deleteQuery = mock(Query.class);
+        when(entityManager.createQuery(anyString())).thenReturn(deleteQuery);
+        when(deleteQuery.setParameter(anyString(), any())).thenReturn(deleteQuery);
+        when(deleteQuery.executeUpdate()).thenReturn(0);
+
+        var exception = assertThrows(CompasNoDataFoundException.class,
+                () -> service.deleteByTypeAndName("xml", "config"));
+
+        assertTrue(exception.getMessage().contains("xml"));
+        assertTrue(exception.getMessage().contains("config"));
     }
 
     // --- upload ---

@@ -9,12 +9,12 @@ import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
-import org.lfenergy.compas.scl.data.model.PluginsCustomResource;
+import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.rest.PluginsCustomResourcesApi;
-import org.lfenergy.compas.scl.data.rest.dto.DataEntry;
-import org.lfenergy.compas.scl.data.rest.dto.DataEntryWithContent;
-import org.lfenergy.compas.scl.data.rest.dto.PagedDataEntryResponse;
-import org.lfenergy.compas.scl.data.rest.dto.UploadDataResponse;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntry;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntryWithContent;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.PagedDataEntryResponse;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.UploadDataResponse;
 import org.lfenergy.compas.scl.data.service.CompasPluginsResourceService;
 import org.lfenergy.compas.scl.data.service.UploadCustomPluginsResourceData;
 
@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @RequestScoped
@@ -70,6 +71,35 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
         LOGGER.info("Getting plugins custom resource by id '{}'", id);
 
         var entity = service.findById(id);
+        return toDataEntryWithContent(entity);
+    }
+
+    @Override
+    public void deleteDataByType(String dataType) {
+        LOGGER.info("Deleting plugins custom resources by type '{}'", dataType);
+        service.deleteByType(dataType);
+    }
+
+    @Override
+    public List<DataEntry> getLatestDataByType(String dataType) {
+        LOGGER.info("Getting latest plugins custom resource by type '{}'", dataType);
+
+        return service.findLatestByType(dataType).stream()
+                .map(this::toDataEntry)
+                .toList();
+    }
+
+    @Override
+    public void deleteDataByTypeAndName(String dataType, String name) {
+        LOGGER.info("Deleting plugins custom resources by type '{}' and name '{}'", dataType, name);
+        service.deleteByTypeAndName(dataType, name);
+    }
+
+    @Override
+    public DataEntryWithContent getLatestDataByTypeAndName(String dataType, String name) {
+        LOGGER.info("Getting latest plugins custom resource by type '{}' and name '{}'", dataType, name);
+
+        var entity = service.findLatestByTypeAndName(dataType, name);
         return toDataEntryWithContent(entity);
     }
 

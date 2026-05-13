@@ -14,11 +14,12 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
-
+import static org.lfenergy.compas.scl.data.rest.Constants.*;
+import static org.lfenergy.compas.scl.data.rest.Constants.READ_ROLE;
 
 
 @QuarkusTest
-@TestSecurity(user = "test-user")
+@TestSecurity(user = "test-user", roles = {"SCD_" + READ_ROLE, "SCD_" + DELETE_ROLE, PLUGINS_RESOURCES + "_" + READ_ROLE, PLUGINS_RESOURCES + "_" + CREATE_ROLE})
 @TestHTTPEndpoint(CompasPluginsResource.class)
 class CompasPluginsResourceUploadDataTest {
 

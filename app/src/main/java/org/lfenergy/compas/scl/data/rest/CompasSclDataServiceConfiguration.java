@@ -5,6 +5,11 @@ package org.lfenergy.compas.scl.data.rest;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.lfenergy.compas.core.commons.ElementConverter;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntry;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntryWithContent;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.Error;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.PagedDataEntryResponse;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.UploadDataResponse;
 import org.lfenergy.compas.scl.data.util.SclDataModelMarshaller;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,11 +21,11 @@ import jakarta.enterprise.inject.Produces;
 @RegisterForReflection(targets = {
         org.lfenergy.compas.core.commons.model.ErrorResponse.class,
         org.lfenergy.compas.core.commons.model.ErrorMessage.class,
-        org.lfenergy.compas.scl.data.rest.dto.DataEntry.class,
-        org.lfenergy.compas.scl.data.rest.dto.DataEntryWithContent.class,
-        org.lfenergy.compas.scl.data.rest.dto.PagedDataEntryResponse.class,
-        org.lfenergy.compas.scl.data.rest.dto.UploadDataResponse.class,
-        org.lfenergy.compas.scl.data.rest.dto.Error.class
+        DataEntry.class,
+        DataEntryWithContent.class,
+        PagedDataEntryResponse.class,
+        UploadDataResponse.class,
+        Error.class
 })
 public class CompasSclDataServiceConfiguration {
     @Produces

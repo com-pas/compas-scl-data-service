@@ -14,12 +14,14 @@ import org.lfenergy.compas.scl.data.exception.CompasDuplicateVersionException;
 import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
-import org.lfenergy.compas.scl.data.model.PluginsCustomResource;
+import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.model.Version;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Comparator;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static jakarta.transaction.Transactional.TxType.REQUIRED;
 import static jakarta.transaction.Transactional.TxType.SUPPORTS;
@@ -81,6 +83,76 @@ public class CompasPluginsResourceService {
                     String.format("Data entry with id '%s' not found", id));
         }
         return entity;
+    }
+
+    @Transactional(SUPPORTS)
+    public List<PluginsCustomResource> findLatestByType(String type) {
+        TypedQuery<PluginsCustomResource> query = entityManager.createQuery(
+            "SELECT e FROM PluginsCustomResource e WHERE e.type = :type",
+            PluginsCustomResource.class);
+        query.setParameter("type", type);
+        List<PluginsCustomResource> entities = query.getResultList();
+
+        if (entities.isEmpty()) {
+            throw new CompasNoDataFoundException(
+                    String.format("No data entries found for type '%s'", type));
+        }
+
+        return entities.stream()
+            .collect(Collectors.toMap(
+                entity -> entity.name,
+                entity -> entity,
+                (left, right) -> new Version(left.version).compareTo(new Version(right.version)) >= 0 ? left : right,
+                TreeMap::new))
+            .values()
+            .stream()
+            .toList();
+    }
+
+    @Transactional(SUPPORTS)
+    public PluginsCustomResource findLatestByTypeAndName(String type, String name) {
+        List<PluginsCustomResource> entities = entityManager.createQuery(
+                        "SELECT e FROM PluginsCustomResource e WHERE e.type = :type AND e.name = :name",
+                        PluginsCustomResource.class)
+                .setParameter("type", type)
+                .setParameter("name", name)
+                .getResultList();
+
+        if (entities.isEmpty()) {
+            throw new CompasNoDataFoundException(
+                    String.format("No data entries found for type '%s' and name '%s'", type, name));
+        }
+
+        return entities.stream()
+                .max(Comparator.comparing(entity -> new Version(entity.version)))
+                .orElseThrow(() -> new CompasNoDataFoundException(
+                        String.format("No data entries found for type '%s' and name '%s'", type, name)));
+    }
+
+    @Transactional(REQUIRED)
+    public void deleteByType(String type) {
+        int deletedCount = entityManager.createQuery("DELETE FROM PluginsCustomResource e WHERE e.type = :type")
+                .setParameter("type", type)
+                .executeUpdate();
+
+        if (deletedCount == 0) {
+            throw new CompasNoDataFoundException(
+                    String.format("No data entries found for type '%s'", type));
+        }
+    }
+
+    @Transactional(REQUIRED)
+    public void deleteByTypeAndName(String type, String name) {
+        int deletedCount = entityManager.createQuery(
+                        "DELETE FROM PluginsCustomResource e WHERE e.type = :type AND e.name = :name")
+                .setParameter("type", type)
+                .setParameter("name", name)
+                .executeUpdate();
+
+        if (deletedCount == 0) {
+            throw new CompasNoDataFoundException(
+                    String.format("No data entries found for type '%s' and name '%s'", type, name));
+        }
     }
 
     @Transactional(REQUIRED)

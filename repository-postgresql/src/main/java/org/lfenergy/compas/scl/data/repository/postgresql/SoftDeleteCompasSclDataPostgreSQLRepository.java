@@ -16,7 +16,8 @@ public class SoftDeleteCompasSclDataPostgreSQLRepository extends CompasSclDataPo
         """;
 
     private static final String SOFT_DELETE_SCL_FILE_SQL_BY_VERSION = """
-        delete from scl_file
+        update scl_file
+         set is_deleted = true
          where scl_file.id   = ?
          and   scl_file.type = ?
          and   scl_file.major_version = ?

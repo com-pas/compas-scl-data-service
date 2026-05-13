@@ -10,7 +10,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
-import org.lfenergy.compas.scl.data.model.PluginsCustomResource;
+import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.service.CompasPluginsResourceService;
 
 import java.time.OffsetDateTime;
@@ -21,13 +21,15 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.lfenergy.compas.scl.data.rest.Constants.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 
 @QuarkusTest
-@TestSecurity(user = "test-user")
+@TestSecurity(user = "test-user", roles = {"SCD_" + READ_ROLE, "SCD_" + DELETE_ROLE, PLUGINS_RESOURCES + "_" + READ_ROLE, PLUGINS_RESOURCES + "_" + CREATE_ROLE, PLUGINS_RESOURCES + "_" + DELETE_ROLE})
 @TestHTTPEndpoint(CompasPluginsResource.class)
 class CompasPluginsResourceGetDataTest {
 
@@ -68,6 +70,130 @@ class CompasPluginsResourceGetDataTest {
         given()
         .when()
             .get("/{id}", nonExistingId)
+        .then()
+            .statusCode(404);
+    }
+
+    @Test
+    void getLatestDataByType_WhenCalledWithValidType_ThenReturnsLatestResources() {
+
+        var resource = createTestResource();
+        var secondResource = createTestResource();
+        secondResource.name = "another-resource";
+        when(compasPluginsResourceService.findLatestByType(resource.type))
+                .thenReturn(List.of(resource, secondResource));
+
+        given()
+        .when()
+            .get("/{dataType}/latest", resource.type)
+        .then()
+            .statusCode(200)
+            .body("size()", equalTo(2))
+            .body("[0].id", equalTo(resource.id.toString()))
+            .body("[0].type", equalTo(resource.type))
+            .body("[0].tenant", equalTo(resource.tenant))
+            .body("[0].name", equalTo(resource.name))
+            .body("[0].description", equalTo(resource.description))
+            .body("[0].contentType", equalTo(resource.contentType))
+            .body("[0].version", equalTo(resource.version))
+            .body("[0].dataCompatibilityVersion", equalTo(resource.dataCompatibilityVersion))
+            .body("[0].uploadedAt", not(empty()))
+            .body("[1].id", equalTo(secondResource.id.toString()))
+            .body("[1].name", equalTo(secondResource.name));
+    }
+
+    @Test
+    void getLatestDataByType_WhenCalledWithNonExistingType_ThenReturnsNotFoundError() {
+
+        var nonExistingType = "non-existing-type";
+        when(compasPluginsResourceService.findLatestByType(nonExistingType))
+                .thenThrow(CompasNoDataFoundException.class);
+
+        given()
+        .when()
+            .get("/{dataType}/latest", nonExistingType)
+        .then()
+            .statusCode(404);
+    }
+
+    @Test
+    void deleteDataByType_WhenCalledWithExistingType_ThenReturnsNoContent() {
+        String type = "xml";
+
+        given()
+        .when()
+            .delete("/{dataType}", type)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test
+    void deleteDataByType_WhenCalledWithNonExistingType_ThenReturnsNotFoundError() {
+        String type = "non-existing-type";
+        doThrow(CompasNoDataFoundException.class)
+                .when(compasPluginsResourceService).deleteByType(type);
+
+        given()
+        .when()
+            .delete("/{dataType}", type)
+        .then()
+            .statusCode(404);
+    }
+
+    @Test
+    void getLatestDataByTypeAndName_WhenCalledWithValidArguments_ThenReturnsResource() {
+
+        var resource = createTestResource();
+        when(compasPluginsResourceService.findLatestByTypeAndName(resource.type, resource.name))
+                .thenReturn(resource);
+
+        given()
+        .when()
+            .get("/{dataType}/{name}/latest", resource.type, resource.name)
+        .then()
+            .statusCode(200)
+            .body("id", equalTo(resource.id.toString()))
+            .body("type", equalTo(resource.type))
+            .body("name", equalTo(resource.name))
+            .body("version", equalTo(resource.version));
+    }
+
+    @Test
+    void getLatestDataByTypeAndName_WhenCalledWithUnknownArguments_ThenReturnsNotFoundError() {
+
+        var type = "xml";
+        var name = "unknown";
+        when(compasPluginsResourceService.findLatestByTypeAndName(type, name))
+                .thenThrow(CompasNoDataFoundException.class);
+
+        given()
+        .when()
+            .get("/{dataType}/{name}/latest", type, name)
+        .then()
+            .statusCode(404);
+    }
+
+    @Test
+    void deleteDataByTypeAndName_WhenCalledWithExistingArguments_ThenReturnsNoContent() {
+        var resource = createTestResource();
+
+        given()
+        .when()
+            .delete("/{dataType}/{name}", resource.type, resource.name)
+        .then()
+            .statusCode(204);
+    }
+
+    @Test
+    void deleteDataByTypeAndName_WhenCalledWithUnknownArguments_ThenReturnsNotFoundError() {
+        var type = "xml";
+        var name = "unknown";
+        doThrow(CompasNoDataFoundException.class)
+                .when(compasPluginsResourceService).deleteByTypeAndName(type, name);
+
+        given()
+        .when()
+            .delete("/{dataType}/{name}", type, name)
         .then()
             .statusCode(404);
     }
