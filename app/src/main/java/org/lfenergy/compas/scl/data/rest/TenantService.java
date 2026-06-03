@@ -43,10 +43,17 @@ public class TenantService {
                 return GLOBAL_TENANT;
             }
             // Issuer URL format (Keycloak): http://<host>/auth/realms/<realm>
-            // Extract the last path segment as the realm / tenant name.
-            int lastSlash = issuer.lastIndexOf('/');
-            if (lastSlash >= 0 && lastSlash < issuer.length() - 1) {
-                return issuer.substring(lastSlash + 1);
+            // Strip any trailing slash so that "http://host/realms/compas/" is treated
+            // the same as "http://host/realms/compas".
+            String normalized = issuer.endsWith("/") ? issuer.substring(0, issuer.length() - 1) : issuer;
+            int lastSlash = normalized.lastIndexOf('/');
+            // Guard against URLs with no path (e.g. "http://host") by ensuring the
+            // character before lastSlash is not also a slash (i.e. not the "://" part).
+            if (lastSlash > 0 && normalized.charAt(lastSlash - 1) != '/') {
+                String segment = normalized.substring(lastSlash + 1);
+                if (!segment.isBlank()) {
+                    return segment;
+                }
             }
         } catch (Exception e) {
             // No token available – fall back to global tenant.

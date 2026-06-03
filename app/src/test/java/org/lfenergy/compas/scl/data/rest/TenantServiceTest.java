@@ -38,7 +38,7 @@ class TenantServiceTest {
     }
 
     @Test
-    void resolveTenant_WhenIssuerHasRealmPath_ThenReturnsRealmAssTenant() {
+    void resolveTenant_WhenIssuerHasRealmPath_ThenReturnsRealmAsTenant() {
         when(jsonWebToken.getIssuer()).thenReturn("http://host/auth/realms/compas");
 
         assertEquals("compas", tenantService.resolveTenant());
@@ -55,9 +55,14 @@ class TenantServiceTest {
     void resolveTenant_WhenIssuerHasNoPath_ThenReturnsGlobalTenant() {
         when(jsonWebToken.getIssuer()).thenReturn("http://host");
 
-        // "http://host" has a last slash at position 6 (before "host"),
-        // so host is extracted as tenant
-        assertEquals("host", tenantService.resolveTenant());
+        assertEquals(GLOBAL_TENANT, tenantService.resolveTenant());
+    }
+
+    @Test
+    void resolveTenant_WhenIssuerHasTrailingSlash_ThenReturnsRealmAsTenant() {
+        when(jsonWebToken.getIssuer()).thenReturn("http://host/realms/compas/");
+
+        assertEquals("compas", tenantService.resolveTenant());
     }
 
     @Test
