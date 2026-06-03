@@ -23,11 +23,12 @@ class GetEventRequestTest {
         var type = SclFileType.CID;
         var id = UUID.randomUUID();
 
-        var result = new GetEventRequest(session, type, id);
+        var result = new GetEventRequest(session, type, id, "test-tenant");
 
         assertEquals(session, result.getSession());
         assertEquals(type, result.getType());
         assertEquals(id, result.getId());
+        assertEquals("test-tenant", result.getTenant());
     }
 
     @Test

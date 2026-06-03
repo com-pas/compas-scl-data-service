@@ -25,7 +25,7 @@ class CreateEventRequestTest {
         var comment = "Some comment";
         var sclData = "Some SCL Data";
 
-        var result = new CreateEventRequest(session, type, name, who, comment, sclData);
+        var result = new CreateEventRequest(session, type, name, who, comment, sclData, "test-tenant");
 
         assertEquals(session, result.getSession());
         assertEquals(type, result.getType());
@@ -33,6 +33,7 @@ class CreateEventRequestTest {
         assertEquals(who, result.getWho());
         assertEquals(comment, result.getComment());
         assertEquals(sclData, result.getSclData());
+        assertEquals("test-tenant", result.getTenant());
     }
 
     @Test

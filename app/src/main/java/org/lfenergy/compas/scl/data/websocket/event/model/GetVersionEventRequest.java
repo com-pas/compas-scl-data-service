@@ -14,12 +14,14 @@ public class GetVersionEventRequest {
     private final SclFileType type;
     private final UUID id;
     private final Version version;
+    private final String tenant;
 
-    public GetVersionEventRequest(Session session, SclFileType type, UUID id, Version version) {
+    public GetVersionEventRequest(Session session, SclFileType type, UUID id, Version version, String tenant) {
         this.session = session;
         this.type = type;
         this.id = id;
         this.version = version;
+        this.tenant = tenant;
     }
 
     public Session getSession() {
@@ -36,5 +38,9 @@ public class GetVersionEventRequest {
 
     public Version getVersion() {
         return version;
+    }
+
+    public String getTenant() {
+        return tenant;
     }
 }

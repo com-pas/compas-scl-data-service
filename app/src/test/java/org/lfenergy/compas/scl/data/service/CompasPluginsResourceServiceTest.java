@@ -28,6 +28,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CompasPluginsResourceServiceTest {
+    private static final String TENANT = "test-tenant";
 
     @Mock
     EntityManager entityManager;
@@ -43,7 +44,7 @@ class CompasPluginsResourceServiceTest {
         var resource = createResource();
         when(query.getResultList()).thenReturn(List.of(resource));
 
-        var result = service.list("xml", null, null, null, 0, 20);
+        var result = service.list(TENANT, "xml", null, null, null, 0, 20);
 
         assertEquals(1, result.size());
         assertEquals(resource, result.get(0));
@@ -56,7 +57,7 @@ class CompasPluginsResourceServiceTest {
         var query = mockTypedQuery(PluginsCustomResource.class);
         when(query.getResultList()).thenReturn(List.of());
 
-        service.list("xml", new Date(), new Date(), "test", 1, 10);
+        service.list(TENANT, "xml", new Date(), new Date(), "test", 1, 10);
 
         var jpqlCaptor = ArgumentCaptor.forClass(String.class);
         verify(entityManager).createQuery(jpqlCaptor.capture(), eq(PluginsCustomResource.class));
@@ -76,7 +77,7 @@ class CompasPluginsResourceServiceTest {
         var query = mockTypedQuery(Long.class);
         when(query.getSingleResult()).thenReturn(5L);
 
-        var result = service.count("xml", null, null, null);
+        var result = service.count(TENANT, "xml", null, null, null);
 
         assertEquals(5L, result);
     }
@@ -86,7 +87,7 @@ class CompasPluginsResourceServiceTest {
         var query = mockTypedQuery(Long.class);
         when(query.getSingleResult()).thenReturn(3L);
 
-        var result = service.count("xml", new Date(), new Date(), "search");
+        var result = service.count(TENANT, "xml", new Date(), new Date(), "search");
 
         assertEquals(3L, result);
         var jpqlCaptor = ArgumentCaptor.forClass(String.class);
@@ -126,7 +127,7 @@ class CompasPluginsResourceServiceTest {
         var duplicateQuery = mockTypedQuery(Long.class);
         when(duplicateQuery.getSingleResult()).thenReturn(0L);
 
-        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var result = service.upload(TENANT, new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "2.0.0", null));
 
         verify(entityManager).persist(any(PluginsCustomResource.class));
@@ -137,7 +138,7 @@ class CompasPluginsResourceServiceTest {
         assertEquals("2.0.0", result.version);
         assertEquals("1.0.0", result.dataCompatibilityVersion);
         assertEquals("desc", result.description);
-        assertEquals("default", result.tenant);
+        assertEquals(TENANT, result.tenant);
     }
 
     @Test
@@ -147,7 +148,7 @@ class CompasPluginsResourceServiceTest {
 
         var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "2.0.0", null);
-        assertThrows(CompasDuplicateVersionException.class, () -> service.upload(request));
+        assertThrows(CompasDuplicateVersionException.class, () -> service.upload(TENANT, request));
     }
 
     @ParameterizedTest
@@ -161,7 +162,7 @@ class CompasPluginsResourceServiceTest {
         existing.version = "1.2.3";
         when(existingQuery.getResultList()).thenReturn(List.of(existing));
 
-        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
+        var result = service.upload(TENANT, new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
                 "1.0.0", "desc", null, nextVersionType));
 
         assertEquals(expectedVersion, result.version);
@@ -175,7 +176,7 @@ class CompasPluginsResourceServiceTest {
         var existingQuery = mockTypedQuery(PluginsCustomResource.class);
         when(existingQuery.getResultList()).thenReturn(List.of());
 
-        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
+        var result = service.upload(TENANT, new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
                 "1.0.0", "desc", null, "MAJOR"));
 
         assertEquals("1.0.0", result.version);
@@ -185,21 +186,21 @@ class CompasPluginsResourceServiceTest {
     void upload_WhenInvalidNextVersionType_ThenThrowsCompasInvalidInputException() {
         var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", null, "INVALID");
-        assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
+        assertThrows(CompasInvalidInputException.class, () -> service.upload(TENANT, request));
     }
 
     @Test
     void upload_WhenNoVersionAndNoNextVersionType_ThenThrowsCompasInvalidInputException() {
         var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", null, null);
-        assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
+        assertThrows(CompasInvalidInputException.class, () -> service.upload(TENANT, request));
     }
 
     @Test
     void upload_WhenBlankVersionAndBlankNextVersionType_ThenThrowsCompasInvalidInputException() {
         var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "  ", "  ");
-        assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
+        assertThrows(CompasInvalidInputException.class, () -> service.upload(TENANT, request));
     }
 
     // --- validation ---
@@ -208,28 +209,28 @@ class CompasPluginsResourceServiceTest {
     void upload_WhenInvalidContentType_ThenThrowsCompasInvalidInputException() {
         var request = new UploadCustomPluginsResourceData("xml", "name", "text/plain", "<root/>",
                 "1.0.0", "desc", "1.0.0", null);
-        assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
+        assertThrows(CompasInvalidInputException.class, () -> service.upload(TENANT, request));
     }
 
     @Test
     void upload_WhenNullContentType_ThenThrowsCompasInvalidInputException() {
         var request = new UploadCustomPluginsResourceData("xml", "name", null, "<root/>",
                 "1.0.0", "desc", "1.0.0", null);
-        assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
+        assertThrows(CompasInvalidInputException.class, () -> service.upload(TENANT, request));
     }
 
     @Test
     void upload_WhenInvalidSemverForDataCompatibilityVersion_ThenThrowsCompasInvalidInputException() {
         var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "not-a-version", "desc", "1.0.0", null);
-        assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
+        assertThrows(CompasInvalidInputException.class, () -> service.upload(TENANT, request));
     }
 
     @Test
     void upload_WhenInvalidSemverForExplicitVersion_ThenThrowsCompasInvalidInputException() {
         var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "bad", null);
-        assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
+        assertThrows(CompasInvalidInputException.class, () -> service.upload(TENANT, request));
     }
 
     // --- helpers ---

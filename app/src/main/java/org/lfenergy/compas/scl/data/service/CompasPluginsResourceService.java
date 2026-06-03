@@ -28,7 +28,6 @@ import static jakarta.transaction.Transactional.TxType.SUPPORTS;
 public class CompasPluginsResourceService {
 
     private static final Logger LOGGER = LogManager.getLogger(CompasPluginsResourceService.class);
-    private static final String DEFAULT_TENANT = "default";
 
 
     private static final List<String> ALLOWED_CONTENT_TYPES = List.of(
@@ -44,11 +43,12 @@ public class CompasPluginsResourceService {
     }
 
     @Transactional(SUPPORTS)
-    public List<PluginsCustomResource> list(String type, Date uploadedAfter, Date uploadedBefore,
+    public List<PluginsCustomResource> list(String tenant, String type, Date uploadedAfter, Date uploadedBefore,
                                             String name, int page, int size) {
-        var queryBuilder = new StringBuilder("SELECT e FROM PluginsCustomResource e WHERE e.type = :type");
+        var queryBuilder = new StringBuilder("SELECT e FROM PluginsCustomResource e WHERE e.type = :type AND e.tenant = :tenant");
         var params = new HashMap<String, Object>();
         params.put("type", type);
+        params.put("tenant", tenant);
 
         appendFilters(queryBuilder, params, uploadedAfter, uploadedBefore, name);
         queryBuilder.append(" ORDER BY e.uploadedAt DESC");
@@ -61,10 +61,11 @@ public class CompasPluginsResourceService {
     }
 
     @Transactional(SUPPORTS)
-    public long count(String type, Date uploadedAfter, Date uploadedBefore, String name) {
-        var queryBuilder = new StringBuilder("SELECT COUNT(e) FROM PluginsCustomResource e WHERE e.type = :type");
+    public long count(String tenant, String type, Date uploadedAfter, Date uploadedBefore, String name) {
+        var queryBuilder = new StringBuilder("SELECT COUNT(e) FROM PluginsCustomResource e WHERE e.type = :type AND e.tenant = :tenant");
         var params = new HashMap<String, Object>();
         params.put("type", type);
+        params.put("tenant", tenant);
 
         appendFilters(queryBuilder, params, uploadedAfter, uploadedBefore, name);
 
@@ -84,20 +85,20 @@ public class CompasPluginsResourceService {
     }
 
     @Transactional(REQUIRED)
-    public PluginsCustomResource upload(UploadCustomPluginsResourceData request) {
+    public PluginsCustomResource upload(String tenant, UploadCustomPluginsResourceData request) {
         LOGGER.info("Uploading plugins custom resource type='{}', name='{}'", request.type(), request.name());
 
         validateContentType(request.contentType());
         validateSemver(request.dataCompatibilityVersion(), "data-compatibility-version");
 
-        String resolvedVersion = resolveVersion(request.type(), request.name(), request.version(), request.nextVersionType());
+        String resolvedVersion = resolveVersion(tenant, request.type(), request.name(), request.version(), request.nextVersionType());
 
         Long duplicateCount = entityManager.createQuery(
                         "SELECT COUNT(e) FROM PluginsCustomResource e " +
                                 "WHERE e.type = :type AND e.tenant = :tenant AND e.name = :name AND e.version = :version",
                         Long.class)
                 .setParameter("type", request.type())
-                .setParameter("tenant", DEFAULT_TENANT)
+                .setParameter("tenant", tenant)
                 .setParameter("name", request.name())
                 .setParameter("version", resolvedVersion)
                 .getSingleResult();
@@ -110,7 +111,7 @@ public class CompasPluginsResourceService {
 
         var entity = new PluginsCustomResource();
         entity.type = request.type();
-        entity.tenant = DEFAULT_TENANT;
+        entity.tenant = tenant;
         entity.name = request.name();
         entity.description = request.description();
         entity.contentType = request.contentType();
@@ -123,7 +124,7 @@ public class CompasPluginsResourceService {
         return entity;
     }
 
-    private String resolveVersion(String type, String name,
+    private String resolveVersion(String tenant, String type, String name,
                                   String explicitVersion, String nextVersionType) {
         if (explicitVersion != null && !explicitVersion.isBlank()) {
             validateSemver(explicitVersion, "version");
@@ -137,20 +138,20 @@ public class CompasPluginsResourceService {
                 throw new CompasInvalidInputException(
                         "Invalid nextVersionType: must be 'major', 'minor', or 'patch'");
             }
-            return findLatestVersionAndIncrement(type, name, changeSetType);
+            return findLatestVersionAndIncrement(tenant, type, name, changeSetType);
         }
         throw new CompasInvalidInputException(
                 "Either 'version' or 'nextVersionType' must be provided");
     }
 
-    private String findLatestVersionAndIncrement(String type, String name,
+    private String findLatestVersionAndIncrement(String tenant, String type, String name,
                                                  ChangeSetType changeSetType) {
         List<PluginsCustomResource> existing = entityManager.createQuery(
                         "SELECT e FROM PluginsCustomResource e " +
                                 "WHERE e.type = :type AND e.tenant = :tenant AND e.name = :name",
                         PluginsCustomResource.class)
                 .setParameter("type", type)
-                .setParameter("tenant", DEFAULT_TENANT)
+                .setParameter("tenant", tenant)
                 .setParameter("name", name)
                 .getResultList();
 

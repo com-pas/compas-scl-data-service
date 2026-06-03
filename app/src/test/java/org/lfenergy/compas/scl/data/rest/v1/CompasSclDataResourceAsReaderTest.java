@@ -27,14 +27,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.lfenergy.compas.scl.data.rest.Constants.*;
 import static org.mockito.Mockito.*;
 import io.quarkus.test.InjectMock;
+import org.lfenergy.compas.scl.data.rest.TenantService;
 
 @QuarkusTest
 @TestHTTPEndpoint(CompasSclDataResource.class)
 @TestSecurity(user = "test-reader", roles = {"SCD_" + READ_ROLE})
 class CompasSclDataResourceAsReaderTest {
+    private static final String TENANT = "test-tenant";
 
     @InjectMock
     private CompasSclDataService compasSclDataService;
+
+    @InjectMock
+    private TenantService tenantService;
 
     @Test
     void list_WhenCalled_ThenItemResponseRetrieved() {
@@ -44,7 +49,8 @@ class CompasSclDataResourceAsReaderTest {
         var version = "1.0.0";
         var labels = List.of("Label1");
 
-        when(compasSclDataService.list(type))
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasSclDataService.list(TENANT, type))
                 .thenReturn(Collections.singletonList(new Item(uuid.toString(), name, version, labels)));
 
         var response = given()
@@ -60,7 +66,7 @@ class CompasSclDataResourceAsReaderTest {
         assertEquals(name, xmlPath.get("ListResponse.Item[0].Name"));
         assertEquals(version, xmlPath.get("ListResponse.Item[0].Version"));
         assertEquals(labels.get(0), xmlPath.get("ListResponse.Item[0].Label"));
-        verify(compasSclDataService).list(type);
+        verify(compasSclDataService).list(TENANT, type);
     }
 
     @Test
@@ -70,7 +76,8 @@ class CompasSclDataResourceAsReaderTest {
         var name = "Name";
         var version = "1.0.0";
 
-        when(compasSclDataService.listVersionsByUUID(type, uuid))
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasSclDataService.listVersionsByUUID(TENANT, type, uuid))
                 .thenReturn(Collections.singletonList(new HistoryItem(uuid.toString(), name, version, null, null, null)));
 
         var response = given()
@@ -86,7 +93,7 @@ class CompasSclDataResourceAsReaderTest {
         assertEquals(uuid.toString(), xmlPath.get("VersionsResponse.HistoryItem[0].Id"));
         assertEquals(name, xmlPath.get("VersionsResponse.HistoryItem[0].Name"));
         assertEquals(version, xmlPath.get("VersionsResponse.HistoryItem[0].Version"));
-        verify(compasSclDataService).listVersionsByUUID(type, uuid);
+        verify(compasSclDataService).listVersionsByUUID(TENANT, type, uuid);
     }
 
     @Test
@@ -95,7 +102,8 @@ class CompasSclDataResourceAsReaderTest {
         var uuid = UUID.randomUUID();
         var scl = readSCL();
 
-        when(compasSclDataService.findByUUID(type, uuid)).thenReturn(scl);
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasSclDataService.findByUUID(TENANT, type, uuid)).thenReturn(scl);
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -107,7 +115,7 @@ class CompasSclDataResourceAsReaderTest {
                 .response();
 
         assertEquals(scl, response.xmlPath().getString("GetResponse.SclData"));
-        verify(compasSclDataService).findByUUID(type, uuid);
+        verify(compasSclDataService).findByUUID(TENANT, type, uuid);
     }
 
     @Test
@@ -117,7 +125,8 @@ class CompasSclDataResourceAsReaderTest {
         var scl = readSCL();
         var version = new Version(1, 2, 3);
 
-        when(compasSclDataService.findByUUID(type, uuid, version)).thenReturn(scl);
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasSclDataService.findByUUID(TENANT, type, uuid, version)).thenReturn(scl);
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -130,7 +139,7 @@ class CompasSclDataResourceAsReaderTest {
                 .response();
 
         assertEquals(scl, response.xmlPath().getString("GetResponse.SclData"));
-        verify(compasSclDataService).findByUUID(type, uuid, version);
+        verify(compasSclDataService).findByUUID(TENANT, type, uuid, version);
     }
 
     @Test
@@ -186,8 +195,6 @@ class CompasSclDataResourceAsReaderTest {
         var uuid = UUID.randomUUID();
         var type = SclFileType.SCD;
 
-        doNothing().when(compasSclDataService).delete(type, uuid);
-
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
                 .pathParam(ID_PATH_PARAM, uuid)
@@ -203,8 +210,6 @@ class CompasSclDataResourceAsReaderTest {
         var uuid = UUID.randomUUID();
         var type = SclFileType.SCD;
         var version = new Version(1, 2, 3);
-
-        doNothing().when(compasSclDataService).delete(type, uuid, version);
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)

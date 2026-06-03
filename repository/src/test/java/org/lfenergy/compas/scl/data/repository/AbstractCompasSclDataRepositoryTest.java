@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_DATA_FOUND_ERROR_CODE;
 
 public abstract class AbstractCompasSclDataRepositoryTest {
+    protected static final String TENANT = "test-tenant";
     protected static final SclFileType TYPE = SclFileType.SCD;
 
     // Use different types, so tests don't conflict with each other.
@@ -23,7 +24,7 @@ public abstract class AbstractCompasSclDataRepositoryTest {
 
     @Test
     void list_WhenCalledOnEmptyDatabase_ThenNoRecordsReturned() {
-        var items = getRepository().list(LIST1_TYPE);
+        var items = getRepository().list(TENANT, LIST1_TYPE);
 
         assertNotNull(items);
         assertEquals(0, items.size());
@@ -33,7 +34,7 @@ public abstract class AbstractCompasSclDataRepositoryTest {
     void listVersionsByUUID_WhenCalledWithUnknownID_ThenExceptionIsThrown() {
         var uuid = UUID.randomUUID();
 
-        var items = getRepository().listVersionsByUUID(TYPE, uuid);
+        var items = getRepository().listVersionsByUUID(TENANT, TYPE, uuid);
 
         assertNotNull(items);
         assertEquals(0, items.size());
@@ -45,7 +46,7 @@ public abstract class AbstractCompasSclDataRepositoryTest {
 
         var repository = getRepository();
         var exception = assertThrows(CompasNoDataFoundException.class,
-                () -> repository.findByUUID(TYPE, uuid));
+                () -> repository.findByUUID(TENANT, TYPE, uuid));
         assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
     }
 
@@ -55,7 +56,7 @@ public abstract class AbstractCompasSclDataRepositoryTest {
 
         var repository = getRepository();
         var exception = assertThrows(CompasNoDataFoundException.class,
-                () -> repository.findMetaInfoByUUID(TYPE, uuid));
+                () -> repository.findMetaInfoByUUID(TENANT, TYPE, uuid));
         assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
     }
 
@@ -66,12 +67,12 @@ public abstract class AbstractCompasSclDataRepositoryTest {
         Version version2 = new Version(2, 0, 0);
 
         var repository = getRepository();
-        repository.create(TYPE, uuid, "TestName", "<SCL></SCL>", version1, "tester", List.of("label"));
-        repository.create(TYPE, uuid, "TestName", "<SCL></SCL>", version2, "tester", List.of("label"));
+        repository.create(TENANT, TYPE, uuid, "TestName", "<SCL></SCL>", version1, "tester", List.of("label"));
+        repository.create(TENANT, TYPE, uuid, "TestName", "<SCL></SCL>", version2, "tester", List.of("label"));
 
-        repository.delete(TYPE, uuid);
+        repository.delete(TENANT, TYPE, uuid);
 
-        var items = repository.listVersionsByUUID(TYPE, uuid);
+        var items = repository.listVersionsByUUID(TENANT, TYPE, uuid);
         assertEquals(0, items.size(), "All versions should be soft deleted");
     }
 
@@ -82,12 +83,12 @@ public abstract class AbstractCompasSclDataRepositoryTest {
         Version version2 = new Version(2, 0, 0);
 
         var repository = getRepository();
-        repository.create(TYPE, uuid, "TestName", "<SCL></SCL>", version1, "tester", List.of("label"));
-        repository.create(TYPE, uuid, "TestName", "<SCL></SCL>", version2, "tester", List.of("label"));
+        repository.create(TENANT, TYPE, uuid, "TestName", "<SCL></SCL>", version1, "tester", List.of("label"));
+        repository.create(TENANT, TYPE, uuid, "TestName", "<SCL></SCL>", version2, "tester", List.of("label"));
 
-        repository.delete(TYPE, uuid, version1);
+        repository.delete(TENANT, TYPE, uuid, version1);
 
-        var items = repository.listVersionsByUUID(TYPE, uuid);
+        var items = repository.listVersionsByUUID(TENANT, TYPE, uuid);
         assertEquals(1, items.size(), "Only one version should remain");
         assertEquals(version2.toString(), items.get(0).getVersion(), "Remaining version should be version2");
     }

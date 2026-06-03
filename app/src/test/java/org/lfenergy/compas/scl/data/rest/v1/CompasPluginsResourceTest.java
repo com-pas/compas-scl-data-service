@@ -23,18 +23,23 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CompasPluginsResourceTest {
+    private static final String TENANT = "test-tenant";
 
     @Mock
     CompasPluginsResourceService service;
+
+    @Mock
+    org.lfenergy.compas.scl.data.rest.TenantService tenantService;
 
     @InjectMocks
     CompasPluginsResource resource;
 
     @Test
     void getAllData_WhenSizeIsZero_ThenTotalPagesIsZero() {
-        when(service.list(eq("xml"), isNull(), isNull(), isNull(), eq(0), eq(0)))
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(service.list(eq(TENANT), eq("xml"), isNull(), isNull(), isNull(), eq(0), eq(0)))
                 .thenReturn(List.of());
-        when(service.count(eq("xml"), isNull(), isNull(), isNull()))
+        when(service.count(eq(TENANT), eq("xml"), isNull(), isNull(), isNull()))
                 .thenReturn(5L);
 
         var response = resource.getAllData("xml", null, null, null, 0, 0);

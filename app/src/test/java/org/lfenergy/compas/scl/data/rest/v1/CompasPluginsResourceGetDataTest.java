@@ -30,10 +30,13 @@ import static org.mockito.Mockito.when;
 @TestSecurity(user = "test-user")
 @TestHTTPEndpoint(CompasPluginsResource.class)
 class CompasPluginsResourceGetDataTest {
-
+    private static final String TENANT = "test-tenant";
 
     @InjectMock
     private CompasPluginsResourceService compasPluginsResourceService;
+
+    @InjectMock
+    private org.lfenergy.compas.scl.data.rest.TenantService tenantService;
 
     @Test
     void getDataById_WhenCalledWithValidUUID_ThenReturnsResource() {
@@ -82,9 +85,10 @@ class CompasPluginsResourceGetDataTest {
         var resource2 = createTestResource();
         resource2.name = "another-resource";
 
-        when(compasPluginsResourceService.list(eq(type), any(), any(), any(), eq(page), eq(size)))
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasPluginsResourceService.list(eq(TENANT), eq(type), any(), any(), any(), eq(page), eq(size)))
                 .thenReturn(List.of(resource1, resource2));
-        when(compasPluginsResourceService.count(eq(type), any(), any(), any()))
+        when(compasPluginsResourceService.count(eq(TENANT), eq(type), any(), any(), any()))
                 .thenReturn(2L);
 
         given()
@@ -112,9 +116,10 @@ class CompasPluginsResourceGetDataTest {
 
         var resource = createTestResource();
 
-        when(compasPluginsResourceService.list(eq(type), any(), any(), any(), eq(page), eq(size)))
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasPluginsResourceService.list(eq(TENANT), eq(type), any(), any(), any(), eq(page), eq(size)))
                 .thenReturn(List.of(resource));
-        when(compasPluginsResourceService.count(eq(type), any(), any(), any()))
+        when(compasPluginsResourceService.count(eq(TENANT), eq(type), any(), any(), any()))
                 .thenReturn(6L); // e.g. 6 total entries -> 2 pages of 5
 
         given()
@@ -138,9 +143,10 @@ class CompasPluginsResourceGetDataTest {
         int page = 0;
         int size = 20;
 
-        when(compasPluginsResourceService.list(eq(type), any(), any(), any(), eq(page), eq(size)))
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasPluginsResourceService.list(eq(TENANT), eq(type), any(), any(), any(), eq(page), eq(size)))
                 .thenReturn(List.of());
-        when(compasPluginsResourceService.count(eq(type), any(), any(), any()))
+        when(compasPluginsResourceService.count(eq(TENANT), eq(type), any(), any(), any()))
                 .thenReturn(0L);
 
         given()

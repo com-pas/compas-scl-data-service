@@ -25,12 +25,13 @@ class GetVersionEventRequestTest {
         var id = UUID.randomUUID();
         var version = new Version("1.2.3");
 
-        var result = new GetVersionEventRequest(session, type, id, version);
+        var result = new GetVersionEventRequest(session, type, id, version, "test-tenant");
 
         assertEquals(session, result.getSession());
         assertEquals(type, result.getType());
         assertEquals(id, result.getId());
         assertEquals(version, result.getVersion());
+        assertEquals("test-tenant", result.getTenant());
     }
 
     @Test

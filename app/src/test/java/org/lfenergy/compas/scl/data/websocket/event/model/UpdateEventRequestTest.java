@@ -28,7 +28,7 @@ class UpdateEventRequestTest {
         var comment = "Some comment";
         var sclData = "Some SCL Data";
 
-        var result = new UpdateEventRequest(session, type, id, changeSetType, who, comment, sclData);
+        var result = new UpdateEventRequest(session, type, id, changeSetType, who, comment, sclData, "test-tenant");
 
         assertEquals(session, result.getSession());
         assertEquals(type, result.getType());
@@ -37,6 +37,7 @@ class UpdateEventRequestTest {
         assertEquals(who, result.getWho());
         assertEquals(comment, result.getComment());
         assertEquals(sclData, result.getSclData());
+        assertEquals("test-tenant", result.getTenant());
     }
 
     @Test

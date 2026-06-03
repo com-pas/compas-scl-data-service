@@ -25,8 +25,13 @@ import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class CompasSclCreateServerEndpointAsEditorTest extends AbstractServerEndpointAsEditorTestSupport {
+    private static final String TENANT = "test-tenant";
+
     @InjectMock
     private CompasSclDataService service;
+
+    @InjectMock
+    private org.lfenergy.compas.scl.data.rest.TenantService tenantService;
 
     @TestHTTPResource("/scl-ws/v1/SCD/create")
     private URI uri;
@@ -44,14 +49,15 @@ class CompasSclCreateServerEndpointAsEditorTest extends AbstractServerEndpointAs
         request.setComment(comment);
         request.setSclData(sclData);
 
-        when(service.create(sclFileTye, name, USERNAME, comment, sclData))
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(service.create(TENANT, sclFileTye, name, USERNAME, comment, sclData))
                 .thenReturn(sclData);
 
         try (Session session = ContainerProvider.getWebSocketContainer().connectToServer(Client.class, uri)) {
             session.getAsyncRemote().sendText(encoder.encode(request));
 
             assertSclData(sclData);
-            verify(service).create(sclFileTye, name, USERNAME, comment, sclData);
+            verify(service).create(TENANT, sclFileTye, name, USERNAME, comment, sclData);
         }
     }
 

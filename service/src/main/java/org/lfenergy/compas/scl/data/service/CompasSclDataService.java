@@ -55,12 +55,13 @@ public class CompasSclDataService {
     /**
      * List the latest version of all SCL XML Files for a specific type.
      *
-     * @param type The type to search for.
+     * @param tenant The tenant to scope the data to.
+     * @param type   The type to search for.
      * @return The List of Items found.
      */
     @Transactional(SUPPORTS)
-    public List<Item> list(SclFileType type) {
-        return repository.list(type)
+    public List<Item> list(String tenant, SclFileType type) {
+        return repository.list(tenant, type)
                 .stream()
                 .map(e -> new Item(e.getId(), e.getName(), e.getVersion(), e.getLabels()))
                 .toList();
@@ -69,13 +70,14 @@ public class CompasSclDataService {
     /**
      * Search for all versions of a specific SCL XML File (using the UUID) for a specific type.
      *
-     * @param type The type to search for.
-     * @param id   The UUID of the record to search for.
+     * @param tenant The tenant to scope the data to.
+     * @param type   The type to search for.
+     * @param id     The UUID of the record to search for.
      * @return The list of versions found.
      */
     @Transactional(SUPPORTS)
-    public List<HistoryItem> listVersionsByUUID(SclFileType type, UUID id) {
-        var items = repository.listVersionsByUUID(type, id);
+    public List<HistoryItem> listVersionsByUUID(String tenant, SclFileType type, UUID id) {
+        var items = repository.listVersionsByUUID(tenant, type, id);
         if (items.isEmpty()) {
             var message = String.format("No versions found for type '%s' with ID '%s'", type, id);
             throw new CompasNoDataFoundException(message);
@@ -89,32 +91,35 @@ public class CompasSclDataService {
     /**
      * Get the latest version of a specific SCL XML File (using the UUID) for a specific type.
      *
-     * @param type The type to search for.
-     * @param id   The UUID of the record to search for.
+     * @param tenant The tenant to scope the data to.
+     * @param type   The type to search for.
+     * @param id     The UUID of the record to search for.
      * @return The latest version of the SCL XML Files.
      */
     @Transactional(SUPPORTS)
-    public String findByUUID(SclFileType type, UUID id) {
-        return repository.findByUUID(type, id);
+    public String findByUUID(String tenant, SclFileType type, UUID id) {
+        return repository.findByUUID(tenant, type, id);
     }
 
     /**
      * Get a specific version of a specific SCL XML File (using the UUID) for a specific type.
      *
+     * @param tenant  The tenant to scope the data to.
      * @param type    The type to search for.
      * @param id      The UUID of the record to search for.
      * @param version The version to search for.
      * @return The found version of the SCL XML Files.
      */
     @Transactional(SUPPORTS)
-    public String findByUUID(SclFileType type, UUID id, Version version) {
-        return repository.findByUUID(type, id, version);
+    public String findByUUID(String tenant, SclFileType type, UUID id, Version version) {
+        return repository.findByUUID(tenant, type, id, version);
     }
 
     /**
      * Create a new record for the passed SCL XML File with the passed name for a specific type.
      * A new UUID is generated to be set and also the CoMPAS Private Elements are added on SCL Level.
      *
+     * @param tenant  The tenant to scope the data to.
      * @param type    The type to create it for.
      * @param name    The name that will be stored as CoMPAS Private extension.
      * @param comment Some comments that will be added to the THistory entry being added.
@@ -122,13 +127,13 @@ public class CompasSclDataService {
      * @return The ID of the new created SCL XML File in the database.
      */
     @Transactional(REQUIRED)
-    public String create(SclFileType type, String name, String who, String comment, String sclData) {
+    public String create(String tenant, SclFileType type, String name, String who, String comment, String sclData) {
         var scl = converter.convertToElement(new BufferedInputStream(new ByteArrayInputStream(sclData.getBytes(StandardCharsets.UTF_8))), SCL_ELEMENT_NAME, SCL_NS_URI);
         if (scl == null) {
             throw new CompasException(NO_SCL_ELEMENT_FOUND_ERROR_CODE, "No valid SCL found in the passed SCL Data.");
         }
 
-        if (hasDuplicateSclName(type, name)) {
+        if (hasDuplicateSclName(tenant, type, name)) {
             throw new CompasException(DUPLICATE_SCL_NAME_ERROR_CODE, "Given name of SCL File already used.");
         }
 
@@ -149,12 +154,12 @@ public class CompasSclDataService {
         var labels = validateLabels(scl);
 
         var newSclData = converter.convertToString(scl);
-        repository.create(type, id, name, newSclData, version, who, labels);
+        repository.create(tenant, type, id, name, newSclData, version, who, labels);
         return newSclData;
     }
 
-    public boolean hasDuplicateSclName(SclFileType type, String name){
-        return repository.hasDuplicateSclName(type, name);
+    public boolean hasDuplicateSclName(String tenant, SclFileType type, String name){
+        return repository.hasDuplicateSclName(tenant, type, name);
     }
 
     /**
@@ -163,6 +168,7 @@ public class CompasSclDataService {
      * the CoMPAS Private elements will also be copied, the SCL Name will only be copied if it isn't available in the
      * SCL XML File.
      *
+     * @param tenant        The tenant to scope the data to.
      * @param type          The type to update it for.
      * @param id            The UUID of the record to update.
      * @param changeSetType The type of change to determine the new version.
@@ -170,18 +176,18 @@ public class CompasSclDataService {
      * @param sclData       The SCL XML File with the updated content.
      */
     @Transactional(REQUIRED)
-    public String update(SclFileType type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData) {
+    public String update(String tenant, SclFileType type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData) {
         var scl = converter.convertToElement(new BufferedInputStream(new ByteArrayInputStream(sclData.getBytes(StandardCharsets.UTF_8))), SCL_ELEMENT_NAME, SCL_NS_URI);
         if (scl == null) {
             throw new CompasException(NO_SCL_ELEMENT_FOUND_ERROR_CODE, "No valid SCL found in the passed SCL Data.");
         }
 
-        var currentSclMetaInfo = repository.findMetaInfoByUUID(type, id);
+        var currentSclMetaInfo = repository.findMetaInfoByUUID(tenant, type, id);
         var newFileName = getFilenameFromXML(scl);
 
         if (newFileName.isPresent()
                 && !newFileName.get().equals(currentSclMetaInfo.getName())
-                && repository.hasDuplicateSclName(type, newFileName.get())) {
+                && repository.hasDuplicateSclName(tenant, type, newFileName.get())) {
             throw new CompasException(DUPLICATE_SCL_NAME_ERROR_CODE, "Given name of SCL File already used.");
         }
 
@@ -202,7 +208,7 @@ public class CompasSclDataService {
         var labels = validateLabels(scl);
 
         var newSclData = converter.convertToString(scl);
-        repository.create(type, id, newSclName, newSclData, version, who, labels);
+        repository.create(tenant, type, id, newSclName, newSclData, version, who, labels);
 
         return newSclData;
     }
@@ -210,24 +216,26 @@ public class CompasSclDataService {
     /**
      * Delete all versions for a specific SCL File using it's ID.
      *
-     * @param type The type of SCL where to find the SCL File
-     * @param id   The ID of the SCL File to delete.
+     * @param tenant The tenant to scope the data to.
+     * @param type   The type of SCL where to find the SCL File
+     * @param id     The ID of the SCL File to delete.
      */
     @Transactional(REQUIRED)
-    public void delete(SclFileType type, UUID id) {
-        repository.delete(type, id);
+    public void delete(String tenant, SclFileType type, UUID id) {
+        repository.delete(tenant, type, id);
     }
 
     /**
      * Delete passed versions for a specific SCL File using it's ID.
      *
+     * @param tenant  The tenant to scope the data to.
      * @param type    The type of SCL where to find the SCL File
      * @param id      The ID of the SCL File to delete.
      * @param version The version of that SCL File to delete.
      */
     @Transactional(REQUIRED)
-    public void delete(SclFileType type, UUID id, Version version) {
-        repository.delete(type, id, version);
+    public void delete(String tenant, SclFileType type, UUID id, Version version) {
+        repository.delete(tenant, type, id, version);
     }
 
     /**

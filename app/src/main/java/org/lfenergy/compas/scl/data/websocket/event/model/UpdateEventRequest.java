@@ -17,8 +17,9 @@ public class UpdateEventRequest {
     private final String who;
     private final String comment;
     private final String sclData;
+    private final String tenant;
 
-    public UpdateEventRequest(Session session, SclFileType type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData) {
+    public UpdateEventRequest(Session session, SclFileType type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData, String tenant) {
         this.session = session;
         this.type = type;
         this.id = id;
@@ -26,6 +27,7 @@ public class UpdateEventRequest {
         this.who = who;
         this.comment = comment;
         this.sclData = sclData;
+        this.tenant = tenant;
     }
 
     public Session getSession() {
@@ -54,5 +56,9 @@ public class UpdateEventRequest {
 
     public String getSclData() {
         return sclData;
+    }
+
+    public String getTenant() {
+        return tenant;
     }
 }

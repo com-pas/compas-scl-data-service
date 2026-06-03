@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
 import org.lfenergy.compas.scl.data.model.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.rest.PluginsCustomResourcesApi;
+import org.lfenergy.compas.scl.data.rest.TenantService;
 import org.lfenergy.compas.scl.data.rest.dto.DataEntry;
 import org.lfenergy.compas.scl.data.rest.dto.DataEntryWithContent;
 import org.lfenergy.compas.scl.data.rest.dto.PagedDataEntryResponse;
@@ -32,10 +33,12 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
     private static final Logger LOGGER = LogManager.getLogger(CompasPluginsResource.class);
 
     private final CompasPluginsResourceService service;
+    private final TenantService tenantService;
 
     @Inject
-    public CompasPluginsResource(CompasPluginsResourceService service) {
+    public CompasPluginsResource(CompasPluginsResourceService service, TenantService tenantService) {
         this.service = service;
+        this.tenantService = tenantService;
     }
 
     @Override
@@ -46,9 +49,10 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
                                             Integer page,
                                             Integer size) {
         LOGGER.info("Listing plugins custom resources for type '{}'", type);
+        String tenant = tenantService.resolveTenant();
 
-        var entities = service.list(type, uploadedAfter, uploadedBefore, name, page, size);
-        long totalElements = service.count(type, uploadedAfter, uploadedBefore, name);
+        var entities = service.list(tenant, type, uploadedAfter, uploadedBefore, name, page, size);
+        long totalElements = service.count(tenant, type, uploadedAfter, uploadedBefore, name);
 
         var entries = entities.stream()
                 .map(this::toDataEntry)
@@ -89,7 +93,8 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
             throw new CompasInvalidInputException("Failed to read content from upload");
         }
 
-        var entity = service.upload(new UploadCustomPluginsResourceData(type, name, contentType, contentText,
+        String tenant = tenantService.resolveTenant();
+        var entity = service.upload(tenant, new UploadCustomPluginsResourceData(type, name, contentType, contentText,
                 dataCompatibilityVersion, description, version, nextVersionType));
 
         var response = new UploadDataResponse();

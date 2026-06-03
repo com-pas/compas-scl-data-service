@@ -33,7 +33,7 @@ public class CompasSclDataEventHandler {
     public void createWebsocketsEvent(CreateEventRequest request) {
         new WebsocketHandler<CreateWsResponse>().execute(request.getSession(), () -> {
             var response = new CreateWsResponse();
-            response.setSclData(compasSclDataService.create(request.getType(), request.getName(), request.getWho(),
+            response.setSclData(compasSclDataService.create(request.getTenant(), request.getType(), request.getName(), request.getWho(),
                     request.getComment(), request.getSclData()));
             return response;
         });
@@ -43,7 +43,7 @@ public class CompasSclDataEventHandler {
     public void getWebsocketsEvent(GetEventRequest request) {
         new WebsocketHandler<GetWsResponse>().execute(request.getSession(), () -> {
             var response = new GetWsResponse();
-            response.setSclData(compasSclDataService.findByUUID(request.getType(), request.getId()));
+            response.setSclData(compasSclDataService.findByUUID(request.getTenant(), request.getType(), request.getId()));
             return response;
         });
     }
@@ -52,7 +52,7 @@ public class CompasSclDataEventHandler {
     public void getVersionWebsocketsEvent(GetVersionEventRequest request) {
         new WebsocketHandler<GetWsResponse>().execute(request.getSession(), () -> {
             var response = new GetWsResponse();
-            response.setSclData(compasSclDataService.findByUUID(request.getType(), request.getId(), request.getVersion()));
+            response.setSclData(compasSclDataService.findByUUID(request.getTenant(), request.getType(), request.getId(), request.getVersion()));
             return response;
         });
     }
@@ -61,7 +61,7 @@ public class CompasSclDataEventHandler {
     public void updateWebsocketsEvent(UpdateEventRequest request) {
         new WebsocketHandler<UpdateWsResponse>().execute(request.getSession(), () -> {
             var response = new UpdateWsResponse();
-            response.setSclData(compasSclDataService.update(request.getType(), request.getId(), request.getChangeSetType(),
+            response.setSclData(compasSclDataService.update(request.getTenant(), request.getType(), request.getId(), request.getChangeSetType(),
                     request.getWho(), request.getComment(), request.getSclData()));
             return response;
         });

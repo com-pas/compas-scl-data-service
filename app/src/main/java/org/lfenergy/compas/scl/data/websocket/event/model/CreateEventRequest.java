@@ -14,14 +14,16 @@ public class CreateEventRequest {
     private final String who;
     private final String comment;
     private final String sclData;
+    private final String tenant;
 
-    public CreateEventRequest(Session session, SclFileType type, String name, String who, String comment, String sclData) {
+    public CreateEventRequest(Session session, SclFileType type, String name, String who, String comment, String sclData, String tenant) {
         this.session = session;
         this.type = type;
         this.name = name;
         this.who = who;
         this.comment = comment;
         this.sclData = sclData;
+        this.tenant = tenant;
     }
 
     public Session getSession() {
@@ -46,5 +48,9 @@ public class CreateEventRequest {
 
     public String getSclData() {
         return sclData;
+    }
+
+    public String getTenant() {
+        return tenant;
     }
 }

@@ -10,6 +10,11 @@ public class SclDataServiceConstants {
 
     public static final String SCL_DATA_SERVICE_V1_NS_URI = "https://www.lfenergy.org/compas/SclDataService/v1";
 
+    /**
+     * Fallback tenant name used when authentication is disabled.
+     */
+    public static final String GLOBAL_TENANT = "global";
+
     public static final String SCL_NS_URI = "http://www.iec.ch/61850/2003/SCL";
     public static final String SCL_NS_PREFIX = "";
     public static final String SCL_ELEMENT_NAME = "SCL";

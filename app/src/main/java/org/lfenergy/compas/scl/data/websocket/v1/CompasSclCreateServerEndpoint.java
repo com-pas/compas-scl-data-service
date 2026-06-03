@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.lfenergy.compas.core.websocket.ErrorResponseEncoder;
+import org.lfenergy.compas.scl.data.rest.TenantService;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.websocket.event.model.CreateEventRequest;
 import org.lfenergy.compas.scl.data.websocket.v1.decoder.CreateWsRequestDecoder;
@@ -39,14 +40,17 @@ public class CompasSclCreateServerEndpoint {
     private final EventBus eventBus;
     private final JsonWebToken jsonWebToken;
     private final UserInfoProperties userInfoProperties;
+    private final TenantService tenantService;
 
     @Inject
     public CompasSclCreateServerEndpoint(EventBus eventBus,
                                          JsonWebToken jsonWebToken,
-                                         UserInfoProperties userInfoProperties) {
+                                         UserInfoProperties userInfoProperties,
+                                         TenantService tenantService) {
         this.eventBus = eventBus;
         this.jsonWebToken = jsonWebToken;
         this.userInfoProperties = userInfoProperties;
+        this.tenantService = tenantService;
     }
 
     @OnOpen
@@ -74,7 +78,7 @@ public class CompasSclCreateServerEndpoint {
         LOGGER.trace("Username used for Who {}", who);
 
         eventBus.send("create-ws", new CreateEventRequest(
-                session, SclFileType.valueOf(type), request.getName(), who, request.getComment(), request.getSclData()));
+                session, SclFileType.valueOf(type), request.getName(), who, request.getComment(), request.getSclData(), tenantService.resolveTenant()));
     }
 
     @OnError

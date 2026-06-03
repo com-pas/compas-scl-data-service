@@ -12,11 +12,13 @@ public class GetEventRequest {
     private final Session session;
     private final SclFileType type;
     private final UUID id;
+    private final String tenant;
 
-    public GetEventRequest(Session session, SclFileType type, UUID id) {
+    public GetEventRequest(Session session, SclFileType type, UUID id, String tenant) {
         this.session = session;
         this.type = type;
         this.id = id;
+        this.tenant = tenant;
     }
 
     public Session getSession() {
@@ -29,5 +31,9 @@ public class GetEventRequest {
 
     public UUID getId() {
         return id;
+    }
+
+    public String getTenant() {
+        return tenant;
     }
 }
