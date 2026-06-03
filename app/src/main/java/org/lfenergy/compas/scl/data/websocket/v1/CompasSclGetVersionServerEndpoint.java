@@ -21,6 +21,7 @@ import jakarta.validation.Valid;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
+import org.lfenergy.compas.scl.data.rest.TenantService;
 
 import static org.lfenergy.compas.core.websocket.WebsocketSupport.handleException;
 import static org.lfenergy.compas.scl.data.rest.Constants.TYPE_PATH_PARAM;
@@ -34,10 +35,12 @@ public class CompasSclGetVersionServerEndpoint {
     private static final Logger LOGGER = LogManager.getLogger(CompasSclGetVersionServerEndpoint.class);
 
     private final EventBus eventBus;
+    private final TenantService tenantService;
 
     @Inject
-    public CompasSclGetVersionServerEndpoint(EventBus eventBus) {
+    public CompasSclGetVersionServerEndpoint(EventBus eventBus, TenantService tenantService) {
         this.eventBus = eventBus;
+        this.tenantService = tenantService;
     }
 
     @OnOpen
@@ -52,7 +55,7 @@ public class CompasSclGetVersionServerEndpoint {
         LOGGER.info("Message from session {} for type {}.", session.getId(), type);
 
         eventBus.send("get-version-ws", new GetVersionEventRequest(session, SclFileType.valueOf(type),
-                request.getId(), new Version(request.getVersion())));
+                request.getId(), new Version(request.getVersion()), tenantService.resolveTenant()));
     }
 
     @OnError

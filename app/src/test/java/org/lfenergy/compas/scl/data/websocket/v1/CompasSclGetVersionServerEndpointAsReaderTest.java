@@ -27,8 +27,13 @@ import static org.mockito.Mockito.when;
 
 @QuarkusTest
 class CompasSclGetVersionServerEndpointAsReaderTest extends AbstractServerEndpointAsReaderTestSupport {
+    private static final String TENANT = "test-tenant";
+
     @InjectMock
     private CompasSclDataService service;
+
+    @InjectMock
+    private org.lfenergy.compas.scl.data.rest.TenantService tenantService;
 
     @TestHTTPResource("/scl-ws/v1/SCD/get-version")
     private URI uri;
@@ -45,13 +50,14 @@ class CompasSclGetVersionServerEndpointAsReaderTest extends AbstractServerEndpoi
         request.setId(id);
         request.setVersion(version.toString());
 
-        when(service.findByUUID(sclFileTye, id, version)).thenReturn(sclData);
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(service.findByUUID(TENANT, sclFileTye, id, version)).thenReturn(sclData);
 
         try (Session session = ContainerProvider.getWebSocketContainer().connectToServer(Client.class, uri)) {
             session.getAsyncRemote().sendText(encoder.encode(request));
 
             assertSclData(sclData);
-            verify(service).findByUUID(sclFileTye, id, version);
+            verify(service).findByUUID(TENANT, sclFileTye, id, version);
         }
     }
 

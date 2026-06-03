@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.lfenergy.compas.core.websocket.ErrorResponseEncoder;
+import org.lfenergy.compas.scl.data.rest.TenantService;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.websocket.event.model.UpdateEventRequest;
 import org.lfenergy.compas.scl.data.websocket.v1.decoder.UpdateWsRequestDecoder;
@@ -39,14 +40,17 @@ public class CompasSclUpdateServerEndpoint {
     private final EventBus eventBus;
     private final JsonWebToken jsonWebToken;
     private final UserInfoProperties userInfoProperties;
+    private final TenantService tenantService;
 
     @Inject
     public CompasSclUpdateServerEndpoint(EventBus eventBus,
                                          JsonWebToken jsonWebToken,
-                                         UserInfoProperties userInfoProperties) {
+                                         UserInfoProperties userInfoProperties,
+                                         TenantService tenantService) {
         this.eventBus = eventBus;
         this.jsonWebToken = jsonWebToken;
         this.userInfoProperties = userInfoProperties;
+        this.tenantService = tenantService;
     }
 
     @OnOpen
@@ -75,7 +79,7 @@ public class CompasSclUpdateServerEndpoint {
 
         eventBus.send("update-ws", new UpdateEventRequest(
                 session, SclFileType.valueOf(type), request.getId(), request.getChangeSetType(),
-                who, request.getComment(), request.getSclData()));
+                who, request.getComment(), request.getSclData(), tenantService.resolveTenant()));
     }
 
     @OnError

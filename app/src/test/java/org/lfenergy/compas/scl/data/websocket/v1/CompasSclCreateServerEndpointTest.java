@@ -18,7 +18,7 @@ class CompasSclCreateServerEndpointTest extends AbstractServerEndpointOnOpenTest
 
     @Test
     void onOpen_WhenSessionCloseThrowsIOException_ThenExceptionIsHandledGracefully() throws IOException {
-        var endpoint = new CompasSclCreateServerEndpoint(null, jsonWebToken, null);
+        var endpoint = new CompasSclCreateServerEndpoint(null, jsonWebToken, null, null);
         testOnOpenWhenSessionCloseThrowsIOException(jsonWebToken, endpoint::onOpen);
     }
 }

@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.rest.TenantService;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.rest.v1.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
@@ -39,6 +40,9 @@ public class CompasSclDataResource {
     UserInfoProperties userInfoProperties;
 
     @Inject
+    TenantService tenantService;
+
+    @Inject
     public CompasSclDataResource(CompasSclDataService compasSclDataService) {
         this.compasSclDataService = compasSclDataService;
     }
@@ -52,9 +56,11 @@ public class CompasSclDataResource {
         LOGGER.info("Adding new SCL File for type {} to storage.", type);
         String who = jsonWebToken.getClaim(userInfoProperties.who());
         LOGGER.trace("Username used for Who {}", who);
+        String tenant = tenantService.resolveTenant();
+        LOGGER.trace("Tenant resolved as {}", tenant);
 
         var response = new CreateResponse();
-        response.setSclData(compasSclDataService.create(type, request.getName(), who, request.getComment(),
+        response.setSclData(compasSclDataService.create(tenant, type, request.getName(), who, request.getComment(),
                 request.getSclData()));
         return Uni.createFrom().item(response);
     }
@@ -64,8 +70,9 @@ public class CompasSclDataResource {
     @Produces(MediaType.APPLICATION_XML)
     public Uni<ListResponse> list(@PathParam(TYPE_PATH_PARAM) SclFileType type) {
         LOGGER.info("Listing SCL Files for type {} from storage.", type);
+        String tenant = tenantService.resolveTenant();
         var response = new ListResponse();
-        response.setItems(compasSclDataService.list(type));
+        response.setItems(compasSclDataService.list(tenant, type));
         return Uni.createFrom().item(response);
     }
 
@@ -75,8 +82,9 @@ public class CompasSclDataResource {
     public Uni<VersionsResponse> listVersionsByUUID(@PathParam(TYPE_PATH_PARAM) SclFileType type,
                                                     @PathParam(ID_PATH_PARAM) UUID id) {
         LOGGER.info("Listing versions of SCL File {} for type {} from storage.", id, type);
+        String tenant = tenantService.resolveTenant();
         var response = new VersionsResponse();
-        response.setItems(compasSclDataService.listVersionsByUUID(type, id));
+        response.setItems(compasSclDataService.listVersionsByUUID(tenant, type, id));
         return Uni.createFrom().item(response);
     }
 
@@ -86,8 +94,9 @@ public class CompasSclDataResource {
     public Uni<GetResponse> findByUUID(@PathParam(TYPE_PATH_PARAM) SclFileType type,
                                        @PathParam(ID_PATH_PARAM) UUID id) {
         LOGGER.info("Retrieving latest version of SCL File {} for type {} from storage.", id, type);
+        String tenant = tenantService.resolveTenant();
         var response = new GetResponse();
-        response.setSclData(compasSclDataService.findByUUID(type, id));
+        response.setSclData(compasSclDataService.findByUUID(tenant, type, id));
         return Uni.createFrom().item(response);
     }
 
@@ -98,8 +107,9 @@ public class CompasSclDataResource {
                                                  @PathParam(ID_PATH_PARAM) UUID id,
                                                  @PathParam(VERSION_PATH_PARAM) Version version) {
         LOGGER.info("Retrieving version {} of SCL File {} for type {} from storage.", version, id, type);
+        String tenant = tenantService.resolveTenant();
         var response = new GetResponse();
-        response.setSclData(compasSclDataService.findByUUID(type, id, version));
+        response.setSclData(compasSclDataService.findByUUID(tenant, type, id, version));
         return Uni.createFrom().item(response);
     }
 
@@ -114,9 +124,11 @@ public class CompasSclDataResource {
         LOGGER.info("Updating SCL File {} for type {} to storage.", id, type);
         String who = jsonWebToken.getClaim(userInfoProperties.who());
         LOGGER.trace("Username used for Who {}", who);
+        String tenant = tenantService.resolveTenant();
+        LOGGER.trace("Tenant resolved as {}", tenant);
 
         var response = new UpdateResponse();
-        response.setSclData(compasSclDataService.update(type, id, request.getChangeSetType(), who, request.getComment(),
+        response.setSclData(compasSclDataService.update(tenant, type, id, request.getChangeSetType(), who, request.getComment(),
                 request.getSclData()));
         return Uni.createFrom().item(response);
     }
@@ -128,7 +140,8 @@ public class CompasSclDataResource {
     public Uni<Void> deleteAll(@PathParam(TYPE_PATH_PARAM) SclFileType type,
                                @PathParam(ID_PATH_PARAM) UUID id) {
         LOGGER.info("Removing all versions of SCL File {} for type {} from storage.", id, type);
-        compasSclDataService.delete(type, id);
+        String tenant = tenantService.resolveTenant();
+        compasSclDataService.delete(tenant, type, id);
         return Uni.createFrom().nullItem();
     }
 
@@ -140,7 +153,8 @@ public class CompasSclDataResource {
                                    @PathParam(ID_PATH_PARAM) UUID id,
                                    @PathParam(VERSION_PATH_PARAM) Version version) {
         LOGGER.info("Removing version {} of SCL File {} for type {} from storage.", version, id, type);
-        compasSclDataService.delete(type, id, version);
+        String tenant = tenantService.resolveTenant();
+        compasSclDataService.delete(tenant, type, id, version);
         return Uni.createFrom().nullItem();
     }
 
@@ -151,9 +165,10 @@ public class CompasSclDataResource {
     public Uni<DuplicateNameCheckResponse> checkDuplicateName(@PathParam(TYPE_PATH_PARAM) SclFileType type,
                                                   @Valid DuplicateNameCheckRequest request) {
         LOGGER.info("Checking for duplicate SCL File name.");
+        String tenant = tenantService.resolveTenant();
 
         var response = new DuplicateNameCheckResponse();
-        response.setDuplicate(compasSclDataService.hasDuplicateSclName(type, request.getName()));
+        response.setDuplicate(compasSclDataService.hasDuplicateSclName(tenant, type, request.getName()));
         return Uni.createFrom().item(response);
     }
 }

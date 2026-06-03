@@ -36,6 +36,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CompasSclDataEventHandlerTest {
+    private static final String TENANT = "test-tenant";
+
     @Mock
     private CompasSclDataService service;
 
@@ -51,14 +53,14 @@ class CompasSclDataEventHandlerTest {
         var sclData = "Some SCL Data";
 
         var session = mockSession();
-        var request = new CreateEventRequest(session, type, name, who, comment, sclData);
-        when(service.create(type, name, who, comment, sclData)).thenReturn(sclData);
+        var request = new CreateEventRequest(session, type, name, who, comment, sclData, TENANT);
+        when(service.create(TENANT, type, name, who, comment, sclData)).thenReturn(sclData);
 
         eventHandler.createWebsocketsEvent(request);
 
         var response = verifyResponse(session, CreateWsResponse.class);
         assertEquals(sclData, response.getSclData());
-        verify(service).create(type, name, who, comment, sclData);
+        verify(service).create(TENANT, type, name, who, comment, sclData);
     }
 
     @Test
@@ -71,14 +73,14 @@ class CompasSclDataEventHandlerTest {
         var errorMessage = "Some Error";
 
         var session = mockSession();
-        var request = new CreateEventRequest(session, type, name, who, comment, sclData);
-        when(service.create(type, name, who, comment, sclData))
+        var request = new CreateEventRequest(session, type, name, who, comment, sclData, TENANT);
+        when(service.create(TENANT, type, name, who, comment, sclData))
                 .thenThrow(new CompasException(DUPLICATE_SCL_NAME_ERROR_CODE, errorMessage));
 
         eventHandler.createWebsocketsEvent(request);
 
         verifyErrorResponse(session, DUPLICATE_SCL_NAME_ERROR_CODE, errorMessage);
-        verify(service).create(type, name, who, comment, sclData);
+        verify(service).create(TENANT, type, name, who, comment, sclData);
     }
 
     @Test
@@ -91,13 +93,13 @@ class CompasSclDataEventHandlerTest {
         var errorMessage = "Some Error";
 
         var session = mockSession();
-        var request = new CreateEventRequest(session, type, name, who, comment, sclData);
-        when(service.create(type, name, who, comment, sclData)).thenThrow(new RuntimeException(errorMessage));
+        var request = new CreateEventRequest(session, type, name, who, comment, sclData, TENANT);
+        when(service.create(TENANT, type, name, who, comment, sclData)).thenThrow(new RuntimeException(errorMessage));
 
         eventHandler.createWebsocketsEvent(request);
 
         verifyErrorResponse(session, WEBSOCKET_GENERAL_ERROR_CODE, errorMessage);
-        verify(service).create(type, name, who, comment, sclData);
+        verify(service).create(TENANT, type, name, who, comment, sclData);
     }
 
     @Test
@@ -107,14 +109,14 @@ class CompasSclDataEventHandlerTest {
         var sclData = "Some SCL Data";
 
         var session = mockSession();
-        var request = new GetEventRequest(session, type, id);
-        when(service.findByUUID(type, id)).thenReturn(sclData);
+        var request = new GetEventRequest(session, type, id, TENANT);
+        when(service.findByUUID(TENANT, type, id)).thenReturn(sclData);
 
         eventHandler.getWebsocketsEvent(request);
 
         var response = verifyResponse(session, GetWsResponse.class);
         assertEquals(sclData, response.getSclData());
-        verify(service).findByUUID(type, id);
+        verify(service).findByUUID(TENANT, type, id);
     }
 
     @Test
@@ -124,14 +126,14 @@ class CompasSclDataEventHandlerTest {
         var errorMessage = "Some Error";
 
         var session = mockSession();
-        var request = new GetEventRequest(session, type, id);
-        when(service.findByUUID(type, id))
+        var request = new GetEventRequest(session, type, id, TENANT);
+        when(service.findByUUID(TENANT, type, id))
                 .thenThrow(new CompasException(DUPLICATE_SCL_NAME_ERROR_CODE, errorMessage));
 
         eventHandler.getWebsocketsEvent(request);
 
         verifyErrorResponse(session, DUPLICATE_SCL_NAME_ERROR_CODE, errorMessage);
-        verify(service).findByUUID(type, id);
+        verify(service).findByUUID(TENANT, type, id);
     }
 
     @Test
@@ -141,13 +143,13 @@ class CompasSclDataEventHandlerTest {
         var errorMessage = "Some Error";
 
         var session = mockSession();
-        var request = new GetEventRequest(session, type, id);
-        when(service.findByUUID(type, id)).thenThrow(new RuntimeException(errorMessage));
+        var request = new GetEventRequest(session, type, id, TENANT);
+        when(service.findByUUID(TENANT, type, id)).thenThrow(new RuntimeException(errorMessage));
 
         eventHandler.getWebsocketsEvent(request);
 
         verifyErrorResponse(session, WEBSOCKET_GENERAL_ERROR_CODE, errorMessage);
-        verify(service).findByUUID(type, id);
+        verify(service).findByUUID(TENANT, type, id);
     }
 
     @Test
@@ -158,14 +160,14 @@ class CompasSclDataEventHandlerTest {
         var version = new Version("1.2.3");
 
         var session = mockSession();
-        var request = new GetVersionEventRequest(session, type, id, version);
-        when(service.findByUUID(type, id, version)).thenReturn(sclData);
+        var request = new GetVersionEventRequest(session, type, id, version, TENANT);
+        when(service.findByUUID(TENANT, type, id, version)).thenReturn(sclData);
 
         eventHandler.getVersionWebsocketsEvent(request);
 
         var response = verifyResponse(session, GetWsResponse.class);
         assertEquals(sclData, response.getSclData());
-        verify(service).findByUUID(type, id, version);
+        verify(service).findByUUID(TENANT, type, id, version);
     }
 
     @Test
@@ -176,14 +178,14 @@ class CompasSclDataEventHandlerTest {
         var errorMessage = "Some Error";
 
         var session = mockSession();
-        var request = new GetVersionEventRequest(session, type, id, version);
-        when(service.findByUUID(type, id, version))
+        var request = new GetVersionEventRequest(session, type, id, version, TENANT);
+        when(service.findByUUID(TENANT, type, id, version))
                 .thenThrow(new CompasException(DUPLICATE_SCL_NAME_ERROR_CODE, errorMessage));
 
         eventHandler.getVersionWebsocketsEvent(request);
 
         verifyErrorResponse(session, DUPLICATE_SCL_NAME_ERROR_CODE, errorMessage);
-        verify(service).findByUUID(type, id, version);
+        verify(service).findByUUID(TENANT, type, id, version);
     }
 
     @Test
@@ -194,13 +196,13 @@ class CompasSclDataEventHandlerTest {
         var errorMessage = "Some Error";
 
         var session = mockSession();
-        var request = new GetVersionEventRequest(session, type, id, version);
-        when(service.findByUUID(type, id, version)).thenThrow(new RuntimeException(errorMessage));
+        var request = new GetVersionEventRequest(session, type, id, version, TENANT);
+        when(service.findByUUID(TENANT, type, id, version)).thenThrow(new RuntimeException(errorMessage));
 
         eventHandler.getVersionWebsocketsEvent(request);
 
         verifyErrorResponse(session, WEBSOCKET_GENERAL_ERROR_CODE, errorMessage);
-        verify(service).findByUUID(type, id, version);
+        verify(service).findByUUID(TENANT, type, id, version);
     }
 
     @Test
@@ -213,14 +215,14 @@ class CompasSclDataEventHandlerTest {
         var sclData = "Some SCL Data";
 
         var session = mockSession();
-        var request = new UpdateEventRequest(session, type, id, cst, who, comment, sclData);
-        when(service.update(type, id, cst, who, comment, sclData)).thenReturn(sclData);
+        var request = new UpdateEventRequest(session, type, id, cst, who, comment, sclData, TENANT);
+        when(service.update(TENANT, type, id, cst, who, comment, sclData)).thenReturn(sclData);
 
         eventHandler.updateWebsocketsEvent(request);
 
         var response = verifyResponse(session, UpdateWsResponse.class);
         assertEquals(sclData, response.getSclData());
-        verify(service).update(type, id, cst, who, comment, sclData);
+        verify(service).update(TENANT, type, id, cst, who, comment, sclData);
     }
 
     @Test
@@ -234,14 +236,14 @@ class CompasSclDataEventHandlerTest {
         var errorMessage = "Some Error";
 
         var session = mockSession();
-        var request = new UpdateEventRequest(session, type, id, cst, who, comment, sclData);
-        when(service.update(type, id, cst, who, comment, sclData))
+        var request = new UpdateEventRequest(session, type, id, cst, who, comment, sclData, TENANT);
+        when(service.update(TENANT, type, id, cst, who, comment, sclData))
                 .thenThrow(new CompasException(DUPLICATE_SCL_NAME_ERROR_CODE, errorMessage));
 
         eventHandler.updateWebsocketsEvent(request);
 
         verifyErrorResponse(session, DUPLICATE_SCL_NAME_ERROR_CODE, errorMessage);
-        verify(service).update(type, id, cst, who, comment, sclData);
+        verify(service).update(TENANT, type, id, cst, who, comment, sclData);
     }
 
     @Test
@@ -255,13 +257,13 @@ class CompasSclDataEventHandlerTest {
         var errorMessage = "Some Error";
 
         var session = mockSession();
-        var request = new UpdateEventRequest(session, type, id, cst, who, comment, sclData);
-        when(service.update(type, id, cst, who, comment, sclData)).thenThrow(new RuntimeException(errorMessage));
+        var request = new UpdateEventRequest(session, type, id, cst, who, comment, sclData, TENANT);
+        when(service.update(TENANT, type, id, cst, who, comment, sclData)).thenThrow(new RuntimeException(errorMessage));
 
         eventHandler.updateWebsocketsEvent(request);
 
         verifyErrorResponse(session, WEBSOCKET_GENERAL_ERROR_CODE, errorMessage);
-        verify(service).update(type, id, cst, who, comment, sclData);
+        verify(service).update(TENANT, type, id, cst, who, comment, sclData);
     }
 
     private Session mockSession() {

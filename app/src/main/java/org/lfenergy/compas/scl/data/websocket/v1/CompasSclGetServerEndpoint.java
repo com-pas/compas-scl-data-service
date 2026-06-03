@@ -20,6 +20,7 @@ import jakarta.validation.Valid;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
+import org.lfenergy.compas.scl.data.rest.TenantService;
 
 import static org.lfenergy.compas.core.websocket.WebsocketSupport.handleException;
 import static org.lfenergy.compas.scl.data.rest.Constants.TYPE_PATH_PARAM;
@@ -33,10 +34,12 @@ public class CompasSclGetServerEndpoint {
     private static final Logger LOGGER = LogManager.getLogger(CompasSclGetServerEndpoint.class);
 
     private final EventBus eventBus;
+    private final TenantService tenantService;
 
     @Inject
-    public CompasSclGetServerEndpoint(EventBus eventBus) {
+    public CompasSclGetServerEndpoint(EventBus eventBus, TenantService tenantService) {
         this.eventBus = eventBus;
+        this.tenantService = tenantService;
     }
 
     @OnOpen
@@ -50,7 +53,7 @@ public class CompasSclGetServerEndpoint {
                              @PathParam(TYPE_PATH_PARAM) String type) {
         LOGGER.info("Message (get) from session {} for type {}.", session.getId(), type);
 
-        eventBus.send("get-ws", new GetEventRequest(session, SclFileType.valueOf(type), request.getId()));
+        eventBus.send("get-ws", new GetEventRequest(session, SclFileType.valueOf(type), request.getId(), tenantService.resolveTenant()));
     }
 
     @OnError

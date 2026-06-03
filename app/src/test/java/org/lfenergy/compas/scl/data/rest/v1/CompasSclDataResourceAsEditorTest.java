@@ -40,9 +40,13 @@ import static org.mockito.Mockito.*;
 })
 class CompasSclDataResourceAsEditorTest {
     public static final String USERNAME = "Test Editor";
+    private static final String TENANT = "test-tenant";
 
     @InjectMock
     private CompasSclDataService compasSclDataService;
+
+    @InjectMock
+    private org.lfenergy.compas.scl.data.rest.TenantService tenantService;
 
     @Test
     void list_WhenCalled_ThenItemResponseRetrieved() {
@@ -52,7 +56,8 @@ class CompasSclDataResourceAsEditorTest {
         var version = "1.0.0";
         var labels = List.of("Label1");
 
-        when(compasSclDataService.list(type))
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasSclDataService.list(TENANT, type))
                 .thenReturn(Collections.singletonList(new Item(uuid.toString(), name, version, labels)));
 
         var response = given()
@@ -68,7 +73,7 @@ class CompasSclDataResourceAsEditorTest {
         assertEquals(name, xmlPath.get("ListResponse.Item[0].Name"));
         assertEquals(version, xmlPath.get("ListResponse.Item[0].Version"));
         assertEquals(labels.get(0), xmlPath.get("ListResponse.Item[0].Label"));
-        verify(compasSclDataService).list(type);
+        verify(compasSclDataService).list(TENANT, type);
     }
 
     @Test
@@ -78,7 +83,8 @@ class CompasSclDataResourceAsEditorTest {
         var name = "Name";
         var version = "1.0.0";
 
-        when(compasSclDataService.listVersionsByUUID(type, uuid))
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasSclDataService.listVersionsByUUID(TENANT, type, uuid))
                 .thenReturn(Collections.singletonList(new HistoryItem(uuid.toString(), name, version, null, null, null)));
 
         var response = given()
@@ -94,7 +100,7 @@ class CompasSclDataResourceAsEditorTest {
         assertEquals(uuid.toString(), xmlPath.get("VersionsResponse.HistoryItem[0].Id"));
         assertEquals(name, xmlPath.get("VersionsResponse.HistoryItem[0].Name"));
         assertEquals(version, xmlPath.get("VersionsResponse.HistoryItem[0].Version"));
-        verify(compasSclDataService).listVersionsByUUID(type, uuid);
+        verify(compasSclDataService).listVersionsByUUID(TENANT, type, uuid);
     }
 
     @Test
@@ -103,7 +109,8 @@ class CompasSclDataResourceAsEditorTest {
         var uuid = UUID.randomUUID();
         var scl = readSCL();
 
-        when(compasSclDataService.findByUUID(type, uuid)).thenReturn(scl);
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasSclDataService.findByUUID(TENANT, type, uuid)).thenReturn(scl);
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -115,7 +122,7 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         assertEquals(scl, response.xmlPath().getString("GetResponse.SclData"));
-        verify(compasSclDataService).findByUUID(type, uuid);
+        verify(compasSclDataService).findByUUID(TENANT, type, uuid);
     }
 
     @Test
@@ -125,7 +132,8 @@ class CompasSclDataResourceAsEditorTest {
         var scl = readSCL();
         var version = new Version(1, 2, 3);
 
-        when(compasSclDataService.findByUUID(type, uuid, version)).thenReturn(scl);
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasSclDataService.findByUUID(TENANT, type, uuid, version)).thenReturn(scl);
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -138,7 +146,7 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         assertEquals(scl, response.xmlPath().getString("GetResponse.SclData"));
-        verify(compasSclDataService).findByUUID(type, uuid, version);
+        verify(compasSclDataService).findByUUID(TENANT, type, uuid, version);
     }
 
     @Test
@@ -153,7 +161,8 @@ class CompasSclDataResourceAsEditorTest {
         request.setComment(comment);
         request.setSclData(scl);
 
-        when(compasSclDataService.create(type, name, USERNAME, comment, scl)).thenReturn(scl);
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasSclDataService.create(TENANT, type, name, USERNAME, comment, scl)).thenReturn(scl);
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -166,7 +175,7 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         assertEquals(scl, response.xmlPath().getString("CreateResponse.SclData"));
-        verify(compasSclDataService).create(type, name, USERNAME, comment, scl);
+        verify(compasSclDataService).create(TENANT, type, name, USERNAME, comment, scl);
     }
 
     @Test
@@ -209,7 +218,8 @@ class CompasSclDataResourceAsEditorTest {
         request.setComment(comment);
         request.setSclData(scl);
 
-        when(compasSclDataService.update(type, uuid, changeSetType, USERNAME, comment, scl)).thenReturn(scl);
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasSclDataService.update(TENANT, type, uuid, changeSetType, USERNAME, comment, scl)).thenReturn(scl);
 
         var response = given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -223,7 +233,7 @@ class CompasSclDataResourceAsEditorTest {
                 .response();
 
         assertEquals(scl, response.xmlPath().getString("UpdateResponse.SclData"));
-        verify(compasSclDataService).update(type, uuid, changeSetType, USERNAME, comment, scl);
+        verify(compasSclDataService).update(TENANT, type, uuid, changeSetType, USERNAME, comment, scl);
     }
 
     @Test
@@ -231,7 +241,8 @@ class CompasSclDataResourceAsEditorTest {
         var uuid = UUID.randomUUID();
         var type = SclFileType.SCD;
 
-        doNothing().when(compasSclDataService).delete(type, uuid);
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        doNothing().when(compasSclDataService).delete(TENANT, type, uuid);
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -240,7 +251,7 @@ class CompasSclDataResourceAsEditorTest {
                 .then()
                 .statusCode(204);
 
-        verify(compasSclDataService).delete(type, uuid);
+        verify(compasSclDataService).delete(TENANT, type, uuid);
     }
 
     @Test
@@ -249,7 +260,8 @@ class CompasSclDataResourceAsEditorTest {
         var type = SclFileType.SCD;
         var version = new Version(1, 2, 3);
 
-        doNothing().when(compasSclDataService).delete(type, uuid, version);
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        doNothing().when(compasSclDataService).delete(TENANT, type, uuid, version);
 
         given()
                 .pathParam(TYPE_PATH_PARAM, type)
@@ -259,7 +271,7 @@ class CompasSclDataResourceAsEditorTest {
                 .then()
                 .statusCode(204);
 
-        verify(compasSclDataService).delete(type, uuid, version);
+        verify(compasSclDataService).delete(TENANT, type, uuid, version);
     }
 
     @Test
@@ -267,7 +279,8 @@ class CompasSclDataResourceAsEditorTest {
         var type = SclFileType.SCD;
         var name = "STATION-0012312";
 
-        when(compasSclDataService.hasDuplicateSclName(type, name)).thenReturn(true);
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasSclDataService.hasDuplicateSclName(TENANT, type, name)).thenReturn(true);
 
         var request = new DuplicateNameCheckRequest();
         request.setName(name);
@@ -282,7 +295,7 @@ class CompasSclDataResourceAsEditorTest {
                 .extract()
                 .response();
 
-        verify(compasSclDataService).hasDuplicateSclName(type, name);
+        verify(compasSclDataService).hasDuplicateSclName(TENANT, type, name);
         assertTrue(response.xmlPath().getBoolean("DuplicateNameCheckResponse.Duplicate"));
     }
 
@@ -291,7 +304,8 @@ class CompasSclDataResourceAsEditorTest {
         var type = SclFileType.SCD;
         var name = "STATION-0012312";
 
-        when(compasSclDataService.hasDuplicateSclName(type, name)).thenReturn(false);
+        when(tenantService.resolveTenant()).thenReturn(TENANT);
+        when(compasSclDataService.hasDuplicateSclName(TENANT, type, name)).thenReturn(false);
 
         var request = new DuplicateNameCheckRequest();
         request.setName(name);
@@ -306,7 +320,7 @@ class CompasSclDataResourceAsEditorTest {
                 .extract()
                 .response();
 
-        verify(compasSclDataService).hasDuplicateSclName(type, name);
+        verify(compasSclDataService).hasDuplicateSclName(TENANT, type, name);
         assertFalse(response.xmlPath().getBoolean("DuplicateNameCheckResponse.Duplicate"));
     }
 
