@@ -15,10 +15,8 @@ import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.IHistoryItem;
-import org.lfenergy.compas.scl.data.xml.HistoryItem;
 import org.lfenergy.compas.scl.data.xml.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.Version;
-import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.mockito.Mock;
@@ -42,7 +40,7 @@ class CompasSclDataServiceTest {
     private static final SclFileType SCL_TYPE = SclFileType.SCD;
 
     @Mock
-    private CompasSclDataRepository compasSclDataRepository;
+    private HistorizedSclFileService historizedSclFileService;
 
     private CompasSclDataService compasSclDataService;
 
@@ -51,17 +49,17 @@ class CompasSclDataServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        compasSclDataService = new CompasSclDataService(compasSclDataRepository, converter, processor);
+        compasSclDataService = new CompasSclDataService(converter, processor, historizedSclFileService);
     }
 
     @Test
     void list_WhenCalled_ThenRepositoryIsCalled() {
-        when(compasSclDataRepository.list(SCL_TYPE)).thenReturn(emptyList());
+        when(historizedSclFileService.list(SCL_TYPE)).thenReturn(emptyList());
 
         var result = compasSclDataService.list(SCL_TYPE);
 
         assertNotNull(result);
-        verify(compasSclDataRepository).list(SCL_TYPE);
+        verify(historizedSclFileService).list(SCL_TYPE);
     }
 
     @Test
@@ -72,49 +70,49 @@ class CompasSclDataServiceTest {
         var historyItem = mock(IHistoryItem.class);
         when(historyItem.getId()).thenReturn(id);
         List<IHistoryItem> expectedResult = List.of(historyItem);
-        when(compasSclDataRepository.listVersionsByUUID(SCL_TYPE, uuid)).thenReturn(expectedResult);
+        when(historizedSclFileService.listVersionsByUUID(SCL_TYPE, uuid)).thenReturn(expectedResult);
 
         var result = compasSclDataService.listVersionsByUUID(SCL_TYPE, uuid);
 
         assertNotNull(result);
         assertEquals(expectedResult.size(), result.size());
         assertEquals(historyItem.getId(), result.get(0).getId());
-        verify(compasSclDataRepository).listVersionsByUUID(SCL_TYPE, uuid);
+        verify(historizedSclFileService).listVersionsByUUID(SCL_TYPE, uuid);
     }
 
     @Test
     void listVersionsByUUID_WhenCalledAndRepositoryReturnsEmptyList_ThenExceptionIsThrown() {
         var uuid = UUID.randomUUID();
-        when(compasSclDataRepository.listVersionsByUUID(SCL_TYPE, uuid)).thenReturn(emptyList());
+        when(historizedSclFileService.listVersionsByUUID(SCL_TYPE, uuid)).thenReturn(emptyList());
 
         var exception = assertThrows(CompasNoDataFoundException.class, () -> {
             compasSclDataService.listVersionsByUUID(SCL_TYPE, uuid);
         });
         assertEquals(NO_DATA_FOUND_ERROR_CODE, exception.getErrorCode());
-        verify(compasSclDataRepository).listVersionsByUUID(SCL_TYPE, uuid);
+        verify(historizedSclFileService).listVersionsByUUID(SCL_TYPE, uuid);
     }
 
     @Test
     void findByUUID_WhenCalledWithoutVersion_ThenRepositoryIsCalled() throws IOException {
         var uuid = UUID.randomUUID();
-        when(compasSclDataRepository.findByUUID(SCL_TYPE, uuid)).thenReturn(readSCL("scl_test_file.scd"));
+        when(historizedSclFileService.findByUUID(SCL_TYPE, uuid)).thenReturn(readSCL("scl_test_file.scd"));
 
         var result = compasSclDataService.findByUUID(SCL_TYPE, uuid);
 
         assertNotNull(result);
-        verify(compasSclDataRepository).findByUUID(SCL_TYPE, uuid);
+        verify(historizedSclFileService).findByUUID(SCL_TYPE, uuid);
     }
 
     @Test
     void findByUUID_WhenCalledWithVersion_ThenRepositoryIsCalled() throws IOException {
         var uuid = UUID.randomUUID();
         var version = new Version(1, 0, 0);
-        when(compasSclDataRepository.findByUUID(SCL_TYPE, uuid, version)).thenReturn(readSCL("scl_test_file.scd"));
+        when(historizedSclFileService.findByUUID(SCL_TYPE, uuid, version)).thenReturn(readSCL("scl_test_file.scd"));
 
         var result = compasSclDataService.findByUUID(SCL_TYPE, uuid, version);
 
         assertNotNull(result);
-        verify(compasSclDataRepository).findByUUID(SCL_TYPE, uuid, version);
+        verify(historizedSclFileService).findByUUID(SCL_TYPE, uuid, version);
     }
 
     @Test
@@ -125,16 +123,18 @@ class CompasSclDataServiceTest {
 
         var scl = readSCL("scl_test_file.scd");
 
-        when(compasSclDataRepository.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(false);
-        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
+        when(historizedSclFileService.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(false);
+        doNothing().when(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList())
+        ,eq("SCL created, Some comments"), eq("JUSTSOMENAME.SCD.xml"));
 
         scl = compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
 
         assertNotNull(scl);
         assertCompasExtension(scl, name);
         assertHistoryItem(scl, 2, INITIAL_VERSION, comment);
-        verify(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
-        verify(compasSclDataRepository).hasDuplicateSclName(SCL_TYPE, name);
+        verify(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList())
+                ,eq("SCL created, Some comments"), eq("JUSTSOMENAME.SCD.xml"));
+        verify(historizedSclFileService).hasDuplicateSclName(SCL_TYPE, name);
     }
 
     @Test
@@ -146,16 +146,16 @@ class CompasSclDataServiceTest {
         var scl = readSCL("scl_test_file.scd");
         scl = createCompasPrivate(scl, "JUSTANOTHERNAME");
 
-        when(compasSclDataRepository.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(false);
-        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
+        when(historizedSclFileService.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(false);
+        doNothing().when(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()), eq("SCL created"), eq("JUSTANOTHERNAME"));
 
         scl = compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
 
         assertNotNull(scl);
         assertCompasExtension(scl, name);
         assertHistoryItem(scl, 2, INITIAL_VERSION, comment);
-        verify(compasSclDataRepository).create(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()));
-        verify(compasSclDataRepository).hasDuplicateSclName(SCL_TYPE, name);
+        verify(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()), eq("SCL created"), eq("JUSTANOTHERNAME"));
+        verify(historizedSclFileService).hasDuplicateSclName(SCL_TYPE, name);
     }
 
     @Test
@@ -166,12 +166,12 @@ class CompasSclDataServiceTest {
 
         var scl = readSCL("scl_test_file.scd");
 
-        when(compasSclDataRepository.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(true);
+        when(historizedSclFileService.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(true);
         var exception = assertThrows(CompasException.class, () -> {
             compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
         });
         assertEquals(DUPLICATE_SCL_NAME_ERROR_CODE, exception.getErrorCode());
-        verify(compasSclDataRepository).hasDuplicateSclName(SCL_TYPE, name);
+        verify(historizedSclFileService).hasDuplicateSclName(SCL_TYPE, name);
     }
 
     @Test
@@ -199,17 +199,18 @@ class CompasSclDataServiceTest {
         var scl = readSCL("scl_test_file.scd");
 
         var sclMetaInfo = new SclMetaInfo(uuid.toString(), previousName, INITIAL_VERSION.toString());
-        when(compasSclDataRepository.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
-        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
+        when(historizedSclFileService.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
+        doNothing().when(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()),
+        eq("SCL updated"), eq("Previous SCL Filename"));
 
         scl = compasSclDataService.update(SCL_TYPE, uuid, changeSet, who, null, scl);
 
         assertNotNull(scl);
         assertCompasExtension(scl, previousName);
         assertHistoryItem(scl, 4, nextVersion, null);
-        verify(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
-        verify(compasSclDataRepository).findMetaInfoByUUID(SCL_TYPE, uuid);
-        verify(compasSclDataRepository, never()).hasDuplicateSclName(SCL_TYPE, previousName);
+        verify(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()), eq("SCL updated"), eq("Previous SCL Filename"));
+        verify(historizedSclFileService).findMetaInfoByUUID(SCL_TYPE, uuid);
+        verify(historizedSclFileService, never()).hasDuplicateSclName(SCL_TYPE, previousName);
     }
 
     @Test
@@ -225,18 +226,20 @@ class CompasSclDataServiceTest {
         scl = createCompasPrivate(scl, newName);
 
         var sclMetaInfo = new SclMetaInfo(uuid.toString(), previousName, INITIAL_VERSION.toString());
-        when(compasSclDataRepository.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
-        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(newName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
-        when(compasSclDataRepository.hasDuplicateSclName(SCL_TYPE, newName)).thenReturn(false);
+        when(historizedSclFileService.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
+        doNothing().when(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), eq(uuid), eq(newName), anyString(), eq(nextVersion), eq(who), eq(emptyList()),
+                eq("SCL updated"), eq( "New SCL Filename"));
+        when(historizedSclFileService.hasDuplicateSclName(SCL_TYPE, newName)).thenReturn(false);
 
         scl = compasSclDataService.update(SCL_TYPE, uuid, changeSet, who, null, scl);
 
         assertNotNull(scl);
         assertCompasExtension(scl, newName);
         assertHistoryItem(scl, 4, nextVersion, null);
-        verify(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(newName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
-        verify(compasSclDataRepository).findMetaInfoByUUID(SCL_TYPE, uuid);
-        verify(compasSclDataRepository).hasDuplicateSclName(SCL_TYPE, newName);
+        verify(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), eq(uuid), eq(newName), anyString(), eq(nextVersion), eq(who), eq(emptyList()),
+                eq("SCL updated"), eq( "New SCL Filename"));
+        verify(historizedSclFileService).findMetaInfoByUUID(SCL_TYPE, uuid);
+        verify(historizedSclFileService).hasDuplicateSclName(SCL_TYPE, newName);
     }
 
     @Test
@@ -250,15 +253,15 @@ class CompasSclDataServiceTest {
         var scl = createCompasPrivate(readSCL("scl_test_file.scd"), newName);
 
         var sclMetaInfo = new SclMetaInfo(uuid.toString(), previousName, INITIAL_VERSION.toString());
-        when(compasSclDataRepository.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
-        when(compasSclDataRepository.hasDuplicateSclName(SCL_TYPE, newName)).thenReturn(true);
+        when(historizedSclFileService.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
+        when(historizedSclFileService.hasDuplicateSclName(SCL_TYPE, newName)).thenReturn(true);
 
         var exception = assertThrows(CompasException.class, () -> {
             compasSclDataService.update(SCL_TYPE, uuid, changeSet, who, null, scl);
         });
         assertEquals(DUPLICATE_SCL_NAME_ERROR_CODE, exception.getErrorCode());
-        verify(compasSclDataRepository).findMetaInfoByUUID(SCL_TYPE, uuid);
-        verify(compasSclDataRepository).hasDuplicateSclName(SCL_TYPE, newName);
+        verify(historizedSclFileService).findMetaInfoByUUID(SCL_TYPE, uuid);
+        verify(historizedSclFileService).hasDuplicateSclName(SCL_TYPE, newName);
     }
 
     @Test
@@ -273,17 +276,17 @@ class CompasSclDataServiceTest {
         scl = createCompasPrivate(scl, previousName);
 
         var sclMetaInfo = new SclMetaInfo(uuid.toString(), previousName, INITIAL_VERSION.toString());
-        when(compasSclDataRepository.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
-        doNothing().when(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
+        when(historizedSclFileService.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
+        doNothing().when(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()), eq("SCL updated"), eq("Previous SCL Filename"));
 
         scl = compasSclDataService.update(SCL_TYPE, uuid, changeSet, who, null, scl);
 
         assertNotNull(scl);
         assertCompasExtension(scl, previousName);
         assertHistoryItem(scl, 4, nextVersion, null);
-        verify(compasSclDataRepository).create(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()));
-        verify(compasSclDataRepository).findMetaInfoByUUID(SCL_TYPE, uuid);
-        verify(compasSclDataRepository, never()).hasDuplicateSclName(SCL_TYPE, previousName);
+        verify(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()), eq("SCL updated"), eq("Previous SCL Filename"));
+        verify(historizedSclFileService).findMetaInfoByUUID(SCL_TYPE, uuid);
+        verify(historizedSclFileService, never()).hasDuplicateSclName(SCL_TYPE, previousName);
     }
 
     @Test
@@ -304,11 +307,11 @@ class CompasSclDataServiceTest {
     void delete_WhenCalledWithoutVersion_ThenRepositoryIsCalled() {
         var uuid = UUID.randomUUID();
 
-        doNothing().when(compasSclDataRepository).delete(SCL_TYPE, uuid);
+        doNothing().when(historizedSclFileService).delete(SCL_TYPE, uuid);
 
         compasSclDataService.delete(SCL_TYPE, uuid);
 
-        verify(compasSclDataRepository).delete(SCL_TYPE, uuid);
+        verify(historizedSclFileService).delete(SCL_TYPE, uuid);
     }
 
     @Test
@@ -316,11 +319,11 @@ class CompasSclDataServiceTest {
         var uuid = UUID.randomUUID();
         var version = new Version(1, 0, 0);
 
-        doNothing().when(compasSclDataRepository).delete(SCL_TYPE, uuid, version);
+        doNothing().when(historizedSclFileService).delete(SCL_TYPE, uuid, version);
 
         compasSclDataService.delete(SCL_TYPE, uuid, version);
 
-        verify(compasSclDataRepository).delete(SCL_TYPE, uuid, version);
+        verify(historizedSclFileService).delete(SCL_TYPE, uuid, version);
     }
 
     @Test

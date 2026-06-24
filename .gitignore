@@ -67,6 +67,7 @@ build
 
 # Quarkus specific
 quarkus.log
+jacoco.exec
 
 # OpenAPI generator specific
 api/.openapi-generator/
