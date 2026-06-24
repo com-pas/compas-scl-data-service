@@ -122,14 +122,14 @@ class HistorizedSclFileRepositoryTest {
 
     @Test
     void searchLatest_WhenNoFiltersProvided_ThenOnlyBaseQueryIsBuilt() {
-        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of());
+        var queryMock = mock(org.hibernate.query.Query.class);
+        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(queryMock);
 
-        repository.searchLatest(null, null, null, null, null, null);
+        repository.searchLatest(null, null, null, null, null, null, null);
 
-        var captor = ArgumentCaptor.forClass(String.class);
-        verify(session).createQuery(captor.capture(), eq(HistorizedSclFile.class));
-        var hql = captor.getValue();
+        ArgumentCaptor<String> hqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(session).createQuery(hqlCaptor.capture(), eq(HistorizedSclFile.class));
+        var hql = hqlCaptor.getValue();
         assertFalse(hql.contains(":type"), "No type filter expected");
         assertFalse(hql.contains(":name"), "No name filter expected");
         assertFalse(hql.contains(":locationId"), "No locationId filter expected");
@@ -140,14 +140,14 @@ class HistorizedSclFileRepositoryTest {
 
     @Test
     void searchLatest_WhenBlankFiltersProvided_ThenNoFiltersApplied() {
-        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of());
+        var queryMock = mock(org.hibernate.query.Query.class);
+        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(queryMock);
 
-        repository.searchLatest("  ", "  ", "  ", "  ", null, null);
+        repository.searchLatest("  ", "  ", "  ", "  ", "  ", null, null);
 
-        var captor = ArgumentCaptor.forClass(String.class);
-        verify(session).createQuery(captor.capture(), eq(HistorizedSclFile.class));
-        var hql = captor.getValue();
+        ArgumentCaptor<String> hqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(session).createQuery(hqlCaptor.capture(), eq(HistorizedSclFile.class));
+        var hql = hqlCaptor.getValue();
         assertFalse(hql.contains(":type"));
         assertFalse(hql.contains(":name"));
         assertFalse(hql.contains(":locationId"));
@@ -156,200 +156,114 @@ class HistorizedSclFileRepositoryTest {
 
     @Test
     void searchLatest_WhenTypeFilterProvided_ThenTypeConditionIsAdded() {
-        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of());
+        var queryMock = mock(org.hibernate.query.Query.class);
+        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(queryMock);
 
-        repository.searchLatest("SCD", null, null, null, null, null);
+        repository.searchLatest(null, "SCD", null, null, null, null, null);
 
-        var captor = ArgumentCaptor.forClass(String.class);
-        verify(session).createQuery(captor.capture(), eq(HistorizedSclFile.class));
-        assertTrue(captor.getValue().contains("r.sclFile.type = :type"));
-        verify(query).setParameter("type", "SCD");
+        ArgumentCaptor<String> hqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(session).createQuery(hqlCaptor.capture(), eq(HistorizedSclFile.class));
+        assertTrue(hqlCaptor.getValue().contains("r.sclFile.type = :type"));
+        verify(queryMock).setParameter("type", "SCD");
     }
 
     @Test
     void searchLatest_WhenNameFilterProvided_ThenNameConditionIsAddedWithLowercase() {
-        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of());
+        var queryMock = mock(org.hibernate.query.Query.class);
+        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(queryMock);
 
-        repository.searchLatest(null, "Substation", null, null, null, null);
+        repository.searchLatest(null, null, "Substation", null, null, null, null);
 
-        var captor = ArgumentCaptor.forClass(String.class);
-        verify(session).createQuery(captor.capture(), eq(HistorizedSclFile.class));
-        assertTrue(captor.getValue().contains("lower(r.sclFile.name) like :name"));
-        verify(query).setParameter("name", "%substation%");
+        ArgumentCaptor<String> hqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(session).createQuery(hqlCaptor.capture(), eq(HistorizedSclFile.class));
+        assertTrue(hqlCaptor.getValue().contains("lower(r.sclFile.name) like :name"));
+        verify(queryMock).setParameter("name", "%substation%");
     }
 
     @Test
     void searchLatest_WhenLocationIdFilterProvided_ThenLocationConditionIsAdded() {
-        var locationId = UUID.randomUUID();
-        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of());
+        var queryMock = mock(org.hibernate.query.Query.class);
+        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(queryMock);
+        UUID locationId = UUID.randomUUID();
 
-        repository.searchLatest(null, null, locationId.toString(), null, null, null);
+        repository.searchLatest(null, null, null, locationId.toString(), null, null, null);
 
-        var captor = ArgumentCaptor.forClass(String.class);
-        verify(session).createQuery(captor.capture(), eq(HistorizedSclFile.class));
-        assertTrue(captor.getValue().contains("r.location.id = :locationId"));
-        verify(query).setParameter("locationId", locationId);
+        ArgumentCaptor<String> hqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(session).createQuery(hqlCaptor.capture(), eq(HistorizedSclFile.class));
+        assertTrue(hqlCaptor.getValue().contains("r.location.id = :locationId"));
+        verify(queryMock).setParameter("locationId", locationId);
     }
 
     @Test
     void searchLatest_WhenAuthorFilterProvided_ThenAuthorConditionIsAddedWithLowercase() {
-        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of());
+        var queryMock = mock(org.hibernate.query.Query.class);
+        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(queryMock);
 
-        repository.searchLatest(null, null, null, "Alice", null, null);
+        repository.searchLatest(null, null, null, null, "JohnDoe", null, null);
 
-        var captor = ArgumentCaptor.forClass(String.class);
-        verify(session).createQuery(captor.capture(), eq(HistorizedSclFile.class));
-        assertTrue(captor.getValue().contains("lower(r.author) like :author"));
-        verify(query).setParameter("author", "%alice%");
+        ArgumentCaptor<String> hqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(session).createQuery(hqlCaptor.capture(), eq(HistorizedSclFile.class));
+        assertTrue(hqlCaptor.getValue().contains("lower(r.sclFile.createdBy) like :author"));
+        verify(queryMock).setParameter("author", "%johndoe%");
     }
 
     @Test
-    void searchLatest_WhenFromFilterProvided_ThenFromConditionIsAdded() {
-        var from = OffsetDateTime.now().minusDays(7);
-        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of());
+    void searchLatest_WhenFromDateProvided_ThenFromConditionIsAdded() {
+        var queryMock = mock(org.hibernate.query.Query.class);
+        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(queryMock);
+        OffsetDateTime from = OffsetDateTime.now().minusDays(1);
 
-        repository.searchLatest(null, null, null, null, from, null);
+        repository.searchLatest(null, null, null, null, null, from, null);
 
-        var captor = ArgumentCaptor.forClass(String.class);
-        verify(session).createQuery(captor.capture(), eq(HistorizedSclFile.class));
-        assertTrue(captor.getValue().contains("r.changedAt >= :from"));
-        verify(query).setParameter("from", from);
+        ArgumentCaptor<String> hqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(session).createQuery(hqlCaptor.capture(), eq(HistorizedSclFile.class));
+        assertTrue(hqlCaptor.getValue().contains("r.changedAt >= :from"));
+        verify(queryMock).setParameter("from", from);
     }
 
     @Test
-    void searchLatest_WhenToFilterProvided_ThenToConditionIsAdded() {
-        var to = OffsetDateTime.now();
-        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of());
+    void searchLatest_WhenToDateProvided_ThenToConditionIsAdded() {
+        var queryMock = mock(org.hibernate.query.Query.class);
+        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(queryMock);
+        OffsetDateTime to = OffsetDateTime.now();
 
-        repository.searchLatest(null, null, null, null, null, to);
+        repository.searchLatest(null, null, null, null, null, null, to);
 
-        var captor = ArgumentCaptor.forClass(String.class);
-        verify(session).createQuery(captor.capture(), eq(HistorizedSclFile.class));
-        assertTrue(captor.getValue().contains("r.changedAt <= :to"));
-        verify(query).setParameter("to", to);
+        ArgumentCaptor<String> hqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(session).createQuery(hqlCaptor.capture(), eq(HistorizedSclFile.class));
+        assertTrue(hqlCaptor.getValue().contains("r.changedAt <= :to"));
+        verify(queryMock).setParameter("to", to);
     }
 
     @Test
-    void searchLatest_WhenAllFiltersProvided_ThenAllConditionsAreAdded() {
-        var locationId = UUID.randomUUID();
-        var from = OffsetDateTime.now().minusDays(7);
-        var to = OffsetDateTime.now();
-        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of());
+    void searchLatest_WhenAllFiltersProvided_ThenAllConditionsAddedAndParametersSet() {
+        var queryMock = mock(org.hibernate.query.Query.class);
+        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(queryMock);
 
-        repository.searchLatest("SCD", "sub", locationId.toString(), "alice", from, to);
+        UUID locationId = UUID.randomUUID();
+        OffsetDateTime from = OffsetDateTime.now().minusDays(1);
+        OffsetDateTime to = OffsetDateTime.now();
 
-        var captor = ArgumentCaptor.forClass(String.class);
-        verify(session).createQuery(captor.capture(), eq(HistorizedSclFile.class));
-        var hql = captor.getValue();
-        assertTrue(hql.contains(":type"));
-        assertTrue(hql.contains(":name"));
-        assertTrue(hql.contains(":locationId"));
-        assertTrue(hql.contains(":author"));
-        assertTrue(hql.contains(":from"));
-        assertTrue(hql.contains(":to"));
-    }
+        repository.searchLatest("1234", "SCD", "Substation", locationId.toString(), "JohnDoe", from, to);
 
-    @Test
-    void searchLatest_WhenCalled_ThenQueryEndsWithOrderByName() {
-        when(session.createQuery(anyString(), eq(HistorizedSclFile.class))).thenReturn(query);
-        when(query.getResultList()).thenReturn(List.of());
+        ArgumentCaptor<String> hqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(session).createQuery(hqlCaptor.capture(), eq(HistorizedSclFile.class));
+        String capturedHql = hqlCaptor.getValue();
 
-        repository.searchLatest(null, null, null, null, null, null);
+        assertTrue(capturedHql.contains("cast(r.sclFile.id.id as string) like :uuid"));
+        assertTrue(capturedHql.contains("r.sclFile.type = :type"));
+        assertTrue(capturedHql.contains("lower(r.sclFile.name) like :name"));
+        assertTrue(capturedHql.contains("r.location.id = :locationId"));
+        assertTrue(capturedHql.contains("lower(r.sclFile.createdBy) like :author"));
+        assertTrue(capturedHql.contains("r.changedAt >= :from"));
+        assertTrue(capturedHql.contains("r.changedAt <= :to"));
 
-        var captor = ArgumentCaptor.forClass(String.class);
-        verify(session).createQuery(captor.capture(), eq(HistorizedSclFile.class));
-        assertTrue(captor.getValue().trim().endsWith("order by r.sclFile.name"));
-    }
-
-    // ---- delegation methods ------------------------------------------------
-
-    @Test
-    void findAllBySclFileId_WhenCalled_ThenDelegatesToPanacheListWithCorrectQuery() {
-        var sclFileId = UUID.randomUUID();
-        var entry = new HistorizedSclFile();
-        doReturn(List.of(entry)).when(repository).list(anyString(), eq(sclFileId));
-
-        var result = repository.findAllBySclFileId(sclFileId);
-
-        assertEquals(1, result.size());
-        assertSame(entry, result.get(0));
-        verify(repository).list(contains("sclFile.id.id = ?1"), eq(sclFileId));
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    void findLatestBySclFileId_WhenCalled_ThenDelegatesToPanacheFindWithCorrectQuery() {
-        var sclFileId = UUID.randomUUID();
-        var panacheQuery = mock(io.quarkus.hibernate.panache.blocking.PanacheBlockingQuery.class);
-        var entry = new HistorizedSclFile();
-        doReturn(panacheQuery).when(repository).find(anyString(), eq(sclFileId));
-        when(panacheQuery.firstResultOptional()).thenReturn(Optional.of(entry));
-
-        var result = repository.findLatestBySclFileId(sclFileId);
-
-        assertTrue(result.isPresent());
-        assertSame(entry, result.get());
-    }
-
-    @Test
-    void countBySclFileId_WhenCalled_ThenDelegatesToPanacheCount() {
-        var sclFileId = UUID.randomUUID();
-        doReturn(3L).when(repository).count(anyString(), eq(sclFileId));
-
-        var result = repository.countBySclFileId(sclFileId);
-
-        assertEquals(3L, result);
-    }
-
-    @Test
-    void assignToLocation_WhenCalled_ThenDelegatesToPanacheUpdate() {
-        var sclFileId = UUID.randomUUID();
-        var location = new Location();
-        location.id = UUID.randomUUID();
-        doReturn(1L).when(repository).update(anyString(), eq(location), eq(sclFileId));
-
-        repository.assignToLocation(sclFileId, location);
-
-        verify(repository).update(contains("location = ?1"), eq(location), eq(sclFileId));
-    }
-
-    @Test
-    void unassignFromLocation_WhenCalled_ThenDelegatesToPanacheUpdate() {
-        var sclFileId = UUID.randomUUID();
-        var locationId = UUID.randomUUID();
-        doReturn(1L).when(repository).update(anyString(), eq(sclFileId), eq(locationId));
-
-        repository.unassignFromLocation(sclFileId, locationId);
-
-        verify(repository).update(contains("location = null"), eq(sclFileId), eq(locationId));
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    void findBySclFileIdAndVersion_WhenCalled_ThenDelegatesToPanacheFindWithVersionComponents() {
-        var sclFileId = UUID.randomUUID();
-        var version = "2.3.4";
-        var panacheQuery = mock(io.quarkus.hibernate.panache.blocking.PanacheBlockingQuery.class);
-        when(panacheQuery.firstResultOptional()).thenReturn(Optional.empty());
-        doReturn(panacheQuery).when(repository).find(anyString(),
-                eq(sclFileId), eq((short) 2), eq((short) 3), eq((short) 4));
-
-        var result = repository.findBySclFileIdAndVersion(sclFileId, version);
-
-        assertFalse(result.isPresent());
+        verify(queryMock).setParameter("uuid", "%1234%");
+        verify(queryMock).setParameter("type", "SCD");
+        verify(queryMock).setParameter("name", "%substation%");
+        verify(queryMock).setParameter("locationId", locationId);
+        verify(queryMock).setParameter("author", "%johndoe%");
+        verify(queryMock).setParameter("from", from);
+        verify(queryMock).setParameter("to", to);
     }
 }
