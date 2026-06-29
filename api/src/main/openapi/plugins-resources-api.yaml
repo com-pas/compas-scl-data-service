@@ -515,7 +515,7 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             code: "NOT_FOUND"
-            message: "No resource found for plugin 'engineering_wizard', type 'processes', name 'default-process'"
+            message: "No resource found for plugin 'engineering_wizard', type 'processes'"
 
     Conflict:
       description: Conflict — a resource with this name and version already exists.
