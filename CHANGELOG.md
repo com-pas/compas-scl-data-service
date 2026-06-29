@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.18.2](https://github.com/com-pas/compas-scl-data-service/compare/v0.18.1...v0.18.2) (2026-06-29)
+
+
+### Bug Fixes
+
+* update Docker image name to include postgresql in signing step ([fcdc5c9](https://github.com/com-pas/compas-scl-data-service/commit/fcdc5c94d84272ec1e2ee070436cd4c66bfb483f))
+* update Docker image name to include postgresql in signing step ([04921c7](https://github.com/com-pas/compas-scl-data-service/commit/04921c78e2355f825081c86c93b0061c76d67b6b))
+
 ## [0.18.1](https://github.com/com-pas/compas-scl-data-service/compare/v0.18.0...v0.18.1) (2026-05-12)
 
 
