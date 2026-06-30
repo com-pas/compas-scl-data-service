@@ -155,4 +155,12 @@ class CompasPluginsResourceTest {
 
         org.mockito.Mockito.verify(service).deleteByTypeAndName("test-plugin_xml", "test");
     }
+
+    @Test
+    void deletePluginResourcesByType_WhenPluginOrTypeContainsUnderscore_ThenThrowsCompasInvalidInputException() {
+        assertThrows(CompasInvalidInputException.class,
+                () -> resource.deletePluginResourcesByType("test_plugin", "xml"));
+        assertThrows(CompasInvalidInputException.class,
+                () -> resource.deletePluginResourcesByType("test-plugin", "xml_type"));
+    }
 }

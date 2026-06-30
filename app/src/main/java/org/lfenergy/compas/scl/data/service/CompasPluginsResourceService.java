@@ -326,6 +326,8 @@ public class CompasPluginsResourceService {
     private QualifiedType splitQualifiedType(String qualifiedType) {
         int separatorIndex = qualifiedType.lastIndexOf('_');
         if (separatorIndex <= 0 || separatorIndex == qualifiedType.length() - 1) {
+            // Legacy or malformed values are surfaced as-is for both plugin and type
+            // so administrators can still discover and clean them up.
             return new QualifiedType(qualifiedType, qualifiedType);
         }
 

@@ -158,6 +158,12 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
     }
 
     private String toQualifiedType(String plugin, String type) {
+        if (plugin == null || plugin.isBlank() || type == null || type.isBlank()) {
+            throw new CompasInvalidInputException("Plugin and type must be provided");
+        }
+        if (plugin.contains("_") || type.contains("_")) {
+            throw new CompasInvalidInputException("Plugin and type must not contain '_'");
+        }
         return plugin + "_" + type;
     }
 }

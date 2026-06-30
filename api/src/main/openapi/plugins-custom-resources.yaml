@@ -258,6 +258,7 @@ components:
       name: plugin
       in: path
       required: true
+      description: Plugin identifier. Must not contain underscores because `_` is reserved for internal type composition.
       schema:
         type: string
       example: engineering-wizard
@@ -265,6 +266,7 @@ components:
       name: type
       in: path
       required: true
+      description: Resource type. Must not contain underscores because `_` is reserved for internal type composition.
       schema:
         type: string
       example: process
