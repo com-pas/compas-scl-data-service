@@ -14,7 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,16 +33,19 @@ class CompasPluginsResourceTest {
     CompasPluginsResource resource;
 
     @Test
-    void getAllData_WhenSizeIsZero_ThenTotalPagesIsZero() {
-        when(service.list(eq("xml"), isNull(), isNull(), isNull(), eq(0), eq(0)))
-                .thenReturn(List.of());
-        when(service.count(eq("xml"), isNull(), isNull(), isNull()))
-                .thenReturn(5L);
+    void getPluginsWithTypes_WhenCalled_ThenMapsServiceResponse() {
+        Map<String, List<String>> pluginsWithTypes = new LinkedHashMap<>();
+        pluginsWithTypes.put("engineering-wizard", List.of("config", "process"));
+        pluginsWithTypes.put("switching", List.of("report"));
+        when(service.listPluginsWithTypes()).thenReturn(pluginsWithTypes);
 
-        var response = resource.getAllData("xml", null, null, null, 0, 0);
+        var response = resource.getPluginsWithTypes();
 
-        assertEquals(0, response.getTotalPages());
-        assertEquals(5, response.getTotalElements());
+        assertEquals(2, response.size());
+        assertEquals("engineering-wizard", response.get(0).getPlugin());
+        assertEquals(List.of("config", "process"), response.get(0).getTypes());
+        assertEquals("switching", response.get(1).getPlugin());
+        assertEquals(List.of("report"), response.get(1).getTypes());
     }
 
     @Test
@@ -49,15 +54,15 @@ class CompasPluginsResourceTest {
         when(inputStream.readAllBytes()).thenThrow(new IOException("read failed"));
 
         assertThrows(CompasInvalidInputException.class, () ->
-                resource.uploadData("xml", "name", "application/xml", inputStream,
+                resource.createPluginResource("test-plugin", "xml", "name", "application/xml", inputStream,
                         "1.0.0", "desc", "1.0.0", "MAJOR"));
     }
 
     @Test
-    void getDataById_WhenUploadedAtIsNull_ThenResponseUploadedAtIsNull() {
+    void getPluginResourceById_WhenUploadedAtIsNull_ThenResponseUploadedAtIsNull() {
         var entity = new PluginsCustomResource();
         entity.id = UUID.randomUUID();
-        entity.type = "xml";
+        entity.type = "test-plugin_xml";
         entity.tenant = "default";
         entity.name = "test";
         entity.contentType = "application/xml";
@@ -66,18 +71,19 @@ class CompasPluginsResourceTest {
         entity.dataCompatibilityVersion = "1.0.0";
         entity.uploadedAt = null;
 
-        when(service.findById(eq(entity.id))).thenReturn(entity);
+        when(service.findByIdAndType(eq(entity.id), eq(entity.type))).thenReturn(entity);
 
-        var response = resource.getDataById(entity.id);
+        var response = resource.getPluginResourceById("test-plugin", "xml", entity.id);
 
         assertNull(response.getUploadedAt());
+        assertEquals("xml", response.getType());
     }
 
     @Test
-    void getLatestDataByType_WhenUploadedAtIsNull_ThenResponseUploadedAtIsNull() {
+    void getLatestPluginResourcesByType_WhenUploadedAtIsNull_ThenResponseUploadedAtIsNull() {
         var entity = new PluginsCustomResource();
         entity.id = UUID.randomUUID();
-        entity.type = "xml";
+        entity.type = "test-plugin_xml";
         entity.tenant = "default";
         entity.name = "test";
         entity.contentType = "application/xml";
@@ -88,24 +94,25 @@ class CompasPluginsResourceTest {
 
         when(service.findLatestByType(eq(entity.type))).thenReturn(List.of(entity));
 
-        var response = resource.getLatestDataByType(entity.type);
+        var response = resource.getLatestPluginResourcesByType("test-plugin", "xml");
 
         assertEquals(1, response.size());
         assertNull(response.get(0).getUploadedAt());
+        assertEquals("xml", response.get(0).getType());
     }
 
     @Test
-    void deleteDataByType_WhenCalled_ThenDelegatesToService() {
-        resource.deleteDataByType("xml");
+    void deletePluginResourcesByType_WhenCalled_ThenDelegatesToService() {
+        resource.deletePluginResourcesByType("test-plugin", "xml");
 
-        org.mockito.Mockito.verify(service).deleteByType("xml");
+        org.mockito.Mockito.verify(service).deleteByType("test-plugin_xml");
     }
 
     @Test
-    void getLatestDataByTypeAndName_WhenUploadedAtIsNull_ThenResponseUploadedAtIsNull() {
+    void getLatestPluginResourceByName_WhenUploadedAtIsNull_ThenResponseUploadedAtIsNull() {
         var entity = new PluginsCustomResource();
         entity.id = UUID.randomUUID();
-        entity.type = "xml";
+        entity.type = "test-plugin_xml";
         entity.tenant = "default";
         entity.name = "test";
         entity.contentType = "application/xml";
@@ -116,15 +123,36 @@ class CompasPluginsResourceTest {
 
         when(service.findLatestByTypeAndName(eq(entity.type), eq(entity.name))).thenReturn(entity);
 
-        var response = resource.getLatestDataByTypeAndName(entity.type, entity.name);
+        var response = resource.getLatestPluginResourceByName("test-plugin", "xml", entity.name);
 
         assertNull(response.getUploadedAt());
+        assertEquals("xml", response.getType());
     }
 
     @Test
-    void deleteDataByTypeAndName_WhenCalled_ThenDelegatesToService() {
-        resource.deleteDataByTypeAndName("xml", "test");
+    void getPluginResourceVersionsByName_WhenCalled_ThenDelegatesAndMapsType() {
+        var entity = new PluginsCustomResource();
+        entity.id = UUID.randomUUID();
+        entity.type = "test-plugin_xml";
+        entity.tenant = "default";
+        entity.name = "test";
+        entity.contentType = "application/xml";
+        entity.content = "<root/>";
+        entity.version = "1.0.0";
+        entity.dataCompatibilityVersion = "1.0.0";
 
-        org.mockito.Mockito.verify(service).deleteByTypeAndName("xml", "test");
+        when(service.findVersionsByTypeAndName(eq(entity.type), eq(entity.name))).thenReturn(List.of(entity));
+
+        var response = resource.getPluginResourceVersionsByName("test-plugin", "xml", entity.name);
+
+        assertEquals(1, response.size());
+        assertEquals("xml", response.get(0).getType());
+    }
+
+    @Test
+    void deletePluginResourceByName_WhenCalled_ThenDelegatesToService() {
+        resource.deletePluginResourceByName("test-plugin", "xml", "test");
+
+        org.mockito.Mockito.verify(service).deleteByTypeAndName("test-plugin_xml", "test");
     }
 }

@@ -121,6 +121,32 @@ class CompasPluginsResourceServiceTest {
     }
 
     @Test
+    void findByIdAndType_WhenEntityMatchesType_ThenReturnsEntity() {
+        var id = UUID.randomUUID();
+        var resource = createResource();
+        resource.type = "engineering-wizard_process";
+        when(entityManager.find(PluginsCustomResource.class, id)).thenReturn(resource);
+
+        var result = service.findByIdAndType(id, "engineering-wizard_process");
+
+        assertEquals(resource, result);
+    }
+
+    @Test
+    void findByIdAndType_WhenEntityTypeDoesNotMatch_ThenThrowsCompasNoDataFoundException() {
+        var id = UUID.randomUUID();
+        var resource = createResource();
+        resource.type = "engineering-wizard_process";
+        when(entityManager.find(PluginsCustomResource.class, id)).thenReturn(resource);
+
+        var exception = assertThrows(CompasNoDataFoundException.class,
+                () -> service.findByIdAndType(id, "engineering-wizard_config"));
+
+        assertTrue(exception.getMessage().contains(id.toString()));
+        assertTrue(exception.getMessage().contains("engineering-wizard_config"));
+    }
+
+    @Test
     void findLatestByType_WhenEntitiesExist_ThenReturnsLatestPerName() {
         var query = mockTypedQuery(PluginsCustomResource.class);
         var older = createResource();
@@ -180,6 +206,61 @@ class CompasPluginsResourceServiceTest {
 
         assertTrue(exception.getMessage().contains("xml"));
         assertTrue(exception.getMessage().contains("config"));
+    }
+
+    @Test
+    void findVersionsByTypeAndName_WhenEntitiesExist_ThenReturnsVersionsDescending() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        var older = createResource();
+        older.name = "config";
+        older.version = "1.2.3";
+        var newer = createResource();
+        newer.name = "config";
+        newer.version = "1.10.0";
+        when(query.getResultList()).thenReturn(List.of(older, newer));
+
+        var result = service.findVersionsByTypeAndName("xml", "config");
+
+        assertEquals(List.of(newer, older), result);
+        verify(query).setParameter("type", "xml");
+        verify(query).setParameter("name", "config");
+    }
+
+    @Test
+    void findVersionsByTypeAndName_WhenNoEntityExists_ThenThrowsCompasNoDataFoundException() {
+        var query = mockTypedQuery(PluginsCustomResource.class);
+        when(query.getResultList()).thenReturn(List.of());
+
+        var exception = assertThrows(CompasNoDataFoundException.class,
+                () -> service.findVersionsByTypeAndName("xml", "config"));
+
+        assertTrue(exception.getMessage().contains("xml"));
+        assertTrue(exception.getMessage().contains("config"));
+    }
+
+    @Test
+    void listPluginsWithTypes_WhenEntriesExist_ThenGroupsDistinctTypesPerPlugin() {
+        var query = mockTypedQuery(String.class);
+        when(query.getResultList()).thenReturn(List.of(
+                "engineering-wizard_process",
+                "engineering-wizard_config",
+                "switching_report",
+                "engineering-wizard_process"));
+
+        var result = service.listPluginsWithTypes();
+
+        assertEquals(List.of("config", "process"), result.get("engineering-wizard"));
+        assertEquals(List.of("report"), result.get("switching"));
+    }
+
+    @Test
+    void listPluginsWithTypes_WhenLegacyTypeExists_ThenFallsBackToSamePluginAndTypeValue() {
+        var query = mockTypedQuery(String.class);
+        when(query.getResultList()).thenReturn(List.of("xml"));
+
+        var result = service.listPluginsWithTypes();
+
+        assertEquals(List.of("xml"), result.get("xml"));
     }
 
     @Test
