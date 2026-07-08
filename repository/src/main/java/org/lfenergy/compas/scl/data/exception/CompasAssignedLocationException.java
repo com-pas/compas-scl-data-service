@@ -1,0 +1,12 @@
+package org.lfenergy.compas.scl.data.exception;
+
+import org.lfenergy.compas.core.commons.exception.CompasException;
+
+import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.INVALID_INPUT_ERROR_CODE;
+
+public class CompasAssignedLocationException extends CompasException {
+
+    public CompasAssignedLocationException(String message) {
+        super(INVALID_INPUT_ERROR_CODE, message);
+    }
+}
