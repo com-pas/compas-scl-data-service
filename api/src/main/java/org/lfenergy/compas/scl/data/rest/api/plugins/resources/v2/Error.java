@@ -1,18 +1,22 @@
 // SPDX-FileCopyrightText: 2026 BearingPoint GmbH
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.rest.api.plugins.resources;
+package org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2;
 
 import java.util.HashMap;
 import java.util.Map;
 import jakarta.validation.constraints.*;
 import jakarta.validation.Valid;
+
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-
+/**
+ * Standard error response body.
+ **/
 
 @JsonTypeName("Error")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", comments = "Generator version: 7.12.0")
@@ -34,7 +38,7 @@ public class Error   {
   }
 
   /**
-   * Error code
+   * Machine-readable error code.
    **/
   public Error code(String code) {
     this.code = code;
@@ -53,7 +57,7 @@ public class Error   {
   }
 
   /**
-   * Human-readable error message
+   * Human-readable description of the error.
    **/
   public Error message(String message) {
     this.message = message;
@@ -72,7 +76,7 @@ public class Error   {
   }
 
   /**
-   * Additional error details
+   * Optional additional error context.
    **/
   public Error details(Map<String, Object> details) {
     this.details = details;

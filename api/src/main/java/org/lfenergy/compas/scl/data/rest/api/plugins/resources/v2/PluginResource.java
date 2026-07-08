@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2026 BearingPoint GmbH
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.rest.api.plugins.resources;
+package org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2;
 
 import java.util.Date;
 import java.util.UUID;
 import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
 
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,12 +16,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 
 
-@JsonTypeName("DataEntry")
+@JsonTypeName("PluginResource")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", comments = "Generator version: 7.12.0")
-public class DataEntry   {
+public class PluginResource   {
   private UUID id;
   private String type;
-  private String tenant;
   private String name;
   private String description;
   public enum ContentTypeEnum {
@@ -74,35 +74,36 @@ public class DataEntry   {
   private String version;
   private String dataCompatibilityVersion;
   private Date uploadedAt;
+  private String content;
 
-  public DataEntry() {
+  public PluginResource() {
   }
 
   @JsonCreator
-  public DataEntry(
+  public PluginResource(
     @JsonProperty(required = true, value = "id") UUID id,
     @JsonProperty(required = true, value = "type") String type,
-    @JsonProperty(required = true, value = "tenant") String tenant,
     @JsonProperty(required = true, value = "name") String name,
     @JsonProperty(required = true, value = "contentType") ContentTypeEnum contentType,
     @JsonProperty(required = true, value = "version") String version,
     @JsonProperty(required = true, value = "dataCompatibilityVersion") String dataCompatibilityVersion,
-    @JsonProperty(required = true, value = "uploadedAt") Date uploadedAt
+    @JsonProperty(required = true, value = "uploadedAt") Date uploadedAt,
+    @JsonProperty(required = true, value = "content") String content
   ) {
     this.id = id;
     this.type = type;
-    this.tenant = tenant;
     this.name = name;
     this.contentType = contentType;
     this.version = version;
     this.dataCompatibilityVersion = dataCompatibilityVersion;
     this.uploadedAt = uploadedAt;
+    this.content = content;
   }
 
   /**
-   * Unique identifier for the data entry
+   * Unique identifier for this resource version.
    **/
-  public DataEntry id(UUID id) {
+  public PluginResource id(UUID id) {
     this.id = id;
     return this;
   }
@@ -119,9 +120,9 @@ public class DataEntry   {
   }
 
   /**
-   * Type of the data
+   * Combined type identifier in the form &#x60;{plugin}_{type}&#x60;.
    **/
-  public DataEntry type(String type) {
+  public PluginResource type(String type) {
     this.type = type;
     return this;
   }
@@ -138,28 +139,9 @@ public class DataEntry   {
   }
 
   /**
-   * Tenant identifier
+   * Human-readable resource name, unique within a plugin–type combination.
    **/
-  public DataEntry tenant(String tenant) {
-    this.tenant = tenant;
-    return this;
-  }
-
-  
-  @JsonProperty(required = true, value = "tenant")
-  @NotNull public String getTenant() {
-    return tenant;
-  }
-
-  @JsonProperty(required = true, value = "tenant")
-  public void setTenant(String tenant) {
-    this.tenant = tenant;
-  }
-
-  /**
-   * Name of the data file
-   **/
-  public DataEntry name(String name) {
+  public PluginResource name(String name) {
     this.name = name;
     return this;
   }
@@ -176,9 +158,9 @@ public class DataEntry   {
   }
 
   /**
-   * Optional description of the data file
+   * Optional human-readable description of the resource.
    **/
-  public DataEntry description(String description) {
+  public PluginResource description(String description) {
     this.description = description;
     return this;
   }
@@ -195,9 +177,9 @@ public class DataEntry   {
   }
 
   /**
-   * Content type of the file
+   * Media type of the stored resource content.
    **/
-  public DataEntry contentType(ContentTypeEnum contentType) {
+  public PluginResource contentType(ContentTypeEnum contentType) {
     this.contentType = contentType;
     return this;
   }
@@ -214,16 +196,16 @@ public class DataEntry   {
   }
 
   /**
-   * Semantic version of the data file
+   * Semantic version (semver) of this resource version.
    **/
-  public DataEntry version(String version) {
+  public PluginResource version(String version) {
     this.version = version;
     return this;
   }
 
   
   @JsonProperty(required = true, value = "version")
-  @NotNull public String getVersion() {
+  @NotNull  @Pattern(regexp="^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$")public String getVersion() {
     return version;
   }
 
@@ -233,16 +215,16 @@ public class DataEntry   {
   }
 
   /**
-   * Data compatibility version
+   * Data schema compatibility version. Consumers can use this to decide whether they can process the content without migration. 
    **/
-  public DataEntry dataCompatibilityVersion(String dataCompatibilityVersion) {
+  public PluginResource dataCompatibilityVersion(String dataCompatibilityVersion) {
     this.dataCompatibilityVersion = dataCompatibilityVersion;
     return this;
   }
 
   
   @JsonProperty(required = true, value = "dataCompatibilityVersion")
-  @NotNull public String getDataCompatibilityVersion() {
+  @NotNull  @Pattern(regexp="^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$")public String getDataCompatibilityVersion() {
     return dataCompatibilityVersion;
   }
 
@@ -252,9 +234,9 @@ public class DataEntry   {
   }
 
   /**
-   * Timestamp when the data was uploaded
+   * ISO 8601 timestamp when this resource version was stored.
    **/
-  public DataEntry uploadedAt(Date uploadedAt) {
+  public PluginResource uploadedAt(Date uploadedAt) {
     this.uploadedAt = uploadedAt;
     return this;
   }
@@ -270,6 +252,25 @@ public class DataEntry   {
     this.uploadedAt = uploadedAt;
   }
 
+  /**
+   * The resource content encoded as a UTF-8 string. The format (JSON or XML) is indicated by the &#x60;contentType&#x60; field. 
+   **/
+  public PluginResource content(String content) {
+    this.content = content;
+    return this;
+  }
+
+  
+  @JsonProperty(required = true, value = "content")
+  @NotNull public String getContent() {
+    return content;
+  }
+
+  @JsonProperty(required = true, value = "content")
+  public void setContent(String content) {
+    this.content = content;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -279,37 +280,37 @@ public class DataEntry   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    DataEntry dataEntry = (DataEntry) o;
-    return Objects.equals(this.id, dataEntry.id) &&
-        Objects.equals(this.type, dataEntry.type) &&
-        Objects.equals(this.tenant, dataEntry.tenant) &&
-        Objects.equals(this.name, dataEntry.name) &&
-        Objects.equals(this.description, dataEntry.description) &&
-        Objects.equals(this.contentType, dataEntry.contentType) &&
-        Objects.equals(this.version, dataEntry.version) &&
-        Objects.equals(this.dataCompatibilityVersion, dataEntry.dataCompatibilityVersion) &&
-        Objects.equals(this.uploadedAt, dataEntry.uploadedAt);
+    PluginResource pluginResource = (PluginResource) o;
+    return Objects.equals(this.id, pluginResource.id) &&
+        Objects.equals(this.type, pluginResource.type) &&
+        Objects.equals(this.name, pluginResource.name) &&
+        Objects.equals(this.description, pluginResource.description) &&
+        Objects.equals(this.contentType, pluginResource.contentType) &&
+        Objects.equals(this.version, pluginResource.version) &&
+        Objects.equals(this.dataCompatibilityVersion, pluginResource.dataCompatibilityVersion) &&
+        Objects.equals(this.uploadedAt, pluginResource.uploadedAt) &&
+        Objects.equals(this.content, pluginResource.content);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, type, tenant, name, description, contentType, version, dataCompatibilityVersion, uploadedAt);
+    return Objects.hash(id, type, name, description, contentType, version, dataCompatibilityVersion, uploadedAt, content);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class DataEntry {\n");
+    sb.append("class PluginResource {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
-    sb.append("    tenant: ").append(toIndentedString(tenant)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    contentType: ").append(toIndentedString(contentType)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    dataCompatibilityVersion: ").append(toIndentedString(dataCompatibilityVersion)).append("\n");
     sb.append("    uploadedAt: ").append(toIndentedString(uploadedAt)).append("\n");
+    sb.append("    content: ").append(toIndentedString(content)).append("\n");
     sb.append("}");
     return sb.toString();
   }

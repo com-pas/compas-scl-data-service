@@ -17,12 +17,15 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Table(name = "plugins_custom_resource")
-public class PluginsCustomResource extends PanacheEntityBase {
+@Table(name = "plugin_resource")
+public class PluginResource extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     public UUID id;
+
+    @Column(nullable = false)
+    public String plugin;
 
     @Column(nullable = false)
     public String type;
@@ -55,12 +58,22 @@ public class PluginsCustomResource extends PanacheEntityBase {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        PluginsCustomResource that = (PluginsCustomResource) o;
-        return Objects.equals(id, that.id) && Objects.equals(type, that.type) && Objects.equals(tenant, that.tenant) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(contentType, that.contentType) && Objects.equals(content, that.content) && Objects.equals(version, that.version) && Objects.equals(dataCompatibilityVersion, that.dataCompatibilityVersion) && Objects.equals(uploadedAt, that.uploadedAt);
+        PluginResource that = (PluginResource) o;
+        return Objects.equals(id, that.id)
+                && Objects.equals(plugin, that.plugin)
+                && Objects.equals(type, that.type)
+                && Objects.equals(tenant, that.tenant)
+                && Objects.equals(name, that.name)
+                && Objects.equals(description, that.description)
+                && Objects.equals(contentType, that.contentType)
+                && Objects.equals(content, that.content)
+                && Objects.equals(version, that.version)
+                && Objects.equals(dataCompatibilityVersion, that.dataCompatibilityVersion)
+                && Objects.equals(uploadedAt, that.uploadedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, type, tenant, name, description, contentType, content, version, dataCompatibilityVersion, uploadedAt);
+        return Objects.hash(id, plugin, type, tenant, name, description, contentType, content, version, dataCompatibilityVersion, uploadedAt);
     }
 }
