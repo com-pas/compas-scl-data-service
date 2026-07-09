@@ -47,8 +47,8 @@ public class PluginResourcesService {
     public PluginResource findById(String plugin, String type, UUID id) {
         return pluginResourceRepository.findByIdForPluginAndType(plugin, type, id)
                 .orElseThrow(() -> new CompasNoDataFoundException(
-                        String.format("No resource found for plugin '%s', type '%s' and id '%s'",
-                                plugin, type, id)));
+                        String.format("No resource with id '%s' found under plugin '%s' and type '%s'",
+                                id, plugin, type)));
     }
 
     @Transactional(SUPPORTS)
@@ -57,7 +57,7 @@ public class PluginResourcesService {
 
         if (entities.isEmpty()) {
             throw new CompasNoDataFoundException(
-                    String.format("No resources found for plugin '%s' and type '%s'", plugin, type));
+                    String.format("No resources exist for plugin '%s' and type '%s'", plugin, type));
         }
 
         return entities.stream()
@@ -78,15 +78,15 @@ public class PluginResourcesService {
 
         if (entities.isEmpty()) {
             throw new CompasNoDataFoundException(
-                    String.format("No resource found for plugin '%s', type '%s' and name '%s'",
-                            plugin, type, name));
+                    String.format("No resource named '%s' found for plugin '%s' and type '%s'",
+                            name, plugin, type));
         }
 
         return entities.stream()
                 .max(Comparator.comparing(entity -> new Version(entity.version)))
                 .orElseThrow(() -> new CompasNoDataFoundException(
-                        String.format("No resource found for plugin '%s', type '%s' and name '%s'",
-                                plugin, type, name)));
+                        String.format("Unable to resolve the latest version of resource '%s' for plugin '%s' and type '%s'",
+                                name, plugin, type)));
     }
 
     @Transactional(SUPPORTS)
@@ -96,8 +96,8 @@ public class PluginResourcesService {
 
         if (entities.isEmpty()) {
             throw new CompasNoDataFoundException(
-                    String.format("No versions found for plugin '%s', type '%s' and name '%s'",
-                            plugin, type, name));
+                    String.format("No versions available for resource '%s' under plugin '%s' and type '%s'",
+                            name, plugin, type));
         }
 
         return entities.stream()
@@ -110,7 +110,8 @@ public class PluginResourcesService {
         long deletedCount = pluginResourceRepository.deleteAllByPluginAndType(plugin, type);
         if (deletedCount == 0) {
             throw new CompasNoDataFoundException(
-                    String.format("No resources found for plugin '%s' and type '%s'", plugin, type));
+                    String.format("Nothing to delete: no resources match plugin '%s' and type '%s'",
+                            plugin, type));
         }
     }
 
@@ -119,8 +120,8 @@ public class PluginResourcesService {
         long deletedCount = pluginResourceRepository.deleteAllByPluginTypeAndName(plugin, type, name);
         if (deletedCount == 0) {
             throw new CompasNoDataFoundException(
-                    String.format("No resource found for plugin '%s', type '%s' and name '%s'",
-                            plugin, type, name));
+                    String.format("Nothing to delete: no resource '%s' exists under plugin '%s' and type '%s'",
+                            name, plugin, type));
         }
     }
 
