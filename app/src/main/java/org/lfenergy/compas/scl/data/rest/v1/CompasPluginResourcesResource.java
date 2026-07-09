@@ -42,7 +42,7 @@ public class CompasPluginResourcesResource implements PluginsResourcesApi {
                 plugin,
                 type,
                 request.getName(),
-                request.getContentType() != null ? request.getContentType().value() : null,
+                request.getContentType().value(),
                 request.getContent(),
                 request.getDataCompatibilityVersion(),
                 request.getDescription(),

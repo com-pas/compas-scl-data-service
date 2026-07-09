@@ -4,17 +4,12 @@
 package org.lfenergy.compas.scl.data.rest;
 
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.CreatePluginResourceRequest;
-import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.Error;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.PluginResource;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.PluginResourceMeta;
 import java.util.UUID;
 
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Response;
 
-
-import java.io.InputStream;
-import java.util.Map;
 import java.util.List;
 import jakarta.validation.constraints.*;
 import jakarta.validation.Valid;
