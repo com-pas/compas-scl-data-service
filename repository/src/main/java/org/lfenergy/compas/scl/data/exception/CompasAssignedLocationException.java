@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 BearingPoint GmbH
+//
+// SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.exception;
 
 import org.lfenergy.compas.core.commons.exception.CompasException;
