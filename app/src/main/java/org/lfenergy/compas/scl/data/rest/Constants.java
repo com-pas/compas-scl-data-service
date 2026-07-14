@@ -17,4 +17,6 @@ public final class Constants {
     public static final String DELETE_ROLE = "DELETE";
 
     public static final String PLUGINS_RESOURCES = "PLUGINS_RESOURCES";
+
+    public static final String TEST_CHANGE = "TEST_CHANGE";
 }
