@@ -68,7 +68,7 @@ jobs:
     - name: Set Common Sonar Variables
       id: sonar_env
       run: |
-        echo "sonar_opts=-Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=com-pas_compas-scl-auto-alignment -Dsonar.organization=com-pas" >> "$GITHUB_OUTPUT"
+        echo "sonar_opts=-Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=com-pas_compas-scl-data-service -Dsonar.organization=com-pas" >> "$GITHUB_OUTPUT"
     - name: Create custom Maven Settings.xml
       uses: whelk-io/maven-settings-xml-action@9dc09b23833fa9aa7f27b63db287951856f3433d # v22
       with:
