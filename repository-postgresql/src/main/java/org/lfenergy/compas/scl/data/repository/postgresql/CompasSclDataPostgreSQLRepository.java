@@ -367,4 +367,36 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         }
         return labelsList;
     }
+
+    private void repetitiveExample() {
+        var str = "";
+        str += "Hello";
+        str += "World";
+
+        str = "Hello" + "World";
+    }
+
+    private void repetitiveExample2() {
+        var str = "";
+        str += "Hello";
+        str += "World";
+
+        str = "Hello" + "World";
+    }
+
+    private void repetitiveExample3() {
+        var str = "";
+        str += "Hello";
+        str += "World";
+
+        str = "Hello" + "World";
+    }
+
+    private void repetitiveExample4() {
+        var str = "";
+        str += "Hello";
+        str += "World";
+
+        str = "Hello" + "World";
+    }
 }
