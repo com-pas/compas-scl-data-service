@@ -373,11 +373,23 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         str += "Hello";
         str += "World";
 
+        str += "Hello";
+        str += "World";
+
+        str += "Hello";
+        str += "World";
+
         str = "Hello" + "World";
     }
 
     private void repetitiveExample2() {
         var str = "";
+        str += "Hello";
+        str += "World";
+
+        str += "Hello";
+        str += "World";
+
         str += "Hello";
         str += "World";
 
@@ -389,11 +401,23 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         str += "Hello";
         str += "World";
 
+        str += "Hello";
+        str += "World";
+
+        str += "Hello";
+        str += "World";
+
         str = "Hello" + "World";
     }
 
     private void repetitiveExample4() {
         var str = "";
+        str += "Hello";
+        str += "World";
+
+        str += "Hello";
+        str += "World";
+
         str += "Hello";
         str += "World";
 
