@@ -5,7 +5,7 @@ package org.lfenergy.compas.scl.data.repository;
 
 import io.quarkus.hibernate.panache.managed.blocking.PanacheManagedBlockingRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.lfenergy.compas.scl.data.entities.PluginResource;
+import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
 
 import java.util.List;
 import java.util.Optional;

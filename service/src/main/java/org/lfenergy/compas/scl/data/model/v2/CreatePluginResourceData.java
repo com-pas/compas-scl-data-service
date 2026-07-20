@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 BearingPoint GmbH
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.service;
+package org.lfenergy.compas.scl.data.model.v2;
 
 public record CreatePluginResourceData(
         String plugin,

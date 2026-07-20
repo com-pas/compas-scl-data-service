@@ -1,19 +1,19 @@
 // SPDX-FileCopyrightText: 2026 BearingPoint GmbH
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.rest.v1;
+package org.lfenergy.compas.scl.data.rest.v2;
 
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lfenergy.compas.scl.data.entities.PluginResource;
+import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
 import org.lfenergy.compas.scl.data.rest.PluginsResourcesApi;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.CreatePluginResourceRequest;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.PluginResourceMeta;
-import org.lfenergy.compas.scl.data.service.CreatePluginResourceData;
-import org.lfenergy.compas.scl.data.service.PluginResourcesService;
+import org.lfenergy.compas.scl.data.model.v2.CreatePluginResourceData;
+import org.lfenergy.compas.scl.data.service.v2.PluginResourcesService;
 
 import java.time.OffsetDateTime;
 import java.util.Date;

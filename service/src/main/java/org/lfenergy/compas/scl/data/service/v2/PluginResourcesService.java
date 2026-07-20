@@ -1,20 +1,21 @@
 // SPDX-FileCopyrightText: 2026 BearingPoint GmbH
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.service;
+package org.lfenergy.compas.scl.data.service.v2;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lfenergy.compas.scl.data.entities.PluginResource;
+import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
 import org.lfenergy.compas.scl.data.exception.CompasDuplicateVersionException;
 import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.PluginResourceRepository;
+import org.lfenergy.compas.scl.data.model.v2.CreatePluginResourceData;
 
 import java.util.Comparator;
 import java.util.List;

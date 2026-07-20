@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: 2026 BearingPoint GmbH
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.rest.v1;
+package org.lfenergy.compas.scl.data.rest.v2;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.lfenergy.compas.scl.data.entities.PluginResource;
+import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.CreatePluginResourceRequest;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.PluginResourceMeta;
-import org.lfenergy.compas.scl.data.service.CreatePluginResourceData;
-import org.lfenergy.compas.scl.data.service.PluginResourcesService;
+import org.lfenergy.compas.scl.data.model.v2.CreatePluginResourceData;
+import org.lfenergy.compas.scl.data.rest.v2.CompasPluginResourcesResource;
+import org.lfenergy.compas.scl.data.service.v2.PluginResourcesService;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 BearingPoint GmbH
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.entities;
+package org.lfenergy.compas.scl.data.entities.v2;
 
 import io.quarkus.hibernate.panache.PanacheEntityBase;
 import jakarta.persistence.Column;

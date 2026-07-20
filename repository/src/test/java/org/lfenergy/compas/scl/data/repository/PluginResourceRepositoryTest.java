@@ -7,7 +7,7 @@ import io.quarkus.hibernate.panache.blocking.PanacheBlockingQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.lfenergy.compas.scl.data.entities.PluginResource;
+import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
