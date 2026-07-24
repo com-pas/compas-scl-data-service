@@ -5,9 +5,7 @@ package org.lfenergy.compas.scl.data.rest.v1;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.lfenergy.compas.scl.data.exception.CompasAssignedLocationException;
 import org.lfenergy.compas.scl.data.rest.api.locations.Location;
-import org.lfenergy.compas.scl.data.rest.exception.CompasAssignedLocationExceptionHandler;
 import org.lfenergy.compas.scl.data.service.LocationsService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -16,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.UUID;
 
-import static jakarta.ws.rs.core.Response.Status.CONFLICT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
