@@ -6,6 +6,7 @@ package org.lfenergy.compas.scl.data.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.lfenergy.compas.scl.data.exception.CompasAssignedLocationException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.repository.LocationRepository;
@@ -72,8 +73,8 @@ public class LocationsService {
             .orElseThrow(() -> new CompasNoDataFoundException(
                 ERR_MSG_LOCATION_NOT_FOUND + locationId));
         if (entity.assignedResources > 0) {
-            throw new CompasSclDataServiceException(INVALID_INPUT_ERROR_CODE,
-                "Deletion not allowed, location has " + entity.assignedResources + " assigned resources: " + locationId);
+            throw new CompasAssignedLocationException(
+                "Deletion not allowed, location " + locationId + " has " + entity.assignedResources + " assigned resources");
         }
         locationRepository.delete(entity);
     }

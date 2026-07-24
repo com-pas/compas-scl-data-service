@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl.data.entities.Location;
+import org.lfenergy.compas.scl.data.exception.CompasAssignedLocationException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.repository.HistorizedSclFileRepository;
@@ -174,7 +175,7 @@ class LocationsServiceTest {
         var entity = buildEntity(id, "LOC_A", "Location A", "desc", 3);
         when(locationRepository.findByIdOptional(id)).thenReturn(Optional.of(entity));
 
-        assertThrows(CompasSclDataServiceException.class,
+        assertThrows(CompasAssignedLocationException.class,
                 () -> locationsService.deleteLocation(id));
         verify(locationRepository, never()).delete(any());
     }
