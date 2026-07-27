@@ -18,7 +18,7 @@ class PluginResourceTest {
                 .type("engineering_wizard_processes")
                 .name("default-process")
                 .description("DESCRIPTION")
-                .contentType(PluginResource.ContentTypeEnum.APPLICATION_JSON)
+                .contentType(ContentType.APPLICATION_JSON)
                 .version("1.2.3")
                 .dataCompatibilityVersion("1.0.0")
                 .uploadedAt(new Date())
@@ -35,7 +35,7 @@ class PluginResourceTest {
         resource.setType("engineering_wizard_processes");
         resource.setName("default-process");
         resource.setDescription("DESCRIPTION");
-        resource.setContentType(PluginResource.ContentTypeEnum.APPLICATION_XML);
+        resource.setContentType(ContentType.APPLICATION_XML);
         resource.setVersion("1.2.3");
         resource.setDataCompatibilityVersion("1.0.0");
         resource.setUploadedAt(uploadedAt);
@@ -45,7 +45,7 @@ class PluginResourceTest {
         assertEquals("engineering_wizard_processes", resource.getType());
         assertEquals("default-process", resource.getName());
         assertEquals("DESCRIPTION", resource.getDescription());
-        assertEquals(PluginResource.ContentTypeEnum.APPLICATION_XML, resource.getContentType());
+        assertEquals(ContentType.APPLICATION_XML, resource.getContentType());
         assertEquals("1.2.3", resource.getVersion());
         assertEquals("1.0.0", resource.getDataCompatibilityVersion());
         assertEquals(uploadedAt, resource.getUploadedAt());
@@ -62,7 +62,7 @@ class PluginResourceTest {
                 .type("engineering_wizard_processes")
                 .name("default-process")
                 .description("DESCRIPTION")
-                .contentType(PluginResource.ContentTypeEnum.APPLICATION_JSON)
+                .contentType(ContentType.APPLICATION_JSON)
                 .version("1.2.3")
                 .dataCompatibilityVersion("1.0.0")
                 .uploadedAt(uploadedAt)
@@ -72,7 +72,7 @@ class PluginResourceTest {
         assertEquals("engineering_wizard_processes", resource.getType());
         assertEquals("default-process", resource.getName());
         assertEquals("DESCRIPTION", resource.getDescription());
-        assertEquals(PluginResource.ContentTypeEnum.APPLICATION_JSON, resource.getContentType());
+        assertEquals(ContentType.APPLICATION_JSON, resource.getContentType());
         assertEquals("1.2.3", resource.getVersion());
         assertEquals("1.0.0", resource.getDataCompatibilityVersion());
         assertEquals(uploadedAt, resource.getUploadedAt());
@@ -86,13 +86,13 @@ class PluginResourceTest {
 
         PluginResource a = new PluginResource()
                 .id(id).type("T").name("N").description("D")
-                .contentType(PluginResource.ContentTypeEnum.APPLICATION_JSON)
+                .contentType(ContentType.APPLICATION_JSON)
                 .version("1.0.0").dataCompatibilityVersion("1.0.0")
                 .uploadedAt(now).content("{}");
 
         PluginResource b = new PluginResource()
                 .id(id).type("T").name("N").description("D")
-                .contentType(PluginResource.ContentTypeEnum.APPLICATION_JSON)
+                .contentType(ContentType.APPLICATION_JSON)
                 .version("1.0.0").dataCompatibilityVersion("1.0.0")
                 .uploadedAt(now).content("{}");
 
@@ -128,25 +128,5 @@ class PluginResourceTest {
         assertTrue(result.contains("name"));
         assertTrue(result.contains("version"));
         assertTrue(result.contains("content"));
-    }
-
-    @Test
-    void contentTypeEnumShouldRoundTripValues() {
-        assertEquals("application/json",
-                PluginResource.ContentTypeEnum.APPLICATION_JSON.value());
-        assertEquals("application/xml",
-                PluginResource.ContentTypeEnum.APPLICATION_XML.value());
-        assertEquals(PluginResource.ContentTypeEnum.APPLICATION_JSON,
-                PluginResource.ContentTypeEnum.fromValue("application/json"));
-        assertEquals(PluginResource.ContentTypeEnum.APPLICATION_XML,
-                PluginResource.ContentTypeEnum.fromString("application/xml"));
-    }
-
-    @Test
-    void contentTypeEnumFromValueShouldThrowForUnknown() {
-        assertThrows(IllegalArgumentException.class,
-                () -> PluginResource.ContentTypeEnum.fromValue("text/plain"));
-        assertThrows(IllegalArgumentException.class,
-                () -> PluginResource.ContentTypeEnum.fromString("text/plain"));
     }
 }

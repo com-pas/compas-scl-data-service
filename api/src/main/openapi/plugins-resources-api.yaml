@@ -350,6 +350,14 @@ components:
 
   schemas:
 
+    ContentType:
+      type: string
+      description: Media type of a plugin resource's content.
+      enum:
+        - application/json
+        - application/xml
+      example: "application/json"
+
     PluginResourceMeta:
       type: object
       description: Resource version metadata — content is not included.
@@ -380,12 +388,7 @@ components:
           description: Optional human-readable description of the resource.
           example: "Default process definition for the engineering wizard"
         contentType:
-          type: string
-          description: Media type of the stored resource content.
-          enum:
-            - application/json
-            - application/xml
-          example: "application/json"
+          $ref: '#/components/schemas/ContentType'
         version:
           type: string
           pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
@@ -442,12 +445,7 @@ components:
           description: Optional human-readable description of the resource.
           example: "Default process definition for the engineering wizard"
         contentType:
-          type: string
-          description: Media type of the content being uploaded.
-          enum:
-            - application/json
-            - application/xml
-          example: "application/json"
+          $ref: '#/components/schemas/ContentType'
         version:
           type: string
           pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'

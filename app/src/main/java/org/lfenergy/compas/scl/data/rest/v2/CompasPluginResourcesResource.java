@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
 import org.lfenergy.compas.scl.data.rest.PluginsResourcesApi;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.ContentType;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.CreatePluginResourceRequest;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.PluginResourceMeta;
 import org.lfenergy.compas.scl.data.model.v2.CreatePluginResourceData;
@@ -42,7 +43,7 @@ public class CompasPluginResourcesResource implements PluginsResourcesApi {
                 plugin,
                 type,
                 request.getName(),
-                request.getContentType().value(),
+                request.getContentType().toString(),
                 request.getContent(),
                 request.getDataCompatibilityVersion(),
                 request.getDescription(),
@@ -101,7 +102,7 @@ public class CompasPluginResourcesResource implements PluginsResourcesApi {
         meta.setType(entity.type);
         meta.setName(entity.name);
         meta.setDescription(entity.description);
-        meta.setContentType(PluginResourceMeta.ContentTypeEnum.fromString(entity.contentType));
+        meta.setContentType(ContentType.fromString(entity.contentType));
         meta.setVersion(entity.version);
         meta.setDataCompatibilityVersion(entity.dataCompatibilityVersion);
         meta.setUploadedAt(toDate(entity.uploadedAt));
@@ -115,8 +116,7 @@ public class CompasPluginResourcesResource implements PluginsResourcesApi {
         dto.setType(entity.type);
         dto.setName(entity.name);
         dto.setDescription(entity.description);
-        dto.setContentType(org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.PluginResource
-                .ContentTypeEnum.fromString(entity.contentType));
+        dto.setContentType(ContentType.fromString(entity.contentType));
         dto.setVersion(entity.version);
         dto.setDataCompatibilityVersion(entity.dataCompatibilityVersion);
         dto.setUploadedAt(toDate(entity.uploadedAt));

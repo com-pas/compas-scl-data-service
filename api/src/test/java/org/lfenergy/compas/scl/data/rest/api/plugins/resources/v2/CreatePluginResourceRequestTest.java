@@ -13,7 +13,7 @@ class CreatePluginResourceRequestTest {
         return new CreatePluginResourceRequest()
                 .name("default-process")
                 .description("DESCRIPTION")
-                .contentType(CreatePluginResourceRequest.ContentTypeEnum.APPLICATION_JSON)
+                .contentType(ContentType.APPLICATION_JSON)
                 .version("1.2.3")
                 .dataCompatibilityVersion("1.0.0")
                 .content("{\"a\":1}");
@@ -25,7 +25,7 @@ class CreatePluginResourceRequestTest {
 
         request.setName("default-process");
         request.setDescription("DESCRIPTION");
-        request.setContentType(CreatePluginResourceRequest.ContentTypeEnum.APPLICATION_XML);
+        request.setContentType(ContentType.APPLICATION_XML);
         request.setVersion("1.2.3");
         request.setNextVersionType(CreatePluginResourceRequest.NextVersionTypeEnum.MINOR);
         request.setDataCompatibilityVersion("1.0.0");
@@ -33,7 +33,7 @@ class CreatePluginResourceRequestTest {
 
         assertEquals("default-process", request.getName());
         assertEquals("DESCRIPTION", request.getDescription());
-        assertEquals(CreatePluginResourceRequest.ContentTypeEnum.APPLICATION_XML, request.getContentType());
+        assertEquals(ContentType.APPLICATION_XML, request.getContentType());
         assertEquals("1.2.3", request.getVersion());
         assertEquals(CreatePluginResourceRequest.NextVersionTypeEnum.MINOR, request.getNextVersionType());
         assertEquals("1.0.0", request.getDataCompatibilityVersion());
@@ -45,7 +45,7 @@ class CreatePluginResourceRequestTest {
         CreatePluginResourceRequest request = new CreatePluginResourceRequest()
                 .name("default-process")
                 .description("DESCRIPTION")
-                .contentType(CreatePluginResourceRequest.ContentTypeEnum.APPLICATION_JSON)
+                .contentType(ContentType.APPLICATION_JSON)
                 .version("1.2.3")
                 .nextVersionType(CreatePluginResourceRequest.NextVersionTypeEnum.MAJOR)
                 .dataCompatibilityVersion("1.0.0")
@@ -53,7 +53,7 @@ class CreatePluginResourceRequestTest {
 
         assertEquals("default-process", request.getName());
         assertEquals("DESCRIPTION", request.getDescription());
-        assertEquals(CreatePluginResourceRequest.ContentTypeEnum.APPLICATION_JSON, request.getContentType());
+        assertEquals(ContentType.APPLICATION_JSON, request.getContentType());
         assertEquals("1.2.3", request.getVersion());
         assertEquals(CreatePluginResourceRequest.NextVersionTypeEnum.MAJOR, request.getNextVersionType());
         assertEquals("1.0.0", request.getDataCompatibilityVersion());
@@ -64,12 +64,12 @@ class CreatePluginResourceRequestTest {
     void equalsAndHashCodeShouldMatchForSameValues() {
         CreatePluginResourceRequest a = new CreatePluginResourceRequest()
                 .name("N").description("D")
-                .contentType(CreatePluginResourceRequest.ContentTypeEnum.APPLICATION_JSON)
+                .contentType(ContentType.APPLICATION_JSON)
                 .version("1.0.0").dataCompatibilityVersion("1.0.0").content("{}");
 
         CreatePluginResourceRequest b = new CreatePluginResourceRequest()
                 .name("N").description("D")
-                .contentType(CreatePluginResourceRequest.ContentTypeEnum.APPLICATION_JSON)
+                .contentType(ContentType.APPLICATION_JSON)
                 .version("1.0.0").dataCompatibilityVersion("1.0.0").content("{}");
 
         assertEquals(a, b);
@@ -105,24 +105,6 @@ class CreatePluginResourceRequestTest {
         assertTrue(result.contains("version"));
         assertTrue(result.contains("dataCompatibilityVersion"));
         assertTrue(result.contains("content"));
-    }
-
-    @Test
-    void contentTypeEnumShouldRoundTripValues() {
-        assertEquals("application/json",
-                CreatePluginResourceRequest.ContentTypeEnum.APPLICATION_JSON.value());
-        assertEquals("application/xml",
-                CreatePluginResourceRequest.ContentTypeEnum.APPLICATION_XML.value());
-        assertEquals(CreatePluginResourceRequest.ContentTypeEnum.APPLICATION_JSON,
-                CreatePluginResourceRequest.ContentTypeEnum.fromValue("application/json"));
-        assertEquals(CreatePluginResourceRequest.ContentTypeEnum.APPLICATION_XML,
-                CreatePluginResourceRequest.ContentTypeEnum.fromString("application/xml"));
-    }
-
-    @Test
-    void contentTypeEnumFromValueShouldThrowForUnknown() {
-        assertThrows(IllegalArgumentException.class,
-                () -> CreatePluginResourceRequest.ContentTypeEnum.fromValue("text/plain"));
     }
 
     @Test

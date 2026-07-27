@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.ContentType;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.CreatePluginResourceRequest;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.PluginResourceMeta;
 import org.lfenergy.compas.scl.data.model.v2.CreatePluginResourceData;
-import org.lfenergy.compas.scl.data.rest.v2.CompasPluginResourcesResource;
 import org.lfenergy.compas.scl.data.service.v2.PluginResourcesService;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -51,7 +51,7 @@ class CompasPluginResourcesResourceTest {
         var request = new CreatePluginResourceRequest();
         request.setName(NAME);
         request.setDescription("desc");
-        request.setContentType(CreatePluginResourceRequest.ContentTypeEnum.APPLICATION_JSON);
+        request.setContentType(ContentType.APPLICATION_JSON);
         request.setContent("{}");
         request.setVersion("1.2.3");
         request.setDataCompatibilityVersion("1.0.0");
@@ -81,7 +81,7 @@ class CompasPluginResourcesResourceTest {
 
         var request = new CreatePluginResourceRequest();
         request.setName(NAME);
-        request.setContentType(CreatePluginResourceRequest.ContentTypeEnum.APPLICATION_XML);
+        request.setContentType(ContentType.APPLICATION_XML);
         request.setContent("<root/>");
         request.setNextVersionType(CreatePluginResourceRequest.NextVersionTypeEnum.MINOR);
         request.setDataCompatibilityVersion("1.0.0");

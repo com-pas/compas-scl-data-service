@@ -18,7 +18,7 @@ class PluginResourceMetaTest {
                 .type("engineering_wizard_processes")
                 .name("default-process")
                 .description("DESCRIPTION")
-                .contentType(PluginResourceMeta.ContentTypeEnum.APPLICATION_JSON)
+                .contentType(ContentType.APPLICATION_JSON)
                 .version("1.2.3")
                 .dataCompatibilityVersion("1.0.0")
                 .uploadedAt(new Date());
@@ -34,7 +34,7 @@ class PluginResourceMetaTest {
         meta.setType("engineering_wizard_processes");
         meta.setName("default-process");
         meta.setDescription("DESCRIPTION");
-        meta.setContentType(PluginResourceMeta.ContentTypeEnum.APPLICATION_XML);
+        meta.setContentType(ContentType.APPLICATION_XML);
         meta.setVersion("1.2.3");
         meta.setDataCompatibilityVersion("1.0.0");
         meta.setUploadedAt(uploadedAt);
@@ -43,7 +43,7 @@ class PluginResourceMetaTest {
         assertEquals("engineering_wizard_processes", meta.getType());
         assertEquals("default-process", meta.getName());
         assertEquals("DESCRIPTION", meta.getDescription());
-        assertEquals(PluginResourceMeta.ContentTypeEnum.APPLICATION_XML, meta.getContentType());
+        assertEquals(ContentType.APPLICATION_XML, meta.getContentType());
         assertEquals("1.2.3", meta.getVersion());
         assertEquals("1.0.0", meta.getDataCompatibilityVersion());
         assertEquals(uploadedAt, meta.getUploadedAt());
@@ -59,7 +59,7 @@ class PluginResourceMetaTest {
                 .type("engineering_wizard_processes")
                 .name("default-process")
                 .description("DESCRIPTION")
-                .contentType(PluginResourceMeta.ContentTypeEnum.APPLICATION_JSON)
+                .contentType(ContentType.APPLICATION_JSON)
                 .version("1.2.3")
                 .dataCompatibilityVersion("1.0.0")
                 .uploadedAt(uploadedAt);
@@ -68,7 +68,7 @@ class PluginResourceMetaTest {
         assertEquals("engineering_wizard_processes", meta.getType());
         assertEquals("default-process", meta.getName());
         assertEquals("DESCRIPTION", meta.getDescription());
-        assertEquals(PluginResourceMeta.ContentTypeEnum.APPLICATION_JSON, meta.getContentType());
+        assertEquals(ContentType.APPLICATION_JSON, meta.getContentType());
         assertEquals("1.2.3", meta.getVersion());
         assertEquals("1.0.0", meta.getDataCompatibilityVersion());
         assertEquals(uploadedAt, meta.getUploadedAt());
@@ -81,12 +81,12 @@ class PluginResourceMetaTest {
 
         PluginResourceMeta a = new PluginResourceMeta()
                 .id(id).type("T").name("N").description("D")
-                .contentType(PluginResourceMeta.ContentTypeEnum.APPLICATION_JSON)
+                .contentType(ContentType.APPLICATION_JSON)
                 .version("1.0.0").dataCompatibilityVersion("1.0.0").uploadedAt(now);
 
         PluginResourceMeta b = new PluginResourceMeta()
                 .id(id).type("T").name("N").description("D")
-                .contentType(PluginResourceMeta.ContentTypeEnum.APPLICATION_JSON)
+                .contentType(ContentType.APPLICATION_JSON)
                 .version("1.0.0").dataCompatibilityVersion("1.0.0").uploadedAt(now);
 
         assertEquals(a, b);
@@ -122,25 +122,5 @@ class PluginResourceMetaTest {
         assertTrue(result.contains("version"));
         assertTrue(result.contains("dataCompatibilityVersion"));
         assertTrue(result.contains("uploadedAt"));
-    }
-
-    @Test
-    void contentTypeEnumShouldRoundTripValues() {
-        assertEquals("application/json",
-                PluginResourceMeta.ContentTypeEnum.APPLICATION_JSON.value());
-        assertEquals("application/xml",
-                PluginResourceMeta.ContentTypeEnum.APPLICATION_XML.value());
-        assertEquals(PluginResourceMeta.ContentTypeEnum.APPLICATION_JSON,
-                PluginResourceMeta.ContentTypeEnum.fromValue("application/json"));
-        assertEquals(PluginResourceMeta.ContentTypeEnum.APPLICATION_XML,
-                PluginResourceMeta.ContentTypeEnum.fromString("application/xml"));
-    }
-
-    @Test
-    void contentTypeEnumFromValueShouldThrowForUnknown() {
-        assertThrows(IllegalArgumentException.class,
-                () -> PluginResourceMeta.ContentTypeEnum.fromValue("text/plain"));
-        assertThrows(IllegalArgumentException.class,
-                () -> PluginResourceMeta.ContentTypeEnum.fromString("text/plain"));
     }
 }

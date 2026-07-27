@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: 2026 BearingPoint GmbH
-//
-// SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2;
 
 import jakarta.validation.constraints.*;
@@ -20,54 +17,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 public class CreatePluginResourceRequest   {
   private String name;
   private String description;
-  public enum ContentTypeEnum {
-
-    APPLICATION_JSON(String.valueOf("application/json")), APPLICATION_XML(String.valueOf("application/xml"));
-
-
-    private String value;
-
-    ContentTypeEnum (String v) {
-        value = v;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    /**
-     * Convert a String into String, as specified in the
-     * <a href="https://download.oracle.com/otndocs/jcp/jaxrs-2_0-fr-eval-spec/index.html">See JAX RS 2.0 Specification, section 3.2, p. 12</a>
-     */
-    public static ContentTypeEnum fromString(String s) {
-        for (ContentTypeEnum b : ContentTypeEnum.values()) {
-            // using Objects.toString() to be safe if value type non-object type
-            // because types like 'int' etc. will be auto-boxed
-            if (java.util.Objects.toString(b.value).equals(s)) {
-                return b;
-            }
-        }
-        throw new IllegalArgumentException("Unexpected string value '" + s + "'");
-    }
-
-    @JsonCreator
-    public static ContentTypeEnum fromValue(String value) {
-        for (ContentTypeEnum b : ContentTypeEnum.values()) {
-            if (b.value.equals(value)) {
-                return b;
-            }
-        }
-        throw new IllegalArgumentException("Unexpected value '" + value + "'");
-    }
-}
-
-  private ContentTypeEnum contentType;
+  private ContentType contentType;
   private String version;
   public enum NextVersionTypeEnum {
 
@@ -126,7 +76,7 @@ public class CreatePluginResourceRequest   {
   @JsonCreator
   public CreatePluginResourceRequest(
     @JsonProperty(required = true, value = "name") String name,
-    @JsonProperty(required = true, value = "contentType") ContentTypeEnum contentType,
+    @JsonProperty(required = true, value = "contentType") ContentType contentType,
     @JsonProperty(required = true, value = "dataCompatibilityVersion") String dataCompatibilityVersion,
     @JsonProperty(required = true, value = "content") String content
   ) {
@@ -175,21 +125,20 @@ public class CreatePluginResourceRequest   {
   }
 
   /**
-   * Media type of the content being uploaded.
    **/
-  public CreatePluginResourceRequest contentType(ContentTypeEnum contentType) {
+  public CreatePluginResourceRequest contentType(ContentType contentType) {
     this.contentType = contentType;
     return this;
   }
 
   
   @JsonProperty(required = true, value = "contentType")
-  @NotNull public ContentTypeEnum getContentType() {
+  @NotNull public ContentType getContentType() {
     return contentType;
   }
 
   @JsonProperty(required = true, value = "contentType")
-  public void setContentType(ContentTypeEnum contentType) {
+  public void setContentType(ContentType contentType) {
     this.contentType = contentType;
   }
 
