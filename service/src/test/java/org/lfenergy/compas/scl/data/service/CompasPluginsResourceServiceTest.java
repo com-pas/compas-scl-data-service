@@ -8,8 +8,6 @@ import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl.data.exception.CompasDuplicateVersionException;
 import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
@@ -267,9 +265,8 @@ class CompasPluginsResourceServiceTest {
         assertThrows(CompasDuplicateVersionException.class, () -> service.upload(request));
     }
 
-    @ParameterizedTest
-    @CsvSource({"MAJOR, 2.0.0", "minor, 1.3.0", "patch, 1.2.4"})
-    void upload_WhenNextVersionType_ThenIncrementsVersion(String nextVersionType, String expectedVersion) {
+    @Test
+    void upload_WhenNextVersionMajorType_ThenIncrementsVersion() {
         var duplicateQuery = mockTypedQuery(Long.class);
         when(duplicateQuery.getSingleResult()).thenReturn(0L);
 
@@ -279,9 +276,41 @@ class CompasPluginsResourceServiceTest {
         when(existingQuery.getResultList()).thenReturn(List.of(existing));
 
         var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
-                "1.0.0", "desc", null, nextVersionType));
+                "1.0.0", "desc", null, "MAJOR"));
 
-        assertEquals(expectedVersion, result.version);
+        assertEquals("2.0.0", result.version);
+    }
+
+    @Test
+    void upload_WhenNextVersionMinorType_ThenIncrementsVersion() {
+        var duplicateQuery = mockTypedQuery(Long.class);
+        when(duplicateQuery.getSingleResult()).thenReturn(0L);
+
+        var existingQuery = mockTypedQuery(PluginsCustomResource.class);
+        var existing = createResource();
+        existing.version = "1.2.3";
+        when(existingQuery.getResultList()).thenReturn(List.of(existing));
+
+        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
+                "1.0.0", "desc", null, "minor"));
+
+        assertEquals("1.3.0", result.version);
+    }
+
+    @Test
+    void upload_WhenNextVersionPatchType_ThenIncrementsVersion() {
+        var duplicateQuery = mockTypedQuery(Long.class);
+        when(duplicateQuery.getSingleResult()).thenReturn(0L);
+
+        var existingQuery = mockTypedQuery(PluginsCustomResource.class);
+        var existing = createResource();
+        existing.version = "1.2.3";
+        when(existingQuery.getResultList()).thenReturn(List.of(existing));
+
+        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
+                "1.0.0", "desc", null, "patch"));
+
+        assertEquals("1.2.4", result.version);
     }
 
     @Test
