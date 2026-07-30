@@ -6,8 +6,6 @@ package org.lfenergy.compas.scl.data.service.v2;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
 import org.lfenergy.compas.scl.data.exception.CompasDuplicateVersionException;
 import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
@@ -247,21 +245,52 @@ class PluginResourcesServiceTest {
         assertThrows(CompasDuplicateVersionException.class, () -> service.create(request));
     }
 
-    @ParameterizedTest
-    @CsvSource({"MAJOR, 2.0.0", "minor, 1.3.0", "patch, 1.2.4"})
-    void create_WhenNextVersionType_ThenIncrementsVersion(String nextVersionType, String expectedVersion) {
+    @Test
+    void create_WhenNextVersionMajorType_ThenIncrementsVersion() {
         var existing = buildEntity();
         existing.version = "1.2.3";
         when(pluginResourceRepository.findAllByPluginTypeAndName(PLUGIN, TYPE, NAME))
                 .thenReturn(List.of(existing));
         when(pluginResourceRepository.existsByPluginTypeTenantNameAndVersion(
-                PLUGIN, TYPE, TENANT, NAME, expectedVersion)).thenReturn(false);
+                PLUGIN, TYPE, TENANT, NAME, "2.0.0")).thenReturn(false);
 
         var result = service.create(new CreatePluginResourceData(
                 PLUGIN, TYPE, NAME, "application/json", "{}",
-                "1.0.0", "desc", null, nextVersionType));
+                "1.0.0", "desc", null, "MAJOR"));
 
-        assertEquals(expectedVersion, result.version);
+        assertEquals("2.0.0", result.version);
+    }
+
+    @Test
+    void create_WhenNextVersionMinorType_ThenIncrementsVersion() {
+        var existing = buildEntity();
+        existing.version = "1.2.3";
+        when(pluginResourceRepository.findAllByPluginTypeAndName(PLUGIN, TYPE, NAME))
+                .thenReturn(List.of(existing));
+        when(pluginResourceRepository.existsByPluginTypeTenantNameAndVersion(
+                PLUGIN, TYPE, TENANT, NAME, "1.3.0")).thenReturn(false);
+
+        var result = service.create(new CreatePluginResourceData(
+                PLUGIN, TYPE, NAME, "application/json", "{}",
+                "1.0.0", "desc", null, "minor"));
+
+        assertEquals("1.3.0", result.version);
+    }
+
+    @Test
+    void create_WhenNextVersionPatchType_ThenIncrementsVersion() {
+        var existing = buildEntity();
+        existing.version = "1.2.3";
+        when(pluginResourceRepository.findAllByPluginTypeAndName(PLUGIN, TYPE, NAME))
+                .thenReturn(List.of(existing));
+        when(pluginResourceRepository.existsByPluginTypeTenantNameAndVersion(
+                PLUGIN, TYPE, TENANT, NAME, "1.2.4")).thenReturn(false);
+
+        var result = service.create(new CreatePluginResourceData(
+                PLUGIN, TYPE, NAME, "application/json", "{}",
+                "1.0.0", "desc", null, "patch"));
+
+        assertEquals("1.2.4", result.version);
     }
 
     @Test
