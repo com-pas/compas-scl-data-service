@@ -55,7 +55,7 @@ jobs:
           servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
 
       - name: Request GitHub API for PR data
-        if: github.event.workflow_run.event == 'pull_request'
+        if: github.event_name == 'pull_request'
         uses: octokit/request-action@b91aabaa861c777dcdb14e2387e30eddf04619ae # v3.0.0
         id: get_pr_data
         with:
@@ -71,12 +71,12 @@ jobs:
           echo "sonar_opts=-Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=com-pas_compas-scl-data-service -Dsonar.organization=com-pas" >> "$GITHUB_OUTPUT"
 
       - name: Build and analyze (Pull Request)
-        if: ${{ github.event.workflow_run.event == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_OPTS: ${{ steps.sonar_env.outputs.sonar_opts }}
-          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           mvn -B -s custom_maven_settings.xml -Psonar \
             $SONAR_OPTS \
@@ -87,16 +87,14 @@ jobs:
             verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
       - name: Build and analyze (Push)
-        if: ${{ github.event.workflow_run.event == 'push' }}
+        if: ${{ github.event_name == 'push' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_OPTS: ${{ steps.sonar_env.outputs.sonar_opts }}
-          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_BRANCH: ${{ github.ref_name }}
         run: |
           mvn -B -s custom_maven_settings.xml -Psonar \
             $SONAR_OPTS \
-            -Dsonar.scm.revision="$HEAD_SHA" \
             -Dsonar.branch.name="$HEAD_BRANCH" \
             verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
