@@ -1,0 +1,554 @@
+openapi: 3.0.3
+info:
+  title: CoMPAS SCL Data Service SCL API
+  description: API for storing, retrieving, updating, deleting, and listing SCL files by SCL type.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/compas-scl-data-service
+    description: CoMPAS Local Testing URL
+  - url: https://demo.compas.energy/compas-scl-data-service
+    description: CoMPAS Demo URL
+
+tags:
+  - name: scl-data
+    description: Endpoints managing SCL file content and version history
+
+security:
+  - open-id-connect:
+      - read
+      - write
+      - admin
+
+paths:
+  /scl/v1/{type}:
+    parameters:
+      - $ref: '#/components/parameters/typeParam'
+    post:
+      tags:
+        - scl-data
+      summary: Create a new SCL file
+      operationId: createSclData
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/CreateRequest'
+      responses:
+        '200':
+          description: SCL file created successfully
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/CreateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestXml'
+        '401':
+          $ref: '#/components/responses/UnauthorizedXml'
+        '403':
+          $ref: '#/components/responses/ForbiddenXml'
+        default:
+          $ref: '#/components/responses/DefaultErrorXml'
+
+  /scl/v1/{type}/list:
+    parameters:
+      - $ref: '#/components/parameters/typeParam'
+    get:
+      tags:
+        - scl-data
+      summary: List SCL files by type
+      operationId: listSclData
+      responses:
+        '200':
+          description: SCL file metadata retrieved successfully
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedXml'
+        '403':
+          $ref: '#/components/responses/ForbiddenXml'
+        default:
+          $ref: '#/components/responses/DefaultErrorXml'
+
+  /scl/v1/{type}/{id}/versions:
+    parameters:
+      - $ref: '#/components/parameters/typeParam'
+      - $ref: '#/components/parameters/idParam'
+    get:
+      tags:
+        - scl-data
+      summary: List all versions of one SCL file
+      operationId: listSclDataVersionsById
+      responses:
+        '200':
+          description: SCL file versions retrieved successfully
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/VersionsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestXml'
+        '401':
+          $ref: '#/components/responses/UnauthorizedXml'
+        '403':
+          $ref: '#/components/responses/ForbiddenXml'
+        '404':
+          $ref: '#/components/responses/NotFoundXml'
+        default:
+          $ref: '#/components/responses/DefaultErrorXml'
+
+  /scl/v1/{type}/{id}:
+    parameters:
+      - $ref: '#/components/parameters/typeParam'
+      - $ref: '#/components/parameters/idParam'
+    get:
+      tags:
+        - scl-data
+      summary: Retrieve latest version of one SCL file
+      operationId: getLatestSclDataById
+      responses:
+        '200':
+          description: Latest SCL file retrieved successfully
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/GetResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestXml'
+        '401':
+          $ref: '#/components/responses/UnauthorizedXml'
+        '403':
+          $ref: '#/components/responses/ForbiddenXml'
+        '404':
+          $ref: '#/components/responses/NotFoundXml'
+        default:
+          $ref: '#/components/responses/DefaultErrorXml'
+    put:
+      tags:
+        - scl-data
+      summary: Update one SCL file and create a new version
+      operationId: updateSclDataById
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/UpdateRequest'
+      responses:
+        '200':
+          description: SCL file updated successfully
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/UpdateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestXml'
+        '401':
+          $ref: '#/components/responses/UnauthorizedXml'
+        '403':
+          $ref: '#/components/responses/ForbiddenXml'
+        '404':
+          $ref: '#/components/responses/NotFoundXml'
+        default:
+          $ref: '#/components/responses/DefaultErrorXml'
+    delete:
+      tags:
+        - scl-data
+      summary: Delete all versions of one SCL file
+      operationId: deleteSclDataById
+      responses:
+        '204':
+          description: SCL file deleted successfully
+        '400':
+          $ref: '#/components/responses/BadRequestXml'
+        '401':
+          $ref: '#/components/responses/UnauthorizedXml'
+        '403':
+          $ref: '#/components/responses/ForbiddenXml'
+        '404':
+          $ref: '#/components/responses/NotFoundXml'
+        default:
+          $ref: '#/components/responses/DefaultErrorXml'
+
+  /scl/v1/{type}/{id}/{version}:
+    parameters:
+      - $ref: '#/components/parameters/typeParam'
+      - $ref: '#/components/parameters/idParam'
+      - $ref: '#/components/parameters/versionParam'
+    get:
+      tags:
+        - scl-data
+      summary: Retrieve one specific version of an SCL file
+      operationId: getSclDataByIdAndVersion
+      responses:
+        '200':
+          description: SCL file version retrieved successfully
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/GetResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestXml'
+        '401':
+          $ref: '#/components/responses/UnauthorizedXml'
+        '403':
+          $ref: '#/components/responses/ForbiddenXml'
+        '404':
+          $ref: '#/components/responses/NotFoundXml'
+        default:
+          $ref: '#/components/responses/DefaultErrorXml'
+    delete:
+      tags:
+        - scl-data
+      summary: Delete one specific version of an SCL file
+      operationId: deleteSclDataVersionById
+      responses:
+        '204':
+          description: SCL file version deleted successfully
+        '400':
+          $ref: '#/components/responses/BadRequestXml'
+        '401':
+          $ref: '#/components/responses/UnauthorizedXml'
+        '403':
+          $ref: '#/components/responses/ForbiddenXml'
+        '404':
+          $ref: '#/components/responses/NotFoundXml'
+        default:
+          $ref: '#/components/responses/DefaultErrorXml'
+
+  /scl/v1/{type}/checkname:
+    parameters:
+      - $ref: '#/components/parameters/typeParam'
+    post:
+      tags:
+        - scl-data
+      summary: Check whether an SCL name already exists
+      operationId: checkDuplicateSclName
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/DuplicateNameCheckRequest'
+      responses:
+        '200':
+          description: Duplicate-name check completed
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/DuplicateNameCheckResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestXml'
+        '401':
+          $ref: '#/components/responses/UnauthorizedXml'
+        '403':
+          $ref: '#/components/responses/ForbiddenXml'
+        default:
+          $ref: '#/components/responses/DefaultErrorXml'
+
+components:
+  securitySchemes:
+    open-id-connect:
+      type: openIdConnect
+      openIdConnectUrl: https://example.com/.well-known/openid-configuration
+
+  parameters:
+    typeParam:
+      name: type
+      in: path
+      required: true
+      description: SCL file type
+      schema:
+        type: string
+        enum:
+          - SSD
+          - IID
+          - ICD
+          - SCD
+          - CID
+          - SED
+          - ISD
+          - STD
+    idParam:
+      name: id
+      in: path
+      required: true
+      description: Unique SCL file identifier
+      schema:
+        type: string
+        format: uuid
+    versionParam:
+      name: version
+      in: path
+      required: true
+      description: SCL version in major.minor.patch format
+      schema:
+        type: string
+        pattern: '^([1-9]\\d*)\\.(\\d+)\\.(\\d+)$'
+        example: 1.2.3
+
+  responses:
+    BadRequestXml:
+      description: One of the specified parameters or request fields is invalid
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnauthorizedXml:
+      description: Authentication information is missing or invalid
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ForbiddenXml:
+      description: Access denied for the authenticated user
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFoundXml:
+      description: Requested SCL file or version could not be found
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    DefaultErrorXml:
+      description: Unexpected error, request could not be handled
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    CreateRequest:
+      type: object
+      description: Request to create a new entry in the database containing the SCL element content.
+      required:
+        - Name
+        - SclData
+      xml:
+        name: CreateRequest
+        namespace: https://www.lfenergy.org/compas/SclDataService/v1
+      properties:
+        Name:
+          type: string
+          description: The name stored as private element and later usable as filename.
+          example: STATION-0012312
+        Comment:
+          type: string
+          description: Comment that will be added to the new history record.
+          example: New substation configuration for X
+        SclData:
+          type: string
+          description: Full SCL XML content.
+          example: '<SCL xmlns="http://www.iec.ch/61850/2003/SCL">...</SCL>'
+
+    CreateResponse:
+      type: object
+      description: Response after creating a new SCL entry.
+      required:
+        - SclData
+      xml:
+        name: CreateResponse
+        namespace: https://www.lfenergy.org/compas/SclDataService/v1
+      properties:
+        SclData:
+          type: string
+          description: Stored SCL XML content.
+          example: '<SCL xmlns="http://www.iec.ch/61850/2003/SCL">...</SCL>'
+
+    GetResponse:
+      type: object
+      description: Response containing retrieved SCL content.
+      required:
+        - SclData
+      xml:
+        name: GetResponse
+        namespace: https://www.lfenergy.org/compas/SclDataService/v1
+      properties:
+        SclData:
+          type: string
+          description: Retrieved SCL XML content.
+          example: '<SCL xmlns="http://www.iec.ch/61850/2003/SCL">...</SCL>'
+
+    UpdateRequest:
+      type: object
+      description: Request to update an existing SCL entry by creating a new version.
+      required:
+        - ChangeSet
+        - SclData
+      xml:
+        name: UpdateRequest
+        namespace: https://www.lfenergy.org/compas/SclDataService/v1
+      properties:
+        ChangeSet:
+          $ref: '#/components/schemas/ChangeSetType'
+        Comment:
+          type: string
+          description: Comment that will be added to the new history record.
+          example: Renamed substation names
+        SclData:
+          type: string
+          description: Full SCL XML content.
+          example: '<SCL xmlns="http://www.iec.ch/61850/2003/SCL">...</SCL>'
+
+    UpdateResponse:
+      type: object
+      description: Response after updating an SCL entry.
+      required:
+        - SclData
+      xml:
+        name: UpdateResponse
+        namespace: https://www.lfenergy.org/compas/SclDataService/v1
+      properties:
+        SclData:
+          type: string
+          description: Updated SCL XML content.
+          example: '<SCL xmlns="http://www.iec.ch/61850/2003/SCL">...</SCL>'
+
+    DuplicateNameCheckRequest:
+      type: object
+      description: Request to check for duplicate names.
+      required:
+        - Name
+      xml:
+        name: DuplicateNameCheckRequest
+        namespace: https://www.lfenergy.org/compas/SclDataService/v1
+      properties:
+        Name:
+          type: string
+          description: Name to check.
+          example: STATION-0012312
+
+    DuplicateNameCheckResponse:
+      type: object
+      description: Response from duplicate-name check.
+      xml:
+        name: DuplicateNameCheckResponse
+        namespace: https://www.lfenergy.org/compas/SclDataService/v1
+      properties:
+        Duplicate:
+          type: boolean
+          description: True when at least one SCL file already exists with the same name.
+          example: false
+
+    ListResponse:
+      type: object
+      description: Response containing metadata entries of found SCL files.
+      xml:
+        name: ListResponse
+        namespace: https://www.lfenergy.org/compas/SclDataService/v1
+      properties:
+        Item:
+          type: array
+          description: List of found SCL entries.
+          items:
+            $ref: '#/components/schemas/Item'
+          xml:
+            name: Item
+
+    VersionsResponse:
+      type: object
+      description: Response containing all versions for one SCL file.
+      xml:
+        name: VersionsResponse
+        namespace: https://www.lfenergy.org/compas/SclDataService/v1
+      properties:
+        HistoryItem:
+          type: array
+          description: List of found versions for one SCL file.
+          items:
+            $ref: '#/components/schemas/HistoryItem'
+          xml:
+            name: HistoryItem
+
+    Item:
+      type: object
+      description: Metadata entry for an SCL file.
+      required:
+        - Id
+        - Name
+        - Version
+      xml:
+        name: Item
+      properties:
+        Id:
+          type: string
+          format: uuid
+          description: Identifier of the SCL file.
+          example: 123e4567-e89b-12d3-a456-426614174000
+        Name:
+          type: string
+          description: Name of the SCL file.
+          example: STATION-0012312
+        Version:
+          type: string
+          description: Version of the SCL file.
+          pattern: '^([1-9]\\d*)\\.(\\d+)\\.(\\d+)$'
+          example: 1.2.4
+        Label:
+          type: array
+          description: Labels linked to the SCL file.
+          items:
+            type: string
+          xml:
+            name: Label
+
+    HistoryItem:
+      allOf:
+        - $ref: '#/components/schemas/Item'
+        - type: object
+          description: Metadata entry including version history information.
+          properties:
+            Who:
+              type: string
+              description: User who created this version.
+              example: John Doe
+            When:
+              type: string
+              format: date-time
+              description: Time when this version was created.
+              example: '2022-06-23T12:24:32Z'
+            What:
+              type: string
+              description: Description of what changed.
+              example: New substation added
+
+    ChangeSetType:
+      type: string
+      description: Type of change used to determine the next version value.
+      enum:
+        - MAJOR
+        - MINOR
+        - PATCH
+
+    ErrorResponse:
+      type: object
+      description: Error payload returned by service and validation handlers.
+      xml:
+        name: ErrorResponse
+      properties:
+        ErrorMessage:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorMessage'
+          xml:
+            name: ErrorMessage
+
+    ErrorMessage:
+      type: object
+      xml:
+        name: ErrorMessage
+      properties:
+        Code:
+          type: string
+          example: CORE-8000
+        Message:
+          type: string
+          example: Invalid request input.
+        Property:
+          type: string
+          example: create.request.name
