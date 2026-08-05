@@ -16,6 +16,7 @@ import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.model.UploadCustomPluginsResourceData;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;

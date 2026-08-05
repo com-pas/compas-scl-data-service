@@ -206,6 +206,11 @@ SPDX-License-Identifier: Apache-2.0
                 <sonar.coverage.jacoco.xmlReportPaths>
                     target/site/jacoco/jacoco.xml,
                 </sonar.coverage.jacoco.xmlReportPaths>
+
+                <!-- Exclude generated code from SonarQube analysis -->
+                <sonar.cpd.exclusions>
+                    api/src/main/java/org/lfenergy/compas/scl/data/rest/api/**
+                </sonar.cpd.exclusions>
             </properties>
 
             <build>

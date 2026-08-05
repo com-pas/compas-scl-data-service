@@ -72,6 +72,32 @@ SPDX-License-Identifier: Apache-2.0
                             </configOptions>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-plugins-resources-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>none</phase>
+
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/openapi/plugins-resources-api.yaml</inputSpec>
+                            <generatorName>jaxrs-spec</generatorName>
+                            <output>${project.basedir}</output>
+                            <templateDirectory>${project.basedir}/src/main/resources/templates</templateDirectory>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+
+                            <configOptions>
+                                <sourceFolder>src/main/java</sourceFolder>
+                                <apiPackage>org.lfenergy.compas.scl.data.rest</apiPackage>
+                                <modelPackage>org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2</modelPackage>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useTags>true</useTags>
+                                <useJakartaEe>true</useJakartaEe>
+                                <useSwaggerAnnotations>false</useSwaggerAnnotations>
+                                <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                            </configOptions>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
