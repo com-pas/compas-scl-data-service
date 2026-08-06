@@ -25,6 +25,8 @@ class CompasPluginsResourceUploadDataTest {
 
     private static final String UUID_PATTERN =
             "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$";
+    private static final String PLUGIN = "engineering-wizard";
+    private static final String TYPE = "process";
 
 
     @Test
@@ -32,7 +34,6 @@ class CompasPluginsResourceUploadDataTest {
 
         given()
             .contentType("multipart/form-data")
-            .multiPart("type", "json")
             .multiPart("name", "json-resource")
             .multiPart("description", "Description for JSON resource")
             .multiPart("content-type", "application/json")
@@ -41,11 +42,12 @@ class CompasPluginsResourceUploadDataTest {
             .multiPart("version", "1.0.0")
             .multiPart("nextVersionType", "something")
         .when()
-            .post()
+            .post("/plugins/{plugin}/types/{type}", PLUGIN, TYPE)
         .then()
             .statusCode(200)
             .body("id", matchesPattern(UUID_PATTERN))
             .body("name", equalTo("json-resource"))
+            .body("type", equalTo(TYPE))
             .body("uploadedAt", not(empty()));
     }
 
@@ -54,7 +56,6 @@ class CompasPluginsResourceUploadDataTest {
 
         given()
             .contentType("multipart/form-data")
-            .multiPart("type", "xml")
             .multiPart("name", "xml-resource")
             .multiPart("description", "Description for XML resource")
             .multiPart("content-type", "application/xml")
@@ -63,11 +64,12 @@ class CompasPluginsResourceUploadDataTest {
             .multiPart("version", "1.0.0")
             .multiPart("nextVersionType", "something")
         .when()
-            .post()
+            .post("/plugins/{plugin}/types/{type}", PLUGIN, TYPE)
         .then()
             .statusCode(200)
             .body("id", matchesPattern(UUID_PATTERN))
             .body("name", equalTo("xml-resource"))
+            .body("type", equalTo(TYPE))
             .body("uploadedAt", not(empty()));
     }
 
@@ -76,7 +78,6 @@ class CompasPluginsResourceUploadDataTest {
 
         given()
             .contentType("multipart/form-data")
-            .multiPart("type", "text")
             .multiPart("name", "text-resource")
             .multiPart("description", "Description for Text resource")
             .multiPart("content-type", "*/*")
@@ -85,7 +86,7 @@ class CompasPluginsResourceUploadDataTest {
             .multiPart("version", "1.0.0")
             .multiPart("nextVersionType", "something")
         .when()
-            .post()
+            .post("/plugins/{plugin}/types/{type}", PLUGIN, TYPE)
         .then()
             .statusCode(400);
     }
@@ -95,14 +96,13 @@ class CompasPluginsResourceUploadDataTest {
 
         given()
             .contentType("multipart/form-data")
-            .multiPart("type", "xml")
             .multiPart("name", "xml-resource")
             .multiPart("description", "Description for XML resource")
             .multiPart("content-type", "application/xml")
             .multiPart("content", "<root>Test content</root>")
             .multiPart("data-compatibility-version", "1.1.0")
         .when()
-            .post()
+            .post("/plugins/{plugin}/types/{type}", PLUGIN, TYPE)
         .then()
             .statusCode(400);
     }

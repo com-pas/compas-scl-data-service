@@ -5,122 +5,137 @@ package org.lfenergy.compas.scl.data.rest;
 
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntry;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntryWithContent;
-import java.util.Date;
-
-import org.lfenergy.compas.scl.data.rest.api.plugins.resources.PagedDataEntryResponse;
-import java.util.List;
-import java.util.UUID;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.PluginWithTypes;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.UploadDataResponse;
 
 import jakarta.ws.rs.*;
 
 
 import java.io.InputStream;
+import java.util.List;
+import java.util.UUID;
 
 import jakarta.validation.constraints.*;
 
 /**
 * Represents a collection of functions to interact with the API endpoints.
 */
-@Path("/plugins/resources")
+@Path("/plugins-resources")
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen", comments = "Generator version: 7.12.0")
 public interface PluginsCustomResourcesApi {
 
     /**
-     * Retrieve metadata for all uploaded data entries with optional filtering
+    * Retrieve all plugins with related resource types
      *
-     * @param type Filter by data type
-     * @param uploadedAfter Filter by upload date (ISO 8601 format)
-     * @param uploadedBefore Filter by upload date (ISO 8601 format)
-     * @param name Filter by name (contains search)
-     * @param page Page number for pagination (0-indexed)
-     * @param size Number of items per page
-     * @return List of data entries retrieved successfully
-     * @return Bad request - Invalid query parameters
-     * @return Internal server error
-     */
+    * @return Plugins and their related types retrieved successfully
+    * @return Internal server error
+    */
     @GET
+    @Path("/plugins")
     @Produces({ "application/json" })
-    PagedDataEntryResponse getAllData(@QueryParam("type") @NotNull   String type,@QueryParam("uploadedAfter")   Date uploadedAfter,@QueryParam("uploadedBefore")   Date uploadedBefore,@QueryParam("name")   String name,@QueryParam("page") @Min(0) @DefaultValue("0")   Integer page,@QueryParam("size") @Min(1) @Max(100) @DefaultValue("20")   Integer size);
+    List<PluginWithTypes> getPluginsWithTypes();
 
 
     /**
-     * Retrieve a single data entry by its unique identifier, including the full content
-     *
-     * @param id Unique identifier of the data entry
-     * @return Data entry retrieved successfully
-     * @return Data entry not found
-     * @return Internal server error
-     */
+    * Retrieve a single data entry by its unique identifier, including the full content
+    *
+    * @param plugin Plugin identifier
+    * @param type Resource type
+    * @param id Unique identifier of the data entry
+    * @return Data entry retrieved successfully
+    * @return Data entry not found
+    * @return Internal server error
+    */
     @GET
-    @Path("/{id}")
+    @Path("/plugins/{plugin}/types/{type}/{id}")
     @Produces({ "application/json" })
-    DataEntryWithContent getDataById(@PathParam("id") UUID id);
+    DataEntryWithContent getPluginResourceById(@PathParam("plugin") String plugin, @PathParam("type") String type, @PathParam("id") UUID id);
 
 
     /**
-     * Delete all data entries for the given data type
-     *
-     * @param dataType Data type of the entries to delete
-     * @return Data entries deleted successfully
-     * @return No data entries found for the given data type
-     * @return Internal server error
-     */
+    * Delete all data entries for the given data type
+    *
+    * @param plugin Plugin identifier
+    * @param type Resource type
+    * @return Data entries deleted successfully
+    * @return No data entries found for the given data type
+    * @return Internal server error
+    */
     @DELETE
-    @Path("/{data-type}")
-    void deleteDataByType(@PathParam("data-type") String dataType);
+    @Path("/plugins/{plugin}/types/{type}")
+    void deletePluginResourcesByType(@PathParam("plugin") String plugin, @PathParam("type") String type);
 
 
     /**
     * Retrieve all resources for the given data type, reduced to the latest version per resource name, without content
-     *
-    * @param dataType Data type of the entries to retrieve
+    *
+    * @param plugin Plugin identifier
+    * @param type Resource type
     * @return Data entries retrieved successfully
     * @return Data entries not found
-     * @return Internal server error
-     */
+    * @return Internal server error
+    */
     @GET
-    @Path("/{data-type}/latest")
+    @Path("/plugins/{plugin}/types/{type}/latest")
     @Produces({ "application/json" })
-    List<DataEntry> getLatestDataByType(@PathParam("data-type") String dataType);
+    List<DataEntry> getLatestPluginResourcesByType(@PathParam("plugin") String plugin, @PathParam("type") String type);
 
 
     /**
-     * Delete all data entries for the given data type and resource name
-     *
-     * @param dataType Data type of the entries to delete
-     * @param name Name of the entries to delete
-     * @return Data entries deleted successfully
-     * @return No data entries found for the given data type and name
-     * @return Internal server error
-     */
+    * Delete all data entries for the given data type and resource name
+    *
+    * @param plugin Plugin identifier
+    * @param type Resource type
+    * @param name Name of the entries to delete
+    * @return Data entries deleted successfully
+    * @return No data entries found for the given data type and name
+    * @return Internal server error
+    */
     @DELETE
-    @Path("/{data-type}/{name}")
-    void deleteDataByTypeAndName(@PathParam("data-type") String dataType, @PathParam("name") String name);
+    @Path("/plugins/{plugin}/types/{type}/resources/{name}")
+    void deletePluginResourceByName(@PathParam("plugin") String plugin, @PathParam("type") String type, @PathParam("name") String name);
 
 
     /**
-     * Retrieve the latest version of a data entry for the given data type and resource name, including the full content
-     *
-     * @param dataType Data type of the entry to retrieve
+    * Retrieve the latest version of a data entry for the given data type and resource name, including the full content
+    *
+    * @param plugin Plugin identifier
+    * @param type Resource type
      * @param name Name of the entry to retrieve
      * @return Data entry retrieved successfully
      * @return Data entry not found
      * @return Internal server error
      */
     @GET
-    @Path("/{data-type}/{name}/latest")
+    @Path("/plugins/{plugin}/types/{type}/resources/{name}/latest")
     @Produces({ "application/json" })
-    DataEntryWithContent getLatestDataByTypeAndName(@PathParam("data-type") String dataType, @PathParam("name") String name);
+    DataEntryWithContent getLatestPluginResourceByName(@PathParam("plugin") String plugin, @PathParam("type") String type, @PathParam("name") String name);
 
 
     /**
-     * Upload a JSON or XML data file with associated metadata
+    * Retrieve all versions of a data entry for the given data type and resource name, without content
      *
-     * @param type Type of the data being uploaded
-     * @param name Name of the data file
-     * @param contentType Content type of the uploaded file
-     * @param content The JSON or XML file content
+    * @param plugin Plugin identifier
+    * @param type Resource type
+    * @param name Name of the entry to retrieve
+    * @return Data entries retrieved successfully
+    * @return Data entries not found
+    * @return Internal server error
+    */
+    @GET
+    @Path("/plugins/{plugin}/types/{type}/resources/{name}/versions")
+    @Produces({ "application/json" })
+    List<DataEntry> getPluginResourceVersionsByName(@PathParam("plugin") String plugin, @PathParam("type") String type, @PathParam("name") String name);
+
+
+    /**
+    * Upload a JSON or XML data file with associated metadata
+    *
+    * @param plugin Plugin identifier
+    * @param type Resource type
+    * @param name Name of the data file
+    * @param contentType Content type of the uploaded file
+    * @param content The JSON or XML file content
      * @param dataCompatibilityVersion Data compatibility version (semver format)
      * @param description Optional description of the data file
      * @param version Semantic version of the data file (semver format)
@@ -133,8 +148,9 @@ public interface PluginsCustomResourcesApi {
      * @return Internal server error
      */
     @POST
+    @Path("/plugins/{plugin}/types/{type}")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    UploadDataResponse uploadData(@FormParam(value = "type")  String type,@FormParam(value = "name")  String name,@FormParam(value = "content-type")  String contentType, @FormParam(value = "content") InputStream content,@FormParam(value = "data-compatibility-version")  String dataCompatibilityVersion,@FormParam(value = "description")  String description,@FormParam(value = "version")  String version,@FormParam(value = "nextVersionType")  String nextVersionType);
+    UploadDataResponse createPluginResource(@PathParam("plugin") String plugin, @PathParam("type") String type, @FormParam(value = "name") String name, @FormParam(value = "content-type") String contentType, @FormParam(value = "content") InputStream content, @FormParam(value = "data-compatibility-version") String dataCompatibilityVersion, @FormParam(value = "description") String description, @FormParam(value = "version") String version, @FormParam(value = "nextVersionType") String nextVersionType);
 
 }

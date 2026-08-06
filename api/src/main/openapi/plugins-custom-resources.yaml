@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: CoMPAS SCL Data Service API
-  description: API for uploading and managing SCL data files
+  description: API for uploading and managing plugin resource files
   version: 1.0.0
   contact:
     name: CoMPAS Community
@@ -18,207 +18,21 @@ tags:
     description: Plugins custom resources
 
 paths:
-  /plugins/resources:
+  /plugins-resources/plugins:
     get:
       tags:
         - plugins-custom-resources
-      summary: Get all data entries
-      description: Retrieve metadata for all uploaded data entries with optional filtering
-      operationId: getAllData
-      parameters:
-        - name: type
-          in: query
-          required: true
-          description: Filter by data type
-          schema:
-            type: string
-          example: "engineering-wizard_process"
-        - name: uploadedAfter
-          in: query
-          description: Filter by upload date (ISO 8601 format)
-          schema:
-            type: string
-            format: date-time
-          example: "2026-02-18T10:30:00Z"
-        - name: uploadedBefore
-          in: query
-          description: Filter by upload date (ISO 8601 format)
-          schema:
-            type: string
-            format: date-time
-          example: "2026-02-18T10:30:00Z"
-        - name: name
-          in: query
-          description: Filter by name (contains search)
-          schema:
-            type: string
-        - name: page
-          in: query
-          description: Page number for pagination (0-indexed)
-          schema:
-            type: integer
-            minimum: 0
-            default: 0
-        - name: size
-          in: query
-          description: Number of items per page
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 20
+      summary: Get all plugins with related types
+      operationId: getPluginsWithTypes
       responses:
         '200':
-          description: List of data entries retrieved successfully
+          description: Plugins and their related types retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PagedDataEntryResponse'
-              example:
-                content:
-                  - id: "550e8400-e29b-41d4-a716-446655440000"
-                    type: "engineering-wizard_process"
-                    tenant: "transnetbw"
-                    name: "substation-configuration"
-                    description: "Process definition for substation engineering wizard"
-                    contentType: "application/json"
-                    version: "1.2.3"
-                    dataCompatibilityVersion: "1.0.0"
-                    uploadedAt: "2026-02-18T10:30:00Z"
-                  - id: "660f9511-f39c-52e5-b827-557766551111"
-                    type: "engineering-wizard_process"
-                    tenant: "transnetbw"
-                    name: "line-configuration"
-                    description: "Process definition for line engineering"
-                    contentType: "application/xml"
-                    version: "2.0.0"
-                    dataCompatibilityVersion: "2.0.0"
-                    uploadedAt: "2026-02-17T14:20:00Z"
-                totalElements: 42
-                totalPages: 3
-                page: 0
-                size: 20
-        '400':
-          description: Bad request - Invalid query parameters
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    post:
-      tags:
-        - plugins-custom-resources
-      summary: Upload data file
-      description: Upload a JSON or XML data file with associated metadata
-      operationId: uploadData
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required:
-                - type
-                - name
-                - content-type
-                - content
-                - data-compatibility-version
-              properties:
-                type:
-                  type: string
-                  description: Type of the data being uploaded
-                  example: "engineering-wizard_process"
-                name:
-                  type: string
-                  description: Name of the data file
-                  example: "substation-configuration"
-                description:
-                  type: string
-                  description: Optional description of the data file
-                  example: "Process definition for substation engineering wizard"
-                content-type:
-                  type: string
-                  description: Content type of the uploaded file
-                  enum:
-                    - application/json
-                    - application/xml
-                  example: "application/json"
-                content:
-                  type: string
-                  format: binary
-                  description: The JSON or XML file content
-                version:
-                  type: string
-                  pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
-                  description: Semantic version of the data file (semver format)
-                  example: "1.2.3"
-                nextVersionType:
-                  type: string
-                  description: |-
-                    Type of the next version (used for automatic version increment)
-                    If provided, the service will automatically increment the version based on the specified type. If not
-                    provided, the version must be explicitly specified in the 'version' field.
-                  enum:
-                    - major
-                    - minor
-                    - patch
-                data-compatibility-version:
-                  type: string
-                  pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
-                  description: Data compatibility version (semver format)
-                  example: "1.0.0"
-            encoding:
-              content:
-                contentType: application/json, application/xml, text/xml
-      responses:
-        '201':
-          description: Data uploaded successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UploadDataResponse'
-              example:
-                id: "550e8400-e29b-41d4-a716-446655440000"
-                type: "SCL"
-                tenant: "transnetbw"
-                name: "substation-config"
-                version: "1.2.3"
-                uploadedAt: "2026-02-18T10:30:00Z"
-        '400':
-          description: Bad request - Invalid input data
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: "INVALID_INPUT"
-                message: "Invalid semantic version format"
-        '409':
-          description: Conflict - Data with this name and version already exists
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: "DUPLICATE_VERSION"
-                message: "Data with name 'substation-config' and version '1.2.3' already exists"
-        '413':
-          description: Payload too large
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '415':
-          description: Unsupported media type
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+                type: array
+                items:
+                  $ref: '#/components/schemas/PluginWithTypes'
         '500':
           description: Internal server error
           content:
@@ -226,73 +40,77 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /plugins/resources/{id}:
-    get:
+  /plugins-resources/plugins/{plugin}/types/{type}:
+    post:
       tags:
         - plugins-custom-resources
-      summary: Get data entry by ID
-      description: Retrieve a single data entry by its unique identifier, including the full content
-      operationId: getDataById
+      summary: Create a new resource version
+      operationId: createPluginResource
       parameters:
-        - name: id
-          in: path
-          required: true
-          description: Unique identifier of the data entry
-          schema:
-            type: string
-            format: uuid
-          example: "550e8400-e29b-41d4-a716-446655440000"
+        - $ref: '#/components/parameters/Plugin'
+        - $ref: '#/components/parameters/Type'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+                - content-type
+                - content
+                - data-compatibility-version
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                content-type:
+                  type: string
+                  enum: [application/json, application/xml]
+                content:
+                  type: string
+                  format: binary
+                version:
+                  type: string
+                nextVersionType:
+                  type: string
+                  enum: [major, minor, patch]
+                data-compatibility-version:
+                  type: string
       responses:
         '200':
-          description: Data entry retrieved successfully
+          description: Data uploaded successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DataEntryWithContent'
-              example:
-                id: "550e8400-e29b-41d4-a716-446655440000"
-                type: "engineering-wizard_process"
-                tenant: "transnetbw"
-                name: "substation-configuration"
-                description: "Process definition for substation engineering wizard"
-                contentType: "application/json"
-                version: "1.2.3"
-                dataCompatibilityVersion: "1.0.0"
-                uploadedAt: "2026-02-18T10:30:00Z"
-                content: |
-                  {
-                    "process": "substation-engineering",
-                    "steps": ["design", "validation", "approval"]
-                  }
-        '404':
-          description: Data entry not found
+                $ref: '#/components/schemas/UploadDataResponse'
+        '400':
+          description: Bad request - Invalid input data
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              example:
-                code: "NOT_FOUND"
-                message: "Data entry with id '550e8400-e29b-41d4-a716-446655440000' not found"
+        '409':
+          description: Conflict - Data with this name and version already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: Payload too large
+        '415':
+          description: Unsupported media type
         '500':
           description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
     delete:
       tags:
         - plugins-custom-resources
-      summary: Delete data entries by data type
-      description: Delete all data entries for the given data type
-      operationId: deleteDataByType
+      summary: Delete all resources of a type
+      operationId: deletePluginResourcesByType
       parameters:
-        - name: id
-          in: path
-          required: true
-          description: Data type of the entries to delete
-          schema:
-            type: string
-          example: "engineering-wizard_process"
+        - $ref: '#/components/parameters/Plugin'
+        - $ref: '#/components/parameters/Type'
       responses:
         '204':
           description: Data entries deleted successfully
@@ -302,31 +120,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              example:
-                code: "NOT_FOUND"
-                message: "No data entries found for type 'engineering-wizard_process'"
         '500':
           description: Internal server error
+
+  /plugins-resources/plugins/{plugin}/types/{type}/{id}:
+    get:
+      tags:
+        - plugins-custom-resources
+      summary: Get specific version by UUID
+      operationId: getPluginResourceById
+      parameters:
+        - $ref: '#/components/parameters/Plugin'
+        - $ref: '#/components/parameters/Type'
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Data entry retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataEntryWithContent'
+        '404':
+          description: Data entry not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
 
-  /plugins/resources/{data-type}/latest:
+  /plugins-resources/plugins/{plugin}/types/{type}/latest:
     get:
       tags:
         - plugins-custom-resources
-      summary: Get latest data entries by data type
-      description: Retrieve all resources for the given data type, reduced to the latest version per resource name, without content
-      operationId: getLatestDataByType
+      summary: List latest metadata per resource name
+      operationId: getLatestPluginResourcesByType
       parameters:
-        - name: data-type
-          in: path
-          required: true
-          description: Data type of the entries to retrieve
-          schema:
-            type: string
-          example: "engineering-wizard_process"
+        - $ref: '#/components/parameters/Plugin'
+        - $ref: '#/components/parameters/Type'
       responses:
         '200':
           description: Data entries retrieved successfully
@@ -336,63 +167,25 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DataEntry'
-              example:
-                - id: "550e8400-e29b-41d4-a716-446655440000"
-                  type: "engineering-wizard_process"
-                  tenant: "transnetbw"
-                  name: "substation-configuration"
-                  description: "Process definition for substation engineering wizard"
-                  contentType: "application/json"
-                  version: "1.2.3"
-                  dataCompatibilityVersion: "1.0.0"
-                  uploadedAt: "2026-02-18T10:30:00Z"
-                - id: "660f9511-f39c-52e5-b827-557766551111"
-                  type: "engineering-wizard_process"
-                  tenant: "transnetbw"
-                  name: "line-configuration"
-                  description: "Process definition for line engineering"
-                  contentType: "application/xml"
-                  version: "2.0.0"
-                  dataCompatibilityVersion: "2.0.0"
-                  uploadedAt: "2026-02-17T14:20:00Z"
         '404':
           description: Data entries not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              example:
-                code: "NOT_FOUND"
-                message: "No data entries found for type 'engineering-wizard_process'"
         '500':
           description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
 
-  /plugins/resources/{data-type}/{name}:
+  /plugins-resources/plugins/{plugin}/types/{type}/resources/{name}:
     delete:
       tags:
         - plugins-custom-resources
-      summary: Delete data entries by data type and name
-      description: Delete all data entries for the given data type and resource name
-      operationId: deleteDataByTypeAndName
+      summary: Delete named resource and all versions
+      operationId: deletePluginResourceByName
       parameters:
-        - name: data-type
-          in: path
-          required: true
-          description: Data type of the entries to delete
-          schema:
-            type: string
-          example: "engineering-wizard_process"
-        - name: name
-          in: path
-          required: true
-          description: Name of the entries to delete
-          schema:
-            type: string
-          example: "substation-configuration"
+        - $ref: '#/components/parameters/Plugin'
+        - $ref: '#/components/parameters/Type'
+        - $ref: '#/components/parameters/Name'
       responses:
         '204':
           description: Data entries deleted successfully
@@ -402,38 +195,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              example:
-                code: "NOT_FOUND"
-                message: "No data entries found for type 'engineering-wizard_process' and name 'substation-configuration'"
         '500':
           description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
 
-  /plugins/resources/{data-type}/{name}/latest:
+  /plugins-resources/plugins/{plugin}/types/{type}/resources/{name}/latest:
     get:
       tags:
         - plugins-custom-resources
-      summary: Get latest data entry by data type and name
-      description: Retrieve the latest version of a data entry for the given data type and resource name, including the full content
-      operationId: getLatestDataByTypeAndName
+      summary: Get latest version with content
+      operationId: getLatestPluginResourceByName
       parameters:
-        - name: data-type
-          in: path
-          required: true
-          description: Data type of the entry to retrieve
-          schema:
-            type: string
-          example: "engineering-wizard_process"
-        - name: name
-          in: path
-          required: true
-          description: Name of the entry to retrieve
-          schema:
-            type: string
-          example: "substation-configuration"
+        - $ref: '#/components/parameters/Plugin'
+        - $ref: '#/components/parameters/Type'
+        - $ref: '#/components/parameters/Name'
       responses:
         '200':
           description: Data entry retrieved successfully
@@ -441,42 +215,93 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DataEntryWithContent'
-              example:
-                id: "550e8400-e29b-41d4-a716-446655440000"
-                type: "engineering-wizard_process"
-                tenant: "transnetbw"
-                name: "substation-configuration"
-                description: "Process definition for substation engineering wizard"
-                contentType: "application/json"
-                version: "1.2.3"
-                dataCompatibilityVersion: "1.0.0"
-                uploadedAt: "2026-02-18T10:30:00Z"
-                content: |
-                  {
-                    "process": "substation-engineering",
-                    "steps": ["design", "validation", "approval"]
-                  }
         '404':
           description: Data entry not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              example:
-                code: "NOT_FOUND"
-                message: "No data entries found for type 'engineering-wizard_process' and name 'substation-configuration'"
         '500':
           description: Internal server error
+
+  /plugins-resources/plugins/{plugin}/types/{type}/resources/{name}/versions:
+    get:
+      tags:
+        - plugins-custom-resources
+      summary: List all versions metadata for a resource
+      operationId: getPluginResourceVersionsByName
+      parameters:
+        - $ref: '#/components/parameters/Plugin'
+        - $ref: '#/components/parameters/Type'
+        - $ref: '#/components/parameters/Name'
+      responses:
+        '200':
+          description: Data entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataEntry'
+        '404':
+          description: Data entries not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
 
 components:
+  parameters:
+    Plugin:
+      name: plugin
+      in: path
+      required: true
+      description: Plugin identifier. Must not contain underscores because `_` is reserved for internal type composition.
+      schema:
+        type: string
+      example: engineering-wizard
+    Type:
+      name: type
+      in: path
+      required: true
+      description: Resource type. Must not contain underscores because `_` is reserved for internal type composition.
+      schema:
+        type: string
+      example: process
+    Name:
+      name: name
+      in: path
+      required: true
+      schema:
+        type: string
+      example: substation-configuration
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: 550e8400-e29b-41d4-a716-446655440000
+
   schemas:
+    PluginWithTypes:
+      type: object
+      required:
+        - plugin
+        - types
+      properties:
+        plugin:
+          type: string
+        types:
+          type: array
+          items:
+            type: string
+
     DataEntry:
       type: object
-      x-parent: true
       required:
         - id
         - type
@@ -490,36 +315,27 @@ components:
         id:
           type: string
           format: uuid
-          description: Unique identifier for the data entry
         type:
           type: string
-          description: Type of the data
         tenant:
           type: string
-          description: Tenant identifier
         name:
           type: string
-          description: Name of the data file
         description:
           type: string
-          description: Optional description of the data file
         contentType:
           type: string
-          description: Content type of the file
           enum:
             - application/json
             - application/xml
         version:
           type: string
-          description: Semantic version of the data file
         dataCompatibilityVersion:
           type: string
-          description: Data compatibility version
         uploadedAt:
           type: string
           format: date-time
-          description: Timestamp when the data was uploaded
-    
+
     DataEntryWithContent:
       allOf:
         - $ref: '#/components/schemas/DataEntry'
@@ -529,27 +345,6 @@ components:
           properties:
             content:
               type: string
-              description: The actual content of the file (JSON or XML as string)
-    
-    PagedDataEntryResponse:
-      type: object
-      properties:
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/DataEntry'
-        totalElements:
-          type: integer
-          description: Total number of entries
-        totalPages:
-          type: integer
-          description: Total number of pages
-        page:
-          type: integer
-          description: Current page number
-        size:
-          type: integer
-          description: Page size
 
     UploadDataResponse:
       type: object
@@ -557,7 +352,6 @@ components:
         id:
           type: string
           format: uuid
-          description: Unique identifier for the uploaded data
         type:
           type: string
         tenant:
@@ -569,7 +363,6 @@ components:
         uploadedAt:
           type: string
           format: date-time
-          description: Timestamp of the upload
 
     Error:
       type: object
@@ -579,11 +372,8 @@ components:
       properties:
         code:
           type: string
-          description: Error code
         message:
           type: string
-          description: Human-readable error message
         details:
           type: object
-          description: Additional error details
           additionalProperties: true

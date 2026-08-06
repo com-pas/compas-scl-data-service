@@ -86,6 +86,16 @@ public class CompasPluginsResourceService {
     }
 
     @Transactional(SUPPORTS)
+    public PluginsCustomResource findByIdAndType(UUID id, String type) {
+        PluginsCustomResource entity = findById(id);
+        if (!Objects.equals(entity.type, type)) {
+            throw new CompasNoDataFoundException(
+                    String.format("Data entry with id '%s' not found for type '%s'", id, type));
+        }
+        return entity;
+    }
+
+    @Transactional(SUPPORTS)
     public List<PluginsCustomResource> findLatestByType(String type) {
         TypedQuery<PluginsCustomResource> query = entityManager.createQuery(
             "SELECT e FROM PluginsCustomResource e WHERE e.type = :type",
@@ -127,6 +137,44 @@ public class CompasPluginsResourceService {
                 .max(Comparator.comparing(entity -> new Version(entity.version)))
                 .orElseThrow(() -> new CompasNoDataFoundException(
                         String.format("No data entries found for type '%s' and name '%s'", type, name)));
+    }
+
+    @Transactional(SUPPORTS)
+    public List<PluginsCustomResource> findVersionsByTypeAndName(String type, String name) {
+        List<PluginsCustomResource> entities = entityManager.createQuery(
+                        "SELECT e FROM PluginsCustomResource e WHERE e.type = :type AND e.name = :name",
+                        PluginsCustomResource.class)
+                .setParameter("type", type)
+                .setParameter("name", name)
+                .getResultList();
+
+        if (entities.isEmpty()) {
+            throw new CompasNoDataFoundException(
+                    String.format("No data entries found for type '%s' and name '%s'", type, name));
+        }
+
+        return entities.stream()
+                .sorted(Comparator.comparing((PluginsCustomResource entity) -> new Version(entity.version)).reversed())
+                .toList();
+    }
+
+    @Transactional(SUPPORTS)
+    public Map<String, List<String>> listPluginsWithTypes() {
+        List<String> qualifiedTypes = entityManager.createQuery(
+                        "SELECT DISTINCT e.type FROM PluginsCustomResource e ORDER BY e.type",
+                        String.class)
+                .getResultList();
+
+        return qualifiedTypes.stream()
+                .map(this::splitQualifiedType)
+                .collect(Collectors.groupingBy(
+                        QualifiedType::plugin,
+                        TreeMap::new,
+                        Collectors.mapping(
+                                QualifiedType::type,
+                                Collectors.collectingAndThen(
+                                        Collectors.toCollection(TreeSet::new),
+                                        ArrayList::new))));
     }
 
     @Transactional(REQUIRED)
@@ -273,5 +321,21 @@ public class CompasPluginsResourceService {
     private OffsetDateTime toOffsetDateTime(Date date) {
         if (date == null) return null;
         return date.toInstant().atOffset(ZoneOffset.UTC);
+    }
+
+    private QualifiedType splitQualifiedType(String qualifiedType) {
+        int separatorIndex = qualifiedType.lastIndexOf('_');
+        if (separatorIndex <= 0 || separatorIndex == qualifiedType.length() - 1) {
+            // Legacy or malformed values are surfaced as-is for both plugin and type
+            // so administrators can still discover and clean them up.
+            return new QualifiedType(qualifiedType, qualifiedType);
+        }
+
+        return new QualifiedType(
+                qualifiedType.substring(0, separatorIndex),
+                qualifiedType.substring(separatorIndex + 1));
+    }
+
+    private record QualifiedType(String plugin, String type) {
     }
 }

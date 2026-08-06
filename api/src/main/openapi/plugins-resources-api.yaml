@@ -1,0 +1,538 @@
+openapi: 3.0.3
+info:
+  title: CoMPAS SCL Data Service - Plugins Resources API
+  description: |
+    API for managing plugin-specific typed resources in the CoMPAS SCL Data Service.
+    Resources are organised by plugin and type, enabling plugins to store, version,
+    and retrieve their own typed configuration or process data independently.
+
+    ## Path structure
+    ```
+    /plugins-resources/plugins/{plugin}/types/{type}
+    /plugins-resources/plugins/{plugin}/types/{type}/{id}
+    /plugins-resources/plugins/{plugin}/types/{type}/latest
+    /plugins-resources/plugins/{plugin}/types/{type}/resources/{name}
+    /plugins-resources/plugins/{plugin}/types/{type}/resources/{name}/latest
+    /plugins-resources/plugins/{plugin}/types/{type}/resources/{name}/versions
+    ```
+  version: 2.0.0
+  contact:
+    name: CoMPAS Community
+  license:
+    name: Apache License Version 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: http://compas-scl-data-service
+    description: CoMPAS SCL Data Service
+
+tags:
+  - name: plugins-resources
+    description: Plugin-specific typed resource management
+
+paths:
+
+  # ---------------------------------------------------------------------------
+  # Type-level operations  →  /plugins/{plugin}/types/{type}
+  # ---------------------------------------------------------------------------
+
+  /plugins-resources/plugins/{plugin}/types/{type}:
+    post:
+      tags:
+        - plugins-resources
+      summary: Create a new resource version
+      description: |
+        Creates a new versioned resource for the given plugin and type.
+        Either `version` (explicit semver) or `nextVersionType` (automatic increment)
+        must be supplied — they are mutually exclusive.
+      operationId: createPluginResource
+      parameters:
+        - $ref: '#/components/parameters/plugin'
+        - $ref: '#/components/parameters/type'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePluginResourceRequest'
+            example:
+              name: "default-process"
+              description: "Default process definition for the engineering wizard"
+              contentType: "application/json"
+              nextVersionType: "minor"
+              dataCompatibilityVersion: "1.0.0"
+              content: "{\n  \"process\": \"substation-engineering\",\n  \"steps\": [\"design\", \"validation\", \"approval\"]\n}\n"
+      responses:
+        '201':
+          description: Resource version created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginResourceMeta'
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                type: "engineering-wizard_process"
+                name: "default-process"
+                description: "Default process definition for the engineering wizard"
+                contentType: "application/json"
+                version: "1.1.0"
+                dataCompatibilityVersion: "1.0.0"
+                uploadedAt: "2026-06-10T08:00:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - plugins-resources
+      summary: Delete all resources of a type
+      description: |
+        Deletes all resources (every name, every version) for the given plugin and type.
+        Intended for use when a type is no longer needed, e.g. after plugin refactoring.
+        This operation is irreversible.
+      operationId: deletePluginResourcesByType
+      parameters:
+        - $ref: '#/components/parameters/plugin'
+        - $ref: '#/components/parameters/type'
+      responses:
+        '204':
+          description: All resources of the given type deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------------------------------------------------------------------------
+  # Single version by UUID  →  /plugins/{plugin}/types/{type}/{id}
+  # ---------------------------------------------------------------------------
+
+  /plugins-resources/plugins/{plugin}/types/{type}/{id}:
+    get:
+      tags:
+        - plugins-resources
+      summary: Get a specific resource version by ID
+      description: |
+        Retrieves a specific resource version, including its full content, identified
+        by its unique UUID. Use this endpoint when you already have a concrete version ID
+        (e.g. stored as a reference in another resource).
+      operationId: getPluginResourceById
+      parameters:
+        - $ref: '#/components/parameters/plugin'
+        - $ref: '#/components/parameters/type'
+        - name: id
+          in: path
+          required: true
+          description: UUID of the resource version to retrieve
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Resource version retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginResource'
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                type: "engineering-wizard_process"
+                name: "substation-configuration"
+                description: "Process definition for substation engineering wizard"
+                contentType: "application/json"
+                version: "1.2.3"
+                dataCompatibilityVersion: "1.0.0"
+                uploadedAt: "2026-02-18T10:30:00Z"
+                content: "{\n  \"process\": \"substation-engineering\",\n  \"steps\": [\"design\", \"validation\", \"approval\"]\n}\n"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------------------------------------------------------------------------
+  # Latest resources list  →  /plugins/{plugin}/types/{type}/latest
+  # ---------------------------------------------------------------------------
+
+  /plugins-resources/plugins/{plugin}/types/{type}/latest:
+    get:
+      tags:
+        - plugins-resources
+      summary: Get latest version metadata for all resources of a type
+      description: |
+        Retrieves metadata for all resources belonging to the given plugin and type,
+        reduced to one entry per resource name (the latest version). Content is not
+        included; use the `/resources/{name}/latest` endpoint to fetch content.
+      operationId: getLatestPluginResourcesByType
+      parameters:
+        - $ref: '#/components/parameters/plugin'
+        - $ref: '#/components/parameters/type'
+      responses:
+        '200':
+          description: Latest resource metadata retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PluginResourceMeta'
+              example:
+                - id: "550e8400-e29b-41d4-a716-446655440000"
+                  type: "engineering-wizard_process"
+                  name: "substation-configuration"
+                  description: "Process definition for substation engineering wizard"
+                  contentType: "application/json"
+                  version: "1.2.3"
+                  dataCompatibilityVersion: "1.0.0"
+                  uploadedAt: "2026-02-18T10:30:00Z"
+                - id: "660f9511-f39c-52e5-b827-557766551111"
+                  type: "engineering-wizard_process"
+                  name: "default-process"
+                  description: "Default process definition for the engineering wizard"
+                  contentType: "application/json"
+                  version: "2.0.0"
+                  dataCompatibilityVersion: "2.0.0"
+                  uploadedAt: "2026-06-10T08:00:00Z"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------------------------------------------------------------------------
+  # Named-resource operations  →  /plugins/{plugin}/types/{type}/resources/{name}
+  # ---------------------------------------------------------------------------
+
+  /plugins-resources/plugins/{plugin}/types/{type}/resources/{name}:
+    delete:
+      tags:
+        - plugins-resources
+      summary: Delete a named resource and all its versions
+      description: |
+        Deletes a specific named resource and every version that exists for it under
+        the given plugin and type. This operation is irreversible.
+      operationId: deletePluginResourceByName
+      parameters:
+        - $ref: '#/components/parameters/plugin'
+        - $ref: '#/components/parameters/type'
+        - $ref: '#/components/parameters/name'
+      responses:
+        '204':
+          description: Resource and all its versions deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /plugins-resources/plugins/{plugin}/types/{type}/resources/{name}/latest:
+    get:
+      tags:
+        - plugins-resources
+      summary: Get the latest version of a named resource
+      description: |
+        Retrieves the most recent version of the specified named resource, including
+        its full content. Equivalent to resolving the latest semver tag for the name.
+      operationId: getLatestPluginResourceByName
+      parameters:
+        - $ref: '#/components/parameters/plugin'
+        - $ref: '#/components/parameters/type'
+        - $ref: '#/components/parameters/name'
+      responses:
+        '200':
+          description: Latest resource version retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginResource'
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                type: "engineering-wizard_process"
+                name: "default-process"
+                description: "Default process definition for the engineering wizard"
+                contentType: "application/json"
+                version: "2.0.0"
+                dataCompatibilityVersion: "2.0.0"
+                uploadedAt: "2026-06-10T08:00:00Z"
+                content: "{\n  \"process\": \"substation-engineering\",\n  \"steps\": [\"design\", \"validation\", \"approval\", \"commissioning\"]\n}\n"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /plugins-resources/plugins/{plugin}/types/{type}/resources/{name}/versions:
+    get:
+      tags:
+        - plugins-resources
+      summary: Get all versions of a named resource
+      description: |
+        Retrieves metadata for every version of the specified named resource, ordered
+        by version descending (newest first). Content is not included; use the `/{id}`
+        endpoint to fetch the content of a specific version.
+      operationId: getPluginResourceVersionsByName
+      parameters:
+        - $ref: '#/components/parameters/plugin'
+        - $ref: '#/components/parameters/type'
+        - $ref: '#/components/parameters/name'
+      responses:
+        '200':
+          description: Resource version history retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PluginResourceMeta'
+              example:
+                - id: "550e8400-e29b-41d4-a716-446655440000"
+                  type: "engineering-wizard_process"
+                  name: "default-process"
+                  description: "Default process definition for the engineering wizard"
+                  contentType: "application/json"
+                  version: "2.0.0"
+                  dataCompatibilityVersion: "2.0.0"
+                  uploadedAt: "2026-06-10T08:00:00Z"
+                - id: "440d7300-d18a-30c3-9605-335544330999"
+                  type: "engineering-wizard_process"
+                  name: "default-process"
+                  description: "Default process definition for the engineering wizard"
+                  contentType: "application/json"
+                  version: "1.0.0"
+                  dataCompatibilityVersion: "1.0.0"
+                  uploadedAt: "2026-02-18T10:30:00Z"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+# =============================================================================
+# Reusable components
+# =============================================================================
+components:
+
+  parameters:
+
+    plugin:
+      name: plugin
+      in: path
+      required: true
+      description: |
+        Plugin identifier. Must start with a lowercase letter and contain only
+        lowercase letters, digits, and underscores.
+      schema:
+        type: string
+        pattern: '^[a-z][a-z0-9_]*$'
+      example: "engineering_wizard"
+
+    type:
+      name: type
+      in: path
+      required: true
+      description: |
+        Resource type defined by the plugin. Must start with a lowercase letter and
+        contain only lowercase letters, digits, hyphens, and underscores.
+      schema:
+        type: string
+        pattern: '^[a-z][a-z0-9_-]*$'
+      example: "processes"
+
+    name:
+      name: name
+      in: path
+      required: true
+      description: |
+        Resource name. Must start with a lowercase letter and contain only
+        lowercase letters, digits, hyphens, and underscores.
+      schema:
+        type: string
+        pattern: '^[a-z][a-z0-9_-]*$'
+      example: "default-process"
+
+  schemas:
+
+    PluginResourceMeta:
+      type: object
+      description: Resource version metadata — content is not included.
+      required:
+        - id
+        - type
+        - name
+        - contentType
+        - version
+        - dataCompatibilityVersion
+        - uploadedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for this resource version.
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        type:
+          type: string
+          description: Combined type identifier in the form `{plugin}_{type}`.
+          example: "engineering-wizard_process"
+        name:
+          type: string
+          description: Human-readable resource name, unique within a plugin–type combination.
+          example: "default-process"
+        description:
+          type: string
+          description: Optional human-readable description of the resource.
+          example: "Default process definition for the engineering wizard"
+        contentType:
+          type: string
+          description: Media type of the stored resource content.
+          enum:
+            - application/json
+            - application/xml
+          example: "application/json"
+        version:
+          type: string
+          pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+          description: Semantic version (semver) of this resource version.
+          example: "1.2.3"
+        dataCompatibilityVersion:
+          type: string
+          pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+          description: |
+            Data schema compatibility version. Consumers can use this to decide whether
+            they can process the content without migration.
+          example: "1.0.0"
+        uploadedAt:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when this resource version was stored.
+          example: "2026-02-18T10:30:00Z"
+
+    PluginResource:
+      allOf:
+        - $ref: '#/components/schemas/PluginResourceMeta'
+        - type: object
+          description: Resource version including its full content.
+          required:
+            - content
+          properties:
+            content:
+              type: string
+              description: |
+                The resource content encoded as a UTF-8 string. The format (JSON or XML)
+                is indicated by the `contentType` field.
+              example: "{\n  \"process\": \"substation-engineering\",\n  \"steps\": [\"design\", \"validation\", \"approval\"]\n}\n"
+
+    CreatePluginResourceRequest:
+      type: object
+      description: |
+        Request body for creating a new resource version. Either `version` or
+        `nextVersionType` must be provided — they are mutually exclusive.
+      required:
+        - name
+        - contentType
+        - dataCompatibilityVersion
+        - content
+      properties:
+        name:
+          type: string
+          description: |
+            Resource name. Must be unique within the plugin–type scope.
+            Use the same name across versions to build a version history.
+          pattern: '^[a-z][a-z0-9_-]*$'
+          example: "default-process"
+        description:
+          type: string
+          description: Optional human-readable description of the resource.
+          example: "Default process definition for the engineering wizard"
+        contentType:
+          type: string
+          description: Media type of the content being uploaded.
+          enum:
+            - application/json
+            - application/xml
+          example: "application/json"
+        version:
+          type: string
+          pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+          description: |
+            Explicit semantic version for this resource version.
+            Required when `nextVersionType` is not provided.
+          example: "1.2.3"
+        nextVersionType:
+          type: string
+          description: |
+            Automatic version increment strategy applied to the current latest version
+            of this resource. Required when `version` is not provided.
+          enum:
+            - major
+            - minor
+            - patch
+        dataCompatibilityVersion:
+          type: string
+          pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+          description: Data schema compatibility version for this resource version.
+          example: "1.0.0"
+        content:
+          type: string
+          description: |
+            The resource content as a UTF-8 string. The format must match `contentType`.
+          example: "{\n  \"process\": \"substation-engineering\",\n  \"steps\": [\"design\", \"validation\", \"approval\"]\n}\n"
+
+    Error:
+      type: object
+      description: Standard error response body.
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code.
+          example: "NOT_FOUND"
+        message:
+          type: string
+          description: Human-readable description of the error.
+          example: "No resource found for the given plugin, type, and name"
+        details:
+          type: object
+          description: Optional additional error context.
+          additionalProperties: true
+
+  responses:
+
+    BadRequest:
+      description: Bad request — invalid path parameters, query parameters, or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "INVALID_INPUT"
+            message: "Invalid semantic version format: '1.2' is not a valid semver"
+
+    NotFound:
+      description: The requested resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "NOT_FOUND"
+            message: "No resource found for plugin 'engineering_wizard', type 'processes'"
+
+    Conflict:
+      description: Conflict — a resource with this name and version already exists.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "DUPLICATE_VERSION"
+            message: "Resource 'default-process' version '1.2.3' already exists for plugin 'engineering_wizard' and type 'processes'"
+
+    InternalServerError:
+      description: Internal server error — an unexpected condition occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "INTERNAL_ERROR"
+            message: "An unexpected error occurred"

@@ -13,7 +13,7 @@ import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.rest.PluginsCustomResourcesApi;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntry;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.DataEntryWithContent;
-import org.lfenergy.compas.scl.data.rest.api.plugins.resources.PagedDataEntryResponse;
+import org.lfenergy.compas.scl.data.rest.api.plugins.resources.PluginWithTypes;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.UploadDataResponse;
 import org.lfenergy.compas.scl.data.service.CompasPluginsResourceService;
 import org.lfenergy.compas.scl.data.service.UploadCustomPluginsResourceData;
@@ -40,78 +40,72 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
     }
 
     @Override
-    public PagedDataEntryResponse getAllData(String type,
-                                            Date uploadedAfter,
-                                            Date uploadedBefore,
-                                            String name,
-                                            Integer page,
-                                            Integer size) {
-        LOGGER.info("Listing plugins custom resources for type '{}'", type);
+    public List<PluginWithTypes> getPluginsWithTypes() {
+        LOGGER.info("Listing plugins custom resource plugins with their types");
 
-        var entities = service.list(type, uploadedAfter, uploadedBefore, name, page, size);
-        long totalElements = service.count(type, uploadedAfter, uploadedBefore, name);
-
-        var entries = entities.stream()
-                .map(this::toDataEntry)
-                .toList();
-
-        int totalPages = size > 0 ? (int) Math.ceil((double) totalElements / size) : 0;
-
-        var response = new PagedDataEntryResponse();
-        response.setContent(entries);
-        response.setTotalElements((int) totalElements);
-        response.setTotalPages(totalPages);
-        response.setPage(page);
-        response.setSize(size);
-        return response;
-    }
-
-    @Override
-    public DataEntryWithContent getDataById(UUID id) {
-        LOGGER.info("Getting plugins custom resource by id '{}'", id);
-
-        var entity = service.findById(id);
-        return toDataEntryWithContent(entity);
-    }
-
-    @Override
-    public void deleteDataByType(String dataType) {
-        LOGGER.info("Deleting plugins custom resources by type '{}'", dataType);
-        service.deleteByType(dataType);
-    }
-
-    @Override
-    public List<DataEntry> getLatestDataByType(String dataType) {
-        LOGGER.info("Getting latest plugins custom resource by type '{}'", dataType);
-
-        return service.findLatestByType(dataType).stream()
-                .map(this::toDataEntry)
+        return service.listPluginsWithTypes().entrySet().stream()
+                .map(entry -> new PluginWithTypes()
+                        .plugin(entry.getKey())
+                        .types(entry.getValue()))
                 .toList();
     }
 
     @Override
-    public void deleteDataByTypeAndName(String dataType, String name) {
-        LOGGER.info("Deleting plugins custom resources by type '{}' and name '{}'", dataType, name);
-        service.deleteByTypeAndName(dataType, name);
+    public DataEntryWithContent getPluginResourceById(String plugin, String type, UUID id) {
+        LOGGER.info("Getting plugins custom resource by plugin '{}', type '{}' and id '{}'", plugin, type, id);
+
+        var entity = service.findByIdAndType(id, toQualifiedType(plugin, type));
+        return toDataEntryWithContent(entity, type);
     }
 
     @Override
-    public DataEntryWithContent getLatestDataByTypeAndName(String dataType, String name) {
-        LOGGER.info("Getting latest plugins custom resource by type '{}' and name '{}'", dataType, name);
-
-        var entity = service.findLatestByTypeAndName(dataType, name);
-        return toDataEntryWithContent(entity);
+    public void deletePluginResourcesByType(String plugin, String type) {
+        LOGGER.info("Deleting plugins custom resources by plugin '{}' and type '{}'", plugin, type);
+        service.deleteByType(toQualifiedType(plugin, type));
     }
 
     @Override
-    public UploadDataResponse uploadData(String type,
-                                             String name,
-                                             String contentType,
-                                             InputStream content,
-                                             String dataCompatibilityVersion,
-                                             String description,
-                                             String version,
-                                             String nextVersionType) {
+    public List<DataEntry> getLatestPluginResourcesByType(String plugin, String type) {
+        LOGGER.info("Getting latest plugins custom resources by plugin '{}' and type '{}'", plugin, type);
+
+        return service.findLatestByType(toQualifiedType(plugin, type)).stream()
+                .map(entity -> toDataEntry(entity, type))
+                .toList();
+    }
+
+    @Override
+    public void deletePluginResourceByName(String plugin, String type, String name) {
+        LOGGER.info("Deleting plugins custom resources by plugin '{}', type '{}' and name '{}'", plugin, type, name);
+        service.deleteByTypeAndName(toQualifiedType(plugin, type), name);
+    }
+
+    @Override
+    public DataEntryWithContent getLatestPluginResourceByName(String plugin, String type, String name) {
+        LOGGER.info("Getting latest plugins custom resource by plugin '{}', type '{}' and name '{}'", plugin, type, name);
+
+        var entity = service.findLatestByTypeAndName(toQualifiedType(plugin, type), name);
+        return toDataEntryWithContent(entity, type);
+    }
+
+    @Override
+    public List<DataEntry> getPluginResourceVersionsByName(String plugin, String type, String name) {
+        LOGGER.info("Getting plugins custom resource versions by plugin '{}', type '{}' and name '{}'", plugin, type, name);
+
+        return service.findVersionsByTypeAndName(toQualifiedType(plugin, type), name).stream()
+                .map(entity -> toDataEntry(entity, type))
+                .toList();
+    }
+
+    @Override
+    public UploadDataResponse createPluginResource(String plugin,
+                                                   String type,
+                                                   String name,
+                                                   String contentType,
+                                                   InputStream content,
+                                                   String dataCompatibilityVersion,
+                                                   String description,
+                                                   String version,
+                                                   String nextVersionType) {
         String contentText;
         try {
             contentText = new String(content.readAllBytes(), StandardCharsets.UTF_8);
@@ -119,12 +113,12 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
             throw new CompasInvalidInputException("Failed to read content from upload");
         }
 
-        var entity = service.upload(new UploadCustomPluginsResourceData(type, name, contentType, contentText,
+        var entity = service.upload(new UploadCustomPluginsResourceData(toQualifiedType(plugin, type), name, contentType, contentText,
                 dataCompatibilityVersion, description, version, nextVersionType));
 
         var response = new UploadDataResponse();
         response.setId(entity.id);
-        response.setType(entity.type);
+        response.setType(type);
         response.setTenant(entity.tenant);
         response.setName(entity.name);
         response.setVersion(entity.version);
@@ -132,23 +126,23 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
         return response;
     }
 
-    private DataEntry toDataEntry(PluginsCustomResource entity) {
+    private DataEntry toDataEntry(PluginsCustomResource entity, String type) {
         var entry = new DataEntry();
-        mapCommonDataEntryFields(entry, entity);
+        mapCommonDataEntryFields(entry, entity, type);
         return entry;
     }
 
-    private DataEntryWithContent toDataEntryWithContent(PluginsCustomResource entity) {
+    private DataEntryWithContent toDataEntryWithContent(PluginsCustomResource entity, String type) {
         var entry = new DataEntryWithContent();
-        mapCommonDataEntryFields(entry, entity);
+        mapCommonDataEntryFields(entry, entity, type);
         entry.setContent(entity.content);
         return entry;
     }
 
 
-    private void mapCommonDataEntryFields(DataEntry entry, PluginsCustomResource entity) {
+    private void mapCommonDataEntryFields(DataEntry entry, PluginsCustomResource entity, String type) {
         entry.setId(entity.id);
-        entry.setType(entity.type);
+        entry.setType(type);
         entry.setTenant(entity.tenant);
         entry.setName(entity.name);
         entry.setDescription(entity.description);
@@ -161,5 +155,15 @@ public class CompasPluginsResource implements PluginsCustomResourcesApi {
     private Date toDate(OffsetDateTime odt) {
         if (odt == null) return null;
         return Date.from(odt.toInstant());
+    }
+
+    private String toQualifiedType(String plugin, String type) {
+        if (plugin == null || plugin.isBlank() || type == null || type.isBlank()) {
+            throw new CompasInvalidInputException("Plugin and type must be provided");
+        }
+        if (plugin.contains("_") || type.contains("_")) {
+            throw new CompasInvalidInputException("Plugin and type must not contain '_'");
+        }
+        return plugin + "_" + type;
     }
 }
