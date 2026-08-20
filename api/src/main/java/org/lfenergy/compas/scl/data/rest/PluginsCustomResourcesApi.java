@@ -62,9 +62,6 @@ public interface PluginsCustomResourcesApi {
      * Delete all data entries for the given data type
      *
      * @param dataType Data type of the entries to delete
-     * @return Data entries deleted successfully
-     * @return No data entries found for the given data type
-     * @return Internal server error
      */
     @DELETE
     @Path("/{data-type}")
@@ -90,9 +87,6 @@ public interface PluginsCustomResourcesApi {
      *
      * @param dataType Data type of the entries to delete
      * @param name Name of the entries to delete
-     * @return Data entries deleted successfully
-     * @return No data entries found for the given data type and name
-     * @return Internal server error
      */
     @DELETE
     @Path("/{data-type}/{name}")
