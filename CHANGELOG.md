@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.18.3](https://github.com/com-pas/compas-scl-data-service/compare/v0.18.2...v0.18.3) (2026-08-21)
+
+
+### Bug Fixes
+
+* add license text in CompasAssignedLocationException ([65eb55e](https://github.com/com-pas/compas-scl-data-service/commit/65eb55e502672bd11f77e01cf8aa5ff8eb767b95))
+* **ci:** Fix sonar workflows ([3de3a89](https://github.com/com-pas/compas-scl-data-service/commit/3de3a89601f130f3bb666d96fa56a496826a49f4))
+* Fix release workflow ([bd745fc](https://github.com/com-pas/compas-scl-data-service/commit/bd745fccf711a2e64768d758f011d12d24887006))
+* Remove pr target trigger ([7387b6f](https://github.com/com-pas/compas-scl-data-service/commit/7387b6fab6ae64ceaae6cbde4ec99b0fe363d64d))
+* Remove pr target trigger ([00a7205](https://github.com/com-pas/compas-scl-data-service/commit/00a7205dd3e17986da1e7a826ab1f72f5a5da65f))
+
 ## [0.18.2](https://github.com/com-pas/compas-scl-data-service/compare/v0.18.1...v0.18.2) (2026-06-29)
 
 
