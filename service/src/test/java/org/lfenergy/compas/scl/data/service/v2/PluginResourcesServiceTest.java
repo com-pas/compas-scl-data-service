@@ -6,7 +6,7 @@ package org.lfenergy.compas.scl.data.service.v2;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
+import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.exception.CompasDuplicateVersionException;
 import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
@@ -39,7 +39,7 @@ class PluginResourcesServiceTest {
     private PluginResourceRepository pluginResourceRepository;
 
     @Captor
-    private ArgumentCaptor<PluginResource> entityCaptor;
+    private ArgumentCaptor<PluginsCustomResource> entityCaptor;
 
     private PluginResourcesService service;
 
@@ -358,8 +358,8 @@ class PluginResourcesServiceTest {
 
     // ---- helpers -----------------------------------------------------------
 
-    private PluginResource buildEntity() {
-        var entity = new PluginResource();
+    private PluginsCustomResource buildEntity() {
+        var entity = new PluginsCustomResource();
         entity.id = UUID.randomUUID();
         entity.plugin = PLUGIN;
         entity.type = TYPE;

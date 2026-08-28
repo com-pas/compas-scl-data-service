@@ -7,7 +7,7 @@ import io.quarkus.hibernate.panache.blocking.PanacheBlockingQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
+import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -47,7 +47,7 @@ class PluginResourceRepositoryTest {
     @Test
     void findByIdForPluginAndType_WhenEntityFound_ThenReturnsOptionalOfEntity() {
         var id = UUID.randomUUID();
-        var entity = new PluginResource();
+        var entity = new PluginsCustomResource();
         var query = mock(PanacheBlockingQuery.class);
         doReturn(query).when(repository).find(anyString(), eq(PLUGIN), eq(TYPE), eq(id));
         when(query.firstResultOptional()).thenReturn(Optional.of(entity));
@@ -74,8 +74,8 @@ class PluginResourceRepositoryTest {
 
     @Test
     void findAllByPluginAndType_WhenCalled_ThenDelegatesToList() {
-        var e1 = new PluginResource();
-        var e2 = new PluginResource();
+        var e1 = new PluginsCustomResource();
+        var e2 = new PluginsCustomResource();
         doReturn(List.of(e1, e2)).when(repository).list(anyString(), eq(PLUGIN), eq(TYPE));
 
         var result = repository.findAllByPluginAndType(PLUGIN, TYPE);
@@ -87,7 +87,7 @@ class PluginResourceRepositoryTest {
 
     @Test
     void findAllByPluginTypeAndName_WhenCalled_ThenDelegatesToList() {
-        var e1 = new PluginResource();
+        var e1 = new PluginsCustomResource();
         doReturn(List.of(e1)).when(repository).list(anyString(), eq(PLUGIN), eq(TYPE), eq(NAME));
 
         var result = repository.findAllByPluginTypeAndName(PLUGIN, TYPE, NAME);

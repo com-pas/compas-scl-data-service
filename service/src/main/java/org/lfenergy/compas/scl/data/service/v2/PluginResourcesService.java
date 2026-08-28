@@ -8,7 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
+import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.exception.CompasDuplicateVersionException;
 import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
@@ -45,7 +45,7 @@ public class PluginResourcesService {
     }
 
     @Transactional(SUPPORTS)
-    public PluginResource findById(String plugin, String type, UUID id) {
+    public PluginsCustomResource findById(String plugin, String type, UUID id) {
         return pluginResourceRepository.findByIdForPluginAndType(plugin, type, id)
                 .orElseThrow(() -> new CompasNoDataFoundException(
                         String.format("No resource with id '%s' found under plugin '%s' and type '%s'",
@@ -53,8 +53,8 @@ public class PluginResourcesService {
     }
 
     @Transactional(SUPPORTS)
-    public List<PluginResource> findLatestByType(String plugin, String type) {
-        List<PluginResource> entities = pluginResourceRepository.findAllByPluginAndType(plugin, type);
+    public List<PluginsCustomResource> findLatestByType(String plugin, String type) {
+        List<PluginsCustomResource> entities = pluginResourceRepository.findAllByPluginAndType(plugin, type);
 
         if (entities.isEmpty()) {
             throw new CompasNoDataFoundException(
@@ -73,8 +73,8 @@ public class PluginResourcesService {
     }
 
     @Transactional(SUPPORTS)
-    public PluginResource findLatestByName(String plugin, String type, String name) {
-        List<PluginResource> entities =
+    public PluginsCustomResource findLatestByName(String plugin, String type, String name) {
+        List<PluginsCustomResource> entities =
                 pluginResourceRepository.findAllByPluginTypeAndName(plugin, type, name);
 
         if (entities.isEmpty()) {
@@ -91,8 +91,8 @@ public class PluginResourcesService {
     }
 
     @Transactional(SUPPORTS)
-    public List<PluginResource> findVersionsByName(String plugin, String type, String name) {
-        List<PluginResource> entities =
+    public List<PluginsCustomResource> findVersionsByName(String plugin, String type, String name) {
+        List<PluginsCustomResource> entities =
                 pluginResourceRepository.findAllByPluginTypeAndName(plugin, type, name);
 
         if (entities.isEmpty()) {
@@ -102,7 +102,7 @@ public class PluginResourcesService {
         }
 
         return entities.stream()
-                .sorted(Comparator.comparing((PluginResource e) -> new Version(e.version)).reversed())
+                .sorted(Comparator.comparing((PluginsCustomResource e) -> new Version(e.version)).reversed())
                 .toList();
     }
 
@@ -127,7 +127,7 @@ public class PluginResourcesService {
     }
 
     @Transactional(REQUIRED)
-    public PluginResource create(CreatePluginResourceData request) {
+    public PluginsCustomResource create(CreatePluginResourceData request) {
         LOGGER.info("Creating plugin resource plugin='{}', type='{}', name='{}'",
                 request.plugin(), request.type(), request.name());
 
@@ -144,7 +144,7 @@ public class PluginResourcesService {
                             request.name(), resolvedVersion, request.plugin(), request.type()));
         }
 
-        var entity = new PluginResource();
+        var entity = new PluginsCustomResource();
         entity.plugin = request.plugin();
         entity.type = request.type();
         entity.tenant = DEFAULT_TENANT;
@@ -189,7 +189,7 @@ public class PluginResourcesService {
 
     private String findLatestVersionAndIncrement(String plugin, String type, String name,
                                                  ChangeSetType changeSetType) {
-        List<PluginResource> existing =
+        List<PluginsCustomResource> existing =
                 pluginResourceRepository.findAllByPluginTypeAndName(plugin, type, name);
 
         if (existing.isEmpty()) {

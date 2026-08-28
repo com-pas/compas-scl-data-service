@@ -5,7 +5,7 @@ package org.lfenergy.compas.scl.data.rest.v2;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
+import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.ContentType;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.CreatePluginResourceRequest;
@@ -206,8 +206,8 @@ class CompasPluginResourcesResourceTest {
 
     // ---- helpers ----------------------------------------------------------
 
-    private PluginResource createEntity() {
-        var entity = new PluginResource();
+    private PluginsCustomResource createEntity() {
+        var entity = new PluginsCustomResource();
         entity.id = UUID.randomUUID();
         entity.plugin = PLUGIN;
         entity.type = TYPE;

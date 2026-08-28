@@ -8,7 +8,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
+import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.rest.PluginsResourcesApi;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.ContentType;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.CreatePluginResourceRequest;
@@ -96,7 +96,7 @@ public class CompasPluginResourcesResource implements PluginsResourcesApi {
                 .toList();
     }
 
-    private PluginResourceMeta toMeta(PluginResource entity) {
+    private PluginResourceMeta toMeta(PluginsCustomResource entity) {
         var meta = new PluginResourceMeta();
         meta.setId(entity.id);
         meta.setType(entity.type);
@@ -110,7 +110,7 @@ public class CompasPluginResourcesResource implements PluginsResourcesApi {
     }
 
     private org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.PluginResource toResource(
-            PluginResource entity) {
+            PluginsCustomResource entity) {
         var dto = new org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.PluginResource();
         dto.setId(entity.id);
         dto.setType(entity.type);

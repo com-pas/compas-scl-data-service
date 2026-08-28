@@ -5,7 +5,7 @@ package org.lfenergy.compas.scl.data.repository;
 
 import io.quarkus.hibernate.panache.managed.blocking.PanacheManagedBlockingRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.lfenergy.compas.scl.data.entities.v2.PluginResource;
+import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,13 +13,13 @@ import java.util.UUID;
 
 @ApplicationScoped
 public class PluginResourceRepository
-        implements PanacheManagedBlockingRepositoryBase<PluginResource, UUID> {
+        implements PanacheManagedBlockingRepositoryBase<PluginsCustomResource, UUID> {
 
     /**
      * Returns the entity for the given id, restricted to the supplied plugin and type
      * so that a caller cannot fetch a resource that belongs to another plugin/type.
      */
-    public Optional<PluginResource> findByIdForPluginAndType(String plugin, String type, UUID id) {
+    public Optional<PluginsCustomResource> findByIdForPluginAndType(String plugin, String type, UUID id) {
         return find("plugin = ?1 and type = ?2 and id = ?3", plugin, type, id).firstResultOptional();
     }
 
@@ -27,7 +27,7 @@ public class PluginResourceRepository
      * Returns every resource row for the given plugin and type. Reduction to the
      * latest version per name is performed in the service layer.
      */
-    public List<PluginResource> findAllByPluginAndType(String plugin, String type) {
+    public List<PluginsCustomResource> findAllByPluginAndType(String plugin, String type) {
         return list("plugin = ?1 and type = ?2", plugin, type);
     }
 
@@ -36,7 +36,7 @@ public class PluginResourceRepository
      * Ordered by uploadedAt descending as a stable default; callers may re-sort
      * by semver as needed.
      */
-    public List<PluginResource> findAllByPluginTypeAndName(String plugin, String type, String name) {
+    public List<PluginsCustomResource> findAllByPluginTypeAndName(String plugin, String type, String name) {
         return list("plugin = ?1 and type = ?2 and name = ?3 order by uploadedAt desc",
                 plugin, type, name);
     }
