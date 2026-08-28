@@ -43,7 +43,7 @@ class CompasPluginsResourceServiceTest {
         var resource = createResource();
         when(query.getResultList()).thenReturn(List.of(resource));
 
-        var result = service.list("xml", null, null, null, 0, 20);
+        var result = service.list("my-plugin_my-resource", null, null, null, 0, 20);
 
         assertEquals(1, result.size());
         assertEquals(resource, result.get(0));
@@ -56,7 +56,7 @@ class CompasPluginsResourceServiceTest {
         var query = mockTypedQuery(PluginsCustomResource.class);
         when(query.getResultList()).thenReturn(List.of());
 
-        service.list("xml", new Date(), new Date(), "test", 1, 10);
+        service.list("my-plugin_my-resource", new Date(), new Date(), "test", 1, 10);
 
         var jpqlCaptor = ArgumentCaptor.forClass(String.class);
         verify(entityManager).createQuery(jpqlCaptor.capture(), eq(PluginsCustomResource.class));
@@ -76,7 +76,7 @@ class CompasPluginsResourceServiceTest {
         var query = mockTypedQuery(Long.class);
         when(query.getSingleResult()).thenReturn(5L);
 
-        var result = service.count("xml", null, null, null);
+        var result = service.count("my-plugin_my-resource", null, null, null);
 
         assertEquals(5L, result);
     }
@@ -86,7 +86,7 @@ class CompasPluginsResourceServiceTest {
         var query = mockTypedQuery(Long.class);
         when(query.getSingleResult()).thenReturn(3L);
 
-        var result = service.count("xml", new Date(), new Date(), "search");
+        var result = service.count("my-plugin_my-resource", new Date(), new Date(), "search");
 
         assertEquals(3L, result);
         var jpqlCaptor = ArgumentCaptor.forClass(String.class);
@@ -133,12 +133,12 @@ class CompasPluginsResourceServiceTest {
         another.version = "2.0.0";
         when(query.getResultList()).thenReturn(List.of(older, newer, another));
 
-        var result = service.findLatestByType("xml");
+        var result = service.findLatestByType("my-plugin_my-resource");
 
         assertEquals(2, result.size());
         assertEquals(another, result.get(0));
         assertEquals(newer, result.get(1));
-        verify(query).setParameter("type", "xml");
+        verify(query).setParameter("type", "my-plugin_my-resource");
     }
 
     @Test
@@ -146,9 +146,9 @@ class CompasPluginsResourceServiceTest {
         var query = mockTypedQuery(PluginsCustomResource.class);
         when(query.getResultList()).thenReturn(List.of());
 
-        var exception = assertThrows(CompasNoDataFoundException.class, () -> service.findLatestByType("xml"));
+        var exception = assertThrows(CompasNoDataFoundException.class, () -> service.findLatestByType("my-plugin_my-resource"));
 
-        assertTrue(exception.getMessage().contains("xml"));
+        assertTrue(exception.getMessage().contains("my-plugin_my-resource"));
     }
 
     @Test
@@ -162,10 +162,10 @@ class CompasPluginsResourceServiceTest {
         newer.version = "1.10.0";
         when(query.getResultList()).thenReturn(List.of(older, newer));
 
-        var result = service.findLatestByTypeAndName("xml", "config");
+        var result = service.findLatestByTypeAndName("my-plugin_my-resource", "config");
 
         assertEquals(newer, result);
-        verify(query).setParameter("type", "xml");
+        verify(query).setParameter("type", "my-plugin_my-resource");
         verify(query).setParameter("name", "config");
     }
 
@@ -175,9 +175,9 @@ class CompasPluginsResourceServiceTest {
         when(query.getResultList()).thenReturn(List.of());
 
         var exception = assertThrows(CompasNoDataFoundException.class,
-                () -> service.findLatestByTypeAndName("xml", "config"));
+                () -> service.findLatestByTypeAndName("my-plugin_my-resource", "config"));
 
-        assertTrue(exception.getMessage().contains("xml"));
+        assertTrue(exception.getMessage().contains("my-plugin_my-resource"));
         assertTrue(exception.getMessage().contains("config"));
     }
 
@@ -188,9 +188,9 @@ class CompasPluginsResourceServiceTest {
         when(deleteQuery.setParameter(anyString(), any())).thenReturn(deleteQuery);
         when(deleteQuery.executeUpdate()).thenReturn(2);
 
-        service.deleteByType("xml");
+        service.deleteByType("my-plugin_my-resource");
 
-        verify(deleteQuery).setParameter("type", "xml");
+        verify(deleteQuery).setParameter("type", "my-plugin_my-resource");
         verify(deleteQuery).executeUpdate();
     }
 
@@ -201,9 +201,9 @@ class CompasPluginsResourceServiceTest {
         when(deleteQuery.setParameter(anyString(), any())).thenReturn(deleteQuery);
         when(deleteQuery.executeUpdate()).thenReturn(0);
 
-        var exception = assertThrows(CompasNoDataFoundException.class, () -> service.deleteByType("xml"));
+        var exception = assertThrows(CompasNoDataFoundException.class, () -> service.deleteByType("my-plugin_my-resource"));
 
-        assertTrue(exception.getMessage().contains("xml"));
+        assertTrue(exception.getMessage().contains("my-plugin_my-resource"));
     }
 
     @Test
@@ -213,9 +213,9 @@ class CompasPluginsResourceServiceTest {
         when(deleteQuery.setParameter(anyString(), any())).thenReturn(deleteQuery);
         when(deleteQuery.executeUpdate()).thenReturn(2);
 
-        service.deleteByTypeAndName("xml", "config");
+        service.deleteByTypeAndName("my-plugin_my-resource", "config");
 
-        verify(deleteQuery).setParameter("type", "xml");
+        verify(deleteQuery).setParameter("type", "my-plugin_my-resource");
         verify(deleteQuery).setParameter("name", "config");
         verify(deleteQuery).executeUpdate();
     }
@@ -228,9 +228,9 @@ class CompasPluginsResourceServiceTest {
         when(deleteQuery.executeUpdate()).thenReturn(0);
 
         var exception = assertThrows(CompasNoDataFoundException.class,
-                () -> service.deleteByTypeAndName("xml", "config"));
+                () -> service.deleteByTypeAndName("my-plugin_my-resource", "config"));
 
-        assertTrue(exception.getMessage().contains("xml"));
+        assertTrue(exception.getMessage().contains("my-plugin_my-resource"));
         assertTrue(exception.getMessage().contains("config"));
     }
 
@@ -241,11 +241,11 @@ class CompasPluginsResourceServiceTest {
         var duplicateQuery = mockTypedQuery(Long.class);
         when(duplicateQuery.getSingleResult()).thenReturn(0L);
 
-        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var result = service.upload(new UploadCustomPluginsResourceData("my-plugin_my-resource", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "2.0.0", null));
 
         verify(entityManager).persist(any(PluginsCustomResource.class));
-        assertEquals("xml", result.type);
+        assertEquals("my-plugin_my-resource", result.type);
         assertEquals("name", result.name);
         assertEquals("application/xml", result.contentType);
         assertEquals("<root/>", result.content);
@@ -260,7 +260,7 @@ class CompasPluginsResourceServiceTest {
         var duplicateQuery = mockTypedQuery(Long.class);
         when(duplicateQuery.getSingleResult()).thenReturn(1L);
 
-        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var request = new UploadCustomPluginsResourceData("my-plugin_my-resource", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "2.0.0", null);
         assertThrows(CompasDuplicateVersionException.class, () -> service.upload(request));
     }
@@ -275,7 +275,7 @@ class CompasPluginsResourceServiceTest {
         existing.version = "1.2.3";
         when(existingQuery.getResultList()).thenReturn(List.of(existing));
 
-        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
+        var result = service.upload(new UploadCustomPluginsResourceData("my-plugin_my-resource", "name", "application/json", "{}",
                 "1.0.0", "desc", null, "MAJOR"));
 
         assertEquals("2.0.0", result.version);
@@ -291,7 +291,7 @@ class CompasPluginsResourceServiceTest {
         existing.version = "1.2.3";
         when(existingQuery.getResultList()).thenReturn(List.of(existing));
 
-        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
+        var result = service.upload(new UploadCustomPluginsResourceData("my-plugin_my-resource", "name", "application/json", "{}",
                 "1.0.0", "desc", null, "minor"));
 
         assertEquals("1.3.0", result.version);
@@ -307,7 +307,7 @@ class CompasPluginsResourceServiceTest {
         existing.version = "1.2.3";
         when(existingQuery.getResultList()).thenReturn(List.of(existing));
 
-        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
+        var result = service.upload(new UploadCustomPluginsResourceData("my-plugin_my-resource", "name", "application/json", "{}",
                 "1.0.0", "desc", null, "patch"));
 
         assertEquals("1.2.4", result.version);
@@ -321,7 +321,7 @@ class CompasPluginsResourceServiceTest {
         var existingQuery = mockTypedQuery(PluginsCustomResource.class);
         when(existingQuery.getResultList()).thenReturn(List.of());
 
-        var result = service.upload(new UploadCustomPluginsResourceData("xml", "name", "application/json", "{}",
+        var result = service.upload(new UploadCustomPluginsResourceData("my-plugin_my-resource", "name", "application/json", "{}",
                 "1.0.0", "desc", null, "MAJOR"));
 
         assertEquals("1.0.0", result.version);
@@ -329,21 +329,21 @@ class CompasPluginsResourceServiceTest {
 
     @Test
     void upload_WhenInvalidNextVersionType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var request = new UploadCustomPluginsResourceData("my-plugin_my-resource", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", null, "INVALID");
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenNoVersionAndNoNextVersionType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var request = new UploadCustomPluginsResourceData("my-plugin_my-resource", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", null, null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenBlankVersionAndBlankNextVersionType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var request = new UploadCustomPluginsResourceData("my-plugin_my-resource", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "  ", "  ");
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
@@ -351,29 +351,36 @@ class CompasPluginsResourceServiceTest {
     // --- validation ---
 
     @Test
+    void upload_WhenInvalidType_ThenThrowsCompasInvalidInputException() {
+        var request = new UploadCustomPluginsResourceData("my-plugin-my-resource", "name", "text/plain", "<root/>",
+                "1.0.0", "desc", "1.0.0", null);
+        assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
+    }
+
+    @Test
     void upload_WhenInvalidContentType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", "text/plain", "<root/>",
+        var request = new UploadCustomPluginsResourceData("my-plugin_my-resource", "name", "text/plain", "<root/>",
                 "1.0.0", "desc", "1.0.0", null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenNullContentType_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", null, "<root/>",
+        var request = new UploadCustomPluginsResourceData("my-plugin_my-resource", "name", null, "<root/>",
                 "1.0.0", "desc", "1.0.0", null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenInvalidSemverForDataCompatibilityVersion_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var request = new UploadCustomPluginsResourceData("my-plugin_my-resource", "name", "application/xml", "<root/>",
                 "not-a-version", "desc", "1.0.0", null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
 
     @Test
     void upload_WhenInvalidSemverForExplicitVersion_ThenThrowsCompasInvalidInputException() {
-        var request = new UploadCustomPluginsResourceData("xml", "name", "application/xml", "<root/>",
+        var request = new UploadCustomPluginsResourceData("my-plugin_my-resource", "name", "application/xml", "<root/>",
                 "1.0.0", "desc", "bad", null);
         assertThrows(CompasInvalidInputException.class, () -> service.upload(request));
     }
@@ -391,7 +398,7 @@ class CompasPluginsResourceServiceTest {
     private PluginsCustomResource createResource() {
         var resource = new PluginsCustomResource();
         resource.id = UUID.randomUUID();
-        resource.type = "xml";
+        resource.type = "my-plugin_my-resource";
         resource.tenant = "default";
         resource.name = "test-resource";
         resource.contentType = "application/xml";

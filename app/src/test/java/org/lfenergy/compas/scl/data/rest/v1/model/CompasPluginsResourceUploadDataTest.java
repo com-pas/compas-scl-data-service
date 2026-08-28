@@ -33,7 +33,7 @@ class CompasPluginsResourceUploadDataTest {
 
         given()
             .contentType("multipart/form-data")
-            .multiPart("type", "json")
+            .multiPart("type", "my-plugin_my-resource")
             .multiPart("name", "json-resource")
             .multiPart("description", "Description for JSON resource")
             .multiPart("content-type", "application/json")
@@ -55,7 +55,7 @@ class CompasPluginsResourceUploadDataTest {
 
         given()
             .contentType("multipart/form-data")
-            .multiPart("type", "xml")
+            .multiPart("type", "my-plugin_my-resource")
             .multiPart("name", "xml-resource")
             .multiPart("description", "Description for XML resource")
             .multiPart("content-type", "application/xml")
@@ -77,7 +77,7 @@ class CompasPluginsResourceUploadDataTest {
 
         given()
             .contentType("multipart/form-data")
-            .multiPart("type", "text")
+            .multiPart("type", "my-plugin_my-resource")
             .multiPart("name", "text-resource")
             .multiPart("description", "Description for Text resource")
             .multiPart("content-type", "*/*")
@@ -96,7 +96,7 @@ class CompasPluginsResourceUploadDataTest {
 
         given()
             .contentType("multipart/form-data")
-            .multiPart("type", "xml")
+            .multiPart("type", "my-plugin_my-resource")
             .multiPart("name", "xml-resource")
             .multiPart("description", "Description for XML resource")
             .multiPart("content-type", "application/xml")
