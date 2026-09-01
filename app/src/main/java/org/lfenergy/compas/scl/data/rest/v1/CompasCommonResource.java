@@ -5,6 +5,7 @@ package org.lfenergy.compas.scl.data.rest.v1;
 
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.common.annotation.Blocking;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -13,6 +14,7 @@ import org.lfenergy.compas.scl.data.rest.v1.model.Type;
 import org.lfenergy.compas.scl.data.rest.v1.model.TypeListResponse;
 import org.lfenergy.compas.scl.data.rest.v1.model.UserInfoResponse;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
+import org.lfenergy.compas.scl.data.service.SclFileGroupService;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -37,13 +39,29 @@ public class CompasCommonResource {
     @Inject
     UserInfoProperties userInfoProperties;
 
+    @Inject
+    SclFileGroupService sclFileGroupService;
+
     @GET
     @Path("/type/list")
     @Produces(MediaType.APPLICATION_XML)
+    @Blocking
     public Uni<TypeListResponse> list() {
         LOGGER.info("Retrieving list of the types of SCL Files");
 
+        var sclFileGroups = sclFileGroupService.listAll();
+
+        // TODO: Filter for user rights
+        var response = new TypeListResponse();
+        response.setTypes(
+                sclFileGroups.stream()
+                        .map(sclFileGroup -> new Type(sclFileGroup.code, sclFileGroup.description))
+                        .sorted(Comparator.comparing(Type::getDescription))
+                        .toList());
+        return Uni.createFrom().item(response);
+
         // Retrieve the roles the logged-in user has.
+        /*
         var roles = jsonWebToken.getGroups();
 
         var response = new TypeListResponse();
@@ -55,6 +73,7 @@ public class CompasCommonResource {
                         .sorted(Comparator.comparing(Type::getDescription))
                         .toList());
         return Uni.createFrom().item(response);
+        */
     }
 
     @GET
