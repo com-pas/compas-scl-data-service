@@ -20,5 +20,5 @@ INSERT INTO scl_file_group(code, name, description) VALUES
   ('SSD', 'SSD', 'Substation Specification Description'),
   ('SED', 'SED', 'System Exchange Description'),
   ('STD', 'STD', 'System Template Definition'),
-  ('LNODETYPE', 'LNodeTypeLibrary', 'LNode Type Library'),
-  ('BAYTYPICAL', 'BayTypical', 'Bay Typical');
+  ('LNT', 'LNodeTypeLibrary', 'LNode Type Library'),
+  ('BAY', 'BayTypical', 'Bay Typical');

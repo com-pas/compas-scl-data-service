@@ -50,7 +50,7 @@ public class CompasSclGetServerEndpoint {
                              @PathParam(TYPE_PATH_PARAM) String type) {
         LOGGER.info("Message (get) from session {} for type {}.", session.getId(), type);
 
-        eventBus.send("get-ws", new GetEventRequest(session, SclFileType.valueOf(type), request.getId()));
+        eventBus.send("get-ws", new GetEventRequest(session, type, request.getId()));
     }
 
     @OnError

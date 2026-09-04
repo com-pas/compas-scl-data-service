@@ -51,7 +51,7 @@ public class HistoryService {
             .orElseThrow(() -> new CompasNoDataFoundException(
                 "No referenced resource for resource " + id + " version " + version));
 
-        var sclType = SclFileType.valueOf(entry.sclFile.type.toUpperCase());
+        var sclType = entry.sclFile.type.toUpperCase();
         var sclContent = compasSclDataRepository.findByUUID(sclType, id, new Version(version));
 
         try {

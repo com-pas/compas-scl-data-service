@@ -20,7 +20,7 @@ public interface CompasSclDataRepository {
      * @param type The type of SCL to search for.
      * @return The list of entries found for the passed type.
      */
-    List<IItem> list(SclFileType type);
+    List<IItem> list(String type);
 
     /**
      * List all versions for a specific SCL Entry for a type of SCL.
@@ -29,7 +29,7 @@ public interface CompasSclDataRepository {
      * @param id   The ID of the SCL to search for.
      * @return The list of versions found for that specific sCl Entry.
      */
-    List<IHistoryItem> listVersionsByUUID(SclFileType type, UUID id);
+    List<IHistoryItem> listVersionsByUUID(String type, UUID id);
 
     /**
      * Return the latest version of a specific SCL Entry.
@@ -38,7 +38,7 @@ public interface CompasSclDataRepository {
      * @param id   The ID of the SCL to search for.
      * @return The SCL XML File Content that is search for.
      */
-    String findByUUID(SclFileType type, UUID id);
+    String findByUUID(String type, UUID id);
 
     /**
      * Return the meta info of the latest version of a specific SCL Entry.
@@ -47,7 +47,7 @@ public interface CompasSclDataRepository {
      * @param id   The ID of the SCL to search for.
      * @return The Meta Info of SCL Entry that is search for.
      */
-    IAbstractItem findMetaInfoByUUID(SclFileType type, UUID id);
+    IAbstractItem findMetaInfoByUUID(String type, UUID id);
 
     /**
      * Return the specific version of a specific SCL Entry.
@@ -57,7 +57,7 @@ public interface CompasSclDataRepository {
      * @param version The version of the ScL to search for.
      * @return The SCL XML File Content that is search for.
      */
-    String findByUUID(SclFileType type, UUID id, Version version);
+    String findByUUID(String type, UUID id, Version version);
 
     /**
      * Return the specific version of a specific SCL Entry.
@@ -66,7 +66,7 @@ public interface CompasSclDataRepository {
      * @param name The name of the SCL used for checking duplicates.
      * @return True if name is already used by another SCL File of the same File type, otherwise false.
      */
-    boolean hasDuplicateSclName(SclFileType type, String name);
+    boolean hasDuplicateSclName(String type, String name);
 
     /**
      * Create a new entry for the passed UUID with the version number passed.
@@ -83,7 +83,7 @@ public interface CompasSclDataRepository {
      * @param who     The user that created the new entry.
      * @param labels  The list of Labels extracted from the SCL XML File.
      */
-    void create(SclFileType type, UUID id, String name, String scl, Version version, String who, List<String> labels);
+    void create(String type, UUID id, String name, String scl, Version version, String who, List<String> labels);
 
     /**
      * Delete all versions for a specific SCL File using its ID.
@@ -91,7 +91,7 @@ public interface CompasSclDataRepository {
      * @param type The type of SCL where to find the SCL File
      * @param id   The ID of the SCL File to delete.
      */
-    void delete(SclFileType type, UUID id);
+    void delete(String type, UUID id);
 
     /**
      * Delete passed versions for a specific SCL File using its ID.
@@ -100,5 +100,5 @@ public interface CompasSclDataRepository {
      * @param id      The ID of the SCL File to delete.
      * @param version The version of that SCL File to delete.
      */
-    void delete(SclFileType type, UUID id, Version version);
+    void delete(String type, UUID id, Version version);
 }

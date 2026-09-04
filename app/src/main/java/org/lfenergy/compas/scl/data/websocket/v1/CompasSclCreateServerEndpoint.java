@@ -74,7 +74,7 @@ public class CompasSclCreateServerEndpoint {
         LOGGER.trace("Username used for Who {}", who);
 
         eventBus.send("create-ws", new CreateEventRequest(
-                session, SclFileType.valueOf(type), request.getName(), who, request.getComment(), request.getSclData()));
+                session, type, request.getName(), who, request.getComment(), request.getSclData()));
     }
 
     @OnError

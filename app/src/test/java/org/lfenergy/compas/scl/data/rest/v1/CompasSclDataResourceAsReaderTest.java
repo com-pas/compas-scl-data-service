@@ -38,7 +38,7 @@ class CompasSclDataResourceAsReaderTest {
 
     @Test
     void list_WhenCalled_ThenItemResponseRetrieved() {
-        var type = SclFileType.SCD;
+        var type = SclFileType.SCD.toString();
         var uuid = UUID.randomUUID();
         var name = "name";
         var version = "1.0.0";
@@ -65,7 +65,7 @@ class CompasSclDataResourceAsReaderTest {
 
     @Test
     void listVersionsByUUID_WhenCalled_ThenItemResponseRetrieved() {
-        var type = SclFileType.SCD;
+        var type = SclFileType.SCD.toString();
         var uuid = UUID.randomUUID();
         var name = "Name";
         var version = "1.0.0";
@@ -91,7 +91,7 @@ class CompasSclDataResourceAsReaderTest {
 
     @Test
     void findByUUID_WhenCalled_ThenSCLResponseRetrieved() throws IOException {
-        var type = SclFileType.SCD;
+        var type = SclFileType.SCD.toString();
         var uuid = UUID.randomUUID();
         var scl = readSCL();
 
@@ -112,7 +112,7 @@ class CompasSclDataResourceAsReaderTest {
 
     @Test
     void findByUUIDAndVersion_WhenCalled_ThenSCLResponseRetrieved() throws IOException {
-        var type = SclFileType.SCD;
+        var type = SclFileType.SCD.toString();
         var uuid = UUID.randomUUID();
         var scl = readSCL();
         var version = new Version(1, 2, 3);
@@ -184,7 +184,7 @@ class CompasSclDataResourceAsReaderTest {
     @Test
     void deleteAll_WhenCalled_ThenServiceCalled() {
         var uuid = UUID.randomUUID();
-        var type = SclFileType.SCD;
+        var type = SclFileType.SCD.toString();
 
         doNothing().when(compasSclDataService).delete(type, uuid);
 
@@ -201,7 +201,7 @@ class CompasSclDataResourceAsReaderTest {
     @Test
     void deleteVersion_WhenCalled_ThenServiceCalled() {
         var uuid = UUID.randomUUID();
-        var type = SclFileType.SCD;
+        var type = SclFileType.SCD.toString();
         var version = new Version(1, 2, 3);
 
         doNothing().when(compasSclDataService).delete(type, uuid, version);

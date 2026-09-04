@@ -59,7 +59,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(SUPPORTS)
-    public List<IItem> list(SclFileType type) {
+    public List<IItem> list(String type) {
         var sql = """
                 select scl_file.id, scl_file.name,
                        scl_file.major_version, scl_file.minor_version, scl_file.patch_version,
@@ -88,7 +88,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         List<IItem> items = new ArrayList<>();
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, type.name());
+            stmt.setString(1, type);
 
             try (var resultSet = stmt.executeQuery()) {
                 while (resultSet.next()) {
@@ -106,7 +106,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(SUPPORTS)
-    public List<IHistoryItem> listVersionsByUUID(SclFileType type, UUID id) {
+    public List<IHistoryItem> listVersionsByUUID(String type, UUID id) {
         var sql = """
                 select scl_file.id, scl_file.name
                      , scl_file.major_version, scl_file.minor_version, scl_file.patch_version
@@ -137,7 +137,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, id);
-            stmt.setString(2, type.name());
+            stmt.setString(2, type);
 
             try (var resultSet = stmt.executeQuery()) {
                 while (resultSet.next()) {
@@ -157,7 +157,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(SUPPORTS)
-    public String findByUUID(SclFileType type, UUID id) {
+    public String findByUUID(String type, UUID id) {
         // Use the find meta info to retrieve info about the latest version.
         var metaInfo = findMetaInfoByUUID(type, id);
         // Next return the data using the meta info.
@@ -166,7 +166,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(SUPPORTS)
-    public String findByUUID(SclFileType type, UUID id, Version version) {
+    public String findByUUID(String type, UUID id, Version version) {
         var sql = """
                 select scl_file.scl_data
                   from scl_file
@@ -181,7 +181,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, id);
-            stmt.setString(2, type.name());
+            stmt.setString(2, type);
             stmt.setInt(3, version.getMajorVersion());
             stmt.setInt(4, version.getMinorVersion());
             stmt.setInt(5, version.getPatchVersion());
@@ -200,7 +200,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(SUPPORTS)
-    public boolean hasDuplicateSclName(SclFileType type, String name) {
+    public boolean hasDuplicateSclName(String type, String name) {
         var sql = """
                 select distinct on (scl_file.id) scl_file.name
                   from scl_file
@@ -214,7 +214,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, type.name());
+            stmt.setString(1, type);
 
             try (var resultSet = stmt.executeQuery()) {
                 while (resultSet.next()) {
@@ -230,7 +230,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(SUPPORTS)
-    public IAbstractItem findMetaInfoByUUID(SclFileType type, UUID id) {
+    public IAbstractItem findMetaInfoByUUID(String type, UUID id) {
         var sql = """
                 select scl_file.id, scl_file.name, scl_file.major_version, scl_file.minor_version, scl_file.patch_version
                   from scl_file
@@ -243,7 +243,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(sql)) {
             stmt.setObject(1, id);
-            stmt.setString(2, type.name());
+            stmt.setString(2, type);
 
             try (var resultSet = stmt.executeQuery()) {
                 // We need to only retrieve the first row, because that's the latest version.
@@ -262,7 +262,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(REQUIRED)
-    public void create(SclFileType type, UUID id, String name, String scl, Version version, String who, List<String> labels) {
+    public void create(String type, UUID id, String name, String scl, Version version, String who, List<String> labels) {
         var createSclSQL = """
                 insert into scl_file(id, major_version, minor_version, patch_version, type, name, created_by, scl_data)
                      values (?, ?, ?, ?, ?, ?, ?, ?)
@@ -275,7 +275,7 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
             sclStmt.setInt(2, version.getMajorVersion());
             sclStmt.setInt(3, version.getMinorVersion());
             sclStmt.setInt(4, version.getPatchVersion());
-            sclStmt.setString(5, type.name());
+            sclStmt.setString(5, type);
             sclStmt.setString(6, name);
             sclStmt.setString(7, who);
             sclStmt.setString(8, scl);
@@ -319,12 +319,12 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(REQUIRED)
-    public void delete(SclFileType type, UUID id) {
+    public void delete(String type, UUID id) {
 
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(DELETE_SCL_FILE_SQL)) {
             stmt.setObject(1, id);
-            stmt.setString(2, type.name());
+            stmt.setString(2, type);
             stmt.executeUpdate();
         } catch (SQLException exp) {
             throw new CompasSclDataServiceException(POSTGRES_DELETE_ERROR_CODE, "Error removing SCL from database!", exp);
@@ -333,12 +333,12 @@ public class CompasSclDataPostgreSQLRepository implements CompasSclDataRepositor
 
     @Override
     @Transactional(REQUIRED)
-    public void delete(SclFileType type, UUID id, Version version) {
+    public void delete(String type, UUID id, Version version) {
 
         try (var connection = dataSource.getConnection();
              var stmt = connection.prepareStatement(DELETE_SCL_FILE_SQL_BY_VERSION)) {
             stmt.setObject(1, id);
-            stmt.setString(2, type.name());
+            stmt.setString(2, type);
             stmt.setInt(3, version.getMajorVersion());
             stmt.setInt(4, version.getMinorVersion());
             stmt.setInt(5, version.getPatchVersion());

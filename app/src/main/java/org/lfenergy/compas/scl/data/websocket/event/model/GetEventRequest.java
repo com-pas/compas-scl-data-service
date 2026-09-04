@@ -10,10 +10,10 @@ import java.util.UUID;
 
 public class GetEventRequest {
     private final Session session;
-    private final SclFileType type;
+    private final String type;
     private final UUID id;
 
-    public GetEventRequest(Session session, SclFileType type, UUID id) {
+    public GetEventRequest(Session session, String type, UUID id) {
         this.session = session;
         this.type = type;
         this.id = id;
@@ -23,7 +23,7 @@ public class GetEventRequest {
         return session;
     }
 
-    public SclFileType getType() {
+    public String getType() {
         return type;
     }
 

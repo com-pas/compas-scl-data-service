@@ -11,14 +11,14 @@ import java.util.UUID;
 
 public class UpdateEventRequest {
     private final Session session;
-    private final SclFileType type;
+    private final String type;
     private final UUID id;
     private final ChangeSetType changeSetType;
     private final String who;
     private final String comment;
     private final String sclData;
 
-    public UpdateEventRequest(Session session, SclFileType type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData) {
+    public UpdateEventRequest(Session session, String type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData) {
         this.session = session;
         this.type = type;
         this.id = id;
@@ -32,7 +32,7 @@ public class UpdateEventRequest {
         return session;
     }
 
-    public SclFileType getType() {
+    public String getType() {
         return type;
     }
 

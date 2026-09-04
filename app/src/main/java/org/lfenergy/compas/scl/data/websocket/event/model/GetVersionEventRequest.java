@@ -11,11 +11,11 @@ import java.util.UUID;
 
 public class GetVersionEventRequest {
     private final Session session;
-    private final SclFileType type;
+    private final String type;
     private final UUID id;
     private final Version version;
 
-    public GetVersionEventRequest(Session session, SclFileType type, UUID id, Version version) {
+    public GetVersionEventRequest(Session session, String type, UUID id, Version version) {
         this.session = session;
         this.type = type;
         this.id = id;
@@ -26,7 +26,7 @@ public class GetVersionEventRequest {
         return session;
     }
 
-    public SclFileType getType() {
+    public String getType() {
         return type;
     }
 

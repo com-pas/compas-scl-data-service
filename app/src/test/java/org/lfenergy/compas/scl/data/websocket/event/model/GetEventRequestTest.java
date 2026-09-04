@@ -20,7 +20,7 @@ class GetEventRequestTest {
     @Test
     void constructor_WhenCalledWith3Arguments_ThenValuesSet() {
         var session = Mockito.mock(Session.class);
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var id = UUID.randomUUID();
 
         var result = new GetEventRequest(session, type, id);

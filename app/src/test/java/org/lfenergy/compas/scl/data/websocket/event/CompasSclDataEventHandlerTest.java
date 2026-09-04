@@ -44,7 +44,7 @@ class CompasSclDataEventHandlerTest {
 
     @Test
     void createWebsocketsEvent_WhenCalled_ThenCreateResponseReturned() {
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var name = "Some name";
         var who = "Who executed it";
         var comment = "Some comment";
@@ -63,7 +63,7 @@ class CompasSclDataEventHandlerTest {
 
     @Test
     void createWebsocketsEvent_WhenCalledAndCompasExceptionThrownByService_ThenErrorResponseReturned() {
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var name = "Some name";
         var who = "Who executed it";
         var comment = "Some comment";
@@ -83,7 +83,7 @@ class CompasSclDataEventHandlerTest {
 
     @Test
     void createWebsocketsEvent_WhenCalledAndRuntimeExceptionThrownByService_ThenErrorResponseReturned() {
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var name = "Some name";
         var who = "Who executed it";
         var comment = "Some comment";
@@ -102,7 +102,7 @@ class CompasSclDataEventHandlerTest {
 
     @Test
     void getWebsocketsEvent_WhenCalled_ThenGetResponseReturned() {
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var id = UUID.randomUUID();
         var sclData = "Some SCL Data";
 
@@ -119,7 +119,7 @@ class CompasSclDataEventHandlerTest {
 
     @Test
     void getWebsocketsEvent_WhenCalledAndCompasExceptionThrownByService_ThenErrorResponseReturned() {
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var id = UUID.randomUUID();
         var errorMessage = "Some Error";
 
@@ -136,7 +136,7 @@ class CompasSclDataEventHandlerTest {
 
     @Test
     void getWebsocketsEvent_WhenCalledAndRuntimeExceptionThrownByService_ThenErrorResponseReturned() {
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var id = UUID.randomUUID();
         var errorMessage = "Some Error";
 
@@ -152,7 +152,7 @@ class CompasSclDataEventHandlerTest {
 
     @Test
     void getVersionWebsocketsEvent_WhenCalled_ThenGetResponseReturned() {
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var id = UUID.randomUUID();
         var sclData = "Some SCL Data";
         var version = new Version("1.2.3");
@@ -170,7 +170,7 @@ class CompasSclDataEventHandlerTest {
 
     @Test
     void getVersionWebsocketsEvent_WhenCalledAndCompasExceptionThrownByService_ThenErrorResponseReturned() {
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var id = UUID.randomUUID();
         var version = new Version("1.2.3");
         var errorMessage = "Some Error";
@@ -188,7 +188,7 @@ class CompasSclDataEventHandlerTest {
 
     @Test
     void getVersionWebsocketsEvent_WhenCalledAndRuntimeExceptionThrownByService_ThenErrorResponseReturned() {
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var id = UUID.randomUUID();
         var version = new Version("1.2.3");
         var errorMessage = "Some Error";
@@ -205,7 +205,7 @@ class CompasSclDataEventHandlerTest {
 
     @Test
     void updateWebsocketsEvent_WhenCalled_ThenUpdateResponseReturned() {
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var id = UUID.randomUUID();
         var cst = ChangeSetType.MINOR;
         var who = "Who executed it";
@@ -225,7 +225,7 @@ class CompasSclDataEventHandlerTest {
 
     @Test
     void updateWebsocketsEvent_WhenCalledAndCompasExceptionThrownByService_ThenErrorResponseReturned() {
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var id = UUID.randomUUID();
         var cst = ChangeSetType.MINOR;
         var who = "Who executed it";
@@ -246,7 +246,7 @@ class CompasSclDataEventHandlerTest {
 
     @Test
     void updateWebsocketsEvent_WhenCalledAndRuntimeExceptionThrownByService_ThenErrorResponseReturned() {
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var id = UUID.randomUUID();
         var cst = ChangeSetType.MINOR;
         var who = "Who executed it";

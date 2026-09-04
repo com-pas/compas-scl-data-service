@@ -74,7 +74,7 @@ public class CompasSclUpdateServerEndpoint {
         LOGGER.trace("Username used for Who {}", who);
 
         eventBus.send("update-ws", new UpdateEventRequest(
-                session, SclFileType.valueOf(type), request.getId(), request.getChangeSetType(),
+                session, type, request.getId(), request.getChangeSetType(),
                 who, request.getComment(), request.getSclData()));
     }
 

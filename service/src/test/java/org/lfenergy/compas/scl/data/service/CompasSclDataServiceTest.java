@@ -37,7 +37,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CompasSclDataServiceTest {
     private static final Version INITIAL_VERSION = new Version("1.0.0");
-    private static final SclFileType SCL_TYPE = SclFileType.SCD;
+    private static final String SCL_TYPE = SclFileType.SCD.toString();
 
     @Mock
     private HistorizedSclFileService historizedSclFileService;
@@ -416,7 +416,7 @@ class CompasSclDataServiceTest {
         var scl = converter.convertToElement(sclData, SCL_ELEMENT_NAME, SCL_NS_URI);
         var compasPrivate = processor.addCompasPrivate(scl);
         processor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, sclName);
-        processor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION, SCL_TYPE.name());
+        processor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION, SCL_TYPE);
         return converter.convertToString(scl);
     }
 

@@ -51,7 +51,7 @@ public class CompasSclGetVersionServerEndpoint {
                                     @PathParam(TYPE_PATH_PARAM) String type) {
         LOGGER.info("Message from session {} for type {}.", session.getId(), type);
 
-        eventBus.send("get-version-ws", new GetVersionEventRequest(session, SclFileType.valueOf(type),
+        eventBus.send("get-version-ws", new GetVersionEventRequest(session, type,
                 request.getId(), new Version(request.getVersion())));
     }
 
