@@ -11,28 +11,11 @@
 alter table plugins_custom_resource
     add column plugin varchar(255);
 
--- 1) Explicit mapping for template-generator,
--- because it has a different naming convention than the other plugins.
-update plugins_custom_resource
-set plugin = 'template-generator'
-where plugin is null
-  and type like 'template-generator%';
-
--- 2) Fallback for any remaining legacy rows that still follow "<plugin>_<resource>".
-update plugins_custom_resource
-set plugin = split_part(type, '_', 1)
-where plugin is null
-  and position('_' in type) > 0;
-
--- 3) Safety net if any row is still null (prevents NOT NULL migration failure).
--- If you prefer strict fail-fast, remove this and run a pre-check query instead.
+-- For now set all existing rows to 'unknown'
+-- Manual migration is required to set the correct plugin for existing rows.
 update plugins_custom_resource
 set plugin = 'unknown'
 where plugin is null;
-
--- Enforce the new column for all future rows.
-alter table plugins_custom_resource
-    alter column plugin set not null;
 
 drop index if exists plugins_custom_resource_unique_version;
 
