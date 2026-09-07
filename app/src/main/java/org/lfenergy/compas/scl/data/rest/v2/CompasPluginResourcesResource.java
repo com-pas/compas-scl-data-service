@@ -9,7 +9,6 @@ import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
-import org.lfenergy.compas.scl.data.rest.PluginsResourcesApi;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.ContentType;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.CreatePluginResourceRequest;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.PluginResourceMeta;

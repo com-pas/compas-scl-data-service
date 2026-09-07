@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 BearingPoint GmbH
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.rest;
+package org.lfenergy.compas.scl.data.rest.v2;
 
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.CreatePluginResourceRequest;
 import org.lfenergy.compas.scl.data.rest.api.plugins.resources.v2.PluginResource;
