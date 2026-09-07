@@ -2,16 +2,16 @@
 --
 -- SPDX-License-Identifier: Apache-2.0
 
-CREATE TABLE scl_file_group (
-    id uuid NOT NULL default gen_random_uuid(),
-    code VARCHAR(50) NOT NULL UNIQUE,
-    name VARCHAR(50) NOT NULL,
-    description VARCHAR(255),
+create table scl_file_group (
+    id uuid not null default gen_random_uuid(),
+    code varchar(3) not null unique,
+    name varchar(50) not null,
+    description varchar(255),
 
     primary key (id)
 );
 
-INSERT INTO scl_file_group(code, name, description) VALUES 
+insert into scl_file_group(code, name, description) values 
   ('CID', 'CID', 'Configured IED Description'),
   ('ICD', 'ICD', 'IED Capability Description'),
   ('IID', 'IID', 'IED Instance Description'),
@@ -22,3 +22,6 @@ INSERT INTO scl_file_group(code, name, description) VALUES
   ('STD', 'STD', 'System Template Definition'),
   ('LNT', 'LNodeTypeLibrary', 'LNode Type Library'),
   ('BAY', 'BayTypical', 'Bay Typical');
+
+/* Set LNodeTypeLibrary type to LNT */
+update scl_file set type = 'LNT' where id = 'fc55c46d-c109-4ccd-bf66-9f1d0e135689';
