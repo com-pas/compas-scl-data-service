@@ -49,9 +49,10 @@ jobs:
           echo "api.version=1.44" > $HOME/.docker-java.properties
 
       - name: Create custom Maven Settings.xml
-        uses: whelk-io/maven-settings-xml-action@9dc09b23833fa9aa7f27b63db287951856f3433d # v22
+        uses: s4u/maven-settings-action@894661b3ddae382f1ae8edbeab60987e08cf0788 # v4.0.0
         with:
-          output_file: custom_maven_settings.xml
+          path: custom_maven_settings.xml
+          githubServer: false
           servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
 
       - name: Request GitHub API for PR data
@@ -59,9 +60,7 @@ jobs:
         uses: octokit/request-action@b91aabaa861c777dcdb14e2387e30eddf04619ae # v3.0.0
         id: get_pr_data
         with:
-          route: GET /repos/{full_name}/pulls/{number}
-          number: ${{ github.event.pull_request.number }}
-          full_name: ${{ github.event.repository.full_name }}
+          route: GET /repos/${{ github.event.repository.full_name }}/pulls/${{ github.event.pull_request.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
