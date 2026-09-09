@@ -16,6 +16,7 @@ import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.model.UploadCustomPluginsResourceData;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -159,6 +160,7 @@ public class CompasPluginsResourceService {
     public PluginsCustomResource upload(UploadCustomPluginsResourceData request) {
         LOGGER.info("Uploading plugins custom resource type='{}', name='{}'", request.type(), request.name());
 
+
         validateContentType(request.contentType());
         validateSemver(request.dataCompatibilityVersion(), "data-compatibility-version");
 
@@ -182,6 +184,7 @@ public class CompasPluginsResourceService {
 
         var entity = new PluginsCustomResource();
         entity.type = request.type();
+        entity.plugin = request.type().split("_", 2)[0];
         entity.tenant = DEFAULT_TENANT;
         entity.name = request.name();
         entity.description = request.description();

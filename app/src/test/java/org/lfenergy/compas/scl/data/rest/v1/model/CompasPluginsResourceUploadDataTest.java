@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: 2026 BearingPoint GmbH
 //
 // SPDX-License-Identifier: Apache-2.0
-package org.lfenergy.compas.scl.data.rest.v1;
+package org.lfenergy.compas.scl.data.rest.v1.model;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
+import org.lfenergy.compas.scl.data.rest.v1.CompasPluginsResource;
 
 
 import static io.restassured.RestAssured.given;
@@ -32,7 +33,7 @@ class CompasPluginsResourceUploadDataTest {
 
         given()
             .contentType("multipart/form-data")
-            .multiPart("type", "json")
+            .multiPart("type", "my-plugin_my-resource")
             .multiPart("name", "json-resource")
             .multiPart("description", "Description for JSON resource")
             .multiPart("content-type", "application/json")
@@ -54,7 +55,7 @@ class CompasPluginsResourceUploadDataTest {
 
         given()
             .contentType("multipart/form-data")
-            .multiPart("type", "xml")
+            .multiPart("type", "my-plugin_my-resource")
             .multiPart("name", "xml-resource")
             .multiPart("description", "Description for XML resource")
             .multiPart("content-type", "application/xml")
@@ -76,7 +77,7 @@ class CompasPluginsResourceUploadDataTest {
 
         given()
             .contentType("multipart/form-data")
-            .multiPart("type", "text")
+            .multiPart("type", "my-plugin_my-resource")
             .multiPart("name", "text-resource")
             .multiPart("description", "Description for Text resource")
             .multiPart("content-type", "*/*")
@@ -95,7 +96,7 @@ class CompasPluginsResourceUploadDataTest {
 
         given()
             .contentType("multipart/form-data")
-            .multiPart("type", "xml")
+            .multiPart("type", "my-plugin_my-resource")
             .multiPart("name", "xml-resource")
             .multiPart("description", "Description for XML resource")
             .multiPart("content-type", "application/xml")
