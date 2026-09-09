@@ -13,7 +13,6 @@ import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.rest.v1.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -49,11 +48,9 @@ public class CompasSclDataResource {
     @Produces(MediaType.APPLICATION_XML)
     public Uni<CreateResponse> create(@PathParam(TYPE_PATH_PARAM) String type,
                                       @Valid CreateRequest request) {
-        LOGGER.info("Adding new SCL File for type {} to storage.", type);
-        // TODO: Readd user
-        // String who = jsonWebToken.getClaim(userInfoProperties.who());
-        // LOGGER.trace("Username used for Who {}", who);
-        var who = "JohnDoe";
+        LOGGER.info("Adding new SCL File to storage.");
+        String who = jsonWebToken.getClaim(userInfoProperties.who());
+        LOGGER.trace("Username used for Who {}", who);
 
         var response = new CreateResponse();
         response.setSclData(compasSclDataService.create(type, request.getName(), who, request.getComment(),

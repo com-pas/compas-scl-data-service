@@ -13,7 +13,6 @@ import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.rest.v1.model.Type;
 import org.lfenergy.compas.scl.data.rest.v1.model.TypeListResponse;
 import org.lfenergy.compas.scl.data.rest.v1.model.UserInfoResponse;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.lfenergy.compas.scl.data.service.SclFileGroupService;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -22,7 +21,6 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import java.util.Arrays;
 import java.util.Comparator;
 
 import static org.lfenergy.compas.scl.data.rest.Constants.READ_ROLE;
@@ -50,30 +48,16 @@ public class CompasCommonResource {
         LOGGER.info("Retrieving list of the types of SCL Files");
 
         var sclFileGroups = sclFileGroupService.listAll();
-
-        // TODO: Filter for user rights
-        var response = new TypeListResponse();
-        response.setTypes(
-                sclFileGroups.stream()
-                        .map(sclFileGroup -> new Type(sclFileGroup.code, sclFileGroup.description))
-                        .sorted(Comparator.comparing(Type::getDescription))
-                        .toList());
-        return Uni.createFrom().item(response);
-
-        // Retrieve the roles the logged-in user has.
-        /*
         var roles = jsonWebToken.getGroups();
 
         var response = new TypeListResponse();
         response.setTypes(
-                Arrays.stream(SclFileType.values())
-                        // Filter on the type the user has read rights.
-                        .filter(sclFileType -> roles.contains(sclFileType.name() + "_" + READ_ROLE))
-                        .map(sclFileType -> new Type(sclFileType.name(), sclFileType.getDescription()))
+                sclFileGroups.stream()
+                        .filter(sclFileGroup -> roles.contains(sclFileGroup.code + "_" + READ_ROLE))
+                        .map(sclFileGroup -> new Type(sclFileGroup.code, sclFileGroup.description))
                         .sorted(Comparator.comparing(Type::getDescription))
                         .toList());
         return Uni.createFrom().item(response);
-        */
     }
 
     @GET
