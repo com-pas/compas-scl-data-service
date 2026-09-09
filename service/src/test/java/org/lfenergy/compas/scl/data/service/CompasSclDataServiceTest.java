@@ -19,6 +19,7 @@ import org.lfenergy.compas.scl.data.xml.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
+import org.lfenergy.compas.scl.data.repository.SclFileGroupRepository;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.w3c.dom.Element;
@@ -32,6 +33,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
 import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +46,9 @@ class CompasSclDataServiceTest {
     @Mock
     private HistorizedSclFileService historizedSclFileService;
 
+    @Mock
+    private SclFileGroupRepository sclFileGroupRepository;
+
     private CompasSclDataService compasSclDataService;
 
     private final ElementConverter converter = new ElementConverter();
@@ -49,7 +56,7 @@ class CompasSclDataServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        compasSclDataService = new CompasSclDataService(converter, processor, historizedSclFileService);
+        compasSclDataService = new CompasSclDataService(converter, processor, historizedSclFileService, sclFileGroupRepository);
     }
 
     @Test

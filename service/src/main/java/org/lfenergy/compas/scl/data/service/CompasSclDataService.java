@@ -5,14 +5,15 @@ package org.lfenergy.compas.scl.data.service;
 
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
+import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.xml.HistoryItem;
 import org.lfenergy.compas.scl.data.xml.Item;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.repository.SclFileGroupRepository;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -42,13 +43,18 @@ public class CompasSclDataService {
     private final ElementConverter converter;
     private final SclElementProcessor sclElementProcessor;
     private final HistorizedSclFileService historizedSclFileService;
+    private final SclFileGroupRepository sclFileGroupRepository;
 
     @Inject
-    public CompasSclDataService(ElementConverter converter,
-                                SclElementProcessor sclElementProcessor, HistorizedSclFileService historizedSclFileService) {
+    public CompasSclDataService(
+        ElementConverter converter,
+        SclElementProcessor sclElementProcessor, 
+        HistorizedSclFileService historizedSclFileService,
+        SclFileGroupRepository sclFileGroupRepository) {
         this.converter = converter;
         this.sclElementProcessor = sclElementProcessor;
         this.historizedSclFileService = historizedSclFileService;
+        this.sclFileGroupRepository = sclFileGroupRepository;
     }
 
     /**
@@ -122,6 +128,10 @@ public class CompasSclDataService {
      */
     @Transactional(REQUIRED)
     public String create(String type, String name, String who, String comment, String sclData) {
+        if (!this.sclFileGroupRepository.doesCodeExist(type)) {
+            throw new CompasInvalidInputException("The specified type does not exist.");
+        }
+
         var scl = converter.convertToElement(new BufferedInputStream(new ByteArrayInputStream(sclData.getBytes(StandardCharsets.UTF_8))), SCL_ELEMENT_NAME, SCL_NS_URI);
         if (scl == null) {
             throw new CompasException(NO_SCL_ELEMENT_FOUND_ERROR_CODE, "No valid SCL found in the passed SCL Data.");
@@ -172,6 +182,10 @@ public class CompasSclDataService {
      */
     @Transactional(REQUIRED)
     public String update(String type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData) {
+        if (!this.sclFileGroupRepository.doesCodeExist(type)) {
+            throw new CompasInvalidInputException("The specified type does not exist.");
+        }
+
         var scl = converter.convertToElement(new BufferedInputStream(new ByteArrayInputStream(sclData.getBytes(StandardCharsets.UTF_8))), SCL_ELEMENT_NAME, SCL_NS_URI);
         if (scl == null) {
             throw new CompasException(NO_SCL_ELEMENT_FOUND_ERROR_CODE, "No valid SCL found in the passed SCL Data.");

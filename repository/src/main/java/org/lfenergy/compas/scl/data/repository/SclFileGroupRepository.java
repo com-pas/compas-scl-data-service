@@ -17,4 +17,8 @@ public class SclFileGroupRepository implements PanacheManagedBlockingRepositoryB
     public List<SclFileGroup> listAll() {
         return listAll(Sort.by("name"));
     }
+
+    public Boolean doesCodeExist(String code) {
+        return count("code = ?1", code) > 0;
+    }
 }
