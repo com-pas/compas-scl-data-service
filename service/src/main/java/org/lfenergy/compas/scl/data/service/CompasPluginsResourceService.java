@@ -160,7 +160,7 @@ public class CompasPluginsResourceService {
     public PluginsCustomResource upload(UploadCustomPluginsResourceData request) {
         LOGGER.info("Uploading plugins custom resource type='{}', name='{}'", request.type(), request.name());
 
-        validateType(request.type());
+
         validateContentType(request.contentType());
         validateSemver(request.dataCompatibilityVersion(), "data-compatibility-version");
 
@@ -270,17 +270,6 @@ public class CompasPluginsResourceService {
             throw new CompasInvalidInputException(
                     String.format("Invalid semantic version format for field '%s': '%s'",
                             fieldName, version));
-        }
-    }
-
-    private void validateType(String type) {
-        final String pattern = "^[a-zA-Z0-9-]+_[a-zA-Z0-9-]+$";
-        if (type == null || type.isBlank()) {
-            throw new CompasInvalidInputException("Type must not be null or blank");
-        }
-        if (!type.matches(pattern)) {
-            throw new CompasInvalidInputException(
-                    String.format("Type '%s' does not match the required pattern '%s'", type, pattern));
         }
     }
 
