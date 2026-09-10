@@ -191,7 +191,6 @@ class CompasSclDataServiceTest {
         var who = "User A";
 
         var scl = readSCL("scl_test_file.scd");
-        when(historizedSclFileService.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(false);
         when(sclFileGroupRepository.doesCodeExist(SCL_TYPE)).thenReturn(false);
         var exception = assertThrows(CompasException.class, () -> {
             compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
