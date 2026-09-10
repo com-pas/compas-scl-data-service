@@ -185,6 +185,21 @@ class CompasSclDataServiceTest {
     }
 
     @Test
+    void create_WhenCalledWithNonExistentFileGroup_ThenCompasExceptionThrown() throws IOException {
+        var name = "JUSTSOMENAME";
+        var comment = "";
+        var who = "User A";
+
+        var scl = readSCL("scl_test_file.scd");
+        when(historizedSclFileService.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(false);
+        when(sclFileGroupRepository.doesCodeExist(SCL_TYPE)).thenReturn(false);
+        var exception = assertThrows(CompasException.class, () -> {
+            compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
+        });
+        assertEquals(INVALID_INPUT_ERROR_CODE, exception.getErrorCode());
+    }
+
+    @Test
     void create_WhenCalledWithXMLStringWithoutSCL_ThenCompasExceptionThrown() {
         var name = "JUSTSOMENAME";
         var comment = "";
@@ -407,7 +422,7 @@ class CompasSclDataServiceTest {
         var typeElement = processor.getChildNodeByName(compasPrivate.get(), COMPAS_SCL_FILE_TYPE_EXTENSION,
                 COMPAS_EXTENSION_NS_URI);
         assertTrue(typeElement.isPresent());
-        assertEquals(SCL_TYPE.toString(), typeElement.get().getTextContent());
+        assertEquals(SCL_TYPE, typeElement.get().getTextContent());
     }
 
     private void assertHistoryItem(String sclData, int expectedHItems, Version version, String comment) {

@@ -14,6 +14,7 @@ import java.util.UUID;
 @ApplicationScoped
 public class SclFileGroupRepository implements PanacheManagedBlockingRepositoryBase<SclFileGroup, UUID> {
 
+    @Override
     public List<SclFileGroup> listAll() {
         return listAll(Sort.by("name"));
     }

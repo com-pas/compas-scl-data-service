@@ -8,7 +8,6 @@ import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.*;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import javax.sql.DataSource;
 import jakarta.transaction.Transactional;

@@ -4,7 +4,6 @@
 package org.lfenergy.compas.scl.data.repository;
 
 import org.lfenergy.compas.scl.data.model.*;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import java.util.List;
 import java.util.UUID;

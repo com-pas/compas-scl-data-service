@@ -3,8 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.websocket.event.model;
 
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
-
 import jakarta.websocket.Session;
 import java.util.UUID;
 

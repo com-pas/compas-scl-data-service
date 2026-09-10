@@ -16,7 +16,6 @@ import org.lfenergy.compas.scl.data.rest.api.history.DataResourceHistory;
 import org.lfenergy.compas.scl.data.rest.api.history.DataResourceSearch;
 import org.lfenergy.compas.scl.data.rest.api.history.DataResourceVersion;
 import org.lfenergy.compas.scl.data.rest.api.history.DataResourcesResult;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import java.io.File;
 import java.io.IOException;

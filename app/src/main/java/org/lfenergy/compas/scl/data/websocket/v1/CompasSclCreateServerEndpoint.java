@@ -14,7 +14,6 @@ import org.lfenergy.compas.scl.data.websocket.event.model.CreateEventRequest;
 import org.lfenergy.compas.scl.data.websocket.v1.decoder.CreateWsRequestDecoder;
 import org.lfenergy.compas.scl.data.websocket.v1.encoder.CreateWsResponseEncoder;
 import org.lfenergy.compas.scl.data.websocket.v1.model.CreateWsRequest;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

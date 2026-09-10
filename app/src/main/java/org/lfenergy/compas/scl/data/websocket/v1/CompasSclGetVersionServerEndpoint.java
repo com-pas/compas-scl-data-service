@@ -13,7 +13,6 @@ import org.lfenergy.compas.scl.data.websocket.event.model.GetVersionEventRequest
 import org.lfenergy.compas.scl.data.websocket.v1.decoder.GetVersionWsRequestDecoder;
 import org.lfenergy.compas.scl.data.websocket.v1.encoder.GetWsResponseEncoder;
 import org.lfenergy.compas.scl.data.websocket.v1.model.GetVersionWsRequest;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

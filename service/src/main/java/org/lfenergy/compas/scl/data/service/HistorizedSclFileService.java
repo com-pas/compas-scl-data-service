@@ -11,7 +11,6 @@ import org.lfenergy.compas.scl.data.model.IItem;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.repository.HistorizedSclFileRepository;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import java.util.List;
 import java.util.UUID;
