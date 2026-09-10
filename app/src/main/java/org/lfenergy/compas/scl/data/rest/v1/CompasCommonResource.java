@@ -41,9 +41,9 @@ public class CompasCommonResource {
     SclFileGroupService sclFileGroupService;
 
     @GET
+    @Blocking
     @Path("/type/list")
     @Produces(MediaType.APPLICATION_XML)
-    @Blocking
     public Uni<TypeListResponse> list() {
         LOGGER.info("Retrieving list of the types of SCL Files");
 
