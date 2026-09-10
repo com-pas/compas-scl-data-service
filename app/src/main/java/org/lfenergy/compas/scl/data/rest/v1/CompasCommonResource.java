@@ -31,14 +31,16 @@ import static org.lfenergy.compas.scl.data.rest.Constants.READ_ROLE;
 public class CompasCommonResource {
     private static final Logger LOGGER = LogManager.getLogger(CompasCommonResource.class);
 
-    @Inject
-    JsonWebToken jsonWebToken;
+    private final JsonWebToken jsonWebToken;
+    private final UserInfoProperties userInfoProperties;
+    private final SclFileGroupService sclFileGroupService;
 
-    @Inject
-    UserInfoProperties userInfoProperties;
-
-    @Inject
-    SclFileGroupService sclFileGroupService;
+    @Inject 
+    public CompasCommonResource(JsonWebToken jsonWebToken, UserInfoProperties userInfoProperties, SclFileGroupService sclFileGroupService) {
+        this.jsonWebToken = jsonWebToken;
+        this.userInfoProperties = userInfoProperties;
+        this.sclFileGroupService = sclFileGroupService;
+    }
 
     @GET
     @Blocking
