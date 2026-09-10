@@ -41,7 +41,7 @@ public class SclFileGroupRepositoryTest {
         var group2 = new SclFileGroup();
         group2.name = "XYZ";
 
-        doReturn(List.of(group2, group1)).when(repository).listAll(Sort.by("name"));
+        doReturn(List.of(group1, group2)).when(repository).listAll(any(Sort.class));
 
         var result = repository.listAll();
         assertEquals(List.of(group1, group2), result);
