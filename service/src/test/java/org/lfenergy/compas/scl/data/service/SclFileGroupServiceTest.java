@@ -6,15 +6,18 @@ package org.lfenergy.compas.scl.data.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.lfenergy.compas.scl.data.entities.SclFileGroup;
 import org.lfenergy.compas.scl.data.repository.SclFileGroupRepository;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class SclFileGroupServiceTest {
     @Mock
     private SclFileGroupRepository sclFileGroupRepository;
