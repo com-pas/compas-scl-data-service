@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 Alliander N.V.
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # SCL File Groups
 
 We have replaced the fixed file types SCD, SSD, ICT, etc with a dedicated table in the database `scl_file_type`, so different companies can have different file groups / types. By default this includes SSD, IID, ICD, SCD, CID, SED, ISD, STD, LNT and BAY. Users will only see groups for which they have at least `READ` permissions.
