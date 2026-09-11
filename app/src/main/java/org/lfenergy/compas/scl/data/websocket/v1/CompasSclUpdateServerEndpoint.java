@@ -14,7 +14,6 @@ import org.lfenergy.compas.scl.data.websocket.event.model.UpdateEventRequest;
 import org.lfenergy.compas.scl.data.websocket.v1.decoder.UpdateWsRequestDecoder;
 import org.lfenergy.compas.scl.data.websocket.v1.encoder.UpdateWsResponseEncoder;
 import org.lfenergy.compas.scl.data.websocket.v1.model.UpdateWsRequest;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -74,7 +73,7 @@ public class CompasSclUpdateServerEndpoint {
         LOGGER.trace("Username used for Who {}", who);
 
         eventBus.send("update-ws", new UpdateEventRequest(
-                session, SclFileType.valueOf(type), request.getId(), request.getChangeSetType(),
+                session, type, request.getId(), request.getChangeSetType(),
                 who, request.getComment(), request.getSclData()));
     }
 

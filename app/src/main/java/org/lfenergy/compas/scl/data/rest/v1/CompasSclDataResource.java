@@ -13,7 +13,6 @@ import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.rest.UserInfoProperties;
 import org.lfenergy.compas.scl.data.rest.v1.model.*;
 import org.lfenergy.compas.scl.data.service.CompasSclDataService;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -47,9 +46,9 @@ public class CompasSclDataResource {
     @Blocking
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public Uni<CreateResponse> create(@PathParam(TYPE_PATH_PARAM) SclFileType type,
+    public Uni<CreateResponse> create(@PathParam(TYPE_PATH_PARAM) String type,
                                       @Valid CreateRequest request) {
-        LOGGER.info("Adding new SCL File for type {} to storage.", type);
+        LOGGER.info("Adding new SCL File to storage.");
         String who = jsonWebToken.getClaim(userInfoProperties.who());
         LOGGER.trace("Username used for Who {}", who);
 
@@ -62,7 +61,7 @@ public class CompasSclDataResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_XML)
-    public Uni<ListResponse> list(@PathParam(TYPE_PATH_PARAM) SclFileType type) {
+    public Uni<ListResponse> list(@PathParam(TYPE_PATH_PARAM) String type) {
         LOGGER.info("Listing SCL Files for type {} from storage.", type);
         var response = new ListResponse();
         response.setItems(compasSclDataService.list(type));
@@ -72,7 +71,7 @@ public class CompasSclDataResource {
     @GET
     @Path("/{" + ID_PATH_PARAM + "}/versions")
     @Produces(MediaType.APPLICATION_XML)
-    public Uni<VersionsResponse> listVersionsByUUID(@PathParam(TYPE_PATH_PARAM) SclFileType type,
+    public Uni<VersionsResponse> listVersionsByUUID(@PathParam(TYPE_PATH_PARAM) String type,
                                                     @PathParam(ID_PATH_PARAM) UUID id) {
         LOGGER.info("Listing versions of SCL File {} for type {} from storage.", id, type);
         var response = new VersionsResponse();
@@ -83,7 +82,7 @@ public class CompasSclDataResource {
     @GET
     @Path("/{" + ID_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
-    public Uni<GetResponse> findByUUID(@PathParam(TYPE_PATH_PARAM) SclFileType type,
+    public Uni<GetResponse> findByUUID(@PathParam(TYPE_PATH_PARAM) String type,
                                        @PathParam(ID_PATH_PARAM) UUID id) {
         LOGGER.info("Retrieving latest version of SCL File {} for type {} from storage.", id, type);
         var response = new GetResponse();
@@ -94,7 +93,7 @@ public class CompasSclDataResource {
     @GET
     @Path("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
-    public Uni<GetResponse> findByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) SclFileType type,
+    public Uni<GetResponse> findByUUIDAndVersion(@PathParam(TYPE_PATH_PARAM) String type,
                                                  @PathParam(ID_PATH_PARAM) UUID id,
                                                  @PathParam(VERSION_PATH_PARAM) Version version) {
         LOGGER.info("Retrieving version {} of SCL File {} for type {} from storage.", version, id, type);
@@ -108,7 +107,7 @@ public class CompasSclDataResource {
     @Path("/{" + ID_PATH_PARAM + "}")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public Uni<UpdateResponse> update(@PathParam(TYPE_PATH_PARAM) SclFileType type,
+    public Uni<UpdateResponse> update(@PathParam(TYPE_PATH_PARAM) String type,
                                       @PathParam(ID_PATH_PARAM) UUID id,
                                       @Valid UpdateRequest request) {
         LOGGER.info("Updating SCL File {} for type {} to storage.", id, type);
@@ -125,7 +124,7 @@ public class CompasSclDataResource {
     @Blocking
     @Path("/{" + ID_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
-    public Uni<Void> deleteAll(@PathParam(TYPE_PATH_PARAM) SclFileType type,
+    public Uni<Void> deleteAll(@PathParam(TYPE_PATH_PARAM) String type,
                                @PathParam(ID_PATH_PARAM) UUID id) {
         LOGGER.info("Removing all versions of SCL File {} for type {} from storage.", id, type);
         compasSclDataService.delete(type, id);
@@ -136,7 +135,7 @@ public class CompasSclDataResource {
     @Blocking
     @Path("/{" + ID_PATH_PARAM + "}/{" + VERSION_PATH_PARAM + "}")
     @Produces(MediaType.APPLICATION_XML)
-    public Uni<Void> deleteVersion(@PathParam(TYPE_PATH_PARAM) SclFileType type,
+    public Uni<Void> deleteVersion(@PathParam(TYPE_PATH_PARAM) String type,
                                    @PathParam(ID_PATH_PARAM) UUID id,
                                    @PathParam(VERSION_PATH_PARAM) Version version) {
         LOGGER.info("Removing version {} of SCL File {} for type {} from storage.", version, id, type);
@@ -148,7 +147,7 @@ public class CompasSclDataResource {
     @Path("/checkname")
     @Consumes(MediaType.APPLICATION_XML)
     @Produces(MediaType.APPLICATION_XML)
-    public Uni<DuplicateNameCheckResponse> checkDuplicateName(@PathParam(TYPE_PATH_PARAM) SclFileType type,
+    public Uni<DuplicateNameCheckResponse> checkDuplicateName(@PathParam(TYPE_PATH_PARAM) String type,
                                                   @Valid DuplicateNameCheckRequest request) {
         LOGGER.info("Checking for duplicate SCL File name.");
 

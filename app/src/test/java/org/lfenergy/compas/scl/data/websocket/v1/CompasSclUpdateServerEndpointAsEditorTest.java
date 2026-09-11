@@ -36,7 +36,7 @@ class CompasSclUpdateServerEndpointAsEditorTest extends AbstractServerEndpointAs
     @Test
     void updateSCL_WhenCalled_ThenExpectedResponseIsRetrieved() throws Exception {
         var encoder = new UpdateWsRequestEncoder();
-        var sclFileTye = SclFileType.SCD;
+        var sclFileTye = SclFileType.SCD.toString();
         var id = UUID.randomUUID();
         var cst = ChangeSetType.PATCH;
         var comment = "Some comment";

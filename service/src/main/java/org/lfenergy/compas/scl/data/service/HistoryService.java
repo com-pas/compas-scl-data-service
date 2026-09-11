@@ -16,7 +16,6 @@ import org.lfenergy.compas.scl.data.rest.api.history.DataResourceHistory;
 import org.lfenergy.compas.scl.data.rest.api.history.DataResourceSearch;
 import org.lfenergy.compas.scl.data.rest.api.history.DataResourceVersion;
 import org.lfenergy.compas.scl.data.rest.api.history.DataResourcesResult;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +50,7 @@ public class HistoryService {
             .orElseThrow(() -> new CompasNoDataFoundException(
                 "No referenced resource for resource " + id + " version " + version));
 
-        var sclType = SclFileType.valueOf(entry.sclFile.type.toUpperCase());
+        var sclType = entry.sclFile.type.toUpperCase();
         var sclContent = compasSclDataRepository.findByUUID(sclType, id, new Version(version));
 
         try {

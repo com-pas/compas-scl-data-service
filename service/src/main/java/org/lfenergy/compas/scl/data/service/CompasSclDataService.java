@@ -5,14 +5,15 @@ package org.lfenergy.compas.scl.data.service;
 
 import org.lfenergy.compas.core.commons.ElementConverter;
 import org.lfenergy.compas.core.commons.exception.CompasException;
+import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.ChangeSetType;
 import org.lfenergy.compas.scl.data.xml.HistoryItem;
 import org.lfenergy.compas.scl.data.xml.Item;
 import org.lfenergy.compas.scl.data.model.Version;
+import org.lfenergy.compas.scl.data.repository.SclFileGroupRepository;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -42,13 +43,18 @@ public class CompasSclDataService {
     private final ElementConverter converter;
     private final SclElementProcessor sclElementProcessor;
     private final HistorizedSclFileService historizedSclFileService;
+    private final SclFileGroupRepository sclFileGroupRepository;
 
     @Inject
-    public CompasSclDataService(ElementConverter converter,
-                                SclElementProcessor sclElementProcessor, HistorizedSclFileService historizedSclFileService) {
+    public CompasSclDataService(
+        ElementConverter converter,
+        SclElementProcessor sclElementProcessor, 
+        HistorizedSclFileService historizedSclFileService,
+        SclFileGroupRepository sclFileGroupRepository) {
         this.converter = converter;
         this.sclElementProcessor = sclElementProcessor;
         this.historizedSclFileService = historizedSclFileService;
+        this.sclFileGroupRepository = sclFileGroupRepository;
     }
 
     /**
@@ -58,7 +64,7 @@ public class CompasSclDataService {
      * @return The List of Items found.
      */
     @Transactional(SUPPORTS)
-    public List<Item> list(SclFileType type) {
+    public List<Item> list(String type) {
         return historizedSclFileService.list(type)
                 .stream()
                 .map(e -> new Item(e.getId(), e.getName(), e.getVersion(), e.getLabels()))
@@ -73,7 +79,7 @@ public class CompasSclDataService {
      * @return The list of versions found.
      */
     @Transactional(SUPPORTS)
-    public List<HistoryItem> listVersionsByUUID(SclFileType type, UUID id) {
+    public List<HistoryItem> listVersionsByUUID(String type, UUID id) {
         var items = historizedSclFileService.listVersionsByUUID(type, id);
         if (items.isEmpty()) {
             var message = String.format("No versions found for type '%s' with ID '%s'", type, id);
@@ -93,7 +99,7 @@ public class CompasSclDataService {
      * @return The latest version of the SCL XML Files.
      */
     @Transactional(SUPPORTS)
-    public String findByUUID(SclFileType type, UUID id) {
+    public String findByUUID(String type, UUID id) {
         return historizedSclFileService.findByUUID(type, id);
     }
 
@@ -106,7 +112,7 @@ public class CompasSclDataService {
      * @return The found version of the SCL XML Files.
      */
     @Transactional(SUPPORTS)
-    public String findByUUID(SclFileType type, UUID id, Version version) {
+    public String findByUUID(String type, UUID id, Version version) {
         return historizedSclFileService.findByUUID(type, id, version);
     }
 
@@ -121,7 +127,11 @@ public class CompasSclDataService {
      * @return The ID of the new created SCL XML File in the database.
      */
     @Transactional(REQUIRED)
-    public String create(SclFileType type, String name, String who, String comment, String sclData) {
+    public String create(String type, String name, String who, String comment, String sclData) {
+        if (!this.sclFileGroupRepository.doesCodeExist(type)) {
+            throw new CompasInvalidInputException("The specified type does not exist.");
+        }
+
         var scl = converter.convertToElement(new BufferedInputStream(new ByteArrayInputStream(sclData.getBytes(StandardCharsets.UTF_8))), SCL_ELEMENT_NAME, SCL_NS_URI);
         if (scl == null) {
             throw new CompasException(NO_SCL_ELEMENT_FOUND_ERROR_CODE, "No valid SCL found in the passed SCL Data.");
@@ -154,7 +164,7 @@ public class CompasSclDataService {
         return newSclData;
     }
 
-    public boolean hasDuplicateSclName(SclFileType type, String name){
+    public boolean hasDuplicateSclName(String type, String name){
         return historizedSclFileService.hasDuplicateSclName(type, name);
     }
 
@@ -171,7 +181,11 @@ public class CompasSclDataService {
      * @param sclData       The SCL XML File with the updated content.
      */
     @Transactional(REQUIRED)
-    public String update(SclFileType type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData) {
+    public String update(String type, UUID id, ChangeSetType changeSetType, String who, String comment, String sclData) {
+        if (!this.sclFileGroupRepository.doesCodeExist(type)) {
+            throw new CompasInvalidInputException("The specified type does not exist.");
+        }
+
         var scl = converter.convertToElement(new BufferedInputStream(new ByteArrayInputStream(sclData.getBytes(StandardCharsets.UTF_8))), SCL_ELEMENT_NAME, SCL_NS_URI);
         if (scl == null) {
             throw new CompasException(NO_SCL_ELEMENT_FOUND_ERROR_CODE, "No valid SCL found in the passed SCL Data.");
@@ -216,7 +230,7 @@ public class CompasSclDataService {
      * @param id   The ID of the SCL File to delete.
      */
     @Transactional(REQUIRED)
-    public void delete(SclFileType type, UUID id) {
+    public void delete(String type, UUID id) {
         historizedSclFileService.delete(type, id);
     }
 
@@ -228,7 +242,7 @@ public class CompasSclDataService {
      * @param version The version of that SCL File to delete.
      */
     @Transactional(REQUIRED)
-    public void delete(SclFileType type, UUID id, Version version) {
+    public void delete(String type, UUID id, Version version) {
         historizedSclFileService.delete(type, id, version);
     }
 
@@ -273,7 +287,7 @@ public class CompasSclDataService {
      * @param name     The name to add.
      * @param fileType The file type to add.
      */
-    private void setSclCompasPrivateElement(Element scl, String name, SclFileType fileType) {
+    private void setSclCompasPrivateElement(Element scl, String name, String fileType) {
         var compasPrivate = sclElementProcessor.getCompasPrivate(scl)
                 .orElseGet(() -> sclElementProcessor.addCompasPrivate(scl));
 
@@ -287,9 +301,9 @@ public class CompasSclDataService {
         // Always set the file type as private element.
         sclElementProcessor.getChildNodeByName(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION, COMPAS_EXTENSION_NS_URI)
             .ifPresentOrElse(
-                element -> element.setTextContent(fileType.toString()),
+                element -> element.setTextContent(fileType),
                 () -> sclElementProcessor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION,
-                    fileType.toString())
+                    fileType)
             );
     }
 

@@ -3,19 +3,17 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.lfenergy.compas.scl.data.websocket.event.model;
 
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
-
 import jakarta.websocket.Session;
 
 public class CreateEventRequest {
     private final Session session;
-    private final SclFileType type;
+    private final String type;
     private final String name;
     private final String who;
     private final String comment;
     private final String sclData;
 
-    public CreateEventRequest(Session session, SclFileType type, String name, String who, String comment, String sclData) {
+    public CreateEventRequest(Session session, String type, String name, String who, String comment, String sclData) {
         this.session = session;
         this.type = type;
         this.name = name;
@@ -28,7 +26,7 @@ public class CreateEventRequest {
         return session;
     }
 
-    public SclFileType getType() {
+    public String getType() {
         return type;
     }
 

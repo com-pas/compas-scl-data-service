@@ -11,7 +11,6 @@ import org.lfenergy.compas.scl.data.model.IItem;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
 import org.lfenergy.compas.scl.data.repository.HistorizedSclFileRepository;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,46 +27,46 @@ public class HistorizedSclFileService {
         this.historizedSclFileRepository = historizedSclFileRepository;
     }
 
-    public void insertSclFileWithHistory(SclFileType type, UUID id, String name, String content, Version version,
+    public void insertSclFileWithHistory(String type, UUID id, String name, String content, Version version,
                                                       String who, List<String> labels, String comment, String fileName) {
         var whoToUse = who != null ? who : "Unknown";
         repository.create(type, id, name, content, version, whoToUse, labels);
         historizedSclFileRepository.createEntry(id, version, "application/xml", fileName, comment);
     }
 
-    public List<IItem> list(SclFileType type) {
+    public List<IItem> list(String type) {
         return repository.list(type);
     }
 
-    public List<IHistoryItem> listVersionsByUUID(SclFileType type, UUID id) {
+    public List<IHistoryItem> listVersionsByUUID(String type, UUID id) {
         return repository.listVersionsByUUID(type, id);
     }
 
-    public String findByUUID(SclFileType type, UUID id) {
+    public String findByUUID(String type, UUID id) {
         return repository.findByUUID(type, id);
     }
 
-    public IAbstractItem findMetaInfoByUUID(SclFileType type, UUID id) {
+    public IAbstractItem findMetaInfoByUUID(String type, UUID id) {
         return repository.findMetaInfoByUUID(type, id);
     }
 
-    public String findByUUID(SclFileType type, UUID id, Version version) {
+    public String findByUUID(String type, UUID id, Version version) {
         return repository.findByUUID(type, id, version);
     }
 
-    public boolean hasDuplicateSclName(SclFileType type, String name) {
+    public boolean hasDuplicateSclName(String type, String name) {
         return repository.hasDuplicateSclName(type, name);
     }
 
-    public void create(SclFileType type, UUID id, String name, String scl, Version version, String who, List<String> labels) {
+    public void create(String type, UUID id, String name, String scl, Version version, String who, List<String> labels) {
         repository.create(type, id, name, scl, version, who, labels);
     }
 
-    public void delete(SclFileType type, UUID id) {
+    public void delete(String type, UUID id) {
         repository.delete(type, id);
     }
 
-    public void delete(SclFileType type, UUID id, Version version) {
+    public void delete(String type, UUID id, Version version) {
         repository.delete(type, id, version);
     }
 }
