@@ -13,7 +13,6 @@ import org.lfenergy.compas.scl.data.websocket.event.model.GetVersionEventRequest
 import org.lfenergy.compas.scl.data.websocket.v1.decoder.GetVersionWsRequestDecoder;
 import org.lfenergy.compas.scl.data.websocket.v1.encoder.GetWsResponseEncoder;
 import org.lfenergy.compas.scl.data.websocket.v1.model.GetVersionWsRequest;
-import org.lfenergy.compas.scl.extensions.model.SclFileType;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -51,7 +50,7 @@ public class CompasSclGetVersionServerEndpoint {
                                     @PathParam(TYPE_PATH_PARAM) String type) {
         LOGGER.info("Message from session {} for type {}.", session.getId(), type);
 
-        eventBus.send("get-version-ws", new GetVersionEventRequest(session, SclFileType.valueOf(type),
+        eventBus.send("get-version-ws", new GetVersionEventRequest(session, type,
                 request.getId(), new Version(request.getVersion())));
     }
 

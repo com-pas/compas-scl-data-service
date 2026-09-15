@@ -15,10 +15,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.NO_DATA_FOUND_ERROR_CODE;
 
 public abstract class AbstractCompasSclDataRepositoryTest {
-    protected static final SclFileType TYPE = SclFileType.SCD;
+    protected static final String TYPE = SclFileType.SCD.toString();
 
     // Use different types, so tests don't conflict with each other.
-    protected static final SclFileType LIST1_TYPE = SclFileType.CID;
+    protected static final String LIST1_TYPE = SclFileType.CID.toString();
     protected abstract CompasSclDataRepository getRepository();
 
     @Test

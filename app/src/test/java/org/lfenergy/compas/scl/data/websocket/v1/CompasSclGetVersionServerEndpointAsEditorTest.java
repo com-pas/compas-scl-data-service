@@ -36,7 +36,7 @@ class CompasSclGetVersionServerEndpointAsEditorTest extends AbstractServerEndpoi
     @Test
     void getVersionSCL_WhenCalled_ThenExpectedResponseIsRetrieved() throws Exception {
         var encoder = new GetVersionWsRequestEncoder();
-        var sclFileTye = SclFileType.SCD;
+        var sclFileTye = SclFileType.SCD.toString();
         var id = UUID.randomUUID();
         var version = new Version("1.2.3");
         var sclData = readSCL();

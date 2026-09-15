@@ -19,6 +19,7 @@ import org.lfenergy.compas.scl.data.xml.SclMetaInfo;
 import org.lfenergy.compas.scl.data.model.Version;
 import org.lfenergy.compas.scl.data.util.SclElementProcessor;
 import org.lfenergy.compas.scl.extensions.model.SclFileType;
+import org.lfenergy.compas.scl.data.repository.SclFileGroupRepository;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.w3c.dom.Element;
@@ -32,15 +33,21 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.lfenergy.compas.scl.data.SclDataServiceConstants.*;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.*;
 import static org.lfenergy.compas.scl.extensions.commons.CompasExtensionsConstants.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CompasSclDataServiceTest {
     private static final Version INITIAL_VERSION = new Version("1.0.0");
-    private static final SclFileType SCL_TYPE = SclFileType.SCD;
+    private static final String SCL_TYPE = SclFileType.SCD.toString();
 
     @Mock
     private HistorizedSclFileService historizedSclFileService;
+
+    @Mock
+    private SclFileGroupRepository sclFileGroupRepository;
 
     private CompasSclDataService compasSclDataService;
 
@@ -49,7 +56,7 @@ class CompasSclDataServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        compasSclDataService = new CompasSclDataService(converter, processor, historizedSclFileService);
+        compasSclDataService = new CompasSclDataService(converter, processor, historizedSclFileService, sclFileGroupRepository);
     }
 
     @Test
@@ -124,6 +131,7 @@ class CompasSclDataServiceTest {
         var scl = readSCL("scl_test_file.scd");
 
         when(historizedSclFileService.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(false);
+        when(sclFileGroupRepository.doesCodeExist(SCL_TYPE)).thenReturn(true);
         doNothing().when(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList())
         ,eq("SCL created, Some comments"), eq("JUSTSOMENAME.SCD.xml"));
 
@@ -147,6 +155,7 @@ class CompasSclDataServiceTest {
         scl = createCompasPrivate(scl, "JUSTANOTHERNAME");
 
         when(historizedSclFileService.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(false);
+        when(sclFileGroupRepository.doesCodeExist(SCL_TYPE)).thenReturn(true);
         doNothing().when(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), any(UUID.class), eq(name), anyString(), eq(INITIAL_VERSION), eq(who), eq(emptyList()), eq("SCL created"), eq("JUSTANOTHERNAME"));
 
         scl = compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
@@ -167,11 +176,26 @@ class CompasSclDataServiceTest {
         var scl = readSCL("scl_test_file.scd");
 
         when(historizedSclFileService.hasDuplicateSclName(SCL_TYPE, name)).thenReturn(true);
+        when(sclFileGroupRepository.doesCodeExist(SCL_TYPE)).thenReturn(true);
         var exception = assertThrows(CompasException.class, () -> {
             compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
         });
         assertEquals(DUPLICATE_SCL_NAME_ERROR_CODE, exception.getErrorCode());
         verify(historizedSclFileService).hasDuplicateSclName(SCL_TYPE, name);
+    }
+
+    @Test
+    void create_WhenCalledWithNonExistentFileGroup_ThenCompasExceptionThrown() throws IOException {
+        var name = "JUSTSOMENAME";
+        var comment = "";
+        var who = "User A";
+
+        var scl = readSCL("scl_test_file.scd");
+        when(sclFileGroupRepository.doesCodeExist(SCL_TYPE)).thenReturn(false);
+        var exception = assertThrows(CompasException.class, () -> {
+            compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
+        });
+        assertEquals(INVALID_INPUT_ERROR_CODE, exception.getErrorCode());
     }
 
     @Test
@@ -182,6 +206,7 @@ class CompasSclDataServiceTest {
 
         var scl = "<some-other-tag></some-other-tag>";
 
+        when(sclFileGroupRepository.doesCodeExist(SCL_TYPE)).thenReturn(true);
         var exception = assertThrows(CompasException.class, () -> {
             compasSclDataService.create(SCL_TYPE, name, who, comment, scl);
         });
@@ -200,6 +225,7 @@ class CompasSclDataServiceTest {
 
         var sclMetaInfo = new SclMetaInfo(uuid.toString(), previousName, INITIAL_VERSION.toString());
         when(historizedSclFileService.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
+        when(sclFileGroupRepository.doesCodeExist(SCL_TYPE)).thenReturn(true);
         doNothing().when(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()),
         eq("SCL updated"), eq("Previous SCL Filename"));
 
@@ -227,6 +253,7 @@ class CompasSclDataServiceTest {
 
         var sclMetaInfo = new SclMetaInfo(uuid.toString(), previousName, INITIAL_VERSION.toString());
         when(historizedSclFileService.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
+        when(sclFileGroupRepository.doesCodeExist(SCL_TYPE)).thenReturn(true);
         doNothing().when(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), eq(uuid), eq(newName), anyString(), eq(nextVersion), eq(who), eq(emptyList()),
                 eq("SCL updated"), eq( "New SCL Filename"));
         when(historizedSclFileService.hasDuplicateSclName(SCL_TYPE, newName)).thenReturn(false);
@@ -253,6 +280,7 @@ class CompasSclDataServiceTest {
         var scl = createCompasPrivate(readSCL("scl_test_file.scd"), newName);
 
         var sclMetaInfo = new SclMetaInfo(uuid.toString(), previousName, INITIAL_VERSION.toString());
+        when(sclFileGroupRepository.doesCodeExist(SCL_TYPE)).thenReturn(true);
         when(historizedSclFileService.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
         when(historizedSclFileService.hasDuplicateSclName(SCL_TYPE, newName)).thenReturn(true);
 
@@ -277,6 +305,7 @@ class CompasSclDataServiceTest {
 
         var sclMetaInfo = new SclMetaInfo(uuid.toString(), previousName, INITIAL_VERSION.toString());
         when(historizedSclFileService.findMetaInfoByUUID(SCL_TYPE, uuid)).thenReturn(sclMetaInfo);
+        when(sclFileGroupRepository.doesCodeExist(SCL_TYPE)).thenReturn(true);
         doNothing().when(historizedSclFileService).insertSclFileWithHistory(eq(SCL_TYPE), eq(uuid), eq(previousName), anyString(), eq(nextVersion), eq(who), eq(emptyList()), eq("SCL updated"), eq("Previous SCL Filename"));
 
         scl = compasSclDataService.update(SCL_TYPE, uuid, changeSet, who, null, scl);
@@ -297,6 +326,7 @@ class CompasSclDataServiceTest {
 
         var scl = "<some-other-tag></some-other-tag>";
 
+        when(sclFileGroupRepository.doesCodeExist(SCL_TYPE)).thenReturn(true);
         var exception = assertThrows(CompasException.class, () -> {
             compasSclDataService.update(SCL_TYPE, uuid, changeSet, who, null, scl);
         });
@@ -391,7 +421,7 @@ class CompasSclDataServiceTest {
         var typeElement = processor.getChildNodeByName(compasPrivate.get(), COMPAS_SCL_FILE_TYPE_EXTENSION,
                 COMPAS_EXTENSION_NS_URI);
         assertTrue(typeElement.isPresent());
-        assertEquals(SCL_TYPE.toString(), typeElement.get().getTextContent());
+        assertEquals(SCL_TYPE, typeElement.get().getTextContent());
     }
 
     private void assertHistoryItem(String sclData, int expectedHItems, Version version, String comment) {
@@ -416,7 +446,7 @@ class CompasSclDataServiceTest {
         var scl = converter.convertToElement(sclData, SCL_ELEMENT_NAME, SCL_NS_URI);
         var compasPrivate = processor.addCompasPrivate(scl);
         processor.addCompasElement(compasPrivate, COMPAS_SCL_NAME_EXTENSION, sclName);
-        processor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION, SCL_TYPE.name());
+        processor.addCompasElement(compasPrivate, COMPAS_SCL_FILE_TYPE_EXTENSION, SCL_TYPE);
         return converter.convertToString(scl);
     }
 

@@ -35,7 +35,7 @@ class CompasSclGetServerEndpointAsReaderTest extends AbstractServerEndpointAsRea
     @Test
     void getSCL_WhenCalled_ThenExpectedResponseIsRetrieved() throws Exception {
         var encoder = new GetWsRequestEncoder();
-        var sclFileTye = SclFileType.SCD;
+        var sclFileTye = SclFileType.SCD.toString();
         var id = UUID.randomUUID();
         var sclData = readSCL();
 

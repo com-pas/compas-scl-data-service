@@ -34,7 +34,7 @@ class CompasSclCreateServerEndpointAsEditorTest extends AbstractServerEndpointAs
     @Test
     void createSCL_WhenCalled_ThenExpectedResponseIsRetrieved() throws Exception {
         var encoder = new CreateWsRequestEncoder();
-        var sclFileTye = SclFileType.SCD;
+        var sclFileTye = SclFileType.SCD.toString();
         var name = "Some name";
         var comment = "Some comment";
         var sclData = readSCL();

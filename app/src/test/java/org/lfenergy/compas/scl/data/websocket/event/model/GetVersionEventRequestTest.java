@@ -21,7 +21,7 @@ class GetVersionEventRequestTest {
     @Test
     void constructor_WhenCalledWith3Arguments_ThenValuesSet() {
         var session = Mockito.mock(Session.class);
-        var type = SclFileType.CID;
+        var type = SclFileType.CID.toString();
         var id = UUID.randomUUID();
         var version = new Version("1.2.3");
 

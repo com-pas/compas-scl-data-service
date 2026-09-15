@@ -47,10 +47,10 @@ class HistorizedSclFileServiceTest {
         var version = new Version(1, 0, 0);
         var labels = List.of("label1", "label2");
 
-        service.insertSclFileWithHistory(SclFileType.SCD, id, "test-file", "<SCL/>",
+        service.insertSclFileWithHistory(SclFileType.SCD.toString(), id, "test-file", "<SCL/>",
                 version, "alice", labels, "initial", "test-file.scd");
 
-        verify(repository).create(SclFileType.SCD, id, "test-file", "<SCL/>", version, "alice", labels);
+        verify(repository).create(SclFileType.SCD.toString(), id, "test-file", "<SCL/>", version, "alice", labels);
     }
 
     @Test
@@ -58,7 +58,7 @@ class HistorizedSclFileServiceTest {
         var id = UUID.randomUUID();
         var version = new Version(1, 2, 3);
 
-        service.insertSclFileWithHistory(SclFileType.CID, id, "cid-file", "<SCL/>",
+        service.insertSclFileWithHistory(SclFileType.CID.toString(), id, "cid-file", "<SCL/>",
                 version, "bob", List.of(), "my comment", "cid-file.cid");
 
         verify(historizedSclFileRepository).createEntry(id, version, "application/xml", "cid-file.cid", "my comment");
@@ -69,10 +69,10 @@ class HistorizedSclFileServiceTest {
         var id = UUID.randomUUID();
         var version = new Version(1, 0, 0);
 
-        service.insertSclFileWithHistory(SclFileType.SCD, id, "file", "<SCL/>",
+        service.insertSclFileWithHistory(SclFileType.SCD.toString(), id, "file", "<SCL/>",
                 version, null, List.of(), "comment", "file.scd");
 
-        verify(repository).create(eq(SclFileType.SCD), eq(id), eq("file"), eq("<SCL/>"),
+        verify(repository).create(eq(SclFileType.SCD.toString()), eq(id), eq("file"), eq("<SCL/>"),
                 eq(version), eq("Unknown"), any());
     }
 
@@ -81,11 +81,11 @@ class HistorizedSclFileServiceTest {
         var id = UUID.randomUUID();
         var version = new Version(1, 0, 0);
 
-        service.insertSclFileWithHistory(SclFileType.SCD, id, "file", "<SCL/>",
+        service.insertSclFileWithHistory(SclFileType.SCD.toString(), id, "file", "<SCL/>",
                 version, "charlie", List.of(), null, "file.scd");
 
         var captor = ArgumentCaptor.forClass(String.class);
-        verify(repository).create(eq(SclFileType.SCD), eq(id), eq("file"), eq("<SCL/>"),
+        verify(repository).create(eq(SclFileType.SCD.toString()), eq(id), eq("file"), eq("<SCL/>"),
                 eq(version), captor.capture(), any());
         assertEquals("charlie", captor.getValue());
     }
@@ -95,21 +95,21 @@ class HistorizedSclFileServiceTest {
     @Test
     void list_WhenCalled_ThenDelegatesToRepository() {
         var item = mock(IItem.class);
-        when(repository.list(SclFileType.SCD)).thenReturn(List.of(item));
+        when(repository.list(SclFileType.SCD.toString())).thenReturn(List.of(item));
 
-        var result = service.list(SclFileType.SCD);
+        var result = service.list(SclFileType.SCD.toString());
 
         assertNotNull(result);
         assertEquals(1, result.size());
         assertSame(item, result.get(0));
-        verify(repository).list(SclFileType.SCD);
+        verify(repository).list(SclFileType.SCD.toString());
     }
 
     @Test
     void list_WhenRepositoryReturnsEmpty_ThenReturnsEmpty() {
-        when(repository.list(SclFileType.CID)).thenReturn(List.of());
+        when(repository.list(SclFileType.CID.toString())).thenReturn(List.of());
 
-        var result = service.list(SclFileType.CID);
+        var result = service.list(SclFileType.CID.toString());
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -121,14 +121,14 @@ class HistorizedSclFileServiceTest {
     void listVersionsByUUID_WhenCalled_ThenDelegatesToRepository() {
         var id = UUID.randomUUID();
         var histItem = mock(IHistoryItem.class);
-        when(repository.listVersionsByUUID(SclFileType.SCD, id)).thenReturn(List.of(histItem));
+        when(repository.listVersionsByUUID(SclFileType.SCD.toString(), id)).thenReturn(List.of(histItem));
 
-        var result = service.listVersionsByUUID(SclFileType.SCD, id);
+        var result = service.listVersionsByUUID(SclFileType.SCD.toString(), id);
 
         assertNotNull(result);
         assertEquals(1, result.size());
         assertSame(histItem, result.get(0));
-        verify(repository).listVersionsByUUID(SclFileType.SCD, id);
+        verify(repository).listVersionsByUUID(SclFileType.SCD.toString(), id);
     }
 
     // ---- findByUUID (latest) -----------------------------------------------
@@ -136,12 +136,12 @@ class HistorizedSclFileServiceTest {
     @Test
     void findByUUID_WhenCalled_ThenDelegatesToRepository() {
         var id = UUID.randomUUID();
-        when(repository.findByUUID(SclFileType.SCD, id)).thenReturn("<SCL/>");
+        when(repository.findByUUID(SclFileType.SCD.toString(), id)).thenReturn("<SCL/>");
 
-        var result = service.findByUUID(SclFileType.SCD, id);
+        var result = service.findByUUID(SclFileType.SCD.toString(), id);
 
         assertEquals("<SCL/>", result);
-        verify(repository).findByUUID(SclFileType.SCD, id);
+        verify(repository).findByUUID(SclFileType.SCD.toString(), id);
     }
 
     // ---- findMetaInfoByUUID ------------------------------------------------
@@ -150,12 +150,12 @@ class HistorizedSclFileServiceTest {
     void findMetaInfoByUUID_WhenCalled_ThenDelegatesToRepository() {
         var id = UUID.randomUUID();
         var meta = mock(IAbstractItem.class);
-        when(repository.findMetaInfoByUUID(SclFileType.SCD, id)).thenReturn(meta);
+        when(repository.findMetaInfoByUUID(SclFileType.SCD.toString(), id)).thenReturn(meta);
 
-        var result = service.findMetaInfoByUUID(SclFileType.SCD, id);
+        var result = service.findMetaInfoByUUID(SclFileType.SCD.toString(), id);
 
         assertSame(meta, result);
-        verify(repository).findMetaInfoByUUID(SclFileType.SCD, id);
+        verify(repository).findMetaInfoByUUID(SclFileType.SCD.toString(), id);
     }
 
     // ---- findByUUID (versioned) --------------------------------------------
@@ -164,28 +164,28 @@ class HistorizedSclFileServiceTest {
     void findByUUID_WithVersion_WhenCalled_ThenDelegatesToRepository() {
         var id = UUID.randomUUID();
         var version = new Version(1, 2, 3);
-        when(repository.findByUUID(SclFileType.SCD, id, version)).thenReturn("<SCL/>");
+        when(repository.findByUUID(SclFileType.SCD.toString(), id, version)).thenReturn("<SCL/>");
 
-        var result = service.findByUUID(SclFileType.SCD, id, version);
+        var result = service.findByUUID(SclFileType.SCD.toString(), id, version);
 
         assertEquals("<SCL/>", result);
-        verify(repository).findByUUID(SclFileType.SCD, id, version);
+        verify(repository).findByUUID(SclFileType.SCD.toString(), id, version);
     }
 
     // ---- hasDuplicateSclName -----------------------------------------------
 
     @Test
     void hasDuplicateSclName_WhenDuplicateExists_ThenReturnsTrue() {
-        when(repository.hasDuplicateSclName(SclFileType.SCD, "my-file")).thenReturn(true);
+        when(repository.hasDuplicateSclName(SclFileType.SCD.toString(), "my-file")).thenReturn(true);
 
-        assertTrue(service.hasDuplicateSclName(SclFileType.SCD, "my-file"));
+        assertTrue(service.hasDuplicateSclName(SclFileType.SCD.toString(), "my-file"));
     }
 
     @Test
     void hasDuplicateSclName_WhenNoDuplicate_ThenReturnsFalse() {
-        when(repository.hasDuplicateSclName(SclFileType.SCD, "unique-file")).thenReturn(false);
+        when(repository.hasDuplicateSclName(SclFileType.SCD.toString(), "unique-file")).thenReturn(false);
 
-        assertFalse(service.hasDuplicateSclName(SclFileType.SCD, "unique-file"));
+        assertFalse(service.hasDuplicateSclName(SclFileType.SCD.toString(), "unique-file"));
     }
 
     // ---- create ------------------------------------------------------------
@@ -196,9 +196,9 @@ class HistorizedSclFileServiceTest {
         var version = new Version(1, 0, 0);
         var labels = List.of("tag1");
 
-        service.create(SclFileType.SCD, id, "name", "<SCL/>", version, "user", labels);
+        service.create(SclFileType.SCD.toString(), id, "name", "<SCL/>", version, "user", labels);
 
-        verify(repository).create(SclFileType.SCD, id, "name", "<SCL/>", version, "user", labels);
+        verify(repository).create(SclFileType.SCD.toString(), id, "name", "<SCL/>", version, "user", labels);
     }
 
     // ---- delete (by id) ----------------------------------------------------
@@ -207,9 +207,9 @@ class HistorizedSclFileServiceTest {
     void delete_WhenCalledWithId_ThenDelegatesToRepository() {
         var id = UUID.randomUUID();
 
-        service.delete(SclFileType.SCD, id);
+        service.delete(SclFileType.SCD.toString(), id);
 
-        verify(repository).delete(SclFileType.SCD, id);
+        verify(repository).delete(SclFileType.SCD.toString(), id);
     }
 
     // ---- delete (by id and version) ----------------------------------------
@@ -219,8 +219,8 @@ class HistorizedSclFileServiceTest {
         var id = UUID.randomUUID();
         var version = new Version(1, 0, 0);
 
-        service.delete(SclFileType.SCD, id, version);
+        service.delete(SclFileType.SCD.toString(), id, version);
 
-        verify(repository).delete(SclFileType.SCD, id, version);
+        verify(repository).delete(SclFileType.SCD.toString(), id, version);
     }
 }
