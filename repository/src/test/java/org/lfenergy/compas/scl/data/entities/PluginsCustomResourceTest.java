@@ -15,6 +15,7 @@ class PluginsCustomResourceTest {
     private PluginsCustomResource buildEntity(UUID id) {
         var entity = new PluginsCustomResource();
         entity.id = id;
+        entity.plugin = "legacy";
         entity.type = "SCD";
         entity.tenant = "default";
         entity.name = "test-plugin";
@@ -33,6 +34,12 @@ class PluginsCustomResourceTest {
     void newEntity_ThenTenantDefaultsToDefault() {
         var entity = new PluginsCustomResource();
         assertEquals("default", entity.tenant);
+    }
+
+    @Test
+    void newEntity_ThenPluginDefaultsToLegacy() {
+        var entity = new PluginsCustomResource();
+        assertEquals("legacy", entity.plugin);
     }
 
     // ---- equals() ----------------------------------------------------------
@@ -92,6 +99,21 @@ class PluginsCustomResourceTest {
 
         var b = buildEntity(id);
         b.type = "ICD";
+        b.uploadedAt = now;
+
+        assertNotEquals(a, b);
+    }
+
+    @Test
+    void equals_WhenDifferentPlugin_ThenReturnsFalse() {
+        var id = UUID.randomUUID();
+        var now = OffsetDateTime.now();
+
+        var a = buildEntity(id);
+        a.uploadedAt = now;
+
+        var b = buildEntity(id);
+        b.plugin = "other-plugin";
         b.uploadedAt = now;
 
         assertNotEquals(a, b);
