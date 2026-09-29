@@ -258,6 +258,7 @@ SPDX-License-Identifier: Apache-2.0
                 <quarkus.package.type>native</quarkus.package.type>
                 <!-- Allows for creating a Linux executable without GraalVM being installed -->
                 <quarkus.native.container-build>true</quarkus.native.container-build>
+                <quarkus.native.compression.level>5</quarkus.native.compression.level>
             </properties>
 
             <dependencies>
