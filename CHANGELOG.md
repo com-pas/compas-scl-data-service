@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.19.0](https://github.com/com-pas/compas-scl-data-service/compare/v0.18.3...v0.19.0) (2026-09-30)
+
+
+### Features
+
+* Add file groups ([ad600bc](https://github.com/com-pas/compas-scl-data-service/commit/ad600bc3a1d59b39678450e0901d9c6daf2c7a39))
+
+
+### Bug Fixes
+
+* correct GitHub API route for pull request data retrieval ([43f21ff](https://github.com/com-pas/compas-scl-data-service/commit/43f21ff71ee8c90803b90d7de2709dcea5028f50))
+
 ## [0.18.3](https://github.com/com-pas/compas-scl-data-service/compare/v0.18.2...v0.18.3) (2026-08-21)
 
 
