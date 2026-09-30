@@ -52,9 +52,9 @@ jobs:
           path: custom_maven_settings.xml
           githubServer: false
           servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
-      - name: Build with Maven (Pull Request)
-        if: ${{ github.event_name == 'pull_request' }}
-        run: ./mvnw -s custom_maven_settings.xml -B -Pnative-image clean verify
+      # - name: Build with Maven (Pull Request)
+      #   if: ${{ github.event_name == 'pull_request' }}
+      #   run: ./mvnw -s custom_maven_settings.xml -B -Pnative-image clean verify
       - name: Build with Maven (Push)
         if: ${{ github.event_name == 'push' }}
-        run: ./mvnw -s custom_maven_settings.xml -B clean verify
+        run: ./mvnw -s custom_maven_settings.xml -B -Pnative-image clean verify
