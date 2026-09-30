@@ -62,4 +62,3 @@ jobs:
       - name: Show build results
         run:
           ls -lh ./app/target/postgresql-quarkus-app/*-runner
-          docker image ls -a
