@@ -58,3 +58,8 @@ jobs:
       - name: Build with Maven (Push)
         if: ${{ github.event_name == 'push' }}
         run: ./mvnw -s custom_maven_settings.xml -B -Pnative-image clean verify
+
+      - name: Show build results
+        run:
+          ls -lh ./app/target/postgresql-quarkus-app/*-runner
+          docker image ls -a
