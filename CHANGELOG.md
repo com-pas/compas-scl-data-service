@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.1](https://github.com/com-pas/compas-scl-data-service/compare/v0.19.0...v0.19.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* Fix LNode Type DB type in content ([bf58fe5](https://github.com/com-pas/compas-scl-data-service/commit/bf58fe5d865fe532257c876b8510447eb608b0d8))
+
 ## [0.19.0](https://github.com/com-pas/compas-scl-data-service/compare/v0.18.3...v0.19.0) (2026-09-30)
 
 
