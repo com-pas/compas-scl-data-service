@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package org.lfenergy.compas.scl.data.rest.v1;
+package org.lfenergy.compas.scl.data.rest.v1.model;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
@@ -11,6 +11,7 @@ import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.entities.PluginsCustomResource;
+import org.lfenergy.compas.scl.data.rest.v1.CompasPluginsResource;
 import org.lfenergy.compas.scl.data.service.CompasPluginsResourceService;
 
 import java.time.OffsetDateTime;

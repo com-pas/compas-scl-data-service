@@ -32,12 +32,12 @@ class CompasPluginsResourceTest {
 
     @Test
     void getAllData_WhenSizeIsZero_ThenTotalPagesIsZero() {
-        when(service.list(eq("xml"), isNull(), isNull(), isNull(), eq(0), eq(0)))
+        when(service.list(eq("my-plugin_my-resource"), isNull(), isNull(), isNull(), eq(0), eq(0)))
                 .thenReturn(List.of());
-        when(service.count(eq("xml"), isNull(), isNull(), isNull()))
+        when(service.count(eq("my-plugin_my-resource"), isNull(), isNull(), isNull()))
                 .thenReturn(5L);
 
-        var response = resource.getAllData("xml", null, null, null, 0, 0);
+        var response = resource.getAllData("my-plugin_my-resource", null, null, null, 0, 0);
 
         assertEquals(0, response.getTotalPages());
         assertEquals(5, response.getTotalElements());
@@ -49,7 +49,7 @@ class CompasPluginsResourceTest {
         when(inputStream.readAllBytes()).thenThrow(new IOException("read failed"));
 
         assertThrows(CompasInvalidInputException.class, () ->
-                resource.uploadData("xml", "name", "application/xml", inputStream,
+                resource.uploadData("my-plugin_my-resource", "name", "application/xml", inputStream,
                         "1.0.0", "desc", "1.0.0", "MAJOR"));
     }
 
@@ -57,7 +57,7 @@ class CompasPluginsResourceTest {
     void getDataById_WhenUploadedAtIsNull_ThenResponseUploadedAtIsNull() {
         var entity = new PluginsCustomResource();
         entity.id = UUID.randomUUID();
-        entity.type = "xml";
+        entity.type = "my-plugin_my-resource";
         entity.tenant = "default";
         entity.name = "test";
         entity.contentType = "application/xml";
@@ -77,7 +77,7 @@ class CompasPluginsResourceTest {
     void getLatestDataByType_WhenUploadedAtIsNull_ThenResponseUploadedAtIsNull() {
         var entity = new PluginsCustomResource();
         entity.id = UUID.randomUUID();
-        entity.type = "xml";
+        entity.type = "my-plugin_my-resource";
         entity.tenant = "default";
         entity.name = "test";
         entity.contentType = "application/xml";
@@ -96,16 +96,16 @@ class CompasPluginsResourceTest {
 
     @Test
     void deleteDataByType_WhenCalled_ThenDelegatesToService() {
-        resource.deleteDataByType("xml");
+        resource.deleteDataByType("my-plugin_my-resource");
 
-        org.mockito.Mockito.verify(service).deleteByType("xml");
+        org.mockito.Mockito.verify(service).deleteByType("my-plugin_my-resource");
     }
 
     @Test
     void getLatestDataByTypeAndName_WhenUploadedAtIsNull_ThenResponseUploadedAtIsNull() {
         var entity = new PluginsCustomResource();
         entity.id = UUID.randomUUID();
-        entity.type = "xml";
+        entity.type = "my-plugin_my-resource";
         entity.tenant = "default";
         entity.name = "test";
         entity.contentType = "application/xml";
@@ -123,8 +123,8 @@ class CompasPluginsResourceTest {
 
     @Test
     void deleteDataByTypeAndName_WhenCalled_ThenDelegatesToService() {
-        resource.deleteDataByTypeAndName("xml", "test");
+        resource.deleteDataByTypeAndName("my-plugin_my-resource", "test");
 
-        org.mockito.Mockito.verify(service).deleteByTypeAndName("xml", "test");
+        org.mockito.Mockito.verify(service).deleteByTypeAndName("my-plugin_my-resource", "test");
     }
 }
