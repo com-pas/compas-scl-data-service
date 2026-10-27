@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.19.2](https://github.com/com-pas/compas-scl-data-service/compare/v0.19.1...v0.19.2) (2026-10-27)
+
+
+### Bug Fixes
+
+* Fix WS permission checks for BAY, LNT ([6d0c263](https://github.com/com-pas/compas-scl-data-service/commit/6d0c2630ffd4100dcac24c5b4f8c9d48e1b009b4))
+* Fix WS permission checks for BAY, LNT ([a3858d8](https://github.com/com-pas/compas-scl-data-service/commit/a3858d832190949d44d19bbb91c24fac4c4849ef))
+
 ## [0.19.1](https://github.com/com-pas/compas-scl-data-service/compare/v0.19.0...v0.19.1) (2026-10-05)
 
 
