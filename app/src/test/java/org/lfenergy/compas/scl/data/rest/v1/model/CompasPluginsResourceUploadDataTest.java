@@ -20,7 +20,7 @@ import static org.lfenergy.compas.scl.data.rest.Constants.READ_ROLE;
 
 
 @QuarkusTest
-@TestSecurity(user = "test-user", roles = {"SCD_" + READ_ROLE, "SCD_" + DELETE_ROLE, PLUGINS_RESOURCES + "_" + READ_ROLE, PLUGINS_RESOURCES + "_" + CREATE_ROLE})
+@TestSecurity(user = "test-user", roles = {"SCD_" + READ_ROLE, "SCD_" + DELETE_ROLE, PLUGINS_RESOURCES + "_" + READ_ROLE, PLUGINS_RESOURCES + "_" + WRITE_ROLE})
 @TestHTTPEndpoint(CompasPluginsResource.class)
 class CompasPluginsResourceUploadDataTest {
 

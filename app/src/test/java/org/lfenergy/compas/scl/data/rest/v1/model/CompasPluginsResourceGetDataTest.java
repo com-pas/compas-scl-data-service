@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 
 
 @QuarkusTest
-@TestSecurity(user = "test-user", roles = {"SCD_" + READ_ROLE, "SCD_" + DELETE_ROLE, PLUGINS_RESOURCES + "_" + READ_ROLE, PLUGINS_RESOURCES + "_" + CREATE_ROLE, PLUGINS_RESOURCES + "_" + DELETE_ROLE})
+@TestSecurity(user = "test-user", roles = {"SCD_" + READ_ROLE, "SCD_" + DELETE_ROLE, PLUGINS_RESOURCES + "_" + READ_ROLE, PLUGINS_RESOURCES + "_" + WRITE_ROLE, PLUGINS_RESOURCES + "_" + DELETE_ROLE})
 @TestHTTPEndpoint(CompasPluginsResource.class)
 class CompasPluginsResourceGetDataTest {
 

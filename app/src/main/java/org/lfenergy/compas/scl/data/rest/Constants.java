@@ -13,6 +13,7 @@ public final class Constants {
 
     public static final String READ_ROLE = "READ";
     public static final String CREATE_ROLE = "CREATE";
+    public static final String WRITE_ROLE = "WRITE";
     public static final String UPDATE_ROLE = "UPDATE";
     public static final String DELETE_ROLE = "DELETE";
 
