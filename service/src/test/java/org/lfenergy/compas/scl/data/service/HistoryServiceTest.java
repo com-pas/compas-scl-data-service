@@ -10,6 +10,7 @@ import org.lfenergy.compas.scl.data.entities.HistorizedSclFile;
 import org.lfenergy.compas.scl.data.entities.Location;
 import org.lfenergy.compas.scl.data.entities.SclFile;
 import org.lfenergy.compas.scl.data.entities.SclFileId;
+import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.repository.CompasSclDataRepository;
@@ -200,6 +201,40 @@ class HistoryServiceTest {
     // ---- searchForResources ------------------------------------------------
 
     @Test
+    void searchForResources_WhenUuidCombinedWithAnotherFilter_ThenThrowsInvalidInputBeforeQuerying() {
+        var date = OffsetDateTime.now();
+        var searches = List.of(
+                new DataResourceSearch().type("SCD"),
+                new DataResourceSearch().name("file"),
+                new DataResourceSearch().location(UUID.randomUUID().toString()),
+                new DataResourceSearch().author("JohnDoe"),
+                new DataResourceSearch().from(date),
+                new DataResourceSearch().to(date));
+
+        for (var search : searches) {
+            search.setUuid("1234");
+
+            var exception = assertThrows(CompasInvalidInputException.class,
+                    () -> historyService.searchForResources(search));
+
+            assertEquals("UUID search cannot be combined with other filters.", exception.getMessage());
+        }
+        verifyNoInteractions(historizedSclFileRepository, compasSclDataRepository);
+    }
+
+    @Test
+    void searchForResources_WhenUuidProvidedWithBlankFilters_ThenDelegatesToSearchLatest() {
+        var search = new DataResourceSearch().uuid("1234").type(" ").name("\t").location("").author("  ");
+        when(historizedSclFileRepository.searchLatest("1234", " ", "\t", "", "  ", null, null))
+                .thenReturn(List.of());
+
+        var result = historyService.searchForResources(search);
+
+        assertTrue(result.getResults().isEmpty());
+        verify(historizedSclFileRepository).searchLatest("1234", " ", "\t", "", "  ", null, null);
+    }
+
+    @Test
     void searchForResources_WhenNoUuidProvided_ThenDelegatesToSearchLatest() {
         var id = UUID.randomUUID();
         var entry = buildEntry(id, "SCD", "file", "1.0.0", true, false);
@@ -218,7 +253,7 @@ class HistoryServiceTest {
 
     @Test
     void searchForResources_WhenBlankUuidProvided_ThenDelegatesToSearchLatest() {
-        var search = new DataResourceSearch().uuid("  ");
+        var search = new DataResourceSearch().uuid("  ").type("SCD");
 
         when(historizedSclFileRepository.searchLatest(eq("  "), any(), any(), any(), any(), any(), any()))
                 .thenReturn(List.of());
@@ -226,7 +261,7 @@ class HistoryServiceTest {
         var result = historyService.searchForResources(search);
 
         assertNotNull(result);
-        verify(historizedSclFileRepository).searchLatest(eq("  "), any(), any(), any(), any(), any(), any());
+        verify(historizedSclFileRepository).searchLatest("  ", "SCD", null, null, null, null, null);
     }
 
     @Test
@@ -330,9 +365,8 @@ class HistoryServiceTest {
     }
 
     @Test
-    void searchForResources_WhenAllFiltersProvided_ThenCallsSearchLatestWithAllParams() {
+    void searchForResources_WhenAllNonUuidFiltersProvided_ThenCallsSearchLatestWithAllParams() {
         DataResourceSearch search = new DataResourceSearch();
-        search.setUuid("1234");
         search.setType("SCD");
         search.setName("Substation");
         search.setLocation(UUID.randomUUID().toString());

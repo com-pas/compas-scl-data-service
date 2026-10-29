@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -244,13 +245,13 @@ class HistorizedSclFileRepositoryTest {
         OffsetDateTime from = OffsetDateTime.now().minusDays(1);
         OffsetDateTime to = OffsetDateTime.now();
 
-        repository.searchLatest("1234", "SCD", "Substation", locationId.toString(), "JohnDoe", from, to);
+        repository.searchLatest("  ", "SCD", "Substation", locationId.toString(), "JohnDoe", from, to);
 
         ArgumentCaptor<String> hqlCaptor = ArgumentCaptor.forClass(String.class);
         verify(session).createQuery(hqlCaptor.capture(), eq(HistorizedSclFile.class));
         String capturedHql = hqlCaptor.getValue();
 
-        assertTrue(capturedHql.contains("cast(r.sclFile.id.id as string) like :uuid"));
+        assertFalse(capturedHql.contains(":uuid"));
         assertTrue(capturedHql.contains("r.sclFile.type = :type"));
         assertTrue(capturedHql.contains("lower(r.sclFile.name) like :name"));
         assertTrue(capturedHql.contains("r.location.id = :locationId"));
@@ -258,7 +259,6 @@ class HistorizedSclFileRepositoryTest {
         assertTrue(capturedHql.contains("r.changedAt >= :from"));
         assertTrue(capturedHql.contains("r.changedAt <= :to"));
 
-        verify(queryMock).setParameter("uuid", "%1234%");
         verify(queryMock).setParameter("type", "SCD");
         verify(queryMock).setParameter("name", "%substation%");
         verify(queryMock).setParameter("locationId", locationId);
