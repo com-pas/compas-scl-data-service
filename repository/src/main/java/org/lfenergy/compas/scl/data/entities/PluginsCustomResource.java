@@ -25,6 +25,9 @@ public class PluginsCustomResource extends PanacheEntityBase {
     public UUID id;
 
     @Column(nullable = false)
+    public String plugin = "legacy";
+
+    @Column(nullable = false)
     public String type;
 
     @Column(nullable = false)
@@ -56,11 +59,11 @@ public class PluginsCustomResource extends PanacheEntityBase {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         PluginsCustomResource that = (PluginsCustomResource) o;
-        return Objects.equals(id, that.id) && Objects.equals(type, that.type) && Objects.equals(tenant, that.tenant) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(contentType, that.contentType) && Objects.equals(content, that.content) && Objects.equals(version, that.version) && Objects.equals(dataCompatibilityVersion, that.dataCompatibilityVersion) && Objects.equals(uploadedAt, that.uploadedAt);
+        return Objects.equals(id, that.id) && Objects.equals(plugin, that.plugin) && Objects.equals(type, that.type) && Objects.equals(tenant, that.tenant) && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(contentType, that.contentType) && Objects.equals(content, that.content) && Objects.equals(version, that.version) && Objects.equals(dataCompatibilityVersion, that.dataCompatibilityVersion) && Objects.equals(uploadedAt, that.uploadedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, type, tenant, name, description, contentType, content, version, dataCompatibilityVersion, uploadedAt);
+        return Objects.hash(id, plugin, type, tenant, name, description, contentType, content, version, dataCompatibilityVersion, uploadedAt);
     }
 }
