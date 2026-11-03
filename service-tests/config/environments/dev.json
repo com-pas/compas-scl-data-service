@@ -1,0 +1,9 @@
+{
+  "projectName": "CoMPAS SCL Data Service - Development",
+  "baseUrl": "http://localhost:8080",
+  "auth": {
+    "type": "none"
+  },
+  "timeout": 30000,
+  "retries": 1
+}
