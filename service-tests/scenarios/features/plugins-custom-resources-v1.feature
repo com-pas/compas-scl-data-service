@@ -23,6 +23,61 @@ Feature: Plugins Custom Resources V1
     And the response should contain field "id"
     And I schedule a DELETE for "/compas-scl-data-service/plugins/resources/engineering-wizard_process_{{UUID}}"
 
+  @remaining-endpoints
+  Scenario: Get the latest version of each plugin resource by type
+    Given I POST "/compas-scl-data-service/plugins/resources" with multipart form data:
+      """
+      {
+        "type": "latest-type-{{UUID}}",
+        "name": "Resource A {{UUID}}",
+        "content-type": "application/json",
+        "content": "{}",
+        "data-compatibility-version": "1.0.0",
+        "version": "1.0.0"
+      }
+      """
+    Then the response status should be 200
+    And I schedule a DELETE for "/compas-scl-data-service/plugins/resources/latest-type-{{UUID}}"
+    Given I POST "/compas-scl-data-service/plugins/resources" with multipart form data:
+      """
+      {
+        "type": "latest-type-{{UUID}}",
+        "name": "Resource A {{UUID}}",
+        "content-type": "application/json",
+        "content": "{}",
+        "data-compatibility-version": "1.0.0",
+        "version": "1.0.2"
+      }
+      """
+    Then the response status should be 200
+    Given I POST "/compas-scl-data-service/plugins/resources" with multipart form data:
+      """
+      {
+        "type": "latest-type-{{UUID}}",
+        "name": "Resource B {{UUID}}",
+        "content-type": "application/json",
+        "content": "{}",
+        "data-compatibility-version": "1.0.0",
+        "version": "1.0.0"
+      }
+      """
+    Then the response status should be 200
+
+    When I GET "/compas-scl-data-service/plugins/resources/latest-type-{{UUID}}/latest"
+    Then the response status should be 200
+    And the response should be an array
+    And the response field "length" should equal "2"
+    And the response field "0.name" should equal "Resource A {__UUID__}"
+    And the response field "0.version" should equal "1.0.2"
+    And the response field "0.type" should equal "latest-type-{__UUID__}"
+    And the response field "1.name" should equal "Resource B {__UUID__}"
+    And the response field "1.version" should equal "1.0.0"
+
+  @remaining-endpoints
+  Scenario: Get latest resources for a non-existing type
+    When I GET "/compas-scl-data-service/plugins/resources/missing-type-{{UUID}}/latest"
+    Then the response status should be 404
+
   Scenario: Post a new plugin resource with invalid content-type
     When I POST "/compas-scl-data-service/plugins/resources" with multipart form data:
       """

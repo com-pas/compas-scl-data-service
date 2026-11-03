@@ -35,6 +35,91 @@ Feature: Plugins Custom Resources V2
       """
     Then the response status should be 400
 
+  @remaining-endpoints
+  Scenario: Delete every resource version of a type without affecting other types or plugins
+    Given I POST "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/delete-type-{{UUID}}" with JSON body:
+      """
+      {
+        "name": "resource-a",
+        "contentType": "application/json",
+        "version": "1.0.0",
+        "dataCompatibilityVersion": "1.0.0",
+        "content": "{}"
+      }
+      """
+    Then the response status should be 200
+    And I schedule a DELETE for "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/delete-type-{{UUID}}"
+    Given I POST "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/delete-type-{{UUID}}" with JSON body:
+      """
+      {
+        "name": "resource-a",
+        "contentType": "application/json",
+        "version": "1.0.1",
+        "dataCompatibilityVersion": "1.0.0",
+        "content": "{}"
+      }
+      """
+    Then the response status should be 200
+    Given I POST "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/delete-type-{{UUID}}" with JSON body:
+      """
+      {
+        "name": "resource-b",
+        "contentType": "application/json",
+        "version": "1.0.0",
+        "dataCompatibilityVersion": "1.0.0",
+        "content": "{}"
+      }
+      """
+    Then the response status should be 200
+    Given I POST "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/retained-type-{{UUID}}" with JSON body:
+      """
+      {
+        "name": "retained-resource",
+        "contentType": "application/json",
+        "version": "1.0.0",
+        "dataCompatibilityVersion": "1.0.0",
+        "content": "{}"
+      }
+      """
+    Then the response status should be 200
+    And I save the response field "id" as "retainedTypeId"
+    And I schedule a DELETE for "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/retained-type-{{UUID}}"
+    Given I POST "/compas-scl-data-service/plugins-resources/plugins/retained_plugin/types/delete-type-{{UUID}}" with JSON body:
+      """
+      {
+        "name": "retained-resource",
+        "contentType": "application/json",
+        "version": "1.0.0",
+        "dataCompatibilityVersion": "1.0.0",
+        "content": "{}"
+      }
+      """
+    Then the response status should be 200
+    And I save the response field "id" as "retainedPluginId"
+    And I schedule a DELETE for "/compas-scl-data-service/plugins-resources/plugins/retained_plugin/types/delete-type-{{UUID}}"
+
+    When I DELETE "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/delete-type-{{UUID}}"
+    Then the response status should be 204
+
+    When I GET "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/delete-type-{{UUID}}/resources/resource-a/versions"
+    Then the response status should be 404
+
+    When I GET "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/delete-type-{{UUID}}/resources/resource-b/versions"
+    Then the response status should be 404
+
+    When I GET "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/retained-type-{{UUID}}/{retainedTypeId}"
+    Then the response status should be 200
+    And the response field "id" should equal "{retainedTypeId}"
+
+    When I GET "/compas-scl-data-service/plugins-resources/plugins/retained_plugin/types/delete-type-{{UUID}}/{retainedPluginId}"
+    Then the response status should be 200
+    And the response field "id" should equal "{retainedPluginId}"
+
+  @remaining-endpoints
+  Scenario: Delete resources of a non-existing type
+    When I DELETE "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/missing-type-{{UUID}}"
+    Then the response status should be 404
+
   Scenario: Post an existing plugin resource
     Given I POST "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/process" with JSON body:
       """
