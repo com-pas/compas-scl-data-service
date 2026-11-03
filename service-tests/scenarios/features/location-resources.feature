@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 BearingPoint GmbH
+#
+# SPDX-License-Identifier: Apache-2.0
+
 @scl-data-service @location-resources
 Feature: Location API
 
