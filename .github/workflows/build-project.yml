@@ -16,7 +16,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 30
 
     steps:
@@ -67,3 +67,5 @@ jobs:
           TAG=$(docker image ls lfenergy/compas-scl-data-service --format '{{.Tag}}' | grep -i 'latest-postgresql' | head -n 1)
           echo "Image = lfenergy/compas-scl-data-service:$TAG"
           docker image inspect lfenergy/compas-scl-data-service:$TAG
+
+          file ./app/target/postgresql-quarkus-app/*-runner
