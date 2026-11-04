@@ -60,5 +60,10 @@ jobs:
         run: ./mvnw -s custom_maven_settings.xml -B -Pnative-image clean verify
 
       - name: Show build results
-        run:
+        run: |
           ls -lh ./app/target/postgresql-quarkus-app/*-runner
+          docker image ls lfenergy/compas-scl-data-service
+
+          TAG=$(docker image ls lfenergy/compas-scl-data-service --format '{{.Tag}}' | grep -i 'latest-postgresql' | head -n 1)
+          echo "Image = lfenergy/compas-scl-data-service:$TAG"
+          docker image inspect lfenergy/compas-scl-data-service:$TAG
