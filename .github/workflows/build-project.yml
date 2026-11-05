@@ -14,10 +14,28 @@ on:
       - 'develop'
 
 jobs:
+  prepare_runners:
+    name: Prepare Runners
+    runs-on: ubuntu-latest
+    outputs:
+      runners: ${{ steps.set_runners.outputs.runners }}
+    steps:
+      - id: set_runners
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            echo 'runners={"include":[{"name":"Build (amd64)","runner":"ubuntu-latest"},{"name":"Build (arm64)","runner":"ubuntu-24.04-arm"}]}' >> "$GITHUB_OUTPUT"
+          else
+            echo 'runners={"include":[{"name":"Build","runner":"ubuntu-latest"}]}' >> "$GITHUB_OUTPUT"
+          fi
+
   build:
-    name: Build
-    runs-on: ubuntu-24.04-arm
+    needs: prepare_runners
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare_runners.outputs.runners) }}
 
     steps:
       - name: Checkout
@@ -27,7 +45,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('**/Dockerfile') }}
+          key: ${{ matrix.runner }}-buildx-${{ hashFiles('**/Dockerfile') }}
 
       - name: Set up Docker Buildx
         id: buildx
