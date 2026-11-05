@@ -191,8 +191,6 @@ SPDX-License-Identifier: Apache-2.0
                                 <quarkus.docker.dockerfile-native-path>src/main/docker/Dockerfile-postgresql.native
                                 </quarkus.docker.dockerfile-native-path>
                                 <quarkus.container-image.tag>${project.version}-postgresql</quarkus.container-image.tag>
-                                <quarkus.container-image.additional-tags>latest-postgresql
-                                </quarkus.container-image.additional-tags>
                             </properties>
                         </configuration>
                     </execution>
@@ -293,18 +291,6 @@ SPDX-License-Identifier: Apache-2.0
                     target/jacoco-report/jacoco.xml,
                     target/site/jacoco/jacoco.xml,
                 </sonar.coverage.jacoco.xmlReportPaths>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>release</id>
-
-            <properties>
-                <!-- Make a Docker Image from the component -->
-                <quarkus.container-image.build>true</quarkus.container-image.build>
-
-                <!-- Properties only used for publishing a native docker image (default to Docker Hub) -->
-                <quarkus.container-image.push>true</quarkus.container-image.push>
             </properties>
         </profile>
     </profiles>

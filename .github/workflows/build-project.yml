@@ -21,11 +21,12 @@ jobs:
       runners: ${{ steps.set_runners.outputs.runners }}
     steps:
       - id: set_runners
+        ## TODO: multi-arch native image builds on pull requests + push to main, otherwise only build
         run: |
           if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
-            echo 'runners={"include":[{"name":"Build (amd64)","runner":"ubuntu-latest"},{"name":"Build (arm64)","runner":"ubuntu-24.04-arm"}]}' >> "$GITHUB_OUTPUT"
+            echo 'runners={"include":[{"name":"Build Native Image (amd64)","runner":"ubuntu-26.04"},{"name":"Build Native Image (arm64)","runner":"ubuntu-26.04-arm"}]}' >> "$GITHUB_OUTPUT"
           else
-            echo 'runners={"include":[{"name":"Build","runner":"ubuntu-latest"}]}' >> "$GITHUB_OUTPUT"
+            echo 'runners={"include":[{"name":"Build","runner":"ubuntu-26.04"}]}' >> "$GITHUB_OUTPUT"
           fi
 
   build:
@@ -56,7 +57,7 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
           cache: 'maven'
-          
+
       - name: Set Docker API version
         # Workaround for Docker 29.x incompatibility with Testcontainers/EmbeddedPostgres.
         # See: https://github.com/testcontainers/testcontainers-java/issues/11212
@@ -77,12 +78,13 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         run: ./mvnw -s custom_maven_settings.xml -B -Pnative-image clean verify
 
+      # TODO: remove
       - name: Show build results
         run: |
           ls -lh ./app/target/postgresql-quarkus-app/*-runner
           docker image ls lfenergy/compas-scl-data-service
 
-          TAG=$(docker image ls lfenergy/compas-scl-data-service --format '{{.Tag}}' | grep -i 'latest-postgresql' | head -n 1)
+          TAG=$(./mvnw -B -q -N help:evaluate -Dexpression=project.version -DforceStdout)-postgresql
           echo "Image = lfenergy/compas-scl-data-service:$TAG"
           docker image inspect lfenergy/compas-scl-data-service:$TAG
 
