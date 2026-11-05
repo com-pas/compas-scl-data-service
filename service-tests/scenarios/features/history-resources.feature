@@ -38,8 +38,8 @@ Feature: History API
 
     Examples:
       | body                                                           |
-      | {"uuid": "{resourceId}"}                                        |
-      | {"name": "history-resource-{{UUID}}", "type": "SCD"}             |
+      | {"uuid": "{resourceId}"}                                       |
+      | {"name": "history-resource-{{UUID}}", "type": "SCD"}           |
 
   Scenario: Search for resources assigned to a location
     Given I POST "/compas-scl-data-service/api/locations" with JSON body:

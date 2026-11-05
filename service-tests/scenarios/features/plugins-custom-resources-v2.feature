@@ -39,7 +39,6 @@ Feature: Plugins Custom Resources V2
       """
     Then the response status should be 400
 
-  @remaining-endpoints
   Scenario: Delete every resource version of a type without affecting other types or plugins
     Given I POST "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/delete-type-{{UUID}}" with JSON body:
       """
@@ -119,7 +118,6 @@ Feature: Plugins Custom Resources V2
     Then the response status should be 200
     And the response field "id" should equal "{retainedPluginId}"
 
-  @remaining-endpoints
   Scenario: Delete resources of a non-existing type
     When I DELETE "/compas-scl-data-service/plugins-resources/plugins/engineering_wizard/types/missing-type-{{UUID}}"
     Then the response status should be 404

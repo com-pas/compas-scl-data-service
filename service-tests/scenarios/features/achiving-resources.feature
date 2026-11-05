@@ -192,7 +192,7 @@ Feature: Archiving API
 
       Examples:
         | body                                                           |
-        | {"uuid": "{resourceId}"}                                        |
-        | {"name": "archive-resource-{{UUID}}"}                           |
+        | {"uuid": "{resourceId}"}                                       |
+        | {"name": "archive-resource-{{UUID}}"}                          |
         | {"location": "{locationKey}"}                                  |
-        | {"name": "archive-resource-{{UUID}}", "type": "SCD"}             |
+        | {"name": "archive-resource-{{UUID}}", "type": "SCD"}           |

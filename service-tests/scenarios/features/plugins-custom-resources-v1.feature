@@ -27,7 +27,6 @@ Feature: Plugins Custom Resources V1
     And the response should contain field "id"
     And I schedule a DELETE for "/compas-scl-data-service/plugins/resources/engineering-wizard_process_{{UUID}}"
 
-  @remaining-endpoints
   Scenario: Get the latest version of each plugin resource by type
     Given I POST "/compas-scl-data-service/plugins/resources" with multipart form data:
       """
@@ -77,7 +76,6 @@ Feature: Plugins Custom Resources V1
     And the response field "1.name" should equal "Resource B {__UUID__}"
     And the response field "1.version" should equal "1.0.0"
 
-  @remaining-endpoints
   Scenario: Get latest resources for a non-existing type
     When I GET "/compas-scl-data-service/plugins/resources/missing-type-{{UUID}}/latest"
     Then the response status should be 404
