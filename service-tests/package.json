@@ -1,0 +1,16 @@
+{
+  "name": "service-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test:scl-data-service": "cucumber-js --config node_modules/@ase-compas/compas-service-tests/config/cucumber.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@ase-compas/compas-service-tests": "0.0.0-f33b936"
+  }
+}

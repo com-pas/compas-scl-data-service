@@ -71,3 +71,8 @@ jacoco.exec
 
 # OpenAPI generator specific
 api/.openapi-generator/
+
+# cucumber.js service tests
+service-tests/node_modules/
+service-tests/reports/
+**/.env
