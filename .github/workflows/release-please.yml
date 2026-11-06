@@ -126,7 +126,7 @@ jobs:
 
       # - name: Publish GitHub Packages
       #   if: ${{ matrix.arch == 'amd64' }}
-      #   run: ./mvnw -B -s custom_maven_settings.xml -DskipTests deploy
+      #   run: ./mvnw -B -s custom_maven_settings.xml -Prelease -DskipTests deploy
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
