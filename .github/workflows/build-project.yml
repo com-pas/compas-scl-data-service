@@ -21,9 +21,8 @@ jobs:
       runners: ${{ steps.set_runners.outputs.runners }}
     steps:
       - id: set_runners
-        ## TODO: multi-arch native image builds on pull requests + push to main, otherwise only build
         run: |
-          if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" || ( "$GITHUB_EVENT_NAME" == "push" && "$GITHUB_REF" == "refs/heads/main" ) ]]; then
             echo 'runners={"include":[{"name":"Build Native Image (amd64)","runner":"ubuntu-26.04"},{"name":"Build Native Image (arm64)","runner":"ubuntu-26.04-arm"}]}' >> "$GITHUB_OUTPUT"
           else
             echo 'runners={"include":[{"name":"Build","runner":"ubuntu-26.04"}]}' >> "$GITHUB_OUTPUT"
@@ -71,21 +70,11 @@ jobs:
           path: custom_maven_settings.xml
           githubServer: false
           servers: '[{ "id": "github-packages-compas", "username": "OWNER", "password": "${{ secrets.GITHUB_TOKEN }}" }]'
-      # - name: Build with Maven (Pull Request)
-      #   if: ${{ github.event_name == 'pull_request' }}
-      #   run: ./mvnw -s custom_maven_settings.xml -B -Pnative-image clean verify
-      - name: Build with Maven (Push)
-        if: ${{ github.event_name == 'push' }}
+
+      - name: Build with Maven (Native Image)
+        if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
         run: ./mvnw -s custom_maven_settings.xml -B -Pnative-image clean verify
 
-      # TODO: remove
-      - name: Show build results
-        run: |
-          ls -lh ./app/target/postgresql-quarkus-app/*-runner
-          docker image ls lfenergy/compas-scl-data-service
-
-          TAG=$(./mvnw -B -q -N help:evaluate -Dexpression=project.version -DforceStdout)-postgresql
-          echo "Image = lfenergy/compas-scl-data-service:$TAG"
-          docker image inspect lfenergy/compas-scl-data-service:$TAG
-
-          file ./app/target/postgresql-quarkus-app/*-runner
+      - name: Build with Maven
+        if: ${{ github.event_name == 'push' && github.ref != 'refs/heads/main' }}
+        run: ./mvnw -s custom_maven_settings.xml -B clean verify
