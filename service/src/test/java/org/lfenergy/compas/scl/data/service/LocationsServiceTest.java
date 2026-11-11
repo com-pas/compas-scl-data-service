@@ -95,6 +95,20 @@ class LocationsServiceTest {
     }
 
     @Test
+    void createLocation_WhenPersistDoesNotAssignId_ThenReturnsDtoWithoutUuid() {
+        var dto = buildDto("LOC_B", "Location B", "desc");
+        when(locationRepository.hasDuplicateValues("LOC_B", "Location B")).thenReturn(false);
+
+        var result = locationsService.createLocation(dto);
+
+        assertNotNull(result);
+        assertNull(result.getUuid());
+        assertEquals("LOC_B", result.getKey());
+        assertEquals("Location B", result.getName());
+        assertEquals("desc", result.getDescription());
+    }
+
+    @Test
     void createLocation_WhenDuplicateKeyOrName_ThenThrowsCompasSclDataServiceException() {
         var dto = buildDto("LOC_A", "Location A", "desc");
         when(locationRepository.hasDuplicateValues("LOC_A", "Location A")).thenReturn(true);

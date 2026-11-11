@@ -126,7 +126,7 @@ public class LocationsService {
 
     private Location toDto(org.lfenergy.compas.scl.data.entities.Location entity) {
         return new Location()
-            .uuid(entity.id.toString())
+            .uuid(entity.id == null ? null : entity.id.toString())
             .key(entity.key)
             .name(entity.name)
             .description(entity.description)
