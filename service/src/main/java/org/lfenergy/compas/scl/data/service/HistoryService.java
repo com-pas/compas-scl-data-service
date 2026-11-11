@@ -6,6 +6,7 @@ package org.lfenergy.compas.scl.data.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.lfenergy.compas.scl.data.exception.CompasInvalidInputException;
 import org.lfenergy.compas.scl.data.exception.CompasNoDataFoundException;
 import org.lfenergy.compas.scl.data.exception.CompasSclDataServiceException;
 import org.lfenergy.compas.scl.data.model.Version;
@@ -23,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static jakarta.transaction.Transactional.TxType.SUPPORTS;
 import static org.lfenergy.compas.scl.data.exception.CompasSclDataServiceErrorCode.CREATION_ERROR_CODE;
@@ -79,23 +81,22 @@ public class HistoryService {
     }
 
     /**
-     * Searches for data resources.  If {@code search.uuid} is set, only entries for that
-     * resource are considered (returning the latest version).  Otherwise the optional
-     * filter fields (type, name, location, author, from, to) constrain the result.
+     * Searches for data resources.  If {@code search.uuid} is set, it performs a partial match.
+     * UUID cannot be combined with other filters; otherwise, all supplied filters constrain the result.
      */
     @Transactional(SUPPORTS)
     public DataResourcesResult searchForResources(DataResourceSearch search) {
-        List<org.lfenergy.compas.scl.data.entities.HistorizedSclFile> entries;
-        if (search.getUuid() != null && !search.getUuid().isBlank()) {
-            entries = historizedSclFileRepository
-                .findLatestBySclFileId(UUID.fromString(search.getUuid()))
-                .map(List::of)
-                .orElse(List.of());
-        } else {
-            entries = historizedSclFileRepository.searchLatest(
-                search.getType(), search.getName(), search.getLocation(),
-                search.getAuthor(), search.getFrom(), search.getTo());
+        if (search.getUuid() != null && !search.getUuid().isBlank()
+                && (Stream.of(search.getType(), search.getName(), search.getLocation(), search.getAuthor())
+                        .anyMatch(value -> value != null && !value.isBlank())
+                    || search.getFrom() != null || search.getTo() != null)) {
+            throw new CompasInvalidInputException("UUID search cannot be combined with other filters.");
         }
+
+        List<org.lfenergy.compas.scl.data.entities.HistorizedSclFile> entries = historizedSclFileRepository.searchLatest(
+                search.getUuid(), search.getType(), search.getName(), search.getLocation(),
+                search.getAuthor(), search.getFrom(), search.getTo());
+
         var results = entries.stream().map(this::toDataResource).toList();
         return new DataResourcesResult().results(results);
     }
